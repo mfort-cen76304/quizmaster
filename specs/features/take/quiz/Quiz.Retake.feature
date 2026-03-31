@@ -1,7 +1,7 @@
 Feature: Quiz retake after evaluation
   After a quiz is evaluated, the quiz taker can start a follow-up run.
   The follow-up run includes only questions that were answered incorrectly
-  in the evaluated attempt.
+  in the evaluated attempt..
 
   Scenario: Exam mode - Retake contains only incorrectly answered questions
     Given workspace "Retake" with questions
