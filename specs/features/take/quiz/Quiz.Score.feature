@@ -1,7 +1,7 @@
 Feature: Evaluate quiz score
   After completing all quiz questions, the score is calculated:
   - Overall result: number correct, percentage, pass/fail against the pass score
-  - Partial scoring: multiple choice questions can award 0, 0.5, or 1 point
+  - Scoring: Correct question is only with all correct answers, otherwise it's incorrect. Correct question is 1 point. Incorrect is 0 points.
 
   Scenario Outline: Quiz score
     Given workspace "Score" with questions
@@ -48,13 +48,11 @@ Feature: Evaluate quiz score
     Then I see the result 2 correct out of 2, 100%, passed, required passScore 100%
     Then I see the original result 1, 50%, failed
 
-  Scenario Outline: Quiz with multiple choice question with partial score
-    Partial scoring applies to multiple choice questions within a quiz.
+  Scenario Outline: Quiz with multiple choice question
     - All correct answers: 1 point
-    - One error: 0.5 points
-    - More than one error: 0 points
+    - Any error: 0 points
 
-    Given workspace "Partial Score" with questions
+    Given workspace "Score" with questions
       | bookmark | question                                              | answers                                      | explanation |
       | Planets  | Which of the following are planets?                    | Mars (*), Pluto, Titan, Venus (*), Earth (*) | Planets     |
       | Sky      | What is the standard colour of sky?                   | Red, Blue (*), Green, Black                  | Rayleigh    |
@@ -69,8 +67,21 @@ Feature: Evaluate quiz score
     Examples:
       | answer                    | correct | percentage | result |
       | Mars, Venus, Earth        | 2       | 100        | passed |
-      | Mars, Venus, Titan, Earth | 1.5     | 75         | passed |
-      | Mars, Venus               | 1.5     | 75         | passed |
+      | Mars, Venus, Titan, Earth | 1       | 50         | failed |
+      | Mars, Venus               | 1       | 50         | failed |
       | Mars, Pluto               | 1       | 50         | failed |
       | Mars, Pluto, Venus, Titan | 1       | 50         | failed |
       | Pluto, Titan              | 1       | 50         | failed |
+
+  Scenario: Multiple choice one-error attempt contributes zero points
+    Given workspace "Score Threshold" with questions
+      | bookmark | question                            | answers                                      |
+      | Planets  | Which of the following are planets? | Mars (*), Pluto, Titan, Venus (*), Earth (*) |
+      | Sky      | What is the standard colour of sky? | Red, Blue (*), Green, Black                  |
+    And a quiz "Threshold Quiz" with all questions
+      | pass score | 75 |
+    When I start the quiz
+    And I answer "Mars, Venus"
+    And I answer "Blue"
+    And I evaluate the quiz
+    Then I see the result 1 correct out of 2, 50%, failed, required passScore 75%

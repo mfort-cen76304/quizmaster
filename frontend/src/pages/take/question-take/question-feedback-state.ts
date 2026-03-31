@@ -42,9 +42,5 @@ export const calculateScore = (
         return { score: 1, errorsCount: totalErrorCount }
     }
 
-    if (totalErrorCount <= 1) {
-        return { score: 0.5, errorsCount: totalErrorCount }
-    }
-
     return { score: 0, errorsCount: totalErrorCount }
 }

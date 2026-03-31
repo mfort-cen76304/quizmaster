@@ -118,6 +118,23 @@ Feature: Show stats
       |          | Points   |                 |                   |       | Status   |
       |          | 0/2      |                 |                   |       | Finished |
 
+  Scenario: Points are binary for partially answered multiple-choice
+    Given workspace "Stats Points Multi Choice" with questions
+      | question                            | answers                                      |
+      | Which of the following are planets? | Mars (*), Pluto, Titan, Venus (*), Earth (*) |
+      | What is the standard colour of sky? | Red, Blue (*), Green, Black                  |
+    And a quiz "Stats Quiz" with all questions
+    And I take quiz "Stats Quiz" with answers
+      | question                            | answers    |
+      | Which of the following are planets? | Mars       |
+      | What is the standard colour of sky? | Blue       |
+    When I open stats for quiz "Stats Quiz"
+    Then I see stats page for quiz "Stats Quiz"
+    And I see attempt stats table
+      | Attempts |          |                 |                   |       |          |
+      |          | Points   | Correct Answers | Incorrect Answers | Score | Status   |
+      |          | 1/2      | 1 (50%)         | 1 (50%)           | 50    | Finished |
+
 
   # Correct Answers (individual): full, half, zero
   Scenario: Correct Answers full 2 (100%)

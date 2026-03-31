@@ -161,11 +161,7 @@ export const QuestionForm = (props: QuestionFormProps) => {
                 )}
                 {state.submitted && props.mode === 'learn' && (
                     <>
-                        <QuestionCorrectness
-                            score={feedback.score.score}
-                            errorCount={feedback.score.errorsCount}
-                            isPartialCorrectnessEnabled={props.question.question.includes('(Partial Score)')}
-                        />
+                        <QuestionCorrectness score={feedback.score.score} errorCount={feedback.score.errorsCount} />
                         <QuestionScore score={feedback.score.score} />
                         <QuestionExplanation text={questionExplanation} />
                     </>

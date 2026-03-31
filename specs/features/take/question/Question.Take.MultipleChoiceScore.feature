@@ -1,7 +1,7 @@
-Feature: Take a question with partial score
-  Partial scoring for multiple choice questions rewards partially correct answers.
+Feature: Take a question with multiple choice answers and evaluate score
+  Scoring for multiple choice questions rewards points.
   - All correct answers selected: 1 point
-  - One error (wrong selected or correct missing): 0.5 points
+  - One error (wrong selected or correct missing): 0 points
   - More than one error: 0 points
 
   Background:
@@ -12,13 +12,12 @@ Feature: Take a question with partial score
       | Titan   |   |
       | Venus   | * |
       | Earth   | * |
-    * mark question as partially scored
     * saved and bookmarked as "Planets"
 
   Scenario Outline: Multiple choice question with score
     Question is scored as follows:
     - all correct answers gives 1 point
-    - one incorrect answer selected gives 0.5 point
+    - one incorrect answer selected gives 0 point
     - more than one incorrect answer selected gives 0 point
 
     When I take question "Planets"
@@ -28,8 +27,8 @@ Feature: Take a question with partial score
     Examples:
       | answer                    | score | feedback                      | description                       |
       | Mars, Venus, Earth        | 1     | Correct!                      | all correct answers               |
-      | Mars, Venus, Titan, Earth | 0.5   | Partially correct! (1 error)  | one incorrect answer              |
-      | Mars, Venus               | 0.5   | Partially correct! (1 error)  | one correct answer missing        |
+      | Mars, Venus, Titan, Earth | 0     | Incorrect!                    | one incorrect answer              |
+      | Mars, Venus               | 0     | Incorrect!                    | one correct answer missing        |
       | Mars, Pluto               | 0     | Incorrect!                    | two missing, one incorrect answer |
       | Mars, Pluto, Venus, Titan | 0     | Incorrect!                    | two incorrect answers             |
       | Pluto, Titan              | 0     | Incorrect!                    | two incorrect answers             |
