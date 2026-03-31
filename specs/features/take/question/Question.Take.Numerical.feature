@@ -1,3 +1,4 @@
+
 Feature: Take a numerical question
   Numerical questions accept a typed number as the answer instead of selecting
   from choices. The user sees a number input field and receives correct/incorrect
@@ -29,6 +30,20 @@ Feature: Take a numerical question
       | 101    | Correct!   |
       | 110    | Correct!   |
       | 111    | Incorrect! |
+
+Scenario Outline: Numerical question with decimal answer
+    Given a numerical question "What is the value of Ludolf's number?" with correct answer "3.141592" bookmarked as "ludolfs-number"
+    When I take question "ludolfs-number"
+    Then I see a number input
+    When I enter "<answer>"
+    Then I see feedback "<feedback>"
+    Examples:
+      | answer | feedback   |
+      | 3    | Incorrect! |
+      | 3.141592 | Correct!   |
+      | 3.141593 | Incorrect! |
+      | 3.14 | Incorrect! |
+
 
   @skip
   Scenario Outline: Numerical question with decimal answer
