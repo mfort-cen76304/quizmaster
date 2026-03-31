@@ -41,7 +41,9 @@ export const QuizEditPage = () => {
 
     return (
         <Page title={title} id={pageId}>
-            <QuizEditForm key={quiz?.id} quiz={quiz} questions={workspaceQuestions} onSubmit={onSubmit} />
+            {(!isEdit || quiz) && (
+                <QuizEditForm key={quiz?.id} quiz={quiz} questions={workspaceQuestions} onSubmit={onSubmit} />
+            )}
             {errorMessage && <Alert type="error">{errorMessage}</Alert>}
         </Page>
     )

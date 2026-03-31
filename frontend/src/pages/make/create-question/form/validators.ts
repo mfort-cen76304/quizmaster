@@ -9,7 +9,7 @@ export const errorMessage = {
     'empty-answer-explanation': 'All or none answer explanations must be filled in.',
     'few-correct-answers': 'Multiple choice questions must have at least two correct answers.',
     'empty-numerical-answer': 'Correct numerical answer must not be empty.',
-    'invalid-numerical-answer': 'Correct numerical answer must be an integer.',
+    'invalid-numerical-answer': 'Correct numerical answer must be a number.',
 }
 
 type ErrorCode = keyof typeof errorMessage
@@ -43,7 +43,7 @@ export function validateQuestionFormState(state: QuestionFormState): Set<ErrorCo
         const numericalValue = state.numericalAnswer.trim()
         if (numericalValue === '') {
             errors.add('empty-numerical-answer')
-        } else if (!/^-?\d+$/.test(numericalValue)) {
+        } else if (!/^-?\d+(\.\d+)?$/.test(numericalValue)) {
             errors.add('invalid-numerical-answer')
         }
         return errors

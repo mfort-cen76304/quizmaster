@@ -52,8 +52,8 @@ export const useQuestionTakeState = (props: QuestionFormProps): QuestionTakeStat
             return
         }
 
-        const userAnswer = Number.parseInt(normalizedValue, 10)
-        const correctAnswer = Number.parseInt(correctNumericalAnswer, 10)
+        const userAnswer = Number.parseFloat(normalizedValue)
+        const correctAnswer = Number.parseFloat(correctNumericalAnswer)
 
         if (Math.abs(userAnswer - correctAnswer) <= tolerance) {
             setSelectedAnswerIdxs([0])

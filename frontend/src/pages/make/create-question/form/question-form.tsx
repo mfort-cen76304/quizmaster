@@ -139,7 +139,8 @@ export const QuestionEditForm = ({ question, onSubmit, onBack, onAiAssistantClic
                 <>
                     <Field label="Correct numerical answer" required>
                         <input
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
                             id="numerical-correct-answer"
                             value={state.numericalAnswer}
                             onChange={e => state.setNumericalAnswer(e.target.value)}
@@ -152,7 +153,7 @@ export const QuestionEditForm = ({ question, onSubmit, onBack, onAiAssistantClic
                             type="number"
                             id="numerical-tolerance"
                             min="0"
-                            step="1"
+                            step="any"
                             value={state.tolerance}
                             onChange={e => state.setTolerance(e.target.value)}
                         />

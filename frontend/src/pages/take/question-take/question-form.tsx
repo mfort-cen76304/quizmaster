@@ -129,6 +129,7 @@ export const QuestionForm = (props: QuestionFormProps) => {
                         <input
                             type="number"
                             id="numerical-answer"
+                            step="any"
                             ref={numericalInputRef}
                             value={state.numericalAnswer}
                             onChange={e => state.onNumericalAnswerChange(e.target.value)}

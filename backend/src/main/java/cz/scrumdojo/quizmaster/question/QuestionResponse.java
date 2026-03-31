@@ -10,7 +10,7 @@ public record QuestionResponse(
     String workspaceGuid,
     boolean easyMode,
     String imageUrl,
-    Integer tolerance
+    Double tolerance
 ) {
     public static QuestionResponse from(Question q) {
         return new QuestionResponse(

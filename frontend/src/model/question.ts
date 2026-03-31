@@ -26,7 +26,7 @@ export const isNumericalQuestion = (question: Question) => {
 
     const normalizedAnswers = question.answers.map(answer => answer.trim())
     const firstAnswer = normalizedAnswers[0] ?? ''
-    const hasNumericPrimaryAnswer = /^-?\d+$/.test(firstAnswer)
+    const hasNumericPrimaryAnswer = /^-?\d+(\.\d+)?$/.test(firstAnswer)
     const hasOnlyEmptySecondaryAnswers = normalizedAnswers.slice(1).every(answer => answer === '')
 
     return hasNumericPrimaryAnswer && hasOnlyEmptySecondaryAnswers

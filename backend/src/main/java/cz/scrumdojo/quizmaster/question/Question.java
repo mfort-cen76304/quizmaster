@@ -42,5 +42,5 @@ public class Question {
     private String imageUrl;
 
     @Column(name = "tolerance")
-    private Integer tolerance;
+    private Double tolerance;
 }

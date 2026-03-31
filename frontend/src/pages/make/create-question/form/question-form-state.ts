@@ -37,7 +37,7 @@ export const useQuestionFormState = (question?: Question) => {
         (question?.answers?.length || 0) === 1 &&
         (question?.correctAnswers?.length || 0) === 1 &&
         question?.correctAnswers?.[0] === 0 &&
-        /^-?\d+$/.test(question?.answers?.[0] || '')
+        /^-?\d+(\.\d+)?$/.test(question?.answers?.[0] || '')
 
     const [aiPromptText, setAiPromptText] = useState<string>(question?.aiPrompt || '')
     const [questionText, setQuestionText] = useState<string>(question?.question || '')
@@ -170,7 +170,7 @@ export const useQuestionFormState = (question?: Question) => {
 export const stateToQuestionApiData = (state: QuestionFormState): QuestionApiData => {
     if (state.isNumerical) {
         const normalizedTolerance = state.tolerance.trim()
-        const parsedTolerance = normalizedTolerance === '' ? undefined : Number.parseInt(normalizedTolerance, 10)
+        const parsedTolerance = normalizedTolerance === '' ? undefined : Number.parseFloat(normalizedTolerance)
         return {
             question: state.questionText,
             answers: [state.numericalAnswer.trim()],

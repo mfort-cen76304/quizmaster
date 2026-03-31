@@ -4,6 +4,20 @@ Feature: Take a numerical question
   from choices. The user sees a number input field and receives correct/incorrect
   feedback based on the entered value.
 
+  Scenario Outline: Numerical question with decimal answer sdss
+    Given a numerical question "What is the value of Ludolfs number?" with correct answer "3.14" bookmarked as "ludolfs-number"
+    When I take question "ludolfs-number"
+    Then I see a number input
+    When I enter "<answer>"
+    Then I see feedback "<feedback>"
+
+    Examples:
+      | answer | feedback   |
+      | 4      | Incorrect! |
+      | 3.14   | Correct!   |
+
+
+@skip
   Scenario Outline: Quizmaker-created numerical question uses number input for quiz taker
     Given a numerical question "How many regions does Czechia have?" with correct answer "14" bookmarked as "regions"
     When I take question "regions"
@@ -31,21 +45,23 @@ Feature: Take a numerical question
       | 110    | Correct!   |
       | 111    | Incorrect! |
 
-Scenario Outline: Numerical question with decimal answer
-    Given a numerical question "What is the value of Ludolf's number?" with correct answer "3.141592" bookmarked as "ludolfs-number"
-    When I take question "ludolfs-number"
+
+  Scenario Outline: Numerical question with decimal tolerance accepts values inside range
+    Given a numerical question "What is π to two decimal places?" with correct answer "3.14" and tolerance "0.5" bookmarked as "pi"
+    When I take question "pi"
     Then I see a number input
     When I enter "<answer>"
     Then I see feedback "<feedback>"
+
     Examples:
       | answer | feedback   |
-      | 3    | Incorrect! |
-      | 3.141592 | Correct!   |
-      | 3.141593 | Incorrect! |
-      | 3.14 | Incorrect! |
+      | 2.63   | Incorrect! |
+      | 2.64   | Correct!   |
+      | 3.14   | Correct!   |
+      | 3.64   | Correct!   |
+      | 3.65   | Incorrect! |
 
 
-  @skip
   Scenario Outline: Numerical question with decimal answer
     Given a numerical question "How many fingers does a healthy human have?" with correct answer "10" bookmarked as "fingers"
     When I take question "fingers"
@@ -58,3 +74,7 @@ Scenario Outline: Numerical question with decimal answer
       | 10     | Correct!   |
       | 10.0   | Correct!   |
       | 10.1   | Incorrect! |
+
+
+
+

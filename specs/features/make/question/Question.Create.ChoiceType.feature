@@ -142,11 +142,21 @@ Feature: Create question - single/multiple choice
     Then I see question edit page
     Then I see tolerance "3"
 
-  @skip
-  Scenario: Numeric question: Create numerical question with decimal places
-    * I switch to numeric question
-    * I enter question "Value of Pi on 3 decimal places"
-    * I enter numerical answer "3,141"
-    When I click save
-    Then I see workspace with question
-    | Value of Pi on 3 decimal places |
+  Scenario: Create numerical question with decimal answer
+    When I mark the question as numerical choice
+    * I enter question "What is π to two decimal places?"
+    * I enter numerical correct answer "3.14"
+    * I submit the question
+    * I edit question "What is π to two decimal places?" from the list
+    Then I see question edit page
+    And I see numerical correct answer "3.14"
+
+  Scenario: Add decimal tolerance to numerical question
+    When I mark the question as numerical choice
+    * I enter question "What is π to two decimal places?"
+    * I enter numerical correct answer "3.14"
+    * I set tolerance to "0.5"
+    * I submit the question
+    * I edit question "What is π to two decimal places?" from the list
+    Then I see question edit page
+    And I see tolerance "0.5"

@@ -12,7 +12,7 @@ public record QuestionRequest(
     String imageUrl,
     Boolean aiGenerated,
     String questionType,
-    Integer tolerance
+    Double tolerance
 ) {
     public Question toEntity(String workspaceGuid) {
         return Question.builder()

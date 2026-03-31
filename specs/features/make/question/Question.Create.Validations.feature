@@ -143,7 +143,7 @@ Feature: Create question - validations
     When I attempt to submit the question
     Then I see no error messages
 
-  Scenario: Numerical question validates integer format
+  Scenario: Numerical question validates number format
     Given I start creating a question
     * I enter question "How many regions does Czechia have?"
     * I mark the question as numerical choice
@@ -152,11 +152,11 @@ Feature: Create question - validations
     Then I see error messages
       | empty-numerical-answer |
 
-    When I enter numerical correct answer "3.14"
+    When I enter numerical correct answer "abc"
     * I attempt to submit the question
     Then I see error messages
       | invalid-numerical-answer |
 
-    When I enter numerical correct answer "14"
+    When I enter numerical correct answer "3.14"
     * I attempt to submit the question
     Then I see no error messages
