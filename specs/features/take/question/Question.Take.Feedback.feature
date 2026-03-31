@@ -6,15 +6,16 @@ Feature: Question answer feedback
     incorrect selected) plus per-answer color coding (green for correct,
     red for selected-incorrect, neutral for unselected-incorrect)
 
-  Background:
-    Given questions
-      | bookmark  | question                              | answers                           |
-      | Australia | What's the capital city of Australia? | Sydney, Canberra (*), Melbourne   |
-      | Planets   | Which of the following are planets?   | Mars (*), Pluto, Venus (*), Titan |
 
   Scenario Outline: Single choice question feedback
     Question is answered correctly if the correct answer is selected
 
+    Given a question "What's the capital city of Australia?"
+    * with answers:
+      | Sydney    |   |
+      | Canberra  | * |
+      | Melbourne |   |
+    * saved and bookmarked as "Australia"
     When I take question "Australia"
     And I answer "<answer>"
     Then I see feedback "<feedback>"
@@ -24,28 +25,46 @@ Feature: Question answer feedback
       | Sydney   | Incorrect! |
       | Canberra | Correct!   |
 
-  Scenario Outline: Multiple choice question feedback
-    Question is answered correctly only if
-    - all correct answers are selected, and,
-    - no incorrect answers are selected
 
+  Scenario Outline: Multiple choice question feedback
+    - 1 point, correct: if all correct answers are selected and no incorrect answer is selected
+    - 0.5 points, partially correct: with one mistake (either one missing correct answer or one incorrect answer selected)
+    - 0 points, incorrect: with two or more mistakes
+
+    Given a question "Which of the following are planets?"
+    * with answers:
+      | Mars    | * |
+      | Pluto   |   |
+      | Titan   |   |
+      | Venus   | * |
+    * saved and bookmarked as "Planets"
     When I take question "Planets"
     And I answer "<answer>"
     Then I see feedback "<feedback>"
+    And I see score "Score: <score>"
     Examples:
-      | answer                    | feedback           |
-      | Mars, Venus               | Correct!           |
-      | Mars, Venus, Titan        | Partially correct! |
-      | Mars, Pluto               | Incorrect!         |
-      | Mars, Pluto, Venus, Titan | Incorrect!         |
-      | Pluto, Titan              | Incorrect!         |
+      | answer                    | score | feedback           |
+      | Mars, Venus               | 1     | Correct!           |
+      | Mars                      | 0.5   | Partially correct! |
+      | Mars, Venus, Titan        | 0.5   | Partially correct! |
+      | Mars, Pluto               | 0     | Incorrect!         |
+      | Mars, Pluto, Venus, Titan | 0     | Incorrect!         |
+      | Pluto, Titan              | 0     | Incorrect!         |
+
 
   Scenario Outline: Multiple choice question per-answer feedback
     Upon submitting the question, each answer is marked with a color:
-    - green if the answer is correct
-    - red if the answer is selected while incorrect
-    - none if the answer is not selected while incorrect
+    - 🟩 green if the answer is correct
+    - 🟥 red if the answer is selected while incorrect
+    - ◼️ no color if the answer is not selected while incorrect
 
+    Given a question "Which of the following are planets?"
+    * with answers:
+      | Mars    | * |
+      | Pluto   |   |
+      | Titan   |   |
+      | Venus   | * |
+    * saved and bookmarked as "Planets"
     When I take question "Planets"
     And I answer "<answer>"
     Then I see individual color feedback per answer:
@@ -56,15 +75,17 @@ Feature: Question answer feedback
       | Titan  | <titan> |
 
     Examples:
-      | answer                    | mars  | pluto | venus | titan |
+      | answer                    | mars    | pluto   | venus   | titan   |
       | Mars, Venus               | 🟩🟩🟩 | ◼️◼️◼️ | 🟩🟩🟩 | ◼️◼️◼️ |
       | Mars, Venus, Titan        | 🟩🟩🟩 | ◼️◼️◼️ | 🟩🟩🟩 | 🟥🟥🟥 |
       | Mars, Pluto               | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | ◼️◼️◼️ |
       | Mars, Pluto, Venus, Titan | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | 🟥🟥🟥 |
       | Pluto, Titan              | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | 🟥🟥🟥 |
 
+
   Scenario Outline: Numeric question feedback
     Question is answered correctly if the correct answer is selected
+
     Given a numerical question "One and only correct numerical answer" with correct answer "54" bookmarked as "Numbers"
     When I take question "Numbers"
     And I enter "<answer>"
