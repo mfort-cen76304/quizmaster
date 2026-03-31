@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 import { useQuizApi } from './hooks.ts'
 
@@ -14,12 +14,17 @@ import { AttemptStatus } from 'model/stats.ts'
 export const QuizTakePage = () => {
     const quiz = useQuizApi()
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswers | null>(null)
+    const [retakeQuestionIds, setRetakeQuestionIds] = useState<number[] | null>(null)
     const navigate = useNavigate()
 
     useEffect(() => {
         const stored = sessionStorage.getItem('quizAnswers')
         if (stored) {
             setQuizAnswers(JSON.parse(stored))
+        }
+        const storedRetake = sessionStorage.getItem('retakeQuestionIds')
+        if (storedRetake) {
+            setRetakeQuestionIds(JSON.parse(storedRetake))
         }
     }, [])
 
@@ -31,10 +36,20 @@ export const QuizTakePage = () => {
         }
     }
 
+    function handleRetakeIncorrect(incorrectQuestionIds: number[]) {
+        updateSessionStorage(null)
+        setQuizAnswers(null)
+        sessionStorage.setItem('retakeQuestionIds', JSON.stringify(incorrectQuestionIds))
+        setRetakeQuestionIds(incorrectQuestionIds)
+        navigate(`/quiz/${quiz?.id}/questions`)
+    }
+
     async function handleEvaluate(answers: QuizAnswers | null, timedOut = false) {
         navigate(`/quiz/${quiz?.id}/questions`)
         updateSessionStorage(answers)
         setQuizAnswers(answers)
+        sessionStorage.removeItem('retakeQuestionIds')
+        setRetakeQuestionIds(null)
 
         if (!quiz || !answers) return
 
@@ -44,7 +59,6 @@ export const QuizTakePage = () => {
         const maxScore = evaluation.total
         const attemptId = getQuizRunId()
 
-        // Get start time from sessionStorage to avoid timezone issues
         const startTimeMs = sessionStorage.getItem('quizStartTime')
         const endTime = new Date()
 
@@ -62,16 +76,24 @@ export const QuizTakePage = () => {
                 finishedAt: endTime.toISOString(),
             })
 
-            // Clean up
             sessionStorage.removeItem('quizStartTime')
         }
     }
 
-    if (quiz) {
+    const activeQuiz = useMemo(() => {
+        if (!quiz) return undefined
+        if (!retakeQuestionIds) return quiz
+        return {
+            ...quiz,
+            questions: quiz.questions.filter(q => retakeQuestionIds.includes(q.id)),
+        }
+    }, [quiz, retakeQuestionIds])
+
+    if (activeQuiz) {
         return quizAnswers ? (
-            <QuizScorePage quiz={quiz} quizAnswers={quizAnswers} />
+            <QuizScorePage quiz={activeQuiz} quizAnswers={quizAnswers} onRetakeIncorrect={handleRetakeIncorrect} />
         ) : (
-            <QuestionForm quiz={quiz} onEvaluate={handleEvaluate} />
+            <QuestionForm quiz={activeQuiz} onEvaluate={handleEvaluate} />
         )
     }
 }

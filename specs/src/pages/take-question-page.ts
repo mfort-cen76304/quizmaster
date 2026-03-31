@@ -47,6 +47,7 @@ export class TakeQuestionPage {
 
     // Retrying assertions
     expectQuestionText = (text: string) => expect(this.questionLocator()).toHaveText(text)
+    expectQuestionTextNotToBe = (text: string) => expect(this.questionLocator()).not.toHaveText(text)
     expectAnswerCount = (count: number) => expect(this.answersLocator()).toHaveCount(count)
     expectAnswerText = (index: number, text: string) => expect(this.answersLocator().nth(index)).toHaveText(text)
     expectNoAnswerSelected = () => expect(this.selectedAnswersLocator()).toHaveCount(0)

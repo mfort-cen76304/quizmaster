@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 
-import { Given, Then } from 'steps/fixture.ts'
+import { Given, Then, When } from 'steps/fixture.ts'
 import {
     expectAllOptionsForQuestion,
     expectOriginalResult,
@@ -90,3 +90,7 @@ Then(
         expect(answerResponse).toBe(response)
     },
 )
+
+When('I retake only incorrectly answered questions', async function () {
+    await this.quizScorePage.retakeIncorrect()
+})

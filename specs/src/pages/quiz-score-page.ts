@@ -68,4 +68,7 @@ export class QuizScorePage {
             .not.toBeVisible()
             .then(() => expect(this.firstPercentageResultLocator()).not.toBeVisible())
             .then(() => expect(this.firstTextResultLocator()).not.toBeVisible())
+
+    retakeIncorrectButtonLocator = () => this.page.locator('#retake-incorrect')
+    retakeIncorrect = () => this.retakeIncorrectButtonLocator().click()
 }

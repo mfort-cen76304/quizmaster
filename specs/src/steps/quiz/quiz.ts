@@ -23,6 +23,11 @@ Then('I see question {string}', async function (bookmark: string) {
     await expectQuestion(this.takeQuestionPage, question)
 })
 
+Then('I do not see question {string}', async function (bookmark: string) {
+    const question = this.questionBookmarks[bookmark]
+    await this.takeQuestionPage.expectQuestionTextNotToBe(question.question)
+})
+
 When('I proceed to the next question', async function () {
     await this.questionPage.next()
 })
