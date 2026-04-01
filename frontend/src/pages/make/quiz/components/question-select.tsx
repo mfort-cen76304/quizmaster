@@ -16,7 +16,9 @@ export const QuestionItem = ({ question, selected, onSelect }: QuestionItemProps
         <div key={question.id} className="question-item">
             {tag && (
                 <div className="question-tag-row">
-                    <span className="question-tag-badge" style={{ background: tagToColor(tag) }}>{tag}</span>
+                    <span className="question-tag-badge" style={{ background: tagToColor(tag) }}>
+                        {tag}
+                    </span>
                 </div>
             )}
             <input id={inputId} type="checkbox" checked={selected} onChange={() => onSelect(question.id)} />

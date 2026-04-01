@@ -19,7 +19,9 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                 <span className="question-index">Q{index + 1}.</span>
                 {tag && (
                     <div className="question-tag-row">
-                        <span className="question-tag-badge" style={{ background: tagToColor(tag) }}>{tag}</span>
+                        <span className="question-tag-badge" style={{ background: tagToColor(tag) }}>
+                            {tag}
+                        </span>
                     </div>
                 )}
                 <div className="question-main-row">
