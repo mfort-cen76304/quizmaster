@@ -10,6 +10,12 @@ export class QuestionEditPage {
 
     private questionLocator = () => this.page.locator('#question-text')
 
+    private tagLocator = () => this.page.locator('#question-tag')
+    enterTag = (tag: string) => this.tagLocator().fill(tag)
+    tagValue = () => this.tagLocator().inputValue()
+    expectTagValue = (value: string) => expect(this.tagLocator()).toHaveValue(value)
+    expectEmptyTag = () => expect(this.tagLocator()).toHaveValue('')
+
     private aiPromptLocator = () => this.page.locator('#ai-prompt-text')
     enterQuestion = (question: string) => this.questionLocator().fill(question)
 

@@ -2,7 +2,7 @@ import type { DataTable } from '@cucumber/cucumber'
 
 import type { TableOf } from 'steps/common.ts'
 import { Given } from 'steps/fixture.ts'
-import { addAnswers, enterImageUrl, enterQuestion, type AnswerRaw } from 'steps/question/ops.ts'
+import { addAnswers, enterImageUrl, enterQuestion, enterTag, type AnswerRaw } from 'steps/question/ops.ts'
 import {
     createQuestionInAutoWorkspace,
     createNumericalQuestionInAutoWorkspace,
@@ -58,6 +58,10 @@ Given('questions', async function (data: DataTable) {
 
 Given('with image {string}', async function (imageUrl: string) {
     await enterImageUrl(this, imageUrl)
+})
+
+Given('with tag {string}', async function (tag: string) {
+    await enterTag(this, tag)
 })
 
 Given('with answers:', async function (answerRawTable: TableOf<AnswerRaw>) {

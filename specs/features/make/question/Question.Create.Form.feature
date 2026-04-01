@@ -34,6 +34,10 @@ Feature: Create question form
     Then I see explanations are enabled
     And I see explanation fields
 
+  Scenario: Tag field is empty by default
+    When I start creating a question
+    Then I see empty tag
+
   Scenario: Test backButton
     Given workspace "Testworkspace"
     And page "Question Creation"

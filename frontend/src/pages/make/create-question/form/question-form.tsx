@@ -92,6 +92,9 @@ export const QuestionEditForm = ({ question, onSubmit, onBack, onAiAssistantClic
                     {aiError && <Alert type="error">{aiError}</Alert>}
                 </Field>
             )}
+            <Field label="Tag">
+                <TextInput id="question-tag" value={state.tagText} onChange={state.setTagText} />
+            </Field>
             <Field label="Question" required>
                 <div className="question-input-with-action">
                     <TextArea

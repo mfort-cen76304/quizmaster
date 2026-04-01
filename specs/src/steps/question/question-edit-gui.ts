@@ -8,6 +8,7 @@ import {
     type AnswerRaw,
     enterAnswer,
     enterAnswerExplanation,
+    enterTag,
     enterAnswerText,
     enterImageUrl,
     enterQuestion,
@@ -81,6 +82,18 @@ Then('I see empty question text', async function () {
 
 Then('I see question text {string}', async function (question: string) {
     await this.questionEditPage.expectQuestionValue(question)
+})
+
+When('I enter tag {string}', async function (tag: string) {
+    await enterTag(this, tag)
+})
+
+Then('I see tag {string}', async function (tag: string) {
+    await this.questionEditPage.expectTagValue(tag)
+})
+
+Then('I see empty tag', async function () {
+    await this.questionEditPage.expectEmptyTag()
 })
 
 Then(/I see explanations are (enabled|disabled)/, async function (value: string) {

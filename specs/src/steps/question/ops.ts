@@ -11,6 +11,11 @@ export const enterQuestion = async (world: QuizmasterWorld, question: string) =>
     world.questionWip.question = question
 }
 
+export const enterTag = async (world: QuizmasterWorld, tag: string) => {
+    await world.questionEditPage.enterTag(tag)
+    world.questionWip.question = `[${tag}] ${world.questionWip.question}`
+}
+
 export const enterAIPrompt = async (world: QuizmasterWorld, prompt: string) => {
     await world.questionEditPage.enterAIPrompt(prompt)
 }

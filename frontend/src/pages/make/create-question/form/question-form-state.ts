@@ -16,6 +16,7 @@ export interface AnswerState {
 
 export interface QuestionFormState {
     readonly questionText: string
+    readonly tagText: string
     readonly answers: readonly string[]
     readonly explanations: readonly string[]
     readonly correctAnswers: readonly number[]
@@ -32,6 +33,11 @@ export interface QuestionFormState {
 
 export type QuestionType = 'single' | 'multiple' | 'numerical'
 
+const parseTagFromQuestion = (raw: string): { tag: string; title: string } => {
+    const match = /^\[([^\]]+)\] (.+)$/.exec(raw)
+    return match ? { tag: match[1], title: match[2] } : { tag: '', title: raw }
+}
+
 export const useQuestionFormState = (question?: Question) => {
     const isQuestionNumerical =
         (question?.answers?.length || 0) === 1 &&
@@ -39,8 +45,11 @@ export const useQuestionFormState = (question?: Question) => {
         question?.correctAnswers?.[0] === 0 &&
         /^-?\d+(\.\d+)?$/.test(question?.answers?.[0] || '')
 
+    const { tag: initialTag, title: initialTitle } = parseTagFromQuestion(question?.question || '')
+
     const [aiPromptText, setAiPromptText] = useState<string>(question?.aiPrompt || '')
-    const [questionText, setQuestionText] = useState<string>(question?.question || '')
+    const [questionText, setQuestionText] = useState<string>(initialTitle)
+    const [tagText, setTagText] = useState<string>(initialTag)
     const [questionType, setQuestionType] = useState<QuestionType>(
         isQuestionNumerical ? 'numerical' : (question?.correctAnswers?.length || 0) > 1 ? 'multiple' : 'single',
     )
@@ -138,6 +147,7 @@ export const useQuestionFormState = (question?: Question) => {
 
     return {
         questionText,
+        tagText,
         aiPromptText,
         answerStates,
         answers,
@@ -153,6 +163,7 @@ export const useQuestionFormState = (question?: Question) => {
         showExplanations,
         imageUrl,
         setQuestionText,
+        setTagText,
         setAiPromptText,
         addAnswer,
         removeAnswer,
@@ -167,12 +178,17 @@ export const useQuestionFormState = (question?: Question) => {
     }
 }
 
+const buildQuestionTitle = (tagText: string, questionText: string): string => {
+    const tag = tagText.trim()
+    return tag ? `[${tag}] ${questionText}` : questionText
+}
+
 export const stateToQuestionApiData = (state: QuestionFormState): QuestionApiData => {
     if (state.isNumerical) {
         const normalizedTolerance = state.tolerance.trim()
         const parsedTolerance = normalizedTolerance === '' ? undefined : Number.parseFloat(normalizedTolerance)
         return {
-            question: state.questionText,
+            question: buildQuestionTitle(state.tagText, state.questionText),
             answers: [state.numericalAnswer.trim()],
             correctAnswers: [0],
             explanations: [''],
@@ -183,7 +199,7 @@ export const stateToQuestionApiData = (state: QuestionFormState): QuestionApiDat
     }
 
     return {
-        question: state.questionText,
+        question: buildQuestionTitle(state.tagText, state.questionText),
         answers: Array.from(state.answers),
         correctAnswers: Array.from(state.correctAnswers),
         explanations: Array.from(state.explanations),
