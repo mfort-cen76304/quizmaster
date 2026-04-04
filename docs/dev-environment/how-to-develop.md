@@ -10,77 +10,74 @@
 
 ## First-time setup
 
-To install frontend dependencies, run in the `frontend` directory:
+To install frontend & specs dependencies and Chrome browser for E2E tests, run:
 
 ```sh
-pnpm install
-```
-
-To install E2E test dependencies and Playwright browsers, run in the `specs` directory:
-
-```sh
-pnpm ci:install
+pnpm install:all
 ```
 
 ## 🚀 Running Quizmaster
 
-### Build the frontend
+### Start Quizmaster
 
-To build the front end, run the following command in the `frontend` directory:
-
-```sh
-pnpm run build
-```
-
-The front end is built to the `backend/src/main/resources/static` directory
-and becomes part of the JAR assembly.
-
-### Run the backend
-
-To run the application, in the `backend` directory execute:
+The following command rebuilds the frontend and starts Quizmaster:
 
 ```sh
-./gradlew bootRun
+pnpm start
 ```
-
-This command does not build the front end, so you need to run `pnpm run build` first.
 
 ### Run backend tests
 
-Run the following commands from the `backend` directory:
+```sh
+pnpm test:be
+```
 
-- `./gradlew test` — runs **all** tests, including AI integration tests that call a real LLM (requires `OPENROUTER_API_KEY`)
-- `./gradlew testLocal` — runs only local tests (excludes AI tests, no API key needed)
-- `./gradlew testAi` — runs only AI integration tests (requires `OPENROUTER_API_KEY`)
+This runs **all** backend tests, including AI integration tests that call a real LLM (requires `OPENROUTER_API_KEY`).
+
+To run only a subset:
+
+- `pnpm test:be:local` — local tests only (no API key needed)
+- `pnpm test:be:ai` — AI integration tests only (requires `OPENROUTER_API_KEY`)
 
 AI tests are tagged with JUnit 5 `@Tag("ai")`. When `OPENROUTER_API_KEY` is not set,
 AI tests are skipped automatically via `assumeTrue`.
 
+### Code quality
+
+Run before committing:
+
+```sh
+pnpm code
+```
+
+This runs TypeScript type checking and Biome linting/formatting on both frontend and specs.
+
 <!-- markdownlint-disable-next-line MD045 MD033-->
 ## <img alt="Vite logo" src="https://vitejs.dev/logo.svg" height="20"> Running Vite Development Server
 
-To avoid rebuilding frontend and backend every time you make a change, you can run the [Vite](https://vitejs.dev/guide/)
-development server in the `frontend` directory:
+For frontend development with hot module replacement, start both the backend and Vite dev server:
 
 ```sh
-pnpm dev
+pnpm start
 ```
 
-Vite starts a development server on `http://localhost:5173` and proxies requests to the backend server
-on `http://localhost:8080`.
-
-It watches for changes in the `frontend` directory and reloads the browser automatically with HMR.
+This runs the backend on `http://localhost:8080` and the Vite dev server on `http://localhost:5173`.
+Vite proxies API requests to the backend and reloads the browser automatically on frontend changes.
 
 ## 🧪 Running end-to-end tests
 
-You can run the end-to-end [Cucumber](https://cucumber.io/docs/guides/) + [Playwright](https://playwright.dev/) tests from the `specs` directory.
+Run [Cucumber](https://cucumber.io/docs/guides/) + [Playwright](https://playwright.dev/) end-to-end tests:
 
+```sh
+pnpm test:e2e
+```
 
-Run one of the following commands from the `specs` directory:
+This builds the frontend, starts the backend, runs all E2E specs, and stops the backend.
 
-- `pnpm run test:e2e` against the running app on `http://localhost:8080` (requires building the frontend first)
-- `pnpm run test:e2e:vite` against the running app on `http://localhost:5173`
-- `pnpm run test:e2e:ui` with Playwright UI (at `http://localhost:3333`) against the Vite development server on `http://localhost:5173`
+For development, with backend and Vite already running via `pnpm start`:
+
+- `pnpm test:e2e:dev` — run tests against the Vite dev server on `:5173`
+- `pnpm test:e2e:ui` — open Playwright UI at `http://localhost:3333`
 
 ## Swagger UI ###
 For easier testing, Swagger UI is available at http://localhost:8080/swagger-ui/index.html
@@ -127,29 +124,18 @@ but runs in end-to-end tests in GitHub Actions CI/CD build.
 
 To enable the feature flag, set the `FEATURE_FLAG` environment variable to `true`.
 
-- Enable feature flag on the backend:
+- Enable feature flag and start Quizmaster:
 
     ```bash
-    cd backend
     export FEATURE_FLAG=true
-    ./gradlew build
-    ./gradlew bootrun
-    ```
-
-- Enable feature flag on the frontend:
-
-    ```bash
-    cd frontend
-    export FEATURE_FLAG=true
-    pnpm dev
+    pnpm start
     ```
 
 - Run end-to-end tests with feature flag enabled
 
     ```bash
-    cd specs
     export FEATURE_FLAG=true
-    pnpm test:e2e:vite
+    pnpm test:e2e
     ```
 
 Note: on Windows set the feature flag with `$env:FEATURE_FLAG="true"` command.
@@ -176,8 +162,7 @@ Question generation uses [OpenRouter](https://openrouter.ai/) to call an LLM. Co
 ### Example
 
 ```bash
-cd backend
 export OPENROUTER_API_KEY=sk-or-...
 export OPENROUTER_MODEL=anthropic/claude-sonnet-4
-./gradlew bootRun
+pnpm start
 ```

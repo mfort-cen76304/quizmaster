@@ -45,24 +45,19 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Install frontend dependencies and Playwright
-        working-directory: specs
-        run: pnpm ci:install
+        run: pnpm install:all
 
-      - name: Type check & lint & format frontend
-        working-directory: specs
-        run: pnpm ci:code
+      - name: Type check & lint & format frontend + specs
+        run: pnpm code:ci
 
       - name: Build frontend
-        working-directory: specs
-        run: pnpm ci:build
+        run: pnpm build:ci:fe
 
       - name: Run backend tests
-        working-directory: backend
-        run: ./gradlew test
+        run: pnpm test:be
 
       - name: Run end-to-end tests
-        working-directory: specs
-        run: pnpm ci:test:e2e
+        run: pnpm test:e2e:ci
 
       - name: Upload backend test results
         if: always()

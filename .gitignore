@@ -1,5 +1,6 @@
 .idea/
 .pnpm-store/
+node_modules/
 
 backend/bin/
 backend/.gradle/
@@ -7,12 +8,10 @@ backend/build/
 backend/src/main/resources/static/
 
 frontend/node/
-frontend/node_modules/
 frontend/.vite
 
 specs/.features-gen
 specs/coverage/
-specs/node_modules/
 specs/playwright-report/
 specs/test-results
 

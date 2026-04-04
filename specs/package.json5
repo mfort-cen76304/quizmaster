@@ -5,38 +5,23 @@
     "version": "0.0.0",
     "type": "module",
     "scripts": {
+        "install:playwright": "pnpm playwright install chromium",
+
         "code:tsc": "tsc -b && rm -f *.tsbuildinfo",
         "code:lint": "biome lint --fix",
         "code:format": "biome format --write",
+        "code:ci": "tsc -b && biome ci",
         "code": "pnpm code:tsc && pnpm code:lint && pnpm code:format",
 
-        "test:playwright": "bddgen && cross-var wait-on tcp:$FE_PORT && playwright test",
-        "test:e2e": "cross-env FE_PORT=8080 pnpm test:playwright",
-        "test:e2e:vite": "cross-env FE_PORT=5173 pnpm test:playwright",
-        "test:e2e:watch": "chokidar 'features/**/*.feature' 'src/**/*.ts' -c bddgen",
-        "test:e2e:ui": "concurrently 'pnpm test:e2e:watch' 'pnpm test:e2e:vite --ui-host=0.0.0.0 --ui-port=3333'",
+        "playwright:test": "bddgen && cross-var wait-on tcp:$FE_PORT && playwright test",
+        "playwright:watch": "chokidar 'features/**/*.feature' 'src/**/*.ts' -c bddgen",
+        "playwright:ui": "concurrently 'pnpm playwright:watch' 'pnpm playwright:test --ui-host=0.0.0.0 --ui-port=3333'",
 
         "doc:gen": "node --require esbuild-register src/doc-gen/doc-gen.ts",
 
         "coverage:clean": "rm -rf coverage",
-        "coverage:test:e2e": "pnpm coverage:clean && c8 --experimental-monocart cross-env ENABLE_COVERAGE=1 pnpm test:e2e",
+        "coverage:test:e2e": "pnpm coverage:clean && c8 --experimental-monocart cross-env ENABLE_COVERAGE=1 pnpm playwright:test",
         "coverage:report": "node src/coverage/report.js",
-
-        "ci:install:fe": "cd ../frontend && pnpm install",
-        "ci:install:specs": "pnpm install && pnpm playwright install chromium",
-        "ci:install": "pnpm ci:install:fe && pnpm ci:install:specs",
-
-        "ci:code:fe": "cd ../frontend && tsc -b && biome ci",
-        "ci:code:specs": "tsc -b && biome ci",
-        "ci:code": "pnpm ci:code:fe && pnpm ci:code:specs",
-
-        "ci:build:fe": "cd ../frontend && cross-env FEATURE_FLAG=true pnpm vite build --sourcemap",
-        "ci:build:be": "cd ../backend && cross-env FEATURE_FLAG=true ./gradlew build",
-        "ci:build": "pnpm ci:build:fe && pnpm ci:build:be",
-
-        "ci:bootrun": "cd ../backend && ./gradlew bootRun",
-        "ci:test:e2e": "start-server-and-test 'pnpm ci:bootrun' 8080 'cross-env FEATURE_FLAG=true pnpm test:e2e'",
-        "ci:coverage": "start-server-and-test 'pnpm ci:bootrun' 8080 'cross-env FEATURE_FLAG=true pnpm coverage:test:e2e'"
     },
     "dependencies": {
         "react": "19.0.0",
@@ -59,7 +44,6 @@
         "@cucumber/cucumber": "11.1.0",
         "@playwright/test": "1.58.2",
         "playwright-bdd": "8.2.0",
-        "start-server-and-test": "2.0.11",
 
         // Coverage
         "monocart-coverage-reports": "2.12.6",

@@ -6,11 +6,14 @@
     "type": "module",
     "scripts": {
         "dev": "vite --host",
-        "build": "vite build",
+
+        "build:dev": "vite build --sourcemap",
+        "build:prod": "vite build",
 
         "code:tsc": "tsc -b && rm -f *.tsbuildinfo",
         "code:lint": "biome lint --fix",
         "code:format": "biome format --write",
+        "code:ci": "tsc -b && biome ci",
         "code": "pnpm code:tsc && pnpm code:lint && pnpm code:format",
     },
     "dependencies": {

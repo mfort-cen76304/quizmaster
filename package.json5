@@ -1,0 +1,58 @@
+{
+    "schema": "https://json.schemastore.org/package",
+    "name": "quizmaster",
+    "private": true,
+    "version": "0.0.0",
+    "scripts": {
+        // Install dependencies and Playwright browsers
+        "install:fe": "cd frontend && pnpm install",
+        "install:specs": "cd specs && pnpm install && pnpm install:playwright",
+        "install:all": "pnpm install && pnpm install:fe && pnpm install:specs",
+
+        // Build scripts
+        "build:fe:dev": "cd frontend && pnpm build:dev",
+        "build:fe:prod": "cd frontend && pnpm build:prod",
+        "build:be": "cd backend && ./gradlew build",
+
+        // Start Quizmaster in dev mode
+        "start:be": "pnpm build:fe:dev && cd backend && ./gradlew bootRun",
+        "start:fe": "cd frontend && pnpm dev",
+        "start": "concurrently 'pnpm start:be' 'pnpm start:fe'",
+
+        // Code quality
+        "code:fe": "cd frontend && pnpm code",
+        "code:specs": "cd specs && pnpm code",
+        "code": "pnpm code:fe && pnpm code:specs",
+
+        // Unit tests
+        "test:be:local": "cd backend && ./gradlew testLocal",
+        "test:be:ai": "cd backend && ./gradlew testAi",
+        "test:be": "cd backend && ./gradlew test",
+
+        // Helper scripts, do not run directly
+        "test:e2e:vite": "cd specs && cross-env FE_PORT=5173 pnpm playwright:test",
+        "test:e2e:be": "cd specs && cross-env FE_PORT=8080 pnpm playwright:test",
+        "test:e2e:coverage": "cd specs && cross-env FE_PORT=8080 pnpm coverage:test:e2e",
+        "test:e2e:playwright-ui": "cd specs && cross-env FE_PORT=5173 pnpm playwright:ui",
+
+        // E2E tests
+        "test:e2e": "./scripts/test-e2e.sh",
+        "test:e2e:dev": "./scripts/test-e2e.sh --dev",
+        "test:e2e:ui": "./scripts/test-e2e.sh --ui",
+
+        // CI scripts
+        "build:ci:fe": "cross-env FEATURE_FLAG=true pnpm build:fe:prod",
+        "build:ci:be": "cross-env FEATURE_FLAG=true pnpm build:be",
+        "build:ci": "pnpm build:ci:fe && pnpm build:ci:be",
+
+        "code:ci:fe": "cd frontend && pnpm code:ci",
+        "code:ci:specs": "cd specs && pnpm code:ci",
+        "code:ci": "pnpm code:ci:fe && pnpm code:ci:specs",
+
+        "test:e2e:ci": "cross-env FEATURE_FLAG=true ./scripts/test-e2e.sh",
+    },
+    "devDependencies": {
+        "concurrently": "9.1.2",
+        "cross-env": "7.0.3",
+    }
+}

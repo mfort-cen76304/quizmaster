@@ -18,7 +18,7 @@ Built incrementally using thin slices of functionality — a key learning object
 - Database: PostgreSQL (JPA/Hibernate + Flyway migrations in `backend/src/main/resources/db/migration/`)
 - Deployment: Single JAR containing both frontend and backend
 
-**Key insight:** Frontend must be built with `pnpm build` before running backend — changes don't auto-reflect.
+**Key insight:** Frontend is built into backend — `pnpm test:e2e` handles this automatically.
 
 ## Tech Stack
 
@@ -29,29 +29,24 @@ Built incrementally using thin slices of functionality — a key learning object
 
 ## Development Commands
 
+All commands run from the **project root**.
+
 ```bash
-# Setup
-cd frontend && pnpm install        # Frontend dependencies
-cd specs && pnpm ci:install        # E2E test dependencies + Playwright browsers
-
-# Development with HMR (recommended)
-cd backend && ./gradlew bootRun     # :8080 backend
-cd frontend && pnpm dev             # :5173 dev server (proxies API to :8080)
-
-# Production-like
-cd frontend && pnpm build && cd ../backend && ./gradlew bootRun  # :8080
+# First-time setup
+pnpm install:all                   # All dependencies + Playwright browsers
 
 # Code quality (run before committing)
-cd frontend && pnpm code           # TypeScript + Biome lint/format
-cd specs && pnpm code              # TypeScript + Biome lint/format
+pnpm code                          # TypeScript + Biome lint/format (frontend + specs)
 
 # Backend tests
-cd backend && ./gradlew testLocal  # Local tests (no API key needed)
+pnpm test:be                       # All backend tests
+pnpm test:be:local                 # Local tests only (no API key needed)
 
-# E2E tests
-cd specs && pnpm test:e2e          # Against :8080
-cd specs && pnpm test:e2e:vite     # Against :5173
+# E2E tests — builds frontend, starts backend, runs all specs, then stops backend
+pnpm test:e2e
 ```
+
+**If `pnpm test:e2e` fails with "Ports 8080 and/or 5173 are in use"**, stop the running backend/frontend first. Do NOT attempt to kill the processes automatically — ask the user to stop them.
 
 ## Domain Model
 
