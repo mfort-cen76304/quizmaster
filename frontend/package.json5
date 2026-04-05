@@ -17,15 +17,15 @@
         "code": "pnpm code:tsc && pnpm code:lint && pnpm code:format",
     },
     "dependencies": {
-        "react": "19.0.0",
-        "react-dom": "19.0.0",
-        "react-router-dom": "7.1.5"
+        "react": "19.2.4",
+        "react-dom": "19.2.4",
+        "react-router-dom": "7.14.0"
     },
     "devDependencies": {
         // Types
-        "@types/node": "22.10.1",
-        "@types/react": "19.0.8",
-        "@types/react-dom": "19.0.3",
+        "@types/node": "25.5.2",
+        "@types/react": "19.2.14",
+        "@types/react-dom": "19.2.3",
         "typescript": "5.7.2",
 
         // Linting + formatting
