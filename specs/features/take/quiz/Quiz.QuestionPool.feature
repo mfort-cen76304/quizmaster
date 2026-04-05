@@ -22,9 +22,9 @@ Feature: Quiz question pool size
     Then I see the welcome page
     * I see question count 2
     When I start quiz "Normal"
-    * I answer the question
-    * I answer the question
-    * I proceed to the score page
+    * I answer correctly
+    * I answer correctly
+    * I evaluate the quiz
     Then I see the result 2 correct out of 2, 100%, passed, required passScore 100%
 
   Scenario: Empty mode
@@ -34,8 +34,8 @@ Feature: Quiz question pool size
     Then I see the welcome page
     * I see question count 3
     When I start quiz "Full"
-    * I answer the question
-    * I answer the question
-    * I answer the question
-    * I proceed to the score page
+    * I answer correctly
+    * I answer correctly
+    * I answer correctly
+    * I evaluate the quiz
     Then I see the result 3 correct out of 3, 100%, passed, required passScore 100%

@@ -18,10 +18,10 @@ Feature: Quiz progress bar
     When I start the quiz
     Then progress shows 1 of 3
 
-    When I answer the question
+    When I answer correctly
     Then progress shows 2 of 3
 
-    When I answer the question
+    When I answer correctly
     Then progress shows 3 of 3
 
 
@@ -41,7 +41,7 @@ Feature: Quiz progress bar
     When I start the quiz
     Then progress shows 1 of 3
 
-    When I answer the question
+    When I answer correctly
     Then progress shows 1 of 3
 
     When I proceed to the next question

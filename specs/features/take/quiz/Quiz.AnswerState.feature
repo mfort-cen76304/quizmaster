@@ -50,7 +50,7 @@ Feature: Quiz answer state
     Given I start quiz "Quiz"
     When I answer "Green"
     And I answer "Paris"
-    And I proceed to the score page
+    And I evaluate the quiz
     And I start quiz "Quiz"
     Then I see question "Sky"
     And no answer is selected

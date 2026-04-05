@@ -15,7 +15,7 @@ Feature: Evaluate quiz score
     When I start the quiz
     * I answer <correct> questions correctly
     * I answer <incorrect> questions incorrectly
-    * I proceed to the score page
+    * I evaluate the quiz
     Then I see the result <correct> correct out of 4, <percentage>%, <result>, required passScore 75%
 
     Examples:
@@ -44,7 +44,7 @@ Feature: Evaluate quiz score
     * I proceed to the next question
     * I answer incorrectly
     * I answer correctly
-    * I proceed to the score page
+    * I evaluate the quiz
     Then I see the result 2 correct out of 2, 100%, passed, required passScore 100%
     Then I see the original result 1, 50%, failed
 

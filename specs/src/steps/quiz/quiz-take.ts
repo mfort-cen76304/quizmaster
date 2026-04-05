@@ -4,10 +4,6 @@ import { When, Then } from '#steps/fixture.ts'
 import { expectCorrectAnswersCounts } from '#steps/quiz/expects.ts'
 import { answerCorrectly, answerIncorrectly, progressThroughQuestions, repeatAsync } from '#steps/quiz/ops.ts'
 
-When('I answer the question', async function () {
-    await answerCorrectly(this)
-})
-
 When('I answer correctly', async function () {
     await answerCorrectly(this)
 })

@@ -1,6 +1,6 @@
 import { Then, When } from '#steps/fixture.ts'
 
-Then('I see the {string} workspace page', async function (name: string) {
+Then('I see the workspace {string}', async function (name: string) {
     await this.workspacePage.expectWorkspaceName(name)
 })
 

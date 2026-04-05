@@ -41,7 +41,7 @@ Feature: Delete Quiz
     When I take quiz "Math Quiz"
     * I start the quiz
     * I answer 2 questions correctly
-    * I proceed to the score page
+    * I evaluate the quiz
     When I delete quiz "Math Quiz" from the workspace
     And I confirm the deletion
     Then I do not see quiz "Math Quiz" in the workspace

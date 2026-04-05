@@ -15,7 +15,7 @@ Feature: Quiz retake after evaluation
     When I start quiz "Retake Quiz"
     * I answer 2 questions correctly
     * I answer 1 questions incorrectly
-    * I proceed to the score page
+    * I evaluate the quiz
     * I retake only incorrectly answered questions
     Then progress shows 1 of 1
     * I see question "Q3"
@@ -37,7 +37,7 @@ Feature: Quiz retake after evaluation
     * I answer correctly
     * I proceed to the next question
     * I answer incorrectly
-    * I proceed to the score page
+    * I evaluate the quiz
     * I retake only incorrectly answered questions
     Then progress shows 1 of 1
     * I see question "Q3"
@@ -56,7 +56,7 @@ Feature: Quiz retake after evaluation
     When I start quiz "Retake Quiz"
     * I answer 2 questions correctly
     * I answer 1 questions incorrectly
-    * I proceed to the score page
+    * I evaluate the quiz
     * I retake only incorrectly answered questions
     Then I see the submit button as inactive
 
@@ -75,6 +75,6 @@ Feature: Quiz retake after evaluation
     * I answer correctly
     * I proceed to the next question
     * I answer incorrectly
-    * I proceed to the score page
+    * I evaluate the quiz
     * I retake only incorrectly answered questions
     Then I see the submit button as inactive

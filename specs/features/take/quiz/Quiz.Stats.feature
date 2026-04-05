@@ -305,7 +305,7 @@ Feature: Show stats
     And a quiz "Stats Quiz" with all questions
     When I start the quiz
     And I answer 2 questions correctly
-    And I proceed to the score page
+    And I evaluate the quiz
     And I open stats for quiz "Stats Quiz"
     Then I see summary stats table
       | Summary |          |         |

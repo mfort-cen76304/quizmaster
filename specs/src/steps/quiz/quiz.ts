@@ -44,10 +44,6 @@ When('I evaluate the quiz', async function () {
     await this.questionPage.evaluate()
 })
 
-Then('I proceed to the score page', async function () {
-    await this.questionPage.evaluate()
-})
-
 Then('I see the "Game over" dialog', async function () {
     await expect(this.questionPage.evaluateModalButtonLocator()).toBeVisible()
 })

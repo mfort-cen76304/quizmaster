@@ -70,10 +70,6 @@ When('I go back to the workspace {string}', async function () {
     await this.questionEditPage.back()
 })
 
-Then('I see the workspace {string}', async function (name: string) {
-    await this.workspacePage.expectWorkspaceName(name)
-})
-
 // Field assertions
 
 Then('I see empty question text', async function () {
