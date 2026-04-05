@@ -41,7 +41,7 @@
         "esbuild-register": "3.6.0",
 
         // BDD
-        "@cucumber/cucumber": "11.1.0",
+        "@cucumber/cucumber": "12.7.0",
         "@playwright/test": "1.59.1",
         "playwright-bdd": "8.5.0",
 
@@ -50,8 +50,8 @@
         "c8": "11.0.0",
 
         // Living docs
-        "@cucumber/gherkin" : "32.1.2",
-        "@cucumber/messages" : "27.2.0",
+        "@cucumber/gherkin" : "39.0.0",
+        "@cucumber/messages" : "32.2.0",
         "react-markdown": "10.1.0",
 
         // Shell utils
