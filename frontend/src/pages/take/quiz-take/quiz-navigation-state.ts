@@ -1,5 +1,5 @@
-import { useStateSet } from 'helpers'
-import type { Quiz } from 'model/quiz.ts'
+import { useStateSet } from '#fe/helpers'
+import type { Quiz } from '#fe/model/quiz.ts'
 import { useNavigate, useParams } from 'react-router'
 
 export interface QuizNavigationState {

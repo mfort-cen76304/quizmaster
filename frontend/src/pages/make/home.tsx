@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { urls } from 'urls.ts'
+import { urls } from '#fe/urls.ts'
 
 export const HomePage = () => {
     return (

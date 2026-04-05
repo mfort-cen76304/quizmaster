@@ -2,17 +2,17 @@ import './quiz-edit-form.scss'
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import { urls, useWorkspaceId } from 'urls.ts'
-import { Field, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from 'pages/components'
+import { urls, useWorkspaceId } from '#fe/urls.ts'
+import { Field, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from '#fe/pages/components'
 import { QuestionCountInfo } from './components/question-count-info.tsx'
 import { QuestionSelect } from './components/question-select.tsx'
 import { RandomSubsetSection } from './components/random-subset-section.tsx'
-import { ErrorMessage, createValidator } from 'pages/components/forms/validations.tsx'
+import { ErrorMessage, createValidator } from '#fe/pages/components/forms/validations.tsx'
 import { validateQuizForm, errorMessage } from './validations.ts'
 import { useQuizFormState, stateToQuizApiData, type QuizEditFormData } from './quiz-form-state.ts'
 
-import type { QuestionListItem } from 'model/question-list-item.ts'
-import type { Quiz } from 'model/quiz.ts'
+import type { QuestionListItem } from '#fe/model/question-list-item.ts'
+import type { Quiz } from '#fe/model/quiz.ts'
 import { formatTimeLimit } from './utils/formatTimeLimit.ts'
 
 const TIME_LIMIT_PARTIAL_REGEX = /^(?:\d*|\d+m|\d+s|\d+m\d*|\d+s\d*|\d+m\d+s|\d+s\d+m)$/i

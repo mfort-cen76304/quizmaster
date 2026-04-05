@@ -1,6 +1,6 @@
 import './form.scss'
 import { useState } from 'react'
-import { preventDefault } from 'helpers.ts'
+import { preventDefault } from '#fe/helpers.ts'
 import { type FormValidator, ValidationsProvider } from './validations.tsx'
 
 interface FormProps<K extends string> {

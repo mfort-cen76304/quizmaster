@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { isNumericalQuestion, type AnswerIdxs } from 'model/question'
+import { isNumericalQuestion, type AnswerIdxs } from '#fe/model/question'
 import type { QuestionFormProps } from './question-form'
 
 export interface QuestionTakeState {

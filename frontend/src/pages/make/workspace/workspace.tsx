@@ -1,17 +1,17 @@
 import './workspace.scss'
 import { useState } from 'react'
 
-import type { QuestionListItem } from 'model/question-list-item'
-import type { QuizListItem } from 'model/quiz-list-item'
-import type { Workspace } from 'model/workspace'
+import type { QuestionListItem } from '#fe/model/question-list-item'
+import type { QuizListItem } from '#fe/model/quiz-list-item'
+import type { Workspace } from '#fe/model/workspace'
 
-import { useApi } from 'api/hooks'
-import { fetchWorkspace, fetchWorkspaceQuestions, fetchWorkspaceQuizzes } from 'api/workspace'
-import { deleteQuestion } from 'api/question'
-import { deleteQuiz } from 'api/quiz'
+import { useApi } from '#fe/api/hooks'
+import { fetchWorkspace, fetchWorkspaceQuestions, fetchWorkspaceQuizzes } from '#fe/api/workspace'
+import { deleteQuestion } from '#fe/api/question'
+import { deleteQuiz } from '#fe/api/quiz'
 
-import { urls, useWorkspaceId } from 'urls.ts'
-import { ItemList, LinkButton } from 'pages/components'
+import { urls, useWorkspaceId } from '#fe/urls.ts'
+import { ItemList, LinkButton } from '#fe/pages/components'
 import { QuestionItem } from './question-item'
 import { QuizItem } from './quiz-item'
 

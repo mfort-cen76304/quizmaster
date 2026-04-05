@@ -1,5 +1,5 @@
-import type { Quiz } from 'model/quiz.ts'
-import { StartButton } from 'pages/take/quiz-take/components/buttons.tsx'
+import type { Quiz } from '#fe/model/quiz.ts'
+import { StartButton } from '#fe/pages/take/quiz-take/components/buttons.tsx'
 import './quiz-details.scss'
 
 export interface QuizDetailsProps {

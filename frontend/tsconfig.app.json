@@ -6,7 +6,9 @@
         "lib": ["ES2020", "DOM", "DOM.Iterable"],
         "skipLibCheck": true,
 
-        "baseUrl": "src",
+        "paths": {
+            "#fe/*": ["./src/*"]
+        },
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
         "isolatedModules": true,

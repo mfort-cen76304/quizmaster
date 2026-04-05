@@ -1,5 +1,5 @@
-import { isAnsweredCorrectly } from 'model/question.ts'
-import type { Quiz } from 'model/quiz.ts'
+import { isAnsweredCorrectly } from '#fe/model/question.ts'
+import type { Quiz } from '#fe/model/quiz.ts'
 import type { QuizAnswers } from './quiz-answers-state'
 import { calculateScore } from '../question-take'
 

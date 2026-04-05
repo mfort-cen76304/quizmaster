@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useParams } from 'react-router'
 
-import type { Quiz } from 'model/quiz.ts'
-import { useApi } from 'api/hooks.ts'
-import { fetchQuiz } from 'api/quiz.ts'
+import type { Quiz } from '#fe/model/quiz.ts'
+import { useApi } from '#fe/api/hooks.ts'
+import { fetchQuiz } from '#fe/api/quiz.ts'
 import { QuizStats } from './quiz-stats-component.tsx'
-import type { Stats } from 'model/stats.ts'
-import { fetchStats } from 'api/stats.ts'
+import type { Stats } from '#fe/model/stats.ts'
+import { fetchStats } from '#fe/api/stats.ts'
 
 export const QuizStatsPage = () => {
     const params = useParams()

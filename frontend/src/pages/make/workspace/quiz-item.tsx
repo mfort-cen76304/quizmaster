@@ -1,6 +1,6 @@
-import { LinkButton } from 'pages/components'
-import type { QuizListItem } from 'model/quiz-list-item'
-import { urls, useWorkspaceId } from 'urls.ts'
+import { LinkButton } from '#fe/pages/components'
+import type { QuizListItem } from '#fe/model/quiz-list-item'
+import { urls, useWorkspaceId } from '#fe/urls.ts'
 
 interface Props {
     readonly quiz: QuizListItem

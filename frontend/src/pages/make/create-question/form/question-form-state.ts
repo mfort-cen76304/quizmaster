@@ -1,9 +1,9 @@
 import { useRef, useState } from 'react'
-import { updated } from 'helpers.ts'
-import type { Question } from 'model/question.ts'
-import type { QuestionApiData } from 'api/question.ts'
+import { updated } from '#fe/helpers.ts'
+import type { Question } from '#fe/model/question.ts'
+import type { QuestionApiData } from '#fe/api/question.ts'
 import type { AiAssistantResponse } from '../../../../api/ai-assistant.ts'
-import { parseTag } from 'model/tag.ts'
+import { parseTag } from '#fe/model/tag.ts'
 
 export interface AnswerState {
     readonly id: number

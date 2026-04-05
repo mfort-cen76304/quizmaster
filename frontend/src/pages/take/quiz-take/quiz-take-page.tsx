@@ -6,10 +6,10 @@ import { QuizScorePage } from './quiz-score-page.tsx'
 import { QuestionForm } from './quiz.tsx'
 import type { QuizAnswers } from './quiz-answers-state.ts'
 import { useNavigate } from 'react-router'
-import { updateAttempt } from 'api/stats.ts'
-import { getQuizRunId } from 'helpers.ts'
+import { updateAttempt } from '#fe/api/stats.ts'
+import { getQuizRunId } from '#fe/helpers.ts'
 import { evaluate } from './quiz-score.ts'
-import { AttemptStatus } from 'model/stats.ts'
+import { AttemptStatus } from '#fe/model/stats.ts'
 
 export const QuizTakePage = () => {
     const quiz = useQuizApi()
