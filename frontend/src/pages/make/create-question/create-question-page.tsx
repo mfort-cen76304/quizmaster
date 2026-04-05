@@ -1,5 +1,5 @@
 import './create-question.scss'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { type QuestionApiData, saveQuestion } from 'api/question.ts'
 
 import { Page } from 'pages/components/page.tsx'

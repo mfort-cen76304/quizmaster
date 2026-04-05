@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { urls } from 'urls.ts'
 
 export const HomePage = () => {

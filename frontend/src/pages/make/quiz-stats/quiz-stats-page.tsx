@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
 import type { Quiz } from 'model/quiz.ts'
 import { useApi } from 'api/hooks.ts'

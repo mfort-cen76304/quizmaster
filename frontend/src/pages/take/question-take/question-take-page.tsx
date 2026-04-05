@@ -1,7 +1,7 @@
 import './question-take-page.scss'
 
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
 import type { Question } from 'model/question.ts'
 import { useApi } from 'api/hooks'

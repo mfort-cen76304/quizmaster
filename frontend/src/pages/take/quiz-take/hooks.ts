@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 
 import { useApi } from 'api/hooks'
 import { fetchQuiz } from 'api/quiz'

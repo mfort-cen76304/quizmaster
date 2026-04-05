@@ -1,6 +1,6 @@
 import './quiz-edit-form.scss'
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 
 import { urls, useWorkspaceId } from 'urls.ts'
 import { Field, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from 'pages/components'

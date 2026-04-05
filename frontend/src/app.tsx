@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Route, Routes } from 'react-router'
 
 import { HomePage } from 'pages/make/home'
 import { QuestionTakePage } from 'pages/take/question-take'
