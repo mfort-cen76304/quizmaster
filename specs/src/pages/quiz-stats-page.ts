@@ -20,6 +20,9 @@ export class QuizStatsPage {
     expectAttemptStatsRowCount = (count: number) =>
         expect(this.tableBodyRowsLocator(this.attemptStatsTableLocator())).toHaveCount(count)
 
+    expectSummaryStatsRowCount = (count: number) =>
+        expect(this.tableBodyRowsLocator(this.summaryStatsTableLocator())).toHaveCount(count)
+
     expectAttemptStatsBodyRowCell = (rowIndex: number, colIndex: number, text: string) =>
         expectTextToBe(
             this.tableBodyRowsLocator(this.attemptStatsTableLocator()).nth(rowIndex).locator('td').nth(colIndex),

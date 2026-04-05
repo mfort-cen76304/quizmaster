@@ -15,6 +15,10 @@ When(
     },
 )
 
+Then('I see empty attempt stats table', async function () {
+    await this.quizStatsPage.expectAttemptStatsRowCount(0)
+})
+
 Then('I see summary stats table', async function (data: DataTable) {
     await expectSummaryStatsTable(this.quizStatsPage, data)
 })

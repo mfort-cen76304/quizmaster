@@ -4,14 +4,13 @@ Feature: Show stats
   stats page is shown when no attempts have been recorded yet.
 
   Scenario: Show empty stats page for quiz
-    - Shows empty stats page for brand new created quiz.
-
-    Given workspace "Stats Empty" with questions
-      | question              | answers         |
-      | Jaký nábytek má Ikea? | Stůl (*), Auto  |
-      | Jaké nádobí má Ikea?  | Talíř (*), Kolo |
-    And a quiz "Quiz" with all questions
+    Given a quiz "Quiz" with 2 questions
     When I open quiz "Quiz" statistics
+    Then I see summary stats table
+      | Summary |          |         |
+      | Started | Finished | Timeout |
+      |       0 |        0 |       0 |
+    And I see empty attempt stats table
 
   # Duration (individual): full, half, zero
   Scenario: Duration for full correct attempt
