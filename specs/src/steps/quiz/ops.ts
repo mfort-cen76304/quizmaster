@@ -8,6 +8,9 @@ export const openQuiz = async (world: QuizmasterWorld, quizId: string) => {
 }
 
 export const startQuiz = async (world: QuizmasterWorld, quizId: string) => {
+    if (world.useControlledClock) {
+        await world.page.clock.install({ time: new Date() })
+    }
     await openQuiz(world, quizId)
     await world.quizWelcomePage.start()
 }
@@ -84,8 +87,24 @@ export const createQuizViaUI = async (
     // Store quiz bookmark so 'I start quiz "X"' can find it
     await world.workspacePage.takeQuiz(quizName)
     const quizUrl = new URL(world.page.url()).pathname
-    world.quizBookmarks[quizName] = { ...emptyQuizBookmark(), url: quizUrl, title: quizName }
+    const bookmark = { ...emptyQuizBookmark(), url: quizUrl, title: quizName }
+
+    if (properties) {
+        const props = Object.fromEntries(properties.raw())
+        if (props['time limit']) {
+            bookmark.timeLimit = Number.parseInt(props['time limit'])
+            world.useControlledClock = true
+        }
+    }
+
+    world.quizBookmarks[quizName] = bookmark
     world.activeQuizBookmark = quizName
+    await world.workspacePage.goto(world.workspaceGuid)
+}
+
+export const finishQuizInSeconds = async (world: QuizmasterWorld, seconds: number) => {
+    await world.page.clock.fastForward(seconds * 1000)
+    await world.questionPage.evaluateButtonLocator().click()
     await world.workspacePage.goto(world.workspaceGuid)
 }
 

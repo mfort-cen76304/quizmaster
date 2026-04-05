@@ -11,51 +11,16 @@ Feature: Show stats
       |       0 |        0 |       0 |
     And I see empty attempt stats table
 
-  # Duration (individual): full, half, zero
-  Scenario: Duration for full correct attempt
-    Given workspace "Stats Duration Full" with questions
-      | question              | answers         |
-      | Jaký nábytek má Ikea? | Stůl (*), Auto  |
-      | Jaké nádobí má Ikea?  | Talíř (*), Kolo |
-    And a quiz "Stats Quiz" with all questions
-    When I take quiz "Stats Quiz" with answers in 10 seconds
-      | question              | answers |
-      | Jaký nábytek má Ikea? | Stůl    |
-      | Jaké nádobí má Ikea?  | Talíř   |
+  Scenario: Duration is recorded for quiz attempt
+    Given a quiz "Stats Quiz" with 2 questions
+      | time limit | 60s |
+    When I start the quiz
+    And I answer 2 questions correctly
+    And the quiz finishes in 10 seconds
     And I open quiz "Stats Quiz" statistics
     Then I see attempt stats table
-      | Duration   |          |                 |                   |       | Status   |
-      | 10 seconds |          |                 |                   |       | Finished |
-
-  Scenario: Duration for half correct attempt
-    Given workspace "Stats Duration Half" with questions
-      | question              | answers         |
-      | Jaký nábytek má Ikea? | Stůl (*), Auto  |
-      | Jaké nádobí má Ikea?  | Talíř (*), Kolo |
-    And a quiz "Stats Quiz" with all questions
-    When I take quiz "Stats Quiz" with answers in 10 seconds
-      | question              | answers |
-      | Jaký nábytek má Ikea? | Stůl    |
-      | Jaké nádobí má Ikea?  | Kolo    |
-    And I open quiz "Stats Quiz" statistics
-    Then I see attempt stats table
-      | Duration   |          |                 |                   |       | Status   |
-      | 10 seconds |          |                 |                   |       | Finished |
-
-  Scenario: Duration for zero correct attempt
-    Given workspace "Stats Duration Zero" with questions
-      | question              | answers         |
-      | Jaký nábytek má Ikea? | Stůl (*), Auto  |
-      | Jaké nádobí má Ikea?  | Talíř (*), Kolo |
-    And a quiz "Stats Quiz" with all questions
-    When I take quiz "Stats Quiz" with answers in 10 seconds
-      | question              | answers |
-      | Jaký nábytek má Ikea? | Auto    |
-      | Jaké nádobí má Ikea?  | Kolo    |
-    And I open quiz "Stats Quiz" statistics
-    Then I see attempt stats table
-      | Duration   |          |                 |                   |       | Status   |
-      | 10 seconds |          |                 |                   |       | Finished |
+      | Duration   | Points | Correct Answers | Incorrect Answers | Score | Status   |
+      | 10 seconds | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
 
   Scenario Outline: Attempt stats for <label> correct answers
     Given a quiz "Stats Quiz" with 2 questions

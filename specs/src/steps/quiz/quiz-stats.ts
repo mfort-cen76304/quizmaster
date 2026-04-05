@@ -2,7 +2,7 @@ import type { DataTable } from '@cucumber/cucumber'
 
 import { Given, Then, When } from '#steps/fixture.ts'
 import { expectAttemptStatsTable, expectSummaryStatsTable } from '#steps/quiz/expects.ts'
-import { takeQuizWithAnswers, takeQuizWithAnswersTimed } from '#steps/quiz/ops.ts'
+import { finishQuizInSeconds, takeQuizWithAnswers, takeQuizWithAnswersTimed } from '#steps/quiz/ops.ts'
 
 Given('I take quiz {string} with answer(s)', async function (quizName: string, data: DataTable) {
     await takeQuizWithAnswers(this, quizName, data)
@@ -14,6 +14,10 @@ When(
         await takeQuizWithAnswersTimed(this, quizName, timer, data)
     },
 )
+
+When('the quiz finishes in {int} seconds', async function (seconds: number) {
+    await finishQuizInSeconds(this, seconds)
+})
 
 Then('I see empty attempt stats table', async function () {
     await this.quizStatsPage.expectAttemptStatsRowCount(0)
