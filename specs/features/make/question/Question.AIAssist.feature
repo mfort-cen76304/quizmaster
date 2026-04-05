@@ -1,6 +1,6 @@
 Feature: Generate question and answers using AI
 
-  @slow
+  @ai @slow
   Scenario: Generate single-choice question and answers using AI assist
     Given I start creating a question
     When I ask AI:
@@ -12,7 +12,7 @@ Feature: Generate question and answers using AI
     And AI assistant returns at least 2 generated answers
     And AI assistant returns generated answers with only one correct answer
 
-  @slow
+  @ai @slow
   Scenario: Generate multiple-choice question and answers using AI assist
     Given I start creating a question
     When I ask AI:
@@ -35,6 +35,7 @@ Feature: Generate question and answers using AI
     When I enter question "What is the capital of Slovakia?"
     Then I do not see AI section
 
+  @ai
   Scenario: Generate multiple-choice question and answers and explanations using AI assist
       Given I start creating a question
       When I ask AI:

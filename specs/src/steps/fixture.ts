@@ -17,14 +17,17 @@ export const { Given, When, Then, BeforeScenario, After, AfterScenario, AfterAll
 
 const ENABLE_COVERAGE = process.env.ENABLE_COVERAGE === '1'
 const FEATURE_FLAG_ENABLED: boolean = process.env.FEATURE_FLAG === 'true'
+const AI_ENABLED = !!process.env.OPENROUTER_API_KEY
 
 BeforeScenario(async function ({ $tags, $test, $testInfo }) {
     const hasFeatureFlag = $tags.includes('@feature-flag')
     const hasNotFeatureFlag = $tags.includes('@not-feature-flag')
+    const isAi = $tags.includes('@ai')
     const isSlow = $tags.includes('@slow')
 
     if (hasFeatureFlag && !FEATURE_FLAG_ENABLED) $test.skip()
     if (hasNotFeatureFlag && FEATURE_FLAG_ENABLED) $test.skip()
+    if (isAi && !AI_ENABLED) $test.skip()
     if (isSlow) $testInfo.setTimeout($testInfo.timeout * 3)
 
     if (!ENABLE_COVERAGE) return
