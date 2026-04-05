@@ -69,6 +69,18 @@ export const createQuestionInAutoWorkspace = async (
     await createQuestionInWorkspace(world, bookmark, question, answerRawTable, isEasy, explanation, imageUrl)
 }
 
+export const createTrivialQuestions = async (world: QuizmasterWorld, n: number) => {
+    for (let i = 1; i <= n; i++) {
+        const answerRawTable: TableOf<AnswerRaw> = {
+            raw: () => [
+                ['A', '*', undefined],
+                ['B', '', undefined],
+            ],
+        }
+        await createQuestionInWorkspace(world, `Q${i}`, `Question ${i}?`, answerRawTable)
+    }
+}
+
 export const createNumericalQuestionInAutoWorkspace = async (
     world: QuizmasterWorld,
     bookmark: string,

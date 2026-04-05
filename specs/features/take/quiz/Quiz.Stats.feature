@@ -67,11 +67,7 @@ Feature: Show stats
       | 10 seconds |          |                 |                   |       | Finished |
 
   Scenario Outline: Attempt stats for <label> correct answers
-    Given workspace "Stats <label>" with questions
-      | bookmark | question  | answers  |
-      | Q1       | 1 + 1 = ? | 2 (*), 3 |
-      | Q2       | 2 + 2 = ? | 4 (*), 5 |
-    And a quiz "Stats Quiz" with all questions
+    Given a quiz "Stats Quiz" with 2 questions
     When I start the quiz
     And I answer <correct> questions correctly
     And I answer <incorrect> questions incorrectly
@@ -91,11 +87,7 @@ Feature: Show stats
 
   # Summary stats
   Scenario: Summary stats for completed quiz
-    Given workspace "Stats Summary Success" with questions
-      | bookmark | question   | answers  |
-      | Q1       | 1 + 1 = ?  | 2 (*), 3 |
-      | Q2       | 2 + 2 = ?  | 4 (*), 5 |
-    And a quiz "Stats Quiz" with all questions
+    Given a quiz "Stats Quiz" with 2 questions
     When I start the quiz
     And I answer 2 questions correctly
     And I evaluate the quiz
