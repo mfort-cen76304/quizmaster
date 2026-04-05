@@ -10,7 +10,7 @@
 
 ## First-time setup
 
-To install frontend & specs dependencies and Chrome browser for E2E tests, run:
+Install dependencies, Chromium browser for E2E tests, and create a default `.env` configuration:
 
 ```sh
 pnpm install:all
@@ -61,7 +61,10 @@ For frontend development with hot module replacement, start both the backend and
 pnpm start
 ```
 
-This runs the backend on `http://localhost:8080` and the Vite dev server on `http://localhost:5173`.
+This runs the backend on `http://localhost:$BE_PORT` and the Vite dev server on `http://localhost:$FE_PORT`.
+
+Default ports are `BE_PORT=8080` (backend) and `FE_PORT=5173` (Vite), configurable in `.env`.
+
 Vite proxies API requests to the backend and reloads the browser automatically on frontend changes.
 
 ## 🧪 Running end-to-end tests
@@ -76,11 +79,11 @@ This builds the frontend, starts the backend, runs all E2E specs, and stops the 
 
 For development, with backend and Vite already running via `pnpm start`:
 
-- `pnpm test:e2e:dev` — run tests against the Vite dev server on `:5173`
+- `pnpm test:e2e:dev` — run tests against the Vite dev server
 - `pnpm test:e2e:ui` — open Playwright UI at `http://localhost:3333`
 
 ## Swagger UI ###
-For easier testing, Swagger UI is available at http://localhost:8080/swagger-ui/index.html
+For easier testing, Swagger UI is available at `http://localhost:<BE_PORT>/swagger-ui/index.html` (default port `8080`).
 
 ## 🚩 Feature Flag
 

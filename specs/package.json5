@@ -13,14 +13,14 @@
         "code:ci": "tsc -b && biome ci",
         "code": "pnpm code:tsc && pnpm code:lint && pnpm code:format",
 
-        "playwright:test": "bddgen && cross-var wait-on tcp:$FE_PORT && playwright test",
+        "playwright:test": ". ../scripts/load-env.sh; bddgen && wait-on tcp:${E2E_BASE_PORT:-$BE_PORT} && playwright test",
         "playwright:watch": "chokidar 'features/**/*.feature' 'src/**/*.ts' -c bddgen",
         "playwright:ui": "concurrently 'pnpm playwright:watch' 'pnpm playwright:test --ui-host=0.0.0.0 --ui-port=3333'",
 
         "doc:gen": "node --require esbuild-register src/doc-gen/doc-gen.ts",
 
         "coverage:clean": "rm -rf coverage",
-        "coverage:test:e2e": "pnpm coverage:clean && c8 --experimental-monocart cross-env ENABLE_COVERAGE=1 pnpm playwright:test",
+        "coverage:test:e2e": "pnpm coverage:clean && ENABLE_COVERAGE=1 c8 --experimental-monocart pnpm playwright:test",
         "coverage:report": "node src/coverage/report.js",
     },
     "dependencies": {
@@ -57,8 +57,7 @@
         // Shell utils
         "chokidar-cli": "3.0.0",
         "concurrently": "9.1.2",
-        "cross-var": "1.1.0",
-        "cross-env": "7.0.3",
+        "dotenv": "16.4.7",
         "wait-on": "8.0.1",
     }
 }

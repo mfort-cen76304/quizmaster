@@ -1,13 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+. "$(dirname "$0")/load-env.sh"
+
 port_busy() { (echo >/dev/tcp/localhost/"$1") 2>/dev/null; }
 
 case "${1:-}" in
 --dev)
     shift
-    if ! port_busy 8080 || ! port_busy 5173; then
-        echo "Backend (:8080) and Vite (:5173) must be running."
+    if ! port_busy "$BE_PORT" || ! port_busy "$FE_PORT"; then
+        echo "Backend (:$BE_PORT) and Vite (:$FE_PORT) must be running."
         echo "Run 'pnpm start' first, or use 'pnpm test:e2e' for a standalone run."
         exit 1
     fi
@@ -16,8 +18,8 @@ case "${1:-}" in
     ;;
 --ui)
     shift
-    if ! port_busy 8080 || ! port_busy 5173; then
-        echo "Backend (:8080) and Vite (:5173) must be running."
+    if ! port_busy "$BE_PORT" || ! port_busy "$FE_PORT"; then
+        echo "Backend (:$BE_PORT) and Vite (:$FE_PORT) must be running."
         echo "Run 'pnpm start' first."
         exit 1
     fi
@@ -25,8 +27,8 @@ case "${1:-}" in
     pnpm test:e2e:playwright-ui -- "$@"
     ;;
 *)
-    if port_busy 8080 || port_busy 5173; then
-        echo "Ports 8080 and/or 5173 are in use."
+    if port_busy "$BE_PORT" || port_busy "$FE_PORT"; then
+        echo "Ports $BE_PORT and/or $FE_PORT are in use."
         echo "Stop them first, or use 'pnpm test:e2e:dev' to test against running servers."
         exit 1
     fi

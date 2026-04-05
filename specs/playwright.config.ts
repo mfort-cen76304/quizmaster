@@ -1,7 +1,10 @@
+import { config } from 'dotenv'
 import { defineConfig } from '@playwright/test'
 import { defineBddConfig } from 'playwright-bdd'
 
-const port = process.env.FE_PORT || '8080'
+config({ path: '../.env' })
+
+const port = process.env.E2E_BASE_PORT || process.env.BE_PORT || '8080'
 
 export default defineConfig({
     fullyParallel: true,

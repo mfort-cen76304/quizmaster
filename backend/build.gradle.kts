@@ -1,11 +1,13 @@
 import java.io.BufferedReader
 
 import org.springframework.boot.gradle.tasks.bundling.BootJar
+import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
     java
     id("org.springframework.boot") version "3.5.12"
     id("io.spring.dependency-management") version "1.1.7"
+    id("co.uzzu.dotenv.gradle") version "4.0.0"
 }
 
 group = "cz.scrumdojo"
@@ -55,6 +57,10 @@ sourceSets {
             if (!featureFlag()) exclude("feature-flag.properties")
         }
     }
+}
+
+tasks.withType<BootRun> {
+    environment("BE_PORT", env.fetch("BE_PORT", "8080"))
 }
 
 tasks.withType<Test> {
