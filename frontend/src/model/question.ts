@@ -32,12 +32,33 @@ export const isNumericalQuestion = (question: Question) => {
     return hasNumericPrimaryAnswer && hasOnlyEmptySecondaryAnswers
 }
 
-export const isAnsweredCorrectly = (selectedAnswerIdxs: AnswerIdxs, correctAnswers: AnswerIdxs): boolean => {
-    if (selectedAnswerIdxs) {
-        return (
-            selectedAnswerIdxs.length === correctAnswers.length &&
-            selectedAnswerIdxs.every(answerIndex => correctAnswers.includes(answerIndex))
-        )
+export interface AnswerComparison {
+    readonly answered: boolean
+    readonly missedCorrect: number
+    readonly selectedIncorrect: number
+}
+
+export const compareAnswers = (selectedAnswerIdxs: AnswerIdxs, correctAnswers: AnswerIdxs): AnswerComparison => {
+    if (!selectedAnswerIdxs) return { answered: false, missedCorrect: correctAnswers.length, selectedIncorrect: 0 }
+
+    const selected = (predicate: (idx: number) => boolean) => selectedAnswerIdxs.filter(predicate).length
+
+    const selectedCorrect = selected(idx => correctAnswers.includes(idx))
+    const selectedIncorrect = selected(idx => !correctAnswers.includes(idx))
+
+    return {
+        answered: true,
+        missedCorrect: correctAnswers.length - selectedCorrect,
+        selectedIncorrect,
     }
-    return false
+}
+
+export const isAnsweredCorrectly = ({ answered, missedCorrect, selectedIncorrect }: AnswerComparison): boolean =>
+    answered && missedCorrect === 0 && selectedIncorrect === 0
+
+export const calculateScore = (comparison: AnswerComparison): number => {
+    if (!comparison.answered) return 0
+    if (isAnsweredCorrectly(comparison)) return 1
+    if (comparison.missedCorrect + comparison.selectedIncorrect === 1) return 0.5
+    return 0
 }

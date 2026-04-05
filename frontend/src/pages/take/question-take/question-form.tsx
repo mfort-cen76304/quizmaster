@@ -1,16 +1,10 @@
 import './question-form.scss'
 import React from 'react'
 
-import { isNumericalQuestion, type AnswerIdxs, type Question } from '#model/question.ts'
+import { isNumericalQuestion, type AnswerIdxs, type Question, compareAnswers, calculateScore } from '#model/question.ts'
 import type { QuizMode, Difficulty } from '#model/quiz.ts'
 import { Form } from '#pages/components'
-import {
-    Answer,
-    useQuestionFeedbackState,
-    useQuestionTakeState,
-    QuestionCorrectness,
-    QuestionExplanation,
-} from '#pages/take/question-take'
+import { Answer, useQuestionTakeState, QuestionCorrectness, QuestionExplanation } from '#pages/take/question-take'
 
 import { QuestionScore } from './components/question-score.tsx'
 
@@ -29,7 +23,8 @@ export const QuestionForm = (props: QuestionFormProps) => {
     const numericalInputRef = React.useRef<HTMLInputElement>(null)
 
     const state = useQuestionTakeState(props)
-    const feedback = useQuestionFeedbackState(state, props.question)
+    const score = calculateScore(compareAnswers(state.selectedAnswerIdxs, correctAnswers))
+    const showFeedback = (idx: number) => state.isMultipleChoice || state.selectedAnswerIdxs[0] === idx
 
     // Notify parent when answers change
     React.useEffect(() => {
@@ -150,7 +145,7 @@ export const QuestionForm = (props: QuestionFormProps) => {
                                 explanation={
                                     props.question.explanations ? props.question.explanations[idx] : 'not defined'
                                 }
-                                showFeedback={state.submitted && feedback.showFeedback(idx) && props.mode === 'learn'}
+                                showFeedback={state.submitted && showFeedback(idx) && props.mode === 'learn'}
                                 onAnswerChange={state.onSelectedAnswerChange}
                                 isAnswerChecked={state.isAnswerChecked}
                             />
@@ -163,8 +158,8 @@ export const QuestionForm = (props: QuestionFormProps) => {
                 )}
                 {state.submitted && props.mode === 'learn' && (
                     <>
-                        <QuestionCorrectness score={feedback.score} />
-                        <QuestionScore score={feedback.score} />
+                        <QuestionCorrectness score={score} />
+                        <QuestionScore score={score} />
                         <QuestionExplanation text={questionExplanation} />
                     </>
                 )}

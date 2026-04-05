@@ -1,6 +1,5 @@
-import { isAnsweredCorrectly } from '#model/question.ts'
+import { compareAnswers, isAnsweredCorrectly, calculateScore } from '#model/question.ts'
 import type { Quiz } from '#model/quiz.ts'
-import { calculateScore } from '#pages/take/question-take/index.ts'
 
 import type { QuizAnswers } from './quiz-answers-state'
 
@@ -11,21 +10,17 @@ export interface QuizScore {
     readonly score: number
 }
 
-export const evaluate = (quiz: Quiz, quizAnswers: QuizAnswers): QuizScore => ({
-    correct: quiz.questions.filter((question, idx) =>
-        isAnsweredCorrectly(quizAnswers.finalAnswers[idx], question.correctAnswers),
-    ).length,
-    firstCorrect: quiz.questions.filter((question, idx) =>
-        isAnsweredCorrectly(quizAnswers.firstAnswers[idx], question.correctAnswers),
-    ).length,
-    total: quiz.questions.length,
-    score: quiz.questions
-        .map((question, idx) =>
-            calculateScore(
-                quizAnswers.finalAnswers[idx],
-                question.correctAnswers,
-                isAnsweredCorrectly(quizAnswers.finalAnswers[idx], question.correctAnswers),
-            ),
-        )
-        .reduce((a, b) => a + b, 0),
-})
+export const evaluate = (quiz: Quiz, quizAnswers: QuizAnswers): QuizScore => {
+    const comparisons = quiz.questions.map((question, idx) =>
+        compareAnswers(quizAnswers.finalAnswers[idx], question.correctAnswers),
+    )
+
+    return {
+        correct: comparisons.filter(isAnsweredCorrectly).length,
+        firstCorrect: quiz.questions.filter((question, idx) =>
+            isAnsweredCorrectly(compareAnswers(quizAnswers.firstAnswers[idx], question.correctAnswers)),
+        ).length,
+        total: quiz.questions.length,
+        score: comparisons.map(calculateScore).reduce((a, b) => a + b, 0),
+    }
+}

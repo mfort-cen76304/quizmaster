@@ -1,4 +1,4 @@
-import { isAnsweredCorrectly } from '#model/question.ts'
+import { compareAnswers, isAnsweredCorrectly } from '#model/question.ts'
 import type { Quiz } from '#model/quiz.ts'
 import { Button } from '#pages/components/button.tsx'
 
@@ -21,7 +21,10 @@ export const QuizScorePage = ({ quiz, quizAnswers, onRetakeIncorrect }: QuizScor
     const result = passed ? 'passed' : 'failed'
 
     const incorrectQuestionIds = quiz.questions
-        .filter((question, idx) => !isAnsweredCorrectly(quizAnswers.finalAnswers[idx], question.correctAnswers))
+        .filter(
+            (question, idx) =>
+                !isAnsweredCorrectly(compareAnswers(quizAnswers.finalAnswers[idx], question.correctAnswers)),
+        )
         .map(q => q.id)
 
     return (
