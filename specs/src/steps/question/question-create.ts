@@ -1,15 +1,15 @@
 import type { DataTable } from '@cucumber/cucumber'
 
-import type { TableOf } from 'steps/common.ts'
-import { Given } from 'steps/fixture.ts'
-import { addAnswers, enterImageUrl, enterQuestion, enterTag, type AnswerRaw } from 'steps/question/ops.ts'
+import type { TableOf } from '#specs/steps/common.ts'
+import { Given } from '#specs/steps/fixture.ts'
+import { addAnswers, enterImageUrl, enterQuestion, enterTag, type AnswerRaw } from '#specs/steps/question/ops.ts'
 import {
     createQuestionInAutoWorkspace,
     createNumericalQuestionInAutoWorkspace,
     ensureWorkspace,
     navigateToWorkspace,
-} from 'steps/workspace/ops.ts'
-import { emptyQuestion } from 'steps/world'
+} from '#specs/steps/workspace/ops.ts'
+import { emptyQuestion } from '#specs/steps/world'
 
 Given('a question {string}', async function (question: string) {
     await ensureWorkspace(this)

@@ -1,5 +1,5 @@
-import type { TableOf } from 'steps/common.ts'
-import { type Answer, emptyAnswer, type QuizmasterWorld } from 'steps/world'
+import type { TableOf } from '#specs/steps/common.ts'
+import { type Answer, emptyAnswer, type QuizmasterWorld } from '#specs/steps/world'
 
 export type AnswerRaw = [string, '*' | '', string | undefined]
 

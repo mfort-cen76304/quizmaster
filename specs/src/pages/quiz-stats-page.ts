@@ -1,6 +1,6 @@
 import { expect, type Locator, type Page } from '@playwright/test'
 
-import { expectTextToBe } from 'steps/common.ts'
+import { expectTextToBe } from '#specs/steps/common.ts'
 
 export class QuizStatsPage {
     constructor(private page: Page) {}

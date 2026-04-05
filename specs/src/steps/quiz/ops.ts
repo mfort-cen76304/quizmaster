@@ -1,6 +1,6 @@
 import type { DataTable } from '@cucumber/cucumber'
 
-import { type Difficulty, type QuizMode, type QuizmasterWorld, emptyQuizBookmark } from 'steps/world'
+import { type Difficulty, type QuizMode, type QuizmasterWorld, emptyQuizBookmark } from '#specs/steps/world'
 
 export const openQuiz = async (world: QuizmasterWorld, quizId: string) => {
     const quizUrl = world.quizBookmarks[quizId]?.url || `/quiz/${quizId}`

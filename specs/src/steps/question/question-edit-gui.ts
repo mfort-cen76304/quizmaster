@@ -1,8 +1,8 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import { type TableOf, toText } from 'steps/common.ts'
-import { Given, Then, When } from 'steps/fixture.ts'
+import { type TableOf, toText } from '#specs/steps/common.ts'
+import { Given, Then, When } from '#specs/steps/fixture.ts'
 import {
     addAnswers,
     type AnswerRaw,
@@ -16,16 +16,16 @@ import {
     markAnswerCorrectness,
     submitQuestion,
     enterAIPrompt,
-} from 'steps/question/ops.ts'
+} from '#specs/steps/question/ops.ts'
 import {
     expectAnswer,
     expectDeleteButtonsState,
     expectEmptyAnswers,
     expectErrorCount,
     expectErrorMessages,
-} from 'steps/question/expects.ts'
-import { ensureWorkspace, navigateToWorkspace } from 'steps/workspace/ops.ts'
-import { emptyQuestion } from 'steps/world'
+} from '#specs/steps/question/expects.ts'
+import { ensureWorkspace, navigateToWorkspace } from '#specs/steps/workspace/ops.ts'
+import { emptyQuestion } from '#specs/steps/world'
 
 Given('I start creating a question', async function () {
     await ensureWorkspace(this)

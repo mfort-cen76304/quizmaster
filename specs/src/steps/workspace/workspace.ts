@@ -1,5 +1,5 @@
-import { Given, Then, When } from 'steps/fixture.ts'
-import type { QuizmasterWorld } from 'steps/world'
+import { Given, Then, When } from '#specs/steps/fixture.ts'
+import type { QuizmasterWorld } from '#specs/steps/world'
 
 const createWorkspace = async (world: QuizmasterWorld, title: string) => {
     await world.workspaceCreatePage.gotoNew()

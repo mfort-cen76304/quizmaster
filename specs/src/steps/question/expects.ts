@@ -1,7 +1,7 @@
 import { expect } from '@playwright/test'
 
-import type { QuestionEditPage, TakeQuestionPage } from 'pages'
-import type { Question } from 'steps/world'
+import type { QuestionEditPage, TakeQuestionPage } from '#specs/pages/index.ts'
+import type { Question } from '#specs/steps/world'
 
 export const expectQuestion = async (takeQuestionPage: TakeQuestionPage, question: Question) => {
     await takeQuestionPage.expectQuestionText(question.question)

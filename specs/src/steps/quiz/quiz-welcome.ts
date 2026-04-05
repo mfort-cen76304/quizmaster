@@ -1,4 +1,4 @@
-import { Then } from 'steps/fixture.ts'
+import { Then } from '#specs/steps/fixture.ts'
 
 Then('I see the welcome page', async function () {
     await this.quizWelcomePage.expectHeader('Welcome to the quiz')

@@ -1,8 +1,12 @@
 import type { DataTable } from '@cucumber/cucumber'
 
-import { Given, Then, When } from 'steps/fixture.ts'
-import { expectAttemptStatsTable, expectStatsTable, expectSummaryStatsTable } from 'steps/quiz/expects.ts'
-import { takeQuizWithAnswers, takeQuizWithAnswersTimed, takeQuizWithoutCompletingInTimeLimit } from 'steps/quiz/ops.ts'
+import { Given, Then, When } from '#specs/steps/fixture.ts'
+import { expectAttemptStatsTable, expectStatsTable, expectSummaryStatsTable } from '#specs/steps/quiz/expects.ts'
+import {
+    takeQuizWithAnswers,
+    takeQuizWithAnswersTimed,
+    takeQuizWithoutCompletingInTimeLimit,
+} from '#specs/steps/quiz/ops.ts'
 
 Given('I take quiz {string} with answer(s)', async function (quizName: string, data: DataTable) {
     await takeQuizWithAnswers(this, quizName, data)
