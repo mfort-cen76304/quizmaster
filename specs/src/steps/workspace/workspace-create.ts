@@ -1,5 +1,4 @@
 import type { DataTable } from '@cucumber/cucumber'
-import { expect } from '@playwright/test'
 
 import type { TableOf } from '#steps/common.ts'
 import { Given, When, Then } from '#steps/fixture.ts'
@@ -65,8 +64,4 @@ When('I go back to the home page', async function () {
 
 Then('I see the workspace creation page', async function () {
     await this.workspaceCreatePage.expectCreatePageVisible()
-})
-
-Then('I see an error message on workspace page stating title must be mandatory', async function () {
-    await expect.poll(() => this.workspaceCreatePage.errorMessage()).not.toBe('')
 })

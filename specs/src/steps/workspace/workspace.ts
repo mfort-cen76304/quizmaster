@@ -1,15 +1,4 @@
-import { Given, Then, When } from '#steps/fixture.ts'
-import type { QuizmasterWorld } from '#steps/world'
-
-const createWorkspace = async (world: QuizmasterWorld, title: string) => {
-    await world.workspaceCreatePage.gotoNew()
-    await world.workspaceCreatePage.enterWorkspaceName(title)
-    await world.workspaceCreatePage.submit()
-}
-
-Given('I saved the workspace {string}', async function (workspaceTitle: string) {
-    await createWorkspace(this, workspaceTitle)
-})
+import { Then, When } from '#steps/fixture.ts'
 
 Then('I see the {string} workspace page', async function (name: string) {
     await this.workspacePage.expectWorkspaceName(name)
@@ -33,10 +22,6 @@ Then('I do not see tag badge for question {string}', async function (question: s
 
 Then('I do not see question {string} in the list', async function (question: string) {
     await this.workspacePage.expectQuestionNotVisible(question)
-})
-
-Then('I see workspace title {string}', async function (title: string) {
-    await this.workspacePage.expectWorkspaceName(title)
 })
 
 When('I take question {string} from the list', async function (question: string) {

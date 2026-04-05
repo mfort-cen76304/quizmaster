@@ -61,10 +61,6 @@ When('I check answer {string}', async function (answerList: string) {
     }
 })
 
-When('I submit question', async function () {
-    await this.takeQuestionPage.submit()
-})
-
 Then('I see feedback {string}', async function (feedback: string) {
     await expectTextToBe(this.takeQuestionPage.questionFeedbackLocator(), feedback)
 })
@@ -89,16 +85,8 @@ Then('I see individual explanations per answer:', async function (dataTable: Dat
     }
 })
 
-Then('I see the {string} question for the quiz', async function (questionName: string) {
-    await this.takeQuestionPage.expectQuestionText(questionName)
-})
-
 Then('I see individual color feedback per answer:', async function (dataTable: DataTable) {
     await expectColorFeedback(this.takeQuestionPage, dataTable.hashes())
-})
-
-Then('I see that question has number of correct answers displayed', async function () {
-    await this.takeQuestionPage.expectCorrectAnswersCountAttached()
 })
 
 Then('I see that the question has {int} correct answers', async function (count: number) {

@@ -1,9 +1,9 @@
 import { expect } from '@playwright/test'
 
-import { expectTextToBe, expectThatIsNotVisible, expectThatIsVisible } from '#steps/common.ts'
+import { expectTextToBe } from '#steps/common.ts'
 import { Given, When, Then } from '#steps/fixture.ts'
 import { expectQuestion } from '#steps/question/expects.ts'
-import { expectAnswersChecked, expectNavigationButtons } from '#steps/quiz/expects.ts'
+import { expectNavigationButtons } from '#steps/quiz/expects.ts'
 import { openQuiz, startQuiz } from '#steps/quiz/ops.ts'
 
 Given('I open quiz {string}', async function (quizId: string) {
@@ -36,10 +36,6 @@ When('I skip the question', async function () {
     await this.questionPage.next()
 })
 
-When('I click the start button', async function () {
-    await this.quizWelcomePage.start()
-})
-
 When('I go back to previous question', async function () {
     await this.questionPage.back()
 })
@@ -67,22 +63,6 @@ Then('I see buttons {string}', async function (buttonList: string) {
     )
 })
 
-Then('I should see answer {string} is checked', async function (answerList: string) {
-    await expectAnswersChecked(this.takeQuestionPage, this.parseAnswers(answerList), true)
-})
-
-Then('I should see answer {string} is unchecked', async function (answerList: string) {
-    await expectAnswersChecked(this.takeQuestionPage, this.parseAnswers(answerList), false)
-})
-
-Then('I should not see the answer', async function () {
-    await expectThatIsNotVisible(this.takeQuestionPage.questionFeedbackLocator())
-})
-
-Then('I should see the answer', async function () {
-    await expectThatIsVisible(this.takeQuestionPage.questionFeedbackLocator())
-})
-
 Then('progress shows {int} of {int}', async function (current: number, max: number) {
     await this.questionPage.expectProgress(current, max)
 })
@@ -92,13 +72,6 @@ Then('I should see the text "Game over time"', async function () {
 })
 
 Then('I should see the countdown timer {string}', async function (timer: string) {
-    await expectTextToBe(this.questionPage.timerLocator(), timer)
-})
-
-Then('I should see the countdown timer after delay is less then {string}', async function (timer: string) {
-    await this.page.clock.install({ time: new Date() })
-    await expectTextToBe(this.questionPage.timerLocator(), timer)
-    await this.page.clock.fastForward(timer)
     await expectTextToBe(this.questionPage.timerLocator(), timer)
 })
 

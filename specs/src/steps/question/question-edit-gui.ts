@@ -113,10 +113,6 @@ Then('I see numerical answer field', async function () {
     await this.questionEditPage.expectNumericalAnswerVisible()
 })
 
-Then('I do not see numerical answer field', async function () {
-    await this.questionEditPage.expectNumericalAnswerNotVisible()
-})
-
 Then('I do not see answer fields', async function () {
     await this.questionEditPage.expectAnswerRowCount(0)
 })
@@ -149,10 +145,6 @@ Then(/easy is (available|not available)/, async function (value: string) {
     }
 })
 
-Then('I see AI section', async function () {
-    await this.questionEditPage.expectAiBlockVisible()
-})
-
 Then('I do not see AI section', async function () {
     await this.questionEditPage.expectAiBlockNotVisible()
 })
@@ -182,13 +174,6 @@ Then(/I see answer (\d+) as (correct|incorrect)/, async function (index: number,
     }
 })
 
-Then(
-    /I see answer (\d+) text "([^"]*)", (correct|incorrect), with explanation "([^"]*)"/,
-    async function (index: number, answer: string, correctness: string, explanation: string) {
-        await expectAnswer(this.questionEditPage, index - 1, answer, correctness === 'correct', explanation)
-    },
-)
-
 Then('I see the answers fields', async function (data: TableOf<AnswerRaw>) {
     const answers = data.raw()
 
@@ -206,10 +191,6 @@ Then('I see empty question explanation', async function () {
 
 Then('I see question explanation {string}', async function (explanation: string) {
     await this.questionEditPage.expectQuestionExplanation(explanation)
-})
-
-Then('request to AI assistant contains question {string}', async function (expectedPrompt: string) {
-    await this.questionEditPage.expectAiPromptValue(expectedPrompt)
 })
 
 Then('AI assistant returns at least {int} generated answers', async function (count: number) {
@@ -360,8 +341,4 @@ Then('I delete answer {int}', async function (answerNumber: number) {
 
 Then('I can delete {int} answers', async function (buttonCount: number) {
     await expectDeleteButtonsState(this.questionEditPage, buttonCount, false)
-})
-
-Then('I see {int} delete buttons disabled', async function (buttonCount: number) {
-    await expectDeleteButtonsState(this.questionEditPage, buttonCount, true)
 })

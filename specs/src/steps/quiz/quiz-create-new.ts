@@ -1,10 +1,9 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import { expectedNumberOfChildrenToBe } from '#steps/common.ts'
 import { Then, When } from '#steps/fixture.ts'
 import { expectQuizFormErrors } from '#steps/quiz/expects.ts'
-import type { QuizMode, Difficulty } from '#steps/world/quiz.ts'
+import type { QuizMode } from '#steps/world/quiz.ts'
 
 When('I start creating a new quiz', async function () {
     await this.workspacePage.createNewQuiz()
@@ -52,10 +51,6 @@ Then('I do not see tag badge for quiz question {string}', async function (questi
     await this.quizCreatePage.expectQuestionTagBadgeNotVisible(question)
 })
 
-When('I start editing a quiz {string}', async function (quiz: string) {
-    await expect(this.quizCreatePage.getQuestion(quiz).first()).toBeVisible()
-})
-
 When('questions belonging to the quiz are marked', async function (quiz: string) {
     await expect(this.quizCreatePage.getQuestion(quiz).first()).toBeVisible()
 })
@@ -80,11 +75,6 @@ When(/I select (exam|learn) mode/, async function (mode: QuizMode) {
     await this.quizCreatePage.selectFeedbackMode(mode)
 })
 
-When('I select difficulty {string}', async function (inputDifficulty: string) {
-    const difficulty = inputDifficulty.toLowerCase().replace('_', '-') as Difficulty
-    await this.quizCreatePage.selectDifficulty(difficulty)
-})
-
 When('I submit the quiz', async function () {
     await this.quizCreatePage.submit()
 })
@@ -99,14 +89,6 @@ When('I enter time limit {string}', async function (limit: string) {
 
 When('I filter questions by {string}', async function (s: string) {
     await this.quizCreatePage.enterFilterString(s)
-})
-
-Then('I see workspace with {int} available questions', async function (count: number) {
-    await expectedNumberOfChildrenToBe(this.quizCreatePage.questionsInList(), count)
-})
-
-Then('I clear time limit', async function () {
-    await this.quizCreatePage.clearTimeLimit()
 })
 
 Then('I clear score', async function () {
