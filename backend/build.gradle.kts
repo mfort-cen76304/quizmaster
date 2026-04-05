@@ -61,6 +61,7 @@ sourceSets {
 
 tasks.withType<BootRun> {
     environment("BE_PORT", env.fetch("BE_PORT", "8080"))
+    environment("DB_SCHEMA", env.fetch("DB_SCHEMA", "public"))
 
     val apiKey = env.fetch("OPENROUTER_API_KEY", "")
     if (apiKey.isNotEmpty()) environment("OPENROUTER_API_KEY", apiKey)
@@ -70,6 +71,14 @@ tasks.withType<BootRun> {
 }
 
 tasks.withType<Test> {
+    environment("DB_SCHEMA", env.fetch("DB_SCHEMA", "public"))
+
+    val apiKey = env.fetch("OPENROUTER_API_KEY", "")
+    if (apiKey.isNotEmpty()) environment("OPENROUTER_API_KEY", apiKey)
+
+    val model = env.fetch("OPENROUTER_MODEL", "")
+    if (model.isNotEmpty()) environment("OPENROUTER_MODEL", model)
+
     jvmArgs("-XX:+EnableDynamicAgentLoading")
     testLogging {
         events("passed", "skipped", "failed")

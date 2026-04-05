@@ -4,11 +4,17 @@
     "private": true,
     "version": "0.0.0",
     "scripts": {
-        // Install dependencies and Playwright browsers
+        // Worktree management
+        "worktree:add": "./scripts/worktree-add.sh",
+        "worktree:delete": "./scripts/worktree-delete.sh",
+
+        // Install dependencies, psql client, Playwright browsers
         "env:init": "./scripts/init-env.sh",
         "install:fe": "cd frontend && pnpm install",
         "install:specs": "cd specs && pnpm install && pnpm install:playwright",
-        "install:all": "pnpm env:init && pnpm install && pnpm install:fe && pnpm install:specs",
+        "install:psql": "./scripts/install-psql.sh",
+
+        "install:all": "pnpm env:init && pnpm install && pnpm install:fe && pnpm install:specs && pnpm install:psql",
 
         // Build scripts
         "build:fe:dev": "cd frontend && pnpm build:dev",
