@@ -68,26 +68,6 @@ export const expectAnswersChecked = async (takeQuestionPage: TakeQuestionPage, a
     }
 }
 
-export const expectStatsTable = async (quizStatsPage: QuizStatsPage, data: DataTable) => {
-    const statsTableBodyRows = quizStatsPage.attemptStatsBodyRows()
-    const actualRowCount = await statsTableBodyRows.count()
-
-    const expectedRows = data.rows().filter(row => row.some(cell => cell.trim() !== ''))
-
-    expect(actualRowCount).toBe(expectedRows.length)
-
-    for (let i = 0; i < expectedRows.length; i++) {
-        const expectedRow = expectedRows[i]
-
-        for (let j = 0; j < expectedRow.length; j++) {
-            const expectedCell = expectedRow[j].trim()
-            if (expectedCell !== '') {
-                await quizStatsPage.expectAttemptStatsBodyRowCell(i, j, expectedCell)
-            }
-        }
-    }
-}
-
 const parseStatsData = (data: DataTable) => {
     const rawRows = data.raw()
     const [headerRow = [], ...bodyRows] = rawRows

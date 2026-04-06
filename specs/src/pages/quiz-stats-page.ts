@@ -13,8 +13,6 @@ export class QuizStatsPage {
     private tableHeaderCellsLocator = (table: Locator) => table.locator('thead th')
     private tableBodyRowsLocator = (table: Locator) => table.locator('tbody tr')
 
-    attemptStatsBodyRows = () => this.tableBodyRowsLocator(this.attemptStatsTableLocator())
-
     expectPageHeading = (text: string) => expectTextToBe(this.pageHeadingLocator(), text)
 
     expectAttemptStatsRowCount = (count: number) =>
