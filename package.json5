@@ -55,6 +55,10 @@
         "test:e2e:dev": "./scripts/test-e2e.sh --dev",
         "test:e2e:ui": "./scripts/test-e2e.sh --ui",
 
+        // BDD step catalog
+        "steps": "cd specs && pnpm steps",
+        "steps:unused": "cd specs && pnpm steps:unused",
+
         // CI scripts
         "build:ci:fe": "FEATURE_FLAG=true pnpm build:fe:prod",
         "build:ci:be": "FEATURE_FLAG=true pnpm build:be",

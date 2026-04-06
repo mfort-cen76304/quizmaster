@@ -11,6 +11,9 @@
         "playwright:watch": "chokidar 'features/**/*.feature' 'src/**/*.ts' -c bddgen",
         "playwright:ui": "concurrently 'pnpm playwright:watch' 'pnpm playwright:test --ui-host=0.0.0.0 --ui-port=3333'",
 
+        "steps": "bddgen export --steps",
+        "steps:unused": "bddgen export --unused-steps",
+
         "doc:gen": "node --require esbuild-register src/doc-gen/doc-gen.ts",
 
         "coverage:clean": "rm -rf coverage",
