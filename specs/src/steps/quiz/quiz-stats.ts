@@ -15,7 +15,7 @@ When(
     },
 )
 
-When('the quiz finishes in {int} seconds', async function (seconds: number) {
+When('I finish the quiz in {int} seconds', async function (seconds: number) {
     await finishQuizInSeconds(this, seconds)
 })
 

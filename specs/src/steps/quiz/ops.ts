@@ -7,9 +7,16 @@ export const openQuiz = async (world: QuizmasterWorld, quizId: string) => {
     await world.page.goto(quizUrl)
 }
 
+export const installClockIfNeeded = async (world: QuizmasterWorld) => {
+    if (!world.clockInstalled) {
+        await world.page.clock.install({ time: new Date() })
+        world.clockInstalled = true
+    }
+}
+
 export const startQuiz = async (world: QuizmasterWorld, quizId: string) => {
     if (world.useControlledClock) {
-        await world.page.clock.install({ time: new Date() })
+        await installClockIfNeeded(world)
     }
     await openQuiz(world, quizId)
     await world.quizWelcomePage.start()
@@ -125,7 +132,7 @@ export const takeQuizWithAnswersTimed = async (
     timer: number,
     data: DataTable,
 ) => {
-    await world.page.clock.install({ time: new Date() })
+    await installClockIfNeeded(world)
     await world.workspacePage.takeQuiz(quizName)
     await world.quizWelcomePage.start()
     const startTime = Date.now()
@@ -144,7 +151,7 @@ export const takeQuizWithoutCompletingInTimeLimit = async (
     quizName: string,
     data: DataTable,
 ) => {
-    await world.page.clock.install({ time: new Date() })
+    await installClockIfNeeded(world)
     await world.workspacePage.takeQuiz(quizName)
 
     const timeLimitSeconds = await world.quizWelcomePage.timeLimit()

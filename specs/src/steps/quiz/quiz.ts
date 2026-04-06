@@ -72,7 +72,6 @@ Then('I should see the countdown timer {string}', async function (timer: string)
 })
 
 Then('I will wait for {string}', async function (timer: string) {
-    await this.page.clock.install({ time: new Date() })
     await expectTextToBe(this.questionPage.timerLocator(), timer)
     await this.page.clock.fastForward(timer)
 })

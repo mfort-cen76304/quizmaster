@@ -60,6 +60,7 @@ export class QuizmasterWorld {
     activeQuizBookmark = ''
     correctAnswersCounts: Record<string, string> = {}
     useControlledClock = false
+    clockInstalled = false
 
     parseAnswers(answersString: string) {
         return answersString.split(',').map(answer => answer.trim())
