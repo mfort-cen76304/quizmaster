@@ -1,9 +1,9 @@
 import './create-question.scss'
 import { useNavigate } from 'react-router'
 
-import { type QuestionApiData, saveQuestion } from '#fe/api/question.ts'
-import { Page } from '#fe/pages/components/page.tsx'
+import { type QuestionApiData, saveQuestion } from '#api/question.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
+import { Page } from '#pages/components/page.tsx'
 
 import { QuestionEditForm } from './form/question-form.tsx'
 

@@ -1,10 +1,10 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import { expectedNumberOfChildrenToBe } from '#specs/steps/common.ts'
-import { Then, When } from '#specs/steps/fixture.ts'
-import { expectQuizFormErrors } from '#specs/steps/quiz/expects.ts'
-import type { QuizMode, Difficulty } from '#specs/steps/world/quiz.ts'
+import { expectedNumberOfChildrenToBe } from '#steps/common.ts'
+import { Then, When } from '#steps/fixture.ts'
+import { expectQuizFormErrors } from '#steps/quiz/expects.ts'
+import type { QuizMode, Difficulty } from '#steps/world/quiz.ts'
 
 When('I start creating a new quiz', async function () {
     await this.workspacePage.createNewQuiz()

@@ -1,4 +1,4 @@
-import type { Question } from '#fe/model/question.ts'
+import type { Question } from '#model/question.ts'
 
 import { fetchJson, postJson, patchJson, callDelete } from './helpers.ts'
 

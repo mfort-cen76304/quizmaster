@@ -1,4 +1,4 @@
-import { When } from '#specs/steps/fixture.ts'
+import { When } from '#steps/fixture.ts'
 
 When('I navigate to edit quiz {string}', async function (quizName: string) {
     // This is a placeholder. Implementation depends on your UI.

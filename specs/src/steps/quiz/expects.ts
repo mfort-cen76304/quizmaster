@@ -1,14 +1,8 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import type {
-    QuestionPage,
-    QuizCreatePage,
-    QuizScorePage,
-    QuizStatsPage,
-    TakeQuestionPage,
-} from '#specs/pages/index.ts'
-import type { Answer } from '#specs/steps/world'
+import type { QuestionPage, QuizCreatePage, QuizScorePage, QuizStatsPage, TakeQuestionPage } from '#pages/index.ts'
+import type { Answer } from '#steps/world'
 
 export const expectQuizResult = async (
     page: QuizScorePage,

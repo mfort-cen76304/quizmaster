@@ -1,5 +1,5 @@
-import { Given, Then } from '#specs/steps/fixture.ts'
-import type { QuizmasterWorld } from '#specs/steps/world/world.ts'
+import { Given, Then } from '#steps/fixture.ts'
+import type { QuizmasterWorld } from '#steps/world/world.ts'
 
 Given('I am on the home page', async function (this: QuizmasterWorld) {
     await this.homePage.goto()

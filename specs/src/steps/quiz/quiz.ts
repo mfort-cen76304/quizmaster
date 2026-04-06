@@ -1,10 +1,10 @@
 import { expect } from '@playwright/test'
 
-import { expectTextToBe, expectThatIsNotVisible, expectThatIsVisible } from '#specs/steps/common.ts'
-import { Given, When, Then } from '#specs/steps/fixture.ts'
-import { expectQuestion } from '#specs/steps/question/expects.ts'
-import { expectAnswersChecked, expectNavigationButtons } from '#specs/steps/quiz/expects.ts'
-import { openQuiz, startQuiz } from '#specs/steps/quiz/ops.ts'
+import { expectTextToBe, expectThatIsNotVisible, expectThatIsVisible } from '#steps/common.ts'
+import { Given, When, Then } from '#steps/fixture.ts'
+import { expectQuestion } from '#steps/question/expects.ts'
+import { expectAnswersChecked, expectNavigationButtons } from '#steps/quiz/expects.ts'
+import { openQuiz, startQuiz } from '#steps/quiz/ops.ts'
 
 Given('I open quiz {string}', async function (quizId: string) {
     await openQuiz(this, quizId)

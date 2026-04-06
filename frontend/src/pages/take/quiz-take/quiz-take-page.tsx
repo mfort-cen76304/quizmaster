@@ -1,9 +1,9 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router'
 
-import { updateAttempt } from '#fe/api/stats.ts'
+import { updateAttempt } from '#api/stats.ts'
 import { getQuizRunId } from '#fe/helpers.ts'
-import { AttemptStatus } from '#fe/model/stats.ts'
+import { AttemptStatus } from '#model/stats.ts'
 
 import { useQuizApi } from './hooks.ts'
 import type { QuizAnswers } from './quiz-answers-state.ts'

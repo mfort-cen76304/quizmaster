@@ -1,8 +1,8 @@
 import type { DataTable } from '@cucumber/cucumber'
 
-import { When, Then } from '#specs/steps/fixture.ts'
-import { expectCorrectAnswersCounts } from '#specs/steps/quiz/expects.ts'
-import { answerCorrectly, answerIncorrectly, progressThroughQuestions, repeatAsync } from '#specs/steps/quiz/ops.ts'
+import { When, Then } from '#steps/fixture.ts'
+import { expectCorrectAnswersCounts } from '#steps/quiz/expects.ts'
+import { answerCorrectly, answerIncorrectly, progressThroughQuestions, repeatAsync } from '#steps/quiz/ops.ts'
 
 When('I answer the question', async function () {
     await answerCorrectly(this)

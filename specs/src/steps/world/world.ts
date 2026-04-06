@@ -11,7 +11,7 @@ import {
     QuizWelcomePage,
     QuizStatsPage,
     TakeQuestionPage,
-} from '#specs/pages/index.ts'
+} from '#pages/index.ts'
 
 import { emptyQuestion, type Question } from './question.ts'
 import { emptyQuiz, type Quiz, type QuizBookmark } from './quiz.ts'

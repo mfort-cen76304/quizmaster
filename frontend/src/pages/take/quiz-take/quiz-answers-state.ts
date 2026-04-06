@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { updated } from '#fe/helpers'
-import type { AnswerIdxs } from '#fe/model/question.ts'
+import type { AnswerIdxs } from '#model/question.ts'
 
 export type SelectedAnswers = readonly AnswerIdxs[]
 

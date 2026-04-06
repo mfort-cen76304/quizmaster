@@ -1,10 +1,10 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import type { TableOf } from '#specs/steps/common.ts'
-import { Given, When, Then } from '#specs/steps/fixture.ts'
-import type { AnswerRaw } from '#specs/steps/question/ops.ts'
-import { createQuestionInWorkspace, createWorkspace, openCreateWorkspacePage } from '#specs/steps/workspace/ops.ts'
+import type { TableOf } from '#steps/common.ts'
+import { Given, When, Then } from '#steps/fixture.ts'
+import type { AnswerRaw } from '#steps/question/ops.ts'
+import { createQuestionInWorkspace, createWorkspace, openCreateWorkspacePage } from '#steps/workspace/ops.ts'
 
 const parseAnswers = (answers: string) =>
     ({

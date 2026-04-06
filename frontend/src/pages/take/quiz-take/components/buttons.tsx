@@ -1,4 +1,4 @@
-import { Button, type WithOnClick } from '#fe/pages/components/button'
+import { Button, type WithOnClick } from '#pages/components/button'
 
 export const NextButton = ({ onClick }: WithOnClick) => (
     <Button id="next" onClick={onClick}>

@@ -1,4 +1,4 @@
-import type { Quiz, QuizMode, Difficulty } from '#fe/model/quiz.ts'
+import type { Quiz, QuizMode, Difficulty } from '#model/quiz.ts'
 
 import { fetchJson, postJson, putJson, callDelete } from './helpers.ts'
 

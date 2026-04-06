@@ -1,12 +1,12 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
-import { useApi } from '#fe/api/hooks.ts'
-import { fetchQuiz } from '#fe/api/quiz.ts'
-import { createAttempt } from '#fe/api/stats.ts'
+import { useApi } from '#api/hooks.ts'
+import { fetchQuiz } from '#api/quiz.ts'
+import { createAttempt } from '#api/stats.ts'
 import { setQuizRunId } from '#fe/helpers.ts'
-import type { Quiz } from '#fe/model/quiz.ts'
-import { AttemptStatus } from '#fe/model/stats.ts'
+import type { Quiz } from '#model/quiz.ts'
+import { AttemptStatus } from '#model/stats.ts'
 
 import { QuizDetails } from './quiz-details.tsx'
 

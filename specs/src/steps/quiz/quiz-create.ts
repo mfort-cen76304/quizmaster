@@ -1,8 +1,8 @@
 import type { DataTable } from '@cucumber/cucumber'
 
-import { Given, Then } from '#specs/steps/fixture.ts'
-import { createQuizViaUI } from '#specs/steps/quiz/ops.ts'
-import { parseKey } from '#specs/steps/world'
+import { Given, Then } from '#steps/fixture.ts'
+import { createQuizViaUI } from '#steps/quiz/ops.ts'
+import { parseKey } from '#steps/world'
 
 Given('a quiz {string} with all questions', async function (quizName: string, properties?: DataTable) {
     const allBookmarks = Object.keys(this.questionBookmarks)

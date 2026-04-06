@@ -1,4 +1,4 @@
-import type { Stats, StatsRecord, AttemptRequest } from '#fe/model/stats.ts'
+import type { Stats, StatsRecord, AttemptRequest } from '#model/stats.ts'
 
 import { fetchJson, postJson, putJson } from './helpers.ts'
 

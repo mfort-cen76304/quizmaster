@@ -1,5 +1,5 @@
-import { type AnswerIdxs, isAnsweredCorrectly, type Answers } from '#fe/model/question'
-import type { QuestionTakeState } from '#fe/pages/take/question-take'
+import { type AnswerIdxs, isAnsweredCorrectly, type Answers } from '#model/question'
+import type { QuestionTakeState } from '#pages/take/question-take'
 
 export interface QuestionFeedbackState {
     readonly isAnswerCorrect: (idx: number) => boolean

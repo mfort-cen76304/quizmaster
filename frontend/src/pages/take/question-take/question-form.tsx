@@ -1,16 +1,16 @@
 import './question-form.scss'
 import React from 'react'
 
-import { isNumericalQuestion, type AnswerIdxs, type Question } from '#fe/model/question.ts'
-import type { QuizMode, Difficulty } from '#fe/model/quiz.ts'
-import { Form } from '#fe/pages/components'
+import { isNumericalQuestion, type AnswerIdxs, type Question } from '#model/question.ts'
+import type { QuizMode, Difficulty } from '#model/quiz.ts'
+import { Form } from '#pages/components'
 import {
     Answer,
     useQuestionFeedbackState,
     useQuestionTakeState,
     QuestionCorrectness,
     QuestionExplanation,
-} from '#fe/pages/take/question-take'
+} from '#pages/take/question-take'
 
 import { QuestionScore } from './components/question-score'
 

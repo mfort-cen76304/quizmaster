@@ -2,8 +2,8 @@ import './quiz.scss'
 import { useState } from 'react'
 
 import { updated } from '#fe/helpers'
-import type { AnswerIdxs } from '#fe/model/question'
-import type { Quiz } from '#fe/model/quiz.ts'
+import type { AnswerIdxs } from '#model/question'
+import type { Quiz } from '#model/quiz.ts'
 
 import { QuestionForm as StandaloneQuestionForm } from '../question-take/index.ts'
 import { BookmarkList } from './components/bookmark-list.tsx'

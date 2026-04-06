@@ -1,10 +1,10 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import { expectTextToBe } from '#specs/steps/common.ts'
-import { Then, When } from '#specs/steps/fixture.ts'
-import { expectColorFeedback, expectQuestion } from '#specs/steps/question/expects.ts'
-import { answerQuestion } from '#specs/steps/question/ops.ts'
+import { expectTextToBe } from '#steps/common.ts'
+import { Then, When } from '#steps/fixture.ts'
+import { expectColorFeedback, expectQuestion } from '#steps/question/expects.ts'
+import { answerQuestion } from '#steps/question/ops.ts'
 
 When('I take question {string}', async function (bookmark: string) {
     await this.workspacePage.goto(this.workspaceGuid)

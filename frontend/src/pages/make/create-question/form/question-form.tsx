@@ -1,8 +1,8 @@
 import { useState } from 'react'
 
-import { postAiAssistant } from '#fe/api/ai-assistant.ts'
-import type { QuestionApiData } from '#fe/api/question.ts'
-import type { Question } from '#fe/model/question.ts'
+import { postAiAssistant } from '#api/ai-assistant.ts'
+import type { QuestionApiData } from '#api/question.ts'
+import type { Question } from '#model/question.ts'
 import {
     SubmitButton,
     Form,
@@ -14,9 +14,9 @@ import {
     Button,
     Alert,
     RadioSet,
-} from '#fe/pages/components'
-import { ErrorMessage, createValidator } from '#fe/pages/components/forms/validations.tsx'
-import { AnswersEdit, stateToQuestionApiData } from '#fe/pages/make/create-question/form'
+} from '#pages/components'
+import { ErrorMessage, createValidator } from '#pages/components/forms/validations.tsx'
+import { AnswersEdit, stateToQuestionApiData } from '#pages/make/create-question/form'
 
 import { useQuestionFormState } from './question-form-state'
 import { validateQuestionFormState, errorMessage, isValidImageUrl } from './validators.ts'

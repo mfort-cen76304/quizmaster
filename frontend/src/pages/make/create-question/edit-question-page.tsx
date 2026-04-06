@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
-import { useApi } from '#fe/api/hooks'
-import { fetchWorkspaceQuestion, type QuestionApiData, updateQuestion } from '#fe/api/question.ts'
-import type { Question } from '#fe/model/question.ts'
-import { Page } from '#fe/pages/components/page.tsx'
+import { useApi } from '#api/hooks'
+import { fetchWorkspaceQuestion, type QuestionApiData, updateQuestion } from '#api/question.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
+import type { Question } from '#model/question.ts'
+import { Page } from '#pages/components/page.tsx'
 
 import { QuestionEditForm } from './form/question-form.tsx'
 

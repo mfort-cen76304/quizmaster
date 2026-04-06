@@ -1,6 +1,6 @@
-import type { QuestionListItem } from '#fe/model/question-list-item.ts'
-import type { QuizListItem } from '#fe/model/quiz-list-item.ts'
-import type { Workspace } from '#fe/model/workspace.ts'
+import type { QuestionListItem } from '#model/question-list-item.ts'
+import type { QuizListItem } from '#model/quiz-list-item.ts'
+import type { Workspace } from '#model/workspace.ts'
 
 import { postJson, fetchJson } from './helpers.ts'
 

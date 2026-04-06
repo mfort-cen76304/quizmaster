@@ -1,12 +1,12 @@
 import { expect } from '@playwright/test'
 
-import { Given, Then, When } from '#specs/steps/fixture.ts'
+import { Given, Then, When } from '#steps/fixture.ts'
 import {
     expectAllOptionsForQuestion,
     expectOriginalResult,
     expectOriginalResultNotVisible,
     expectQuizResult,
-} from '#specs/steps/quiz/expects.ts'
+} from '#steps/quiz/expects.ts'
 
 Given('I finish the quiz', async function () {
     await this.page.goto('quiz/score')

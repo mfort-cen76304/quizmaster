@@ -6,6 +6,9 @@
         "skipLibCheck": true,
 
         "paths": {
+            "#steps/*": ["./src/steps/*"],
+            "#pages/*": ["./src/pages/*"],
+            "#coverage/*": ["./src/coverage/*"],
             "#specs/*": ["./src/*"]
         },
         "moduleResolution": "bundler",

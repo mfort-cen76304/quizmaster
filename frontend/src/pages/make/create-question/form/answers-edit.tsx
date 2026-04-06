@@ -1,6 +1,6 @@
-import { Button, Field, TextInput, Row, CheckField } from '#fe/pages/components'
-import { ErrorMessage } from '#fe/pages/components/forms/validations.tsx'
-import TrashButton from '#fe/pages/components/trash-button.tsx'
+import { Button, Field, TextInput, Row, CheckField } from '#pages/components'
+import { ErrorMessage } from '#pages/components/forms/validations.tsx'
+import TrashButton from '#pages/components/trash-button.tsx'
 
 import type { AnswerState } from './question-form-state.ts'
 

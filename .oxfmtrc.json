@@ -14,7 +14,7 @@
             ["internal", "type-internal"],
             ["parent", "type-parent", "sibling", "type-sibling", "index", "type-index"]
         ],
-        "internalPattern": ["#fe/", "#specs/"],
+        "internalPattern": ["#"],
         "newlinesBetween": true
     }
 }

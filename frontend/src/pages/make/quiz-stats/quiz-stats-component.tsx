@@ -1,5 +1,5 @@
-import type { Quiz } from '#fe/model/quiz.ts'
-import type { Stats } from '#fe/model/stats.ts'
+import type { Quiz } from '#model/quiz.ts'
+import type { Stats } from '#model/stats.ts'
 import './quiz-stats-component.scss'
 
 export interface QuizStatsProps {
