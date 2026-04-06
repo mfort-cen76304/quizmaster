@@ -35,6 +35,7 @@ Feature: Show stats
     * I evaluate the quiz
 
     # Attempt time outs, quiz taker takes their time to proceed to evaluation
+    # Duration is capped at time limit (30s), not wall-clock time (35s)
     When I start the quiz
     * I answer 2 questions incorrectly
     * 35 seconds pass
