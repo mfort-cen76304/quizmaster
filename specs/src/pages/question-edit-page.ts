@@ -133,7 +133,6 @@ export class QuestionEditPage {
 
     expectAiBlockVisible = () => expect(this.aiPromptLocator().first()).toBeVisible()
     expectAiBlockNotVisible = () => expect(this.aiPromptLocator().first()).not.toBeVisible()
-    expectAiPromptValue = (text: string) => expect(this.aiPromptLocator()).toContainText(text)
     expectNoExplanationFields = () => expect(this.explanationFieldsLocator()).toHaveCount(0)
     expectAnswerRowCount = (count: number) => expect(this.answerRowsLocator()).toHaveCount(count)
     expectAnswerRowCountGreaterThanOrEqual = async (count: number) =>
@@ -150,43 +149,19 @@ export class QuestionEditPage {
     private checkedAnswersLocator = () =>
         this.answerRowsLocator().locator('input[type="checkbox"]:checked, input[type="radio"]:checked')
 
-    expectExactlyOneCorrectAnswer = () => expect(this.checkedAnswersLocator()).toHaveCount(1)
-
-    expectAnswerExplanationCountGreaterThanOrEqual = async (count: number) => {
-        const answerExplanations = this.page.locator('.answer-row input.explanation')
-        const rowCount = await answerExplanations.count()
-        let nonEmptyCount = 0
-
-        for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-            const value = await answerExplanations.nth(rowIndex).inputValue()
-            if (value.trim().length > 0) {
-                nonEmptyCount++
-            }
-        }
-
-        expect(nonEmptyCount).toBeGreaterThanOrEqual(count)
-    }
-
-    expectCorrectAnswerExplanationCountGreaterThanOrEqual = async (count: number) => {
-        const rows = this.page.locator('.answer-row')
-        const rowCount = await rows.count()
-        let correctWithExplanationCount = 0
-
-        for (let rowIndex = 0; rowIndex < rowCount; rowIndex++) {
-            const row = rows.nth(rowIndex)
-            const input = row.locator('input[type="checkbox"], input[type="radio"]')
-            const explanation = row.locator('input.explanation')
-            const checked = await input.isChecked()
-            const explanationText = await explanation.inputValue()
-
-            if (checked && explanationText.trim().length > 0) {
-                correctWithExplanationCount++
-            }
-        }
-
-        expect(correctWithExplanationCount).toBeGreaterThanOrEqual(count)
-    }
+    expectCorrectAnswerCount = (count: number) => expect(this.checkedAnswersLocator()).toHaveCount(count)
 
     expectCorrectAnswerCountGreaterThanOrEqual = async (count: number) =>
         expect(await this.checkedAnswersLocator().count()).toBeGreaterThanOrEqual(count)
+
+    expectAllAnswersHaveExplanations = async () => {
+        const answerExplanations = this.explanationFieldsLocator()
+        const count = await answerExplanations.count()
+        expect(count).toBeGreaterThan(0)
+
+        for (let i = 0; i < count; i++) {
+            const value = await answerExplanations.nth(i).inputValue()
+            expect(value.trim().length).toBeGreaterThan(0)
+        }
+    }
 }

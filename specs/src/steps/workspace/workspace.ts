@@ -8,6 +8,10 @@ Then('I see an empty workspace', async function () {
     await this.workspacePage.expectQuestionCount(0)
 })
 
+Then('the question is saved in the workspace', async function () {
+    await this.workspacePage.expectHasQuestions()
+})
+
 Then('I see question in list {string}', async function (question: string) {
     await this.workspacePage.expectQuestionVisible(question)
 })

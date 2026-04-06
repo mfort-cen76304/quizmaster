@@ -189,24 +189,20 @@ Then('I see question explanation {string}', async function (explanation: string)
     await this.questionEditPage.expectQuestionExplanation(explanation)
 })
 
-Then('AI assistant returns at least {int} generated answers', async function (count: number) {
+Then('I see at least {int} answers', async function (count: number) {
     await this.questionEditPage.expectAnswerRowCountGreaterThanOrEqual(count)
 })
 
-Then('AI assistant returns generated answers with only one correct answer', async function () {
-    await this.questionEditPage.expectExactlyOneCorrectAnswer()
+Then('exactly {int} answer is marked correct', async function (count: number) {
+    await this.questionEditPage.expectCorrectAnswerCount(count)
 })
 
-Then('AI assistant returns at least {int} correct answers', async function (count: number) {
-    this.questionEditPage.expectCorrectAnswerCountGreaterThanOrEqual(count)
+Then('at least {int} answers are marked correct', async function (count: number) {
+    await this.questionEditPage.expectCorrectAnswerCountGreaterThanOrEqual(count)
 })
 
-Then('AI assistant returns at least {int} generated answers with explanations', async function (count: number) {
-    await this.questionEditPage.expectAnswerExplanationCountGreaterThanOrEqual(count)
-})
-
-Then('AI assistant returns at least {int} correct answers with explanations', async function (count: number) {
-    await this.questionEditPage.expectCorrectAnswerExplanationCountGreaterThanOrEqual(count)
+Then('all answers have explanations', async function () {
+    await this.questionEditPage.expectAllAnswersHaveExplanations()
 })
 
 Then('Question field is not empty', async function () {

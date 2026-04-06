@@ -22,6 +22,7 @@ export class WorkspacePage {
     }
 
     expectQuestionCount = (count: number) => expect(this.questionsLocator()).toHaveCount(count)
+    expectHasQuestions = () => expect(this.questionsLocator().first()).toBeVisible()
     expectQuestionVisible = (question: string) => expect(this.questionLocator(question)).toBeVisible()
     expectQuestionNotVisible = (question: string) => expect(this.questionLocator(question)).not.toBeVisible()
 
