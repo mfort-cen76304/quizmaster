@@ -1,6 +1,12 @@
 import React from 'react'
 
-import { type AnswerIdxs, type Question, compareAnswers, calculateScore } from '#model/question.ts'
+import {
+    type AnswerIdxs,
+    type Question,
+    compareAnswers,
+    compareNumericalAnswer,
+    calculateScore,
+} from '#model/question.ts'
 
 import { shouldShowAnswerCount } from './question-display.ts'
 import { useQuizQuestionContext } from './quiz-question-context.tsx'
@@ -41,7 +47,11 @@ export const useQuestionTakeState = (question: Question): QuestionTakeState => {
 
     const tolerance = question.tolerance ?? 0
 
-    const score = calculateScore(compareAnswers(selectedAnswerIdxs, question.correctAnswers))
+    const comparison = isNumerical
+        ? compareNumericalAnswer(numericalAnswer, correctNumericalAnswer, tolerance)
+        : compareAnswers(selectedAnswerIdxs, question.correctAnswers)
+
+    const score = calculateScore(comparison)
 
     const showFeedback = (idx: number) =>
         submitted && showFeedbackOnSubmit && (isMultipleChoice || selectedAnswerIdxs[0] === idx)
@@ -57,9 +67,11 @@ export const useQuestionTakeState = (question: Question): QuestionTakeState => {
     )
 
     const submit = React.useCallback(() => {
+        const finalIdxs = isNumerical ? (comparison.missedCorrect === 0 ? [0] : [1]) : selectedAnswerIdxs
+        setSelectedAnswerIdxs(finalIdxs)
         setSubmitted(true)
-        onSubmitted?.(selectedAnswerIdxs)
-    }, [selectedAnswerIdxs, onSubmitted])
+        onSubmitted?.(finalIdxs)
+    }, [isNumerical, comparison, selectedAnswerIdxs, onSubmitted])
 
     const selectAndSubmit = React.useCallback(
         (idx: number) => {
@@ -83,24 +95,7 @@ export const useQuestionTakeState = (question: Question): QuestionTakeState => {
     }, [selectedAnswerIdxs, onAnswerSelected])
 
     const onNumericalAnswerChange = (value: string) => {
-        setSubmitted(false)
         setNumericalAnswer(value)
-
-        const normalizedValue = value.trim()
-        if (normalizedValue === '') {
-            setSelectedAnswerIdxs([])
-            return
-        }
-
-        const userAnswer = Number.parseFloat(normalizedValue)
-        const correctAnswer = Number.parseFloat(correctNumericalAnswer)
-
-        if (Math.abs(userAnswer - correctAnswer) <= tolerance) {
-            setSelectedAnswerIdxs([0])
-            return
-        }
-
-        setSelectedAnswerIdxs([1])
     }
 
     return {

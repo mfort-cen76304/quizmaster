@@ -28,6 +28,18 @@ export interface AnswerComparison {
     readonly selectedIncorrect: number
 }
 
+export const compareNumericalAnswer = (
+    userInput: string,
+    correctAnswer: string,
+    tolerance: number,
+): AnswerComparison => {
+    const user = Number.parseFloat(userInput.trim())
+    const correct = Number.parseFloat(correctAnswer)
+    if (Number.isNaN(user) || Number.isNaN(correct)) return { answered: false, missedCorrect: 1, selectedIncorrect: 0 }
+    const isCorrect = Math.abs(user - correct) <= tolerance
+    return { answered: true, missedCorrect: isCorrect ? 0 : 1, selectedIncorrect: isCorrect ? 0 : 1 }
+}
+
 export const compareAnswers = (selectedAnswerIdxs: AnswerIdxs, correctAnswers: AnswerIdxs): AnswerComparison => {
     if (!selectedAnswerIdxs) return { answered: false, missedCorrect: correctAnswers.length, selectedIncorrect: 0 }
 
