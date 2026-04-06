@@ -5,6 +5,7 @@ import {
     enterImageUrl,
     enterQuestion,
     enterQuestionExplanation,
+    enterTag,
 } from '#steps/question/ops.ts'
 import { emptyQuestion, type QuizmasterWorld } from '#steps/world'
 
@@ -37,10 +38,14 @@ export const createQuestionInWorkspace = async (
     isEasy?: boolean,
     explanation?: string,
     imageUrl?: string,
+    tag?: string,
 ) => {
     await world.workspacePage.createNewQuestion()
     world.questionWip = emptyQuestion()
     await enterQuestion(world, question)
+    if (tag) {
+        await enterTag(world, tag)
+    }
     await addAnswers(world, answerRawTable)
     if (isEasy) {
         await world.questionEditPage.setEasy()
@@ -63,10 +68,11 @@ export const createQuestionInAutoWorkspace = async (
     isEasy?: boolean,
     explanation?: string,
     imageUrl?: string,
+    tag?: string,
 ) => {
     await ensureWorkspace(world)
     await navigateToWorkspace(world)
-    await createQuestionInWorkspace(world, bookmark, question, answerRawTable, isEasy, explanation, imageUrl)
+    await createQuestionInWorkspace(world, bookmark, question, answerRawTable, isEasy, explanation, imageUrl, tag)
 }
 
 export const createTrivialQuestions = async (world: QuizmasterWorld, n: number) => {

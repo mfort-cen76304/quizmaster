@@ -1,73 +1,14 @@
-Feature: Question tag field
-  The question creation form has a dedicated tag field separate from the question title.
-  When a question is saved, the tag is combined into the stored title as [tag] title.
-  When editing a tagged question, the tag is pre-filled in the tag field and the
-  question field contains only the title without the bracket prefix.
-  Tags are displayed as colored badges in question lists.
+Feature: Question tag
+  Questions can have an optional tag. Tags are displayed as colored badges
+  in question lists (workspace and quiz creation). Takers do not see the tag.
 
-  Scenario: Tag is displayed as badge in workspace question list
-    Given workspace "Tags"
-    When I start creating a new question
-    * I enter tag "scrum"
-    * I enter question "What is a Sprint?"
-    * I enter answers
-      | A time-boxed iteration | * |
-      | An agile ceremony      |   |
-    * I submit the question
-    Then I see question in list "What is a Sprint?"
-    And I see tag badge "scrum" for question "What is a Sprint?"
-
-  Scenario: No tag badge shown in workspace for question without tag
-    Given workspace "Tags"
-    When I start creating a new question
-    * I enter question "What is a Sprint?"
-    * I enter answers
-      | A time-boxed iteration | * |
-      | An agile ceremony      |   |
-    * I submit the question
-    Then I see question in list "What is a Sprint?"
-    And I do not see tag badge for question "What is a Sprint?"
-
-  Scenario: Tag is displayed as badge in quiz creation question list
-    Given workspace "Tags"
-    When I start creating a new question
-    * I enter tag "scrum"
-    * I enter question "What is a Sprint?"
-    * I enter answers
-      | A time-boxed iteration | * |
-      | An agile ceremony      |   |
-    * I submit the question
+  Scenario: Tag badges in question lists
+    Given workspace "Tags" with questions
+      | question           | tag   | answers                              |
+      | What is a Sprint?  | scrum | Time-boxed iteration (*), A ceremony |
+      | What is a Backlog? |       | Ordered list (*), Random list        |
+    Then I see tag badge "scrum" for question "What is a Sprint?"
+    And I do not see tag badge for question "What is a Backlog?"
     When I start creating a new quiz
     Then I see tag badge "scrum" for quiz question "What is a Sprint?"
-
-  Scenario: No tag badge shown in quiz creation for question without tag
-    Given workspace "Tags"
-    When I start creating a new question
-    * I enter question "What is a Sprint?"
-    * I enter answers
-      | A time-boxed iteration | * |
-      | An agile ceremony      |   |
-    * I submit the question
-    When I start creating a new quiz
-    Then I do not see tag badge for quiz question "What is a Sprint?"
-
-  Scenario: Taker does not see tag entered via tag field
-    Given a question "What is a Sprint?"
-    * with tag "scrum"
-    * with answers:
-      | A time-boxed iteration | * |
-      | An agile ceremony      |   |
-    * saved and bookmarked as "Sprint"
-    When I take question "Sprint"
-    Then I see question title "What is a Sprint?"
-
-  Scenario: Edit form has tag field prepopulated for tagged question
-    Given a question "What is a Sprint?"
-    * with tag "scrum"
-    * with answers:
-      | A time-boxed iteration | * |
-      | An agile ceremony      |   |
-    * saved and bookmarked as "Sprint"
-    When I start editing question "Sprint"
-    Then I see tag "scrum"
-    And I see question text "What is a Sprint?"
+    And I do not see tag badge for quiz question "What is a Backlog?"

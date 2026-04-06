@@ -6,6 +6,7 @@ Feature: Edit question form
 
   Scenario: Prepopulated form fields
     Given a question "What is the capital of Czech Republic?"
+      * with tag "geography"
       * with answers:
         | Brno   |   | No Brno |
         | Prague | * | Yes     |
@@ -13,6 +14,7 @@ Feature: Edit question form
       * with explanation "Czechia is a country in Europe. Czechs love beer."
       * saved and bookmarked as "Czechia"
     Then I see question text "What is the capital of Czech Republic?"
+      * I see tag "geography"
       * the question is single choice
       * I see the answers fields
         | Brno   |   | No Brno |
