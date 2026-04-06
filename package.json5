@@ -29,8 +29,9 @@
         // Code quality
         "code:fe": "cd frontend && pnpm code",
         "code:specs": "cd specs && pnpm code",
-        "code:lint": "oxlint --deny-warnings frontend/src/ specs/src/",
-        "code": "pnpm code:fe && pnpm code:specs && pnpm code:lint",
+        "code:lint": "oxlint --fix frontend/src/ specs/src/",
+        "code:format": "oxfmt frontend/src/ specs/src/",
+        "code": "pnpm code:fe && pnpm code:specs && pnpm code:lint && pnpm code:format",
 
         // Unit tests
         "test:be:local": "cd backend && ./gradlew testLocal",
@@ -55,7 +56,9 @@
 
         "code:ci:fe": "cd frontend && pnpm code:ci",
         "code:ci:specs": "cd specs && pnpm code:ci",
-        "code:ci": "pnpm code:ci:fe && pnpm code:ci:specs && pnpm code:lint",
+        "code:ci:lint": "oxlint --deny-warnings frontend/src/ specs/src/",
+        "code:ci:format": "oxfmt --check frontend/src/ specs/src/",
+        "code:ci": "pnpm code:ci:fe && pnpm code:ci:specs && pnpm code:ci:lint && pnpm code:ci:format",
 
         "test:e2e:ci": "FEATURE_FLAG=true ./scripts/test-e2e.sh",
     },
