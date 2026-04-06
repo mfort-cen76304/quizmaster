@@ -1,8 +1,9 @@
 import './quiz.scss'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
-import { updated } from '#fe/helpers.ts'
-import type { AnswerIdxs } from '#model/question.ts'
+import { patchAttempt } from '#api/stats.ts'
+import { getQuizRunId, updated } from '#fe/helpers.ts'
+import { compareAnswers, isAnsweredCorrectly, type AnswerIdxs } from '#model/question.ts'
 import type { Quiz } from '#model/quiz.ts'
 import { QuestionForm as StandaloneQuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
 
@@ -26,6 +27,7 @@ export const QuestionForm = (props: QuestionProps) => {
     const nav = useQuizNavigationState(props.quiz)
     const bookmarks = useQuizBookmarkState()
     const [selectedAnswers, setSelectedAnswers] = useState<AnswerIdxs | undefined>(undefined)
+    const answerCounts = useRef({ correct: 0, incorrect: 0 })
 
     const answer = (selectedAnswerIdxs: AnswerIdxs) => {
         answerQuestion(nav.currentQuestionIdx, selectedAnswerIdxs)
@@ -88,6 +90,19 @@ export const QuestionForm = (props: QuestionProps) => {
 
     const handleAnswerSubmitted = (answers: AnswerIdxs) => {
         setSelectedAnswers(answers)
+
+        const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
+        const comparison = compareAnswers(answers, currentQuestion.correctAnswers)
+        if (isAnsweredCorrectly(comparison)) {
+            answerCounts.current.correct++
+        } else {
+            answerCounts.current.incorrect++
+        }
+        patchAttempt(getQuizRunId(), {
+            correctAnswers: answerCounts.current.correct,
+            incorrectAnswers: answerCounts.current.incorrect,
+        })
+
         if (props.quiz.mode === 'learn') {
             answer(answers)
         } else {

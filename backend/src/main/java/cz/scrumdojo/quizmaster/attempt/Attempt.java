@@ -45,4 +45,10 @@ public class Attempt {
 
     @Column(name = "finished_at")
     private LocalDateTime finishedAt;
+
+    @Column(name = "correct_answers", nullable = false)
+    private Integer correctAnswers;
+
+    @Column(name = "incorrect_answers", nullable = false)
+    private Integer incorrectAnswers;
 }

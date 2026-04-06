@@ -12,7 +12,9 @@ public record AttemptResponse(
         AttemptStatus status,
         Integer maxScore,
         LocalDateTime startedAt,
-        LocalDateTime finishedAt
+        LocalDateTime finishedAt,
+        Integer correctAnswers,
+        Integer incorrectAnswers
 ) {
     public static AttemptResponse from(Attempt attempt) {
         return new AttemptResponse(
@@ -24,7 +26,9 @@ public record AttemptResponse(
                 attempt.getStatus(),
                 attempt.getMaxScore(),
                 attempt.getStartedAt(),
-                attempt.getFinishedAt()
+                attempt.getFinishedAt(),
+                attempt.getCorrectAnswers(),
+                attempt.getIncorrectAnswers()
         );
     }
 }

@@ -11,7 +11,9 @@ public record AttemptRequest(
         AttemptStatus status,
         Integer maxScore,
         LocalDateTime startedAt,
-        LocalDateTime finishedAt
+        LocalDateTime finishedAt,
+        Integer correctAnswers,
+        Integer incorrectAnswers
 ) {
     public Attempt toEntity() {
         return Attempt.builder()
@@ -23,6 +25,8 @@ public record AttemptRequest(
                 .maxScore(maxScore)
                 .startedAt(startedAt)
                 .finishedAt(finishedAt)
+                .correctAnswers(correctAnswers != null ? correctAnswers : 0)
+                .incorrectAnswers(incorrectAnswers != null ? incorrectAnswers : 0)
                 .build();
     }
 }

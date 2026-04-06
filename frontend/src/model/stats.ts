@@ -27,4 +27,9 @@ export interface AttemptRequest {
     readonly finishedAt: string | null
 }
 
+export interface AttemptPatchRequest {
+    readonly correctAnswers?: number
+    readonly incorrectAnswers?: number
+}
+
 export type Stats = readonly StatsRecord[]

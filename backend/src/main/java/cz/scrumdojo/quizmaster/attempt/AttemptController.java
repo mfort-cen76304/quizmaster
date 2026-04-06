@@ -39,12 +39,28 @@ public class AttemptController {
         return ResponseEntity.ok(AttemptResponse.from(attempt));
     }
 
+    @PatchMapping("/{id}")
+    public ResponseEntity<AttemptResponse> patchAttempt(@PathVariable Integer id, @RequestBody AttemptPatchRequest request) {
+        return attemptRepository.findById(id)
+                .map(attempt -> {
+                    if (request.correctAnswers() != null) attempt.setCorrectAnswers(request.correctAnswers());
+                    if (request.incorrectAnswers() != null) attempt.setIncorrectAnswers(request.incorrectAnswers());
+                    return ResponseEntity.ok(AttemptResponse.from(attemptRepository.save(attempt)));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AttemptResponse> updateAttempt(@PathVariable Integer id, @RequestBody AttemptRequest request) {
-        Attempt attempt = request.toEntity();
-        attempt.setId(id);
-        Attempt saved = attemptRepository.save(attempt);
-        return ResponseEntity.ok(AttemptResponse.from(saved));
+        return attemptRepository.findById(id)
+                .map(existing -> {
+                    Attempt attempt = request.toEntity();
+                    attempt.setId(id);
+                    attempt.setCorrectAnswers(existing.getCorrectAnswers());
+                    attempt.setIncorrectAnswers(existing.getIncorrectAnswers());
+                    return ResponseEntity.ok(AttemptResponse.from(attemptRepository.save(attempt)));
+                })
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Transactional
