@@ -1,13 +1,16 @@
 import './question-form.scss'
 
-import { isNumericalQuestion, type AnswerIdxs, type Question } from '#model/question.ts'
+import type { AnswerIdxs, Question } from '#model/question.ts'
 import { Form } from '#pages/components'
-import { useQuestionTakeState, QuestionCorrectness, QuestionExplanation } from '#pages/take/question-take'
+import { useQuestionTakeState } from './question-take-state.ts'
 
+import { AnswerCountHint } from './components/answer-count-hint.tsx'
 import { ChoiceAnswerList } from './components/choice-answer-list.tsx'
 import { NumericalAnswerInput } from './components/numerical-answer-input.tsx'
-import { QuestionScore } from './components/question-score.tsx'
-import { stripTag } from './question-display.ts'
+import { QuestionFeedback } from './components/question-feedback.tsx'
+import { QuestionHeader } from './components/question-header.tsx'
+import { QuestionImage } from './components/question-image.tsx'
+import { SubmitButton } from './components/submit-button.tsx'
 import { useQuestionKeyboardShortcuts } from './use-keyboard-shortcuts.ts'
 
 export interface QuestionFormProps {
@@ -40,21 +43,11 @@ export const QuestionForm = (props: QuestionFormProps) => {
 
     return (
         <Form onSubmit={state.attemptSubmit} id="question-form">
-            <fieldset className="question-fieldset" name={`question-${props.question.id}`}>
-                <legend>
-                    <h1 id="question">{stripTag(props.question.question)}</h1>
-                </legend>
+            <div className="question-fieldset">
+                <QuestionHeader text={props.question.question} />
 
-                {showCorrectAnswersCount && (
-                    <div>
-                        Correct answers count is{' '}
-                        <strong className="correct-answers-count">{correctAnswers.length}</strong>
-                    </div>
-                )}
-
-                {!!props.question.imageUrl && (
-                    <img src={props.question.imageUrl} alt="question" className="question-image" />
-                )}
+                {showCorrectAnswersCount && <AnswerCountHint count={correctAnswers.length} />}
+                {props.question.imageUrl && <QuestionImage url={props.question.imageUrl} />}
 
                 {state.isNumerical ? (
                     <NumericalAnswerInput value={state.numericalAnswer} onChange={state.onNumericalAnswerChange} />
@@ -67,17 +60,9 @@ export const QuestionForm = (props: QuestionFormProps) => {
                     />
                 )}
 
-                {!state.submitted && (
-                    <input type="submit" value="Submit" className="submit-btn" disabled={!state.hasAnswer} />
-                )}
-                {state.showResultFeedback && (
-                    <>
-                        <QuestionCorrectness score={state.score} />
-                        <QuestionScore score={state.score} />
-                        <QuestionExplanation text={questionExplanation} />
-                    </>
-                )}
-            </fieldset>
+                {!state.submitted && <SubmitButton disabled={!state.hasAnswer} />}
+                {state.showResultFeedback && <QuestionFeedback score={state.score} explanation={questionExplanation} />}
+            </div>
         </Form>
     )
 }
