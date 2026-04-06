@@ -7,6 +7,7 @@ import { Form } from '#pages/components'
 import { Answer, useQuestionTakeState, QuestionCorrectness, QuestionExplanation } from '#pages/take/question-take'
 
 import { QuestionScore } from './components/question-score.tsx'
+import { shouldShowAnswerCount, stripTag } from './question-display.ts'
 
 export interface QuestionFormProps {
     readonly question: Question
@@ -91,29 +92,19 @@ export const QuestionForm = (props: QuestionFormProps) => {
 
     const isAnswerChecked = state.hasAnswer
 
-    const correctAnswersCount = correctAnswers.length
-
-    const showCorrectAnswersCount =
-        state.isMultipleChoice &&
-        (props.quizDifficulty
-            ? props.quizDifficulty === 'easy'
-                ? true
-                : props.quizDifficulty === 'hard'
-                  ? false
-                  : isEasy
-            : isEasy)
+    const showCorrectAnswersCount = shouldShowAnswerCount(state.isMultipleChoice, isEasy, props.quizDifficulty)
 
     return (
         <Form onSubmit={handleSubmit} id="question-form">
             <fieldset className="question-fieldset" name={`question-${props.question.id}`}>
                 <legend>
-                    <h1 id="question">{props.question.question.replace(/^\[[^\]]+\]\s*/, '')}</h1>
+                    <h1 id="question">{stripTag(props.question.question)}</h1>
                 </legend>
 
                 {showCorrectAnswersCount && (
                     <div>
                         Correct answers count is{' '}
-                        <strong className="correct-answers-count">{correctAnswersCount}</strong>
+                        <strong className="correct-answers-count">{correctAnswers.length}</strong>
                     </div>
                 )}
 
