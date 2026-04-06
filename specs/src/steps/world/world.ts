@@ -59,7 +59,6 @@ export class QuizmasterWorld {
     quizBookmarks: Record<string, QuizBookmark> = {}
     activeQuizBookmark = ''
     correctAnswersCounts: Record<string, string> = {}
-    useControlledClock = false
     clockInstalled = false
 
     parseAnswers(answersString: string) {

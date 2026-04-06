@@ -7,7 +7,7 @@ export const openQuiz = async (world: QuizmasterWorld, quizId: string) => {
     await world.page.goto(quizUrl)
 }
 
-export const installClockIfNeeded = async (world: QuizmasterWorld) => {
+export const ensureFakeClockInstalled = async (world: QuizmasterWorld) => {
     if (!world.clockInstalled) {
         await world.page.clock.install({ time: new Date() })
         world.clockInstalled = true
@@ -15,11 +15,10 @@ export const installClockIfNeeded = async (world: QuizmasterWorld) => {
 }
 
 export const startQuiz = async (world: QuizmasterWorld, quizId: string) => {
-    if (world.useControlledClock) {
-        await installClockIfNeeded(world)
-    }
+    await ensureFakeClockInstalled(world)
     await openQuiz(world, quizId)
     await world.quizWelcomePage.start()
+    world.activeQuizBookmark = quizId
 }
 
 export const answerNth = async (world: QuizmasterWorld, n: number) => {
@@ -89,20 +88,14 @@ export const createQuizViaUI = async (
         }
     }
 
+    const timeLimitValue = await world.quizCreatePage.timeLimitInput().inputValue()
     await world.quizCreatePage.submit()
 
     // Store quiz bookmark so 'I start quiz "X"' can find it
     await world.workspacePage.takeQuiz(quizName)
     const quizUrl = new URL(world.page.url()).pathname
     const bookmark = { ...emptyQuizBookmark(), url: quizUrl, title: quizName }
-
-    if (properties) {
-        const props = Object.fromEntries(properties.raw())
-        if (props['time limit']) {
-            bookmark.timeLimit = Number.parseInt(props['time limit'])
-            world.useControlledClock = true
-        }
-    }
+    bookmark.timeLimit = Number.parseInt(timeLimitValue)
 
     world.quizBookmarks[quizName] = bookmark
     world.activeQuizBookmark = quizName
@@ -132,7 +125,7 @@ export const takeQuizWithAnswersTimed = async (
     timer: number,
     data: DataTable,
 ) => {
-    await installClockIfNeeded(world)
+    await ensureFakeClockInstalled(world)
     await world.workspacePage.takeQuiz(quizName)
     await world.quizWelcomePage.start()
     const startTime = Date.now()
@@ -151,7 +144,7 @@ export const takeQuizWithoutCompletingInTimeLimit = async (
     quizName: string,
     data: DataTable,
 ) => {
-    await installClockIfNeeded(world)
+    await ensureFakeClockInstalled(world)
     await world.workspacePage.takeQuiz(quizName)
 
     const timeLimitSeconds = await world.quizWelcomePage.timeLimit()
