@@ -61,6 +61,7 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                     <tr>
                         <th>Started</th>
                         <th>Finished</th>
+                        <th>Unfinished</th>
                         <th>Timeout</th>
                     </tr>
                 </thead>
@@ -68,6 +69,7 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                     <tr>
                         <td>{summary.started}</td>
                         <td>{summary.finished}</td>
+                        <td>0</td>
                         <td>{summary.timedOut}</td>
                     </tr>
                 </tbody>

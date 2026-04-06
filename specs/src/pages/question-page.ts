@@ -26,7 +26,12 @@ export class QuestionPage {
     bookmark = () => this.bookmarkQuestionButtonLocator().click()
     unBookmark = (title: string) => this.unBookmarkQuestionButtonLocator(title).click()
     next = () => this.nextButtonLocator().click()
-    evaluate = () => this.page.locator('#evaluate').click()
+    evaluate = async () => {
+        const dialog = this.page.locator('dialog')
+        const isDialogVisible = await dialog.isVisible()
+        const locator = isDialogVisible ? this.evaluateModalButtonLocator() : this.evaluateButtonLocator()
+        await locator.click()
+    }
     submit = () => this.submitButtonLocator().click()
 
     bookmarkListLocator = (title: string) =>
