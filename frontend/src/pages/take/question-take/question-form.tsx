@@ -20,6 +20,7 @@ export interface QuestionFormProps {
 
 export const QuestionForm = (props: QuestionFormProps) => {
     const { correctAnswers, isEasy, answers, questionExplanation } = props.question
+    const { onSubmitted, onAnswerSelected } = props
     const isNumerical = isNumericalQuestion(props.question)
     const numericalInputRef = React.useRef<HTMLInputElement>(null)
 
@@ -27,18 +28,24 @@ export const QuestionForm = (props: QuestionFormProps) => {
     const score = calculateScore(compareAnswers(state.selectedAnswerIdxs, correctAnswers))
     const showFeedback = (idx: number) => state.isMultipleChoice || state.selectedAnswerIdxs[0] === idx
 
-    // Notify parent when answers change
+    const submitAndNotify = React.useCallback(
+        (overrideAnswers?: AnswerIdxs) => {
+            state.submit()
+            onSubmitted?.(overrideAnswers ?? state.selectedAnswerIdxs)
+        },
+        [state, onSubmitted],
+    )
+
     React.useEffect(() => {
-        props.onAnswerSelected?.(state.selectedAnswerIdxs)
-    }, [state.selectedAnswerIdxs, props])
+        onAnswerSelected?.(state.selectedAnswerIdxs)
+    }, [state.selectedAnswerIdxs, onAnswerSelected])
 
     React.useEffect(() => {
         if (isNumerical) return
         const onKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Enter') {
                 if (state.selectedAnswerIdxs.length > 0) {
-                    state.submit()
-                    props.onSubmitted?.(state.selectedAnswerIdxs)
+                    submitAndNotify()
                 }
                 return
             }
@@ -53,14 +60,13 @@ export const QuestionForm = (props: QuestionFormProps) => {
 
             state.onSelectedAnswerChange(idx, true)
             if (!state.isMultipleChoice) {
-                state.submit()
-                props.onSubmitted?.([idx])
+                submitAndNotify([idx])
             }
         }
 
         window.addEventListener('keydown', onKeyDown)
         return () => window.removeEventListener('keydown', onKeyDown)
-    }, [answers.length, isNumerical, state, props])
+    }, [answers.length, isNumerical, state, submitAndNotify])
 
     React.useEffect(() => {
         if (!isNumerical) return
@@ -84,10 +90,7 @@ export const QuestionForm = (props: QuestionFormProps) => {
     }, [isNumerical])
 
     const handleSubmit = () => {
-        if (state.hasAnswer) {
-            state.submit()
-            props.onSubmitted?.(state.selectedAnswerIdxs)
-        }
+        if (state.hasAnswer) submitAndNotify()
     }
 
     const isAnswerChecked = state.hasAnswer
