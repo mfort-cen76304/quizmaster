@@ -1,6 +1,4 @@
-import { compareAnswers, isAnsweredCorrectly } from '#model/question.ts'
 import type { Quiz } from '#model/quiz.ts'
-import { Button } from '#pages/components/button.tsx'
 
 import { QuestionFeedback } from './components/question.tsx'
 import type { QuizAnswers } from './quiz-answers-state.ts'
@@ -9,23 +7,15 @@ import { evaluate } from './quiz-score.ts'
 interface QuizScorePageProps {
     readonly quiz: Quiz
     readonly quizAnswers: QuizAnswers
-    readonly onRetakeIncorrect?: (incorrectQuestionIds: number[]) => void
 }
 
-export const QuizScorePage = ({ quiz, quizAnswers, onRetakeIncorrect }: QuizScorePageProps) => {
+export const QuizScorePage = ({ quiz, quizAnswers }: QuizScorePageProps) => {
     const evaluation = evaluate(quiz, quizAnswers)
     const { total, score } = evaluation
 
     const percentage = (score / total) * 100
     const passed = percentage >= quiz.passScore
     const result = passed ? 'passed' : 'failed'
-
-    const incorrectQuestionIds = quiz.questions
-        .filter(
-            (question, idx) =>
-                !isAnsweredCorrectly(compareAnswers(quizAnswers.finalAnswers[idx], question.correctAnswers)),
-        )
-        .map(q => q.id)
 
     return (
         <>
@@ -52,12 +42,6 @@ export const QuizScorePage = ({ quiz, quizAnswers, onRetakeIncorrect }: QuizScor
                     </div>
                 </div>
             </div>
-
-            {onRetakeIncorrect && incorrectQuestionIds.length > 0 && (
-                <Button id="retake-incorrect" onClick={() => onRetakeIncorrect(incorrectQuestionIds)}>
-                    Retake incorrect questions
-                </Button>
-            )}
 
             <h2>Answer overview</h2>
             {quiz.questions.map((question, idx) => (

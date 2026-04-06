@@ -1,7 +1,7 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import { Then, When } from '#steps/fixture.ts'
+import { Then } from '#steps/fixture.ts'
 import { expectAllOptionsForQuestion, expectQuizResult } from '#steps/quiz/expects.ts'
 
 Then('I see the quiz result', async function (data: DataTable) {
@@ -38,8 +38,4 @@ Then(
 Then('I see user select {string} for question {string}', async function (userSelect: string, question: string) {
     const answerLabel = await this.quizScorePage.checkedAnswerLabel(question)
     expect(answerLabel).toBe(userSelect)
-})
-
-When('I retake only incorrectly answered questions', async function () {
-    await this.quizScorePage.retakeIncorrect()
 })

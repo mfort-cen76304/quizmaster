@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
 import { patchAttempt } from '#api/stats.ts'
@@ -12,17 +12,12 @@ import { QuestionForm } from './quiz.tsx'
 export const QuizTakePage = () => {
     const quiz = useQuizApi()
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswers | null>(null)
-    const [retakeQuestionIds, setRetakeQuestionIds] = useState<number[] | null>(null)
     const navigate = useNavigate()
 
     useEffect(() => {
         const stored = sessionStorage.getItem('quizAnswers')
         if (stored) {
             setQuizAnswers(JSON.parse(stored))
-        }
-        const storedRetake = sessionStorage.getItem('retakeQuestionIds')
-        if (storedRetake) {
-            setRetakeQuestionIds(JSON.parse(storedRetake))
         }
     }, [])
 
@@ -34,20 +29,10 @@ export const QuizTakePage = () => {
         }
     }
 
-    function handleRetakeIncorrect(incorrectQuestionIds: number[]) {
-        updateSessionStorage(null)
-        setQuizAnswers(null)
-        sessionStorage.setItem('retakeQuestionIds', JSON.stringify(incorrectQuestionIds))
-        setRetakeQuestionIds(incorrectQuestionIds)
-        navigate(`/quiz/${quiz?.id}/questions`)
-    }
-
     async function handleEvaluate(answers: QuizAnswers | null) {
         navigate(`/quiz/${quiz?.id}/questions`)
         updateSessionStorage(answers)
         setQuizAnswers(answers)
-        sessionStorage.removeItem('retakeQuestionIds')
-        setRetakeQuestionIds(null)
 
         if (!quiz || !answers) return
 
@@ -56,20 +41,11 @@ export const QuizTakePage = () => {
         })
     }
 
-    const activeQuiz = useMemo(() => {
-        if (!quiz) return undefined
-        if (!retakeQuestionIds) return quiz
-        return {
-            ...quiz,
-            questions: quiz.questions.filter(q => retakeQuestionIds.includes(q.id)),
-        }
-    }, [quiz, retakeQuestionIds])
-
-    if (activeQuiz) {
+    if (quiz) {
         return quizAnswers ? (
-            <QuizScorePage quiz={activeQuiz} quizAnswers={quizAnswers} onRetakeIncorrect={handleRetakeIncorrect} />
+            <QuizScorePage quiz={quiz} quizAnswers={quizAnswers} />
         ) : (
-            <QuestionForm quiz={activeQuiz} onEvaluate={handleEvaluate} />
+            <QuestionForm quiz={quiz} onEvaluate={handleEvaluate} />
         )
     }
 }
