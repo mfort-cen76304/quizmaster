@@ -1,6 +1,7 @@
 {
     "cucumber.features": ["specs/features/**/*.feature"],
     "cucumber.glue": ["specs/src/steps/**/*.ts"],
+
     "editor.codeActionsOnSave": {
         "source.fixAll": "explicit"
     },
@@ -25,9 +26,11 @@
         "editor.defaultFormatter": "oxc.oxc-vscode"
     },
     "java.referencesCodeLens.enabled": true,
-    "typescript.preferences.quoteStyle": "single",
-    "typescript.referencesCodeLens.enabled": true,
-    "typescript.referencesCodeLens.showOnAllFunctions": true,
+
+    "js/ts.preferences.quoteStyle": "single",
+    "js/ts.referencesCodeLens.enabled": true,
+    "js/ts.referencesCodeLens.showOnAllFunctions": true,
+
     "java.compile.nullAnalysis.mode": "disabled",
     "java.configuration.updateBuildConfiguration": "interactive"
 }
