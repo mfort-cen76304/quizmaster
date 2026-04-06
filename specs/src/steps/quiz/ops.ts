@@ -108,62 +108,6 @@ export const finishQuizInSeconds = async (world: QuizmasterWorld, seconds: numbe
     await world.workspacePage.goto(world.workspaceGuid)
 }
 
-export const takeQuizWithAnswers = async (world: QuizmasterWorld, quizName: string, data: DataTable) => {
-    await world.workspacePage.takeQuiz(quizName)
-    await world.quizWelcomePage.start()
-    for (const [, answer] of Array.from(data.rows())) {
-        await world.takeQuestionPage.selectAnswer(answer)
-        await world.questionPage.submit()
-    }
-    await world.questionPage.evaluate()
-    await world.workspacePage.goto(world.workspaceGuid)
-}
-
-export const takeQuizWithAnswersTimed = async (
-    world: QuizmasterWorld,
-    quizName: string,
-    timer: number,
-    data: DataTable,
-) => {
-    await ensureFakeClockInstalled(world)
-    await world.workspacePage.takeQuiz(quizName)
-    await world.quizWelcomePage.start()
-    const startTime = Date.now()
-    for (const [, answer] of Array.from(data.rows())) {
-        await world.takeQuestionPage.selectAnswer(answer)
-        await world.questionPage.submit()
-    }
-    const elapsedTime = Date.now() - startTime
-    await world.page.clock.fastForward(timer * 1000 - elapsedTime)
-    await world.questionPage.evaluate()
-    await world.workspacePage.goto(world.workspaceGuid)
-}
-
-export const takeQuizWithoutCompletingInTimeLimit = async (
-    world: QuizmasterWorld,
-    quizName: string,
-    data: DataTable,
-) => {
-    await ensureFakeClockInstalled(world)
-    await world.workspacePage.takeQuiz(quizName)
-
-    const timeLimitSeconds = await world.quizWelcomePage.timeLimit()
-    await world.quizWelcomePage.start()
-
-    for (const [, rawAnswer] of Array.from(data.rows())) {
-        const answer = rawAnswer?.trim()
-        if (!answer) {
-            break
-        }
-
-        await world.takeQuestionPage.selectAnswer(answer)
-        await world.questionPage.submit()
-    }
-
-    await world.page.clock.fastForward((timeLimitSeconds + 1) * 1000)
-    await world.workspacePage.goto(world.workspaceGuid)
-}
-
 export const progressThroughQuestions = async (world: QuizmasterWorld) => {
     const textToBookmark: Record<string, string> = {}
     for (const [bookmark, question] of Object.entries(world.questionBookmarks)) {
