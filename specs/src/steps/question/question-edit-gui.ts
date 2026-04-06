@@ -218,6 +218,7 @@ When('I enter question {string}', async function (question: string) {
 When('I ask AI:', async function (dataTable: DataTable) {
     await enterAIPrompt(this, toText(dataTable))
     await this.questionEditPage.clickAiAssist()
+    await this.questionEditPage.expectQuestionValueNotEmpty()
 })
 
 When(/I mark the question as (single|multiple|numerical) choice/, async function (choice: string) {

@@ -46,6 +46,32 @@ Feature: Generate question using AI
     And I submit the question
     Then the question is saved in the workspace
 
+  @ai @slow
+  Scenario: Edit an AI-generated question before saving
+    Given I start creating a question
+    When I ask AI:
+      | Generate a question about capital cities |
+      | with 1 correct answer                   |
+      | and 2 incorrect answers                 |
+    And I enter question "What is the capital of France?"
+    And I submit the question
+    Then I see question in list "What is the capital of France?"
+
+  @ai @slow
+  Scenario: Regenerate replaces previous AI response
+    Given I start creating a question
+    When I ask AI:
+      | Generate a question about capital cities |
+      | with 1 correct answer                   |
+      | and 2 incorrect answers                 |
+    Then the question is single choice
+    When I ask AI:
+      | Generate a question about European capitals |
+      | with 2 correct answers                      |
+      | and 2 incorrect answers                     |
+    Then the question is multiple choice
+    And at least 2 answers are marked correct
+
   Scenario: AI section is not available when editing
     Given a question "What is the capital of Czech Republic?"
       * with answers:
