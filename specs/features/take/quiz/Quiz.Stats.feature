@@ -50,7 +50,7 @@ Feature: Show stats
       | 10 seconds | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       4 |        2 |          0 |       2 |
+      |       3 |        2 |          0 |       1 |
 
 
   @skip
