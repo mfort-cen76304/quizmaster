@@ -68,16 +68,17 @@ Then('I should see the text "Game over time"', async function () {
 })
 
 When('{int} seconds pass', async function (seconds: number) {
-    await this.page.clock.runFor(seconds * 1000)
+    // Advance fake clock in 1-second chunks. A single runFor/fastForward with large
+    // values (60s+) is too slow — Playwright processes thousands of rAF callbacks
+    // synchronously, exceeding the test timeout. The await between chunks also gives
+    // React time to process state updates (e.g. rendering the timeout modal).
+    for (let i = 0; i < seconds; i++) {
+        await this.page.clock.runFor(1000)
+    }
 })
 
 Then('I see the countdown timer {string}', async function (timer: string) {
     await expectTextToBe(this.questionPage.timerLocator(), timer)
-})
-
-Then('I will wait for {string}', async function (timer: string) {
-    await expectTextToBe(this.questionPage.timerLocator(), timer)
-    await this.page.clock.fastForward(timer)
 })
 
 Then('I see answer {string} checked', async function (answer: string) {

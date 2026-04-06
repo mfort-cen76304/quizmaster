@@ -31,7 +31,7 @@ Feature: Run timer
       | pass score | 85   |
       | time limit | 60s  |
     When I start the quiz
-    And I will wait for "01:00"
+    And 60 seconds pass
     And I should see the text "Game over time"
     Then I see the "Game over" dialog
     And I confirm the "Game over" dialog
@@ -46,7 +46,7 @@ Feature: Run timer
       | time limit | 60s  |
     When I start the quiz
     And I answer correctly
-    And I will wait for "01:00"
+    And 60 seconds pass
     And I should see the text "Game over time"
     Then I see the "Game over" dialog
     And I confirm the "Game over" dialog
