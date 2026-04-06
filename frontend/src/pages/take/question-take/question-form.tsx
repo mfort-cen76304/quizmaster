@@ -1,5 +1,4 @@
 import './question-form.scss'
-
 import type { Question } from '#model/question.ts'
 import { Form } from '#pages/components'
 

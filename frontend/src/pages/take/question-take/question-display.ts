@@ -1,4 +1,4 @@
-import type { Difficulty } from 'model/quiz.ts'
+import type { Difficulty } from '#model/quiz.ts'
 
 export const stripTag = (text: string): string => text.replace(/^\[[^\]]+\]\s*/, '')
 
