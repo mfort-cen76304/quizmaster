@@ -8,6 +8,7 @@ import { Answer, useQuestionTakeState, QuestionCorrectness, QuestionExplanation 
 
 import { QuestionScore } from './components/question-score.tsx'
 import { shouldShowAnswerCount, stripTag } from './question-display.ts'
+import { useQuestionKeyboardShortcuts } from './use-keyboard-shortcuts.ts'
 
 export interface QuestionFormProps {
     readonly question: Question
@@ -22,7 +23,6 @@ export const QuestionForm = (props: QuestionFormProps) => {
     const { correctAnswers, isEasy, answers, questionExplanation } = props.question
     const { onSubmitted, onAnswerSelected } = props
     const isNumerical = isNumericalQuestion(props.question)
-    const numericalInputRef = React.useRef<HTMLInputElement>(null)
 
     const state = useQuestionTakeState(props)
     const score = calculateScore(compareAnswers(state.selectedAnswerIdxs, correctAnswers))
@@ -40,54 +40,20 @@ export const QuestionForm = (props: QuestionFormProps) => {
         onAnswerSelected?.(state.selectedAnswerIdxs)
     }, [state.selectedAnswerIdxs, onAnswerSelected])
 
-    React.useEffect(() => {
-        if (isNumerical) return
-        const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Enter') {
-                if (state.selectedAnswerIdxs.length > 0) {
-                    submitAndNotify()
-                }
-                return
+    useQuestionKeyboardShortcuts({
+        enabled: !isNumerical,
+        onDigitPressed: idx => {
+            if (idx >= 0 && idx < answers.length) {
+                state.onSelectedAnswerChange(idx, true)
+                if (!state.isMultipleChoice) submitAndNotify([idx])
             }
+        },
+        onEnterPressed: () => {
+            if (state.hasAnswer) submitAndNotify()
+        },
+    })
 
-            const isNumpadDigit = /^Numpad[0-9]$/.test(e.code)
-            const isTopRowDigit = /^Digit[0-9]$/.test(e.code)
-
-            if (!isNumpadDigit && !isTopRowDigit) return
-
-            const idx = Number(e.code.slice(-1)) - 1
-            if (idx < 0 || idx >= answers.length) return
-
-            state.onSelectedAnswerChange(idx, true)
-            if (!state.isMultipleChoice) {
-                submitAndNotify([idx])
-            }
-        }
-
-        window.addEventListener('keydown', onKeyDown)
-        return () => window.removeEventListener('keydown', onKeyDown)
-    }, [answers.length, isNumerical, state, submitAndNotify])
-
-    React.useEffect(() => {
-        if (!isNumerical) return
-        const focusInput = () => numericalInputRef.current?.focus()
-        focusInput()
-        const timeoutId = window.setTimeout(focusInput, 0)
-        const frameId = window.requestAnimationFrame(focusInput)
-        const intervalId = window.setInterval(() => {
-            const input = numericalInputRef.current
-            if (!input) return
-            input.focus()
-        }, 50)
-        const stopIntervalTimeoutId = window.setTimeout(() => window.clearInterval(intervalId), 10000)
-
-        return () => {
-            window.clearTimeout(timeoutId)
-            window.cancelAnimationFrame(frameId)
-            window.clearInterval(intervalId)
-            window.clearTimeout(stopIntervalTimeoutId)
-        }
-    }, [isNumerical])
+    const numericalInputRef = React.useCallback((input: HTMLInputElement | null) => input?.focus(), [])
 
     const handleSubmit = () => {
         if (state.hasAnswer) submitAndNotify()

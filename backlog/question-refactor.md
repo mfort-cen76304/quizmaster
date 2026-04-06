@@ -94,39 +94,35 @@ Removed `errorCount` from `CorrectnessProps`, deleted `QuestionFeedbackScore` in
 
 ---
 
-### Stage 5: Extract `useQuestionKeyboardShortcuts` hook
+### Stage 5: Extract `useQuestionKeyboardShortcuts` hook ✅
 
 **Why:** 27 lines of imperative DOM event wiring in the middle of a React component.
 
 **Changes:**
-- Create `use-keyboard-shortcuts.ts` with hook:
+- Created `use-keyboard-shortcuts.ts` with simplified hook (3 params instead of 6):
   ```ts
   useQuestionKeyboardShortcuts(params: {
-      enabled: boolean           // !isNumerical
+      enabled: boolean
       answersCount: number
-      isMultipleChoice: boolean
-      onSelectedAnswerChange: (idx: number, selected: boolean) => void
-      submitAndNotify: (overrideAnswers?: AnswerIdxs) => void
-      hasAnswer: boolean
+      onDigitPressed: (idx: number) => void
+      onEnterPressed: () => void
   }): void
   ```
-- `question-form.tsx` — remove keyboard `useEffect`, replace with hook call
+  Hook only parses keyboard events (Numpad/Digit regex, bounds check) and calls semantic callbacks. The caller composes select+submit behavior.
+- `question-form.tsx` — removed keyboard `useEffect`, replaced with hook call
 
 **E2E coverage:** `Question.Take.NumKey.feature`
 
 ---
 
-### Stage 6: Extract `useNumericalInputFocus` hook
+### Stage 6: Replace focus hack with callback ref ✅
 
-**Why:** 20 lines of focus hacks (setTimeout + rAF + setInterval) unrelated to question-taking logic.
+**Why:** 20 lines of focus hacks (setTimeout + rAF + setInterval polling every 50ms for 10 seconds) — all unnecessary.
 
 **Changes:**
-- Create `use-numerical-input-focus.ts` with hook:
-  ```ts
-  useNumericalInputFocus(enabled: boolean): React.RefObject<HTMLInputElement | null>
-  ```
-  Hook creates the ref internally, returns it.
-- `question-form.tsx` — remove ref creation and focus `useEffect`, replace with hook call
+- Replaced the entire focus `useEffect` + `useRef` with a callback ref:
+  `React.useCallback((input) => input?.focus(), [])`
+- No separate hook file needed.
 
 **E2E coverage:** `Question.Take.Numerical.feature`
 
@@ -138,9 +134,10 @@ Removed `errorCount` from `CorrectnessProps`, deleted `QuestionFeedbackScore` in
 
 **Changes:**
 - Create `components/choice-answer-list.tsx` — renders `<ul className="answers">` with `Answer` map
-- Create `components/numerical-answer-input.tsx` — renders `<div className="answers"><input type="number">`, calls `useNumericalInputFocus` internally
+- Create `components/numerical-answer-input.tsx` — renders `<div className="answers"><input type="number">` with callback ref focus
 - `question-form.tsx` — replace the branch with `{isNumerical ? <NumericalAnswerInput /> : <ChoiceAnswerList />}`
-- Consider moving `useQuestionKeyboardShortcuts` into `ChoiceAnswerList` if `submitAndNotify` dependency allows it
+- Move `useQuestionKeyboardShortcuts` into `ChoiceAnswerList` — this eliminates the `enabled` parameter entirely (the hook simply won't exist for numerical questions)
+- Drop `enabled` from `useQuestionKeyboardShortcuts` (2 params: `answersCount` + callbacks)
 
 **E2E coverage:** All take question specs
 
