@@ -25,6 +25,6 @@
         // Bundler
         "vite": "8.0.3",
         "@vitejs/plugin-react": "6.0.1",
-        "sass": "1.82.0",
+        "sass": "1.99.0",
     }
 }
