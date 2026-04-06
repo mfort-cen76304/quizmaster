@@ -117,7 +117,7 @@ export class QuestionEditPage {
     expectEditPageVisible = () => expect(this.editPageLocator()).toBeVisible()
     expectCreatePageVisible = () => expect(this.createPageLocator()).toBeVisible()
     expectQuestionValue = (value: string) => expect(this.questionLocator()).toHaveValue(value)
-    expectQuestionValueNotEmpty = () => expect(this.questionLocator()).not.toBeEmpty({ timeout: 60000 })
+    expectQuestionValueNotEmpty = () => expect(this.questionLocator()).not.toBeEmpty()
     expectQuestionType = (type: string) => expect(this.questionTypeRadio(type)).toBeChecked()
     expectExplanationsChecked = () => expect(this.showExplanationLocator()).toBeChecked()
     expectExplanationsUnchecked = () => expect(this.showExplanationLocator()).not.toBeChecked()
