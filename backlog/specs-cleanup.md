@@ -93,18 +93,17 @@
 
 ### Suggestions
 
-1. **Delete `Quiz.Statistics.feature`** — It's an exact copy of `Quiz.MarkQuestions.feature`. If statistics scenarios are needed, write them fresh. *Plan: Delete the file and verify `bddgen test` still generates correctly.*
+#### Done
 
-2. **Remove 30 unused step definitions** — Run `bddgen export --unused-steps` and delete each one. *Plan: Delete the step definitions, run `pnpm code` to verify compilation, run `pnpm test:e2e` to verify no breakage.*
+1. **~~Delete `Quiz.Statistics.feature`~~** — Deleted the byte-for-byte copy of `Quiz.MarkQuestions.feature`. *(commit 6aa0990)*
 
-3. **Consolidate duplicate step patterns** — Pick one canonical phrasing per intent and remove the others:
-   - Keep `I answer correctly` and remove `I answer the question` (or vice versa, but pick one)
-   - Keep `I evaluate the quiz` and remove `I proceed to the score page` (or rename one to express a domain distinction if one exists)
-   - Keep `I skip the question` and remove `I proceed to the next question` only if they truly mean the same thing — if "skip" implies "don't answer first", make the implementation differ
-   - Keep `I start quiz {string}` and remove `I click the start button`
-   - *Plan: Grep feature files for usage of each duplicate, update scenarios to use the canonical phrasing, delete the duplicate step.*
+2. **~~Remove 30 unused step definitions~~** — Deleted all 30 unused steps across 9 files. *(commit f1164e2)*
 
-4. **Collapse Quiz.Stats.feature into Scenario Outlines** — Group the 18 nearly-identical scenarios by what they vary (answers: all correct, half, none) and assert multiple columns per scenario. *Plan: Create 3 scenarios (full/half/zero) each asserting all stats columns, or one Scenario Outline with all combinations.*
+3. **~~Consolidate duplicate step patterns~~** — Unified to canonical phrasings: `I answer correctly`, `I evaluate the quiz`, `I see the workspace {string}`. Kept `I skip the question` / `I proceed to the next question` as distinct domain intents. *(commit 41f1f41)*
+
+4. **~~Collapse Quiz.Stats.feature into Scenario Outlines~~** — Replaced 18 scenarios with 3 focused ones: empty stats, attempt stats (3 attempts asserting full row), and summary stats. Added `a quiz with N questions` step, combined navigation+heading, removed caption row boilerplate, and consolidated 3 identical duration scenarios into 1 with a timing step. *(commits ff2eaa0..e54e9e0, 6 commits)*
+
+#### Remaining
 
 5. **Merge Quiz.ScorePage.feature scenarios** — Combine the 4 scenarios into one or two that share Background setup and make multiple assertions. *Plan: Add Background with the shared setup, reduce to 1-2 scenarios asserting question visibility, options, explanation, and user selection together.*
 
@@ -117,3 +116,5 @@
 9. **Rename UI-language scenario names** — Replace "Test backButton" with domain-oriented names like "Navigate back to workspace from question creation form". Replace "Submit button is visible as active/inactive" with "Answer can be submitted only when selection is made". *Plan: Rename scenario titles across the 3 back-button locations and the 2 submit-button scenarios in Quiz.Navigation.*
 
 10. **Rewrite Timer scenarios to reduce duplication** — The three timeout scenarios share the same flow (start quiz → optional answer → wait → confirm dialog → see results). Combine into a Scenario Outline parameterized by whether an answer was given and the expected score. *Plan: Create one Scenario Outline with columns for pre-timeout-action and expected-score.*
+
+11. **Fix time-limit-related specs fragility** — `Quiz.Timer.feature` uses real-time waits (`I will wait for "02:00"`) which makes tests slow and flaky. The 2 `@skip` scenarios in `Quiz.Stats.feature` (lines 54-87) are disabled because there's no way to simulate timeout. The duration consolidation (item 4) introduced `I finish the quiz in N seconds` with implicit clock installation — this pattern should be extended to Timer scenarios to replace real-time waits with clock manipulation, and to enable the skipped stats timeout scenarios.
