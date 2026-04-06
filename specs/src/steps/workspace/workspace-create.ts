@@ -2,7 +2,14 @@ import type { DataTable } from '@cucumber/cucumber'
 
 import { Given, When, Then } from '#steps/fixture.ts'
 import { parseAnswers } from '#steps/question/ops.ts'
-import { createQuestionInWorkspace, createWorkspace, openCreateWorkspacePage } from '#steps/workspace/ops.ts'
+import {
+    createNumericalQuestionInWorkspace,
+    createQuestionInWorkspace,
+    createWorkspace,
+    openCreateWorkspacePage,
+} from '#steps/workspace/ops.ts'
+
+const NUMERICAL_PATTERN = /^(-?\d+(?:\.\d+)?)\s*±\s*(\d+(?:\.\d+)?)$/
 
 Given('I start creating a workspace', async function () {
     await openCreateWorkspacePage(this)
@@ -21,19 +28,32 @@ Given('workspace {string} with questions', async function (name: string, data: D
 
     for (const row of data.hashes()) {
         const bookmark = row.bookmark || row.question
-        const answerRawTable = parseAnswers(row.answers)
-        const isEasy = row.easy === 'true'
+        const numericalMatch = row.answers.match(NUMERICAL_PATTERN)
 
-        await createQuestionInWorkspace(
-            this,
-            bookmark,
-            row.question,
-            answerRawTable,
-            isEasy,
-            row.explanation,
-            row.image,
-            row.tag,
-        )
+        if (numericalMatch) {
+            const [, correctAnswer, tolerance] = numericalMatch
+            await createNumericalQuestionInWorkspace(
+                this,
+                bookmark,
+                row.question,
+                correctAnswer,
+                row.explanation,
+                tolerance,
+            )
+        } else {
+            const answerRawTable = parseAnswers(row.answers)
+            const isEasy = row.easy === 'true'
+            await createQuestionInWorkspace(
+                this,
+                bookmark,
+                row.question,
+                answerRawTable,
+                isEasy,
+                row.explanation,
+                row.image,
+                row.tag,
+            )
+        }
     }
 })
 

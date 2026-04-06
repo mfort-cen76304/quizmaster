@@ -2,30 +2,33 @@ Feature: Evaluate quiz score
   After completing all quiz questions, the score is calculated:
   - Overall result: number correct, percentage, pass/fail against the pass score
   - Partial scoring: multiple choice questions can award 0, 0.5, or 1 point
+  - Numerical questions: 0 or 1 point (correct if within tolerance)
 
-  Scenario Outline: Quiz score
-    Given workspace "Score" with questions
-      | bookmark | question  | answers  |
-      | Q1       | 1 + 1 = ? | 2 (*), 3 |
-      | Q2       | 2 + 2 = ? | 4 (*), 5 |
-      | Q3       | 3 + 3 = ? | 6 (*), 7 |
-      | Q4       | 4 + 4 = ? | 8 (*), 9 |
-    And a quiz "Score Quiz" with all questions
-      | pass score | 75 |
+  Scenario Outline: Quiz score with mixed question types
+    Given workspace "Mixed" with questions
+      | bookmark | question                           | answers                                      |
+      | Capital  | What is the capital of Italy?       | Rome (*), Naples, Florence                   |
+      | Planets  | Which are planets in solar system?  | Mars (*), Pluto, Venus (*), Titan, Earth (*) |
+      | Boiling  | What is the boiling point of water? | 100 ±5                                       |
+    And a quiz "Mixed Quiz" with all questions
+      | pass score | 66 |
     When I start the quiz
-    * I answer <correct> questions correctly
-    * I answer <incorrect> questions incorrectly
+    * I answer "<capital>"
+    * I answer "<planets>"
+    * I answer "<boiling>"
     * I evaluate the quiz
     Then I see the quiz result
-      | Correct Answers | Score       | Result   | Pass Score |
-      | <correct> / 4   | <percentage> | <result> | 75         |
+      | Correct Answers | Score        | Result   | Pass Score |
+      | <points> / 3    | <percentage> | <result> | 66         |
 
     Examples:
-      | correct | incorrect | percentage | result |
-      | 4       | 0         | 100        | passed |
-      | 3       | 1         | 75         | passed |
-      | 2       | 2         | 50         | failed |
-      | 0       | 4         | 0          | failed |
+      | capital | planets                      | boiling | points | percentage | result |
+      | Rome    | Mars, Venus, Earth           | 100     | 3      | 100        | passed |
+      | Rome    | Mars, Venus, Earth           | 106     | 2      | 67         | passed |
+      | Rome    | Mars, Venus                  | 100     | 2.5    | 83         | passed |
+      | Naples  | Mars, Pluto                  | 95      | 1      | 33         | failed |
+      | Naples  | Mars, Venus, Earth, Pluto    | 106     | 0.5    | 17         | failed |
+      | Naples  | Pluto, Titan                 | 106     | 0      | 0          | failed |
 
   @skip
   Scenario: Quiz score in learning mode
@@ -52,31 +55,3 @@ Feature: Evaluate quiz score
       | 2 / 2           | 100   | passed | 100        |
     And I see the original result 1, 50%, failed
 
-  Scenario Outline: Quiz with multiple choice question with partial score
-    Partial scoring applies to multiple choice questions within a quiz.
-    - All correct answers: 1 point
-    - One error: 0.5 points
-    - More than one error: 0 points
-
-    Given workspace "Partial Score" with questions
-      | bookmark | question                                              | answers                                      | explanation |
-      | Planets  | Which of the following are planets?                    | Mars (*), Pluto, Titan, Venus (*), Earth (*) | Planets     |
-      | Sky      | What is the standard colour of sky?                   | Red, Blue (*), Green, Black                  | Rayleigh    |
-    And a quiz "Quiz" with all questions
-      | pass score | 75 |
-    When I start the quiz
-    And I answer "<answer>"
-    And I answer "Blue"
-    And I evaluate the quiz
-    Then I see the quiz result
-      | Correct Answers | Score        | Result   | Pass Score |
-      | <correct> / 2   | <percentage> | <result> | 75         |
-
-    Examples:
-      | answer                    | correct | percentage | result |
-      | Mars, Venus, Earth        | 2       | 100        | passed |
-      | Mars, Venus, Titan, Earth | 1.5     | 75         | passed |
-      | Mars, Venus               | 1.5     | 75         | passed |
-      | Mars, Pluto               | 1       | 50         | failed |
-      | Mars, Pluto, Venus, Titan | 1       | 50         | failed |
-      | Pluto, Titan              | 1       | 50         | failed |

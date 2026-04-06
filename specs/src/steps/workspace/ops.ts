@@ -87,7 +87,7 @@ export const createTrivialQuestions = async (world: QuizmasterWorld, n: number) 
     }
 }
 
-export const createNumericalQuestionInAutoWorkspace = async (
+export const createNumericalQuestionInWorkspace = async (
     world: QuizmasterWorld,
     bookmark: string,
     question: string,
@@ -95,8 +95,6 @@ export const createNumericalQuestionInAutoWorkspace = async (
     explanation?: string,
     tolerance?: string,
 ) => {
-    await ensureWorkspace(world)
-    await navigateToWorkspace(world)
     await world.workspacePage.createNewQuestion()
     world.questionWip = emptyQuestion()
     await enterQuestion(world, question)
@@ -109,6 +107,20 @@ export const createNumericalQuestionInAutoWorkspace = async (
         await world.questionEditPage.enterQuestionExplanation(explanation)
         world.questionWip.explanation = explanation
     }
+    world.questionWip.isNumerical = true
     world.questionBookmarks[bookmark] = world.questionWip
     await world.questionEditPage.submit()
+}
+
+export const createNumericalQuestionInAutoWorkspace = async (
+    world: QuizmasterWorld,
+    bookmark: string,
+    question: string,
+    correctAnswer: string,
+    explanation?: string,
+    tolerance?: string,
+) => {
+    await ensureWorkspace(world)
+    await navigateToWorkspace(world)
+    await createNumericalQuestionInWorkspace(world, bookmark, question, correctAnswer, explanation, tolerance)
 }
