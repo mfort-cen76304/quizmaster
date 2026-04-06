@@ -1,7 +1,7 @@
 import { isAnsweredCorrectly } from '#model/question.ts'
 import type { Quiz } from '#model/quiz.ts'
+import { calculateScore } from '#pages/take/question-take/index.ts'
 
-import { calculateScore } from '../question-take/index.ts'
 import type { QuizAnswers } from './quiz-answers-state'
 
 export interface QuizScore {

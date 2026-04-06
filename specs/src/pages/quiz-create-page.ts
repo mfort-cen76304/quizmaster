@@ -1,6 +1,6 @@
 import { expect, type Page } from '@playwright/test'
 
-import type { QuizMode, Difficulty } from '../steps/world/quiz.ts'
+import type { QuizMode, Difficulty } from '#steps/world/quiz.ts'
 
 export class QuizCreatePage {
     constructor(private page: Page) {}

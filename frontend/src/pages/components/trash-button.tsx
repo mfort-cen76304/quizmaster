@@ -1,4 +1,5 @@
-import trashIcon from '../../assets/icons/trash-delete-bin.svg'
+import trashIcon from '#fe/assets/icons/trash-delete-bin.svg'
+
 import { Button } from './button.tsx'
 import './trash-button.scss'
 

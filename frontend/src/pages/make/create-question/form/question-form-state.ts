@@ -1,11 +1,10 @@
 import { useRef, useState } from 'react'
 
+import type { AiAssistantResponse } from '#api/ai-assistant.ts'
 import type { QuestionApiData } from '#api/question.ts'
 import { updated } from '#fe/helpers.ts'
 import type { Question } from '#model/question.ts'
 import { parseTag } from '#model/tag.ts'
-
-import type { AiAssistantResponse } from '../../../../api/ai-assistant.ts'
 
 export interface AnswerState {
     readonly id: number
