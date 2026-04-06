@@ -3,6 +3,16 @@ import { type Answer, emptyAnswer, type QuizmasterWorld } from '#steps/world'
 
 export type AnswerRaw = [string, '*' | '', string | undefined]
 
+export const parseAnswers = (answers: string): TableOf<AnswerRaw> => ({
+    raw: () =>
+        answers.split(',').map(a => {
+            const trimmed = a.trim()
+            const isCorrect = trimmed.endsWith('(*)')
+            const answer = isCorrect ? trimmed.slice(0, -3).trimEnd() : trimmed
+            return [answer, isCorrect ? '*' : '', undefined]
+        }),
+})
+
 // if change this value, also change in frontend/src/pages/create-question/create-question.tsx
 const NUM_ANSWERS = 2
 

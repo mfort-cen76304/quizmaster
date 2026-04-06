@@ -2,7 +2,14 @@ import type { DataTable } from '@cucumber/cucumber'
 
 import type { TableOf } from '#steps/common.ts'
 import { Given } from '#steps/fixture.ts'
-import { addAnswers, enterImageUrl, enterQuestion, enterTag, type AnswerRaw } from '#steps/question/ops.ts'
+import {
+    addAnswers,
+    type AnswerRaw,
+    enterImageUrl,
+    enterQuestion,
+    enterTag,
+    parseAnswers,
+} from '#steps/question/ops.ts'
 import {
     createQuestionInAutoWorkspace,
     createNumericalQuestionInAutoWorkspace,
@@ -44,13 +51,7 @@ Given('questions', async function (data: DataTable) {
     for (const row of data.hashes()) {
         const { bookmark, question, answers, easy, explanation } = row
         const isEasy = easy === 'true'
-        const answerRawTable = {
-            raw: () =>
-                answers.split(',').map(a => {
-                    const [answer, correct] = a.trim().split(' ')
-                    return [answer, correct === '(*)' ? '*' : '', undefined]
-                }),
-        } as TableOf<AnswerRaw>
+        const answerRawTable = parseAnswers(answers)
 
         await createQuestionInAutoWorkspace(this, bookmark, question, answerRawTable, isEasy, explanation)
     }

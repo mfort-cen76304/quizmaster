@@ -1,18 +1,8 @@
 import type { DataTable } from '@cucumber/cucumber'
 
-import type { TableOf } from '#steps/common.ts'
 import { Given, When, Then } from '#steps/fixture.ts'
-import type { AnswerRaw } from '#steps/question/ops.ts'
+import { parseAnswers } from '#steps/question/ops.ts'
 import { createQuestionInWorkspace, createWorkspace, openCreateWorkspacePage } from '#steps/workspace/ops.ts'
-
-const parseAnswers = (answers: string) =>
-    ({
-        raw: () =>
-            answers.split(',').map(a => {
-                const [answer, correct] = a.trim().split(' ')
-                return [answer, correct === '(*)' ? '*' : '', undefined]
-            }),
-    }) as TableOf<AnswerRaw>
 
 Given('I start creating a workspace', async function () {
     await openCreateWorkspacePage(this)
@@ -42,6 +32,7 @@ Given('workspace {string} with questions', async function (name: string, data: D
             isEasy,
             row.explanation,
             row.image,
+            row.tag,
         )
     }
 })
