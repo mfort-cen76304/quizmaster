@@ -43,11 +43,11 @@ Feature: Show stats
 
     When I open quiz "Stats Quiz" statistics
     Then I see attempt stats table
-      | Duration   | Points | Correct Answers | Incorrect Answers | Score | Status   |
-      | 30 seconds | 0/2    | 0 (0%)          | 2 (100%)          | 0     | Timeout  |
-      | 30 seconds | 1/2    | 1 (50%)         | 1 (50%)           | 50    | Timeout  |
-      | 20 seconds | 1/2    | 1 (50%)         | 1 (50%)           | 50    | Finished |
-      | 10 seconds | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
+      | 30s      | 0/2    | 0 (0%)          | 2 (100%)          | 0     | Timeout  |
+      | 30s      | 1/2    | 1 (50%)         | 1 (50%)           | 50    | Timeout  |
+      | 20s      | 1/2    | 1 (50%)         | 1 (50%)           | 50    | Finished |
+      | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
       |       4 |        2 |          0 |       2 |

@@ -1,3 +1,4 @@
+import { formatDuration } from '#fe/format/duration.ts'
 import type { Quiz } from '#model/quiz.ts'
 import type { AttemptStatsRecord, QuizStatsResponse } from '#model/stats.ts'
 import './quiz-stats-component.scss'
@@ -5,36 +6,6 @@ import './quiz-stats-component.scss'
 export interface QuizStatsProps {
     readonly quiz: Quiz
     readonly stats: QuizStatsResponse
-}
-
-const formatDuration = (durationSeconds: number): string => {
-    if (durationSeconds < 60) {
-        return `${durationSeconds} second${durationSeconds !== 1 ? 's' : ''}`
-    }
-
-    const minutes = Math.floor(durationSeconds / 60)
-    const seconds = durationSeconds % 60
-
-    if (minutes < 60) {
-        if (seconds === 0) {
-            return `${minutes} minute${minutes !== 1 ? 's' : ''}`
-        }
-        return `${minutes} minute${minutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`
-    }
-
-    const hours = Math.floor(minutes / 60)
-    const remainingMinutes = minutes % 60
-
-    if (remainingMinutes === 0 && seconds === 0) {
-        return `${hours} hour${hours !== 1 ? 's' : ''}`
-    }
-    if (seconds === 0) {
-        return `${hours} hour${hours !== 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}`
-    }
-    if (remainingMinutes === 0) {
-        return `${hours} hour${hours !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`
-    }
-    return `${hours} hour${hours !== 1 ? 's' : ''} ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''} ${seconds} second${seconds !== 1 ? 's' : ''}`
 }
 
 const statusLabels: Record<string, string> = {
