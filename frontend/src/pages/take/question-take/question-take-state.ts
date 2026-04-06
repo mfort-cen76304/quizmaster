@@ -1,8 +1,8 @@
-import { useState } from 'react'
+import React from 'react'
 
-import { isNumericalQuestion, type AnswerIdxs } from '#model/question.ts'
+import { isNumericalQuestion, type AnswerIdxs, compareAnswers, calculateScore } from '#model/question.ts'
 
-import type { QuestionFormProps } from './question-form'
+import type { QuestionFormProps } from './question-form.tsx'
 
 export interface QuestionTakeState {
     readonly isMultipleChoice: boolean
@@ -10,39 +10,65 @@ export interface QuestionTakeState {
     readonly numericalAnswer: string
     readonly selectedAnswerIdxs: AnswerIdxs
     readonly submitted: boolean
-    readonly submit: () => void
+    readonly hasAnswer: boolean
+    readonly score: number
+    readonly showResultFeedback: boolean
+    readonly isAnswerChecked: (idx: number) => boolean
+    readonly showFeedback: (idx: number) => boolean
     readonly onSelectedAnswerChange: (idx: number, selected: boolean) => void
     readonly onNumericalAnswerChange: (value: string) => void
-    readonly isAnswerChecked: (idx: number) => boolean
-    readonly hasAnswer: boolean
+    readonly selectAndSubmit: (idx: number) => void
+    readonly submit: () => void
+    readonly attemptSubmit: () => void
 }
 
 export const useQuestionTakeState = (props: QuestionFormProps): QuestionTakeState => {
-    const question = props.question
+    const { question, onSubmitted, onAnswerSelected, showFeedbackOnSubmit = true } = props
     const isNumerical = isNumericalQuestion(question)
     const isMultipleChoice = question.correctAnswers.length > 1
     const correctNumericalAnswer = question.answers[0] ?? ''
 
-    const [selectedAnswerIdxs, setSelectedAnswerIdxs] = useState<AnswerIdxs>(props.selectedAnswerIdxs ?? [])
-    const [numericalAnswer, setNumericalAnswer] = useState('')
+    const [selectedAnswerIdxs, setSelectedAnswerIdxs] = React.useState<AnswerIdxs>(props.selectedAnswerIdxs ?? [])
+    const [numericalAnswer, setNumericalAnswer] = React.useState('')
+    const [submitted, setSubmitted] = React.useState(false)
 
-    const setSelectedAnswerIdx = (idx: number) => setSelectedAnswerIdxs([idx])
-    const addSelectedAnswerIdx = (idx: number) => setSelectedAnswerIdxs(prev => [...prev, idx])
-    const removeSelectedAnswerIdx = (idx: number) => setSelectedAnswerIdxs(prev => prev.filter(i => i !== idx))
+    const tolerance = question.tolerance ?? 0
 
-    const [submitted, setSubmitted] = useState(false)
+    const score = calculateScore(compareAnswers(selectedAnswerIdxs, question.correctAnswers))
 
-    const submit = () => setSubmitted(true)
+    const showFeedback = (idx: number) =>
+        submitted && showFeedbackOnSubmit && (isMultipleChoice || selectedAnswerIdxs[0] === idx)
+
+    const isAnswerChecked = (idx: number) => selectedAnswerIdxs.includes(idx)
+
+    const hasAnswer = isNumerical ? numericalAnswer.trim() !== '' : selectedAnswerIdxs.length > 0
+    const showResultFeedback = submitted && showFeedbackOnSubmit
+
+    const submit = React.useCallback(() => {
+        setSubmitted(true)
+        onSubmitted?.(selectedAnswerIdxs)
+    }, [selectedAnswerIdxs, onSubmitted])
+
+    const selectAndSubmit = React.useCallback(
+        (idx: number) => {
+            setSelectedAnswerIdxs([idx])
+            setSubmitted(true)
+            onSubmitted?.([idx])
+        },
+        [onSubmitted],
+    )
 
     const onSelectedAnswerChange = (idx: number, selected: boolean) => {
         if (isNumerical) return
         setSubmitted(false)
-        if (!isMultipleChoice) setSelectedAnswerIdx(idx)
-        else if (selected) addSelectedAnswerIdx(idx)
-        else removeSelectedAnswerIdx(idx)
+        if (!isMultipleChoice) setSelectedAnswerIdxs([idx])
+        else if (selected) setSelectedAnswerIdxs(prev => [...prev, idx])
+        else setSelectedAnswerIdxs(prev => prev.filter(i => i !== idx))
     }
 
-    const tolerance = question.tolerance ?? 0
+    React.useEffect(() => {
+        onAnswerSelected?.(selectedAnswerIdxs)
+    }, [selectedAnswerIdxs, onAnswerSelected])
 
     const onNumericalAnswerChange = (value: string) => {
         setSubmitted(false)
@@ -65,22 +91,23 @@ export const useQuestionTakeState = (props: QuestionFormProps): QuestionTakeStat
         setSelectedAnswerIdxs([1])
     }
 
-    const isAnswerChecked = (idx: number) => {
-        return selectedAnswerIdxs.includes(idx)
-    }
-
-    const hasAnswer = isNumerical ? numericalAnswer.trim() !== '' : selectedAnswerIdxs.length > 0
-
     return {
         isMultipleChoice,
         isNumerical,
         numericalAnswer,
         selectedAnswerIdxs,
         submitted,
-        submit,
+        hasAnswer,
+        score,
+        showResultFeedback,
+        isAnswerChecked,
+        showFeedback,
         onSelectedAnswerChange,
         onNumericalAnswerChange,
-        isAnswerChecked,
-        hasAnswer,
+        selectAndSubmit,
+        submit,
+        attemptSubmit: () => {
+            if (hasAnswer) submit()
+        },
     }
 }
