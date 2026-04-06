@@ -2,27 +2,27 @@ import './question-form.scss'
 import React from 'react'
 
 import { isNumericalQuestion, type AnswerIdxs, type Question, compareAnswers, calculateScore } from '#model/question.ts'
-import type { QuizMode, Difficulty } from '#model/quiz.ts'
 import { Form } from '#pages/components'
 import { useQuestionTakeState, QuestionCorrectness, QuestionExplanation } from '#pages/take/question-take'
 
 import { ChoiceAnswerList } from './components/choice-answer-list.tsx'
 import { NumericalAnswerInput } from './components/numerical-answer-input.tsx'
 import { QuestionScore } from './components/question-score.tsx'
-import { shouldShowAnswerCount, stripTag } from './question-display.ts'
+import { stripTag } from './question-display.ts'
+import { useQuestionKeyboardShortcuts } from './use-keyboard-shortcuts.ts'
 
 export interface QuestionFormProps {
     readonly question: Question
     readonly selectedAnswerIdxs?: AnswerIdxs
     readonly onSubmitted?: (selectedAnswerIdxs: AnswerIdxs) => void
     readonly onAnswerSelected?: (selectedAnswerIdxs: AnswerIdxs) => void
-    readonly mode: QuizMode
-    readonly quizDifficulty?: Difficulty
+    readonly showFeedbackOnSubmit?: boolean
+    readonly showAnswerCount?: boolean
 }
 
 export const QuestionForm = (props: QuestionFormProps) => {
-    const { correctAnswers, isEasy, answers, questionExplanation } = props.question
-    const { onSubmitted, onAnswerSelected } = props
+    const { correctAnswers, answers, questionExplanation } = props.question
+    const { onSubmitted, onAnswerSelected, showFeedbackOnSubmit = true, showAnswerCount = false } = props
     const isNumerical = isNumericalQuestion(props.question)
 
     const state = useQuestionTakeState(props)
@@ -41,13 +41,26 @@ export const QuestionForm = (props: QuestionFormProps) => {
         onAnswerSelected?.(state.selectedAnswerIdxs)
     }, [state.selectedAnswerIdxs, onAnswerSelected])
 
+    useQuestionKeyboardShortcuts({
+        enabled: !isNumerical,
+        onDigitPressed: idx => {
+            if (idx >= 0 && idx < answers.length) {
+                state.onSelectedAnswerChange(idx, true)
+                if (!state.isMultipleChoice) submitAndNotify([idx])
+            }
+        },
+        onEnterPressed: () => {
+            if (state.hasAnswer) submitAndNotify()
+        },
+    })
+
     const handleSubmit = () => {
         if (state.hasAnswer) submitAndNotify()
     }
 
     const isAnswerChecked = state.hasAnswer
 
-    const showCorrectAnswersCount = shouldShowAnswerCount(state.isMultipleChoice, isEasy, props.quizDifficulty)
+    const showCorrectAnswersCount = showAnswerCount && state.isMultipleChoice
 
     return (
         <Form onSubmit={handleSubmit} id="question-form">
@@ -71,23 +84,17 @@ export const QuestionForm = (props: QuestionFormProps) => {
                     <NumericalAnswerInput value={state.numericalAnswer} onChange={state.onNumericalAnswerChange} />
                 ) : (
                     <ChoiceAnswerList
-                        questionId={props.question.id}
-                        answers={answers}
-                        explanations={props.question.explanations}
-                        correctAnswers={correctAnswers}
-                        isMultipleChoice={state.isMultipleChoice}
-                        showFeedback={idx => state.submitted && showFeedback(idx) && props.mode === 'learn'}
+                        question={props.question}
+                        showFeedback={idx => state.submitted && showFeedback(idx) && showFeedbackOnSubmit}
                         onSelectedAnswerChange={state.onSelectedAnswerChange}
                         isAnswerChecked={state.isAnswerChecked}
-                        submitAndNotify={submitAndNotify}
-                        hasAnswer={state.hasAnswer}
                     />
                 )}
 
                 {!state.submitted && (
                     <input type="submit" value="Submit" className="submit-btn" disabled={!isAnswerChecked} />
                 )}
-                {state.submitted && props.mode === 'learn' && (
+                {state.submitted && showFeedbackOnSubmit && (
                     <>
                         <QuestionCorrectness score={score} />
                         <QuestionScore score={score} />

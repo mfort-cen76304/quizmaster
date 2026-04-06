@@ -1,49 +1,36 @@
-import type { AnswerIdxs } from '#model/question.ts'
+import type { Question } from '#model/question.ts'
 
 import { Answer } from './answer.tsx'
-import { useQuestionKeyboardShortcuts } from '../use-keyboard-shortcuts.ts'
 
 interface ChoiceAnswerListProps {
-    readonly questionId: number
-    readonly answers: string[]
-    readonly explanations: string[]
-    readonly correctAnswers: AnswerIdxs
-    readonly isMultipleChoice: boolean
+    readonly question: Question
     readonly showFeedback: (idx: number) => boolean
     readonly onSelectedAnswerChange: (idx: number, selected: boolean) => void
     readonly isAnswerChecked: (idx: number) => boolean
-    readonly submitAndNotify: (overrideAnswers?: AnswerIdxs) => void
-    readonly hasAnswer: boolean
 }
 
-export const ChoiceAnswerList = (props: ChoiceAnswerListProps) => {
-    useQuestionKeyboardShortcuts({
-        enabled: true,
-        onDigitPressed: idx => {
-            if (idx >= 0 && idx < props.answers.length) {
-                props.onSelectedAnswerChange(idx, true)
-                if (!props.isMultipleChoice) props.submitAndNotify([idx])
-            }
-        },
-        onEnterPressed: () => {
-            if (props.hasAnswer) props.submitAndNotify()
-        },
-    })
+export const ChoiceAnswerList = ({
+    question,
+    showFeedback,
+    onSelectedAnswerChange,
+    isAnswerChecked,
+}: ChoiceAnswerListProps) => {
+    const isMultipleChoice = question.correctAnswers.length > 1
 
     return (
         <ul className="answers">
-            {props.answers.map((answer, idx) => (
+            {question.answers.map((answer, idx) => (
                 <Answer
                     key={answer}
-                    isMultipleChoice={props.isMultipleChoice}
+                    isMultipleChoice={isMultipleChoice}
                     idx={idx}
-                    questionId={props.questionId}
+                    questionId={question.id}
                     answer={answer}
-                    isCorrect={props.correctAnswers.includes(idx)}
-                    explanation={props.explanations ? props.explanations[idx] : 'not defined'}
-                    showFeedback={props.showFeedback(idx)}
-                    onAnswerChange={props.onSelectedAnswerChange}
-                    isAnswerChecked={props.isAnswerChecked}
+                    isCorrect={question.correctAnswers.includes(idx)}
+                    explanation={question.explanations ? question.explanations[idx] : 'not defined'}
+                    showFeedback={showFeedback(idx)}
+                    onAnswerChange={onSelectedAnswerChange}
+                    isAnswerChecked={isAnswerChecked}
                 />
             ))}
         </ul>

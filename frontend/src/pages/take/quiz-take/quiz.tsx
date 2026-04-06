@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { updated } from '#fe/helpers.ts'
 import type { AnswerIdxs } from '#model/question.ts'
 import type { Quiz } from '#model/quiz.ts'
-import { QuestionForm as StandaloneQuestionForm } from '#pages/take/question-take/index.ts'
+import { QuestionForm as StandaloneQuestionForm, shouldShowAnswerCount } from '#pages/take/question-take/index.ts'
 
 import { BookmarkList } from './components/bookmark-list.tsx'
 import { EvaluateButton, NextButton, BackButton, BookmarkButton } from './components/buttons.tsx'
@@ -114,8 +114,12 @@ export const QuestionForm = (props: QuestionProps) => {
                     setSelectedAnswers(answers)
                 }}
                 onSubmitted={handleAnswerSubmitted}
-                mode={props.quiz.mode}
-                quizDifficulty={props.quiz.difficulty}
+                showFeedbackOnSubmit={props.quiz.mode === 'learn'}
+                showAnswerCount={shouldShowAnswerCount(
+                    currentQuestion.correctAnswers.length > 1,
+                    currentQuestion.isEasy,
+                    props.quiz.difficulty,
+                )}
             />
             <div className="quiz-button-bar">
                 {nav.canBack && <BackButton onClick={nav.back} />}
