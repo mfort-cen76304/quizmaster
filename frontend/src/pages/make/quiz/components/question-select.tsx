@@ -1,6 +1,6 @@
 import './question-select.scss'
 import type { QuestionListItem } from '#model/question-list-item.ts'
-import { parseTag, tagToColor } from '#model/tag.ts'
+import { tagToColor } from '#model/tag.ts'
 
 interface QuestionItemProps {
     readonly question: QuestionListItem
@@ -10,19 +10,20 @@ interface QuestionItemProps {
 
 export const QuestionItem = ({ question, selected, onSelect }: QuestionItemProps) => {
     const inputId = `question-select-${question.id}`
-    const { tag, title } = parseTag(question.question)
 
     return (
         <div key={question.id} className="question-item">
-            {tag && (
+            {question.tags.length > 0 && (
                 <div className="question-tag-row">
-                    <span className="question-tag-badge" style={{ background: tagToColor(tag) }}>
-                        {tag}
-                    </span>
+                    {question.tags.map(tag => (
+                        <span key={tag} className="question-tag-badge" style={{ background: tagToColor(tag) }}>
+                            {tag}
+                        </span>
+                    ))}
                 </div>
             )}
             <input id={inputId} type="checkbox" checked={selected} onChange={() => onSelect(question.id)} />
-            <label htmlFor={inputId}>{title}</label>
+            <label htmlFor={inputId}>{question.question}</label>
         </div>
     )
 }

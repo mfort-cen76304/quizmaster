@@ -41,7 +41,8 @@ public class TestFixtures {
             .correctAnswers(new int[]{1})
             .explanations(new String[]{"No", "Correct!", "No", "No"})
             .isEasy(false)
-            .questionType("single");
+            .questionType("single")
+            .tags(new String[0]);
     }
 
     public Question.QuestionBuilder questionIn(Workspace workspace) {
@@ -58,7 +59,8 @@ public class TestFixtures {
             false,
             null,
             "single",
-            null
+            null,
+            new String[0]
         );
     }
 
@@ -72,7 +74,8 @@ public class TestFixtures {
             false,
             null,
             "multiple",
-            null
+            null,
+            new String[0]
         );
     }
 
@@ -86,7 +89,8 @@ public class TestFixtures {
             false,
             imageUrl,
             "single",
-            null
+            null,
+            new String[0]
         );
     }
 
@@ -115,7 +119,8 @@ public class TestFixtures {
             .correctAnswers(new int[]{0, 1})
             .explanations(new String[]{"Yes!", "Yes!", "No, France", "No, Germany"})
             .isEasy(false)
-            .questionType("multiple");
+            .questionType("multiple")
+            .tags(new String[0]);
     }
 
     public Question save(Question.QuestionBuilder builder) {

@@ -72,14 +72,6 @@ Feature: Create Quiz from Workspace
       | Ikea    | Jaký nábytek má Ikea? | Jaké nádobí má Ikea?           |       2 + 2 = ? |             3 * 3 = ? |
       | nábytek | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |       2 + 2 = ? |             4 / 2 = ? |
 
-  Scenario: Question tag is visible when selecting questions for a quiz
-    Given workspace "Geography" with questions
-      | question                                   | answers           |
-      | [geografie] Which countries are in Europe? | Italy (*), Canada |
-    When I start creating a new quiz
-    Then I see quiz question "Which countries are in Europe?"
-    And I see tag badge "geografie" for quiz question "Which countries are in Europe?"
-
 @skip
 Scenario: Test backButton
   Given workspace "Testworkspace"

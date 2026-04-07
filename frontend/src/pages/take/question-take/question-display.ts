@@ -1,7 +1,5 @@
 import type { Difficulty } from '#model/quiz.ts'
 
-export const stripTag = (text: string): string => text.replace(/^\[[^\]]+\]\s*/, '')
-
 export const shouldShowAnswerCount = (
     isMultipleChoice: boolean,
     isEasy: boolean,

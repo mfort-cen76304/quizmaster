@@ -46,4 +46,8 @@ public class Question {
 
     @Column(name = "tolerance")
     private Double tolerance;
+
+    @Column(name = "tags", columnDefinition = "text[]")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    private String[] tags;
 }

@@ -61,16 +61,3 @@ Feature: Workspace page management
       | 2 + 2 = ?             | 4 (*), 5     |                                       |
     Then I see image thumbnail for question "Which animal is this?"
     And I do not see image thumbnail for question "2 + 2 = ?"
-
-
-  Scenario: Question tag is visible in workspace question list
-    Given workspace "Workspace" with questions
-      | question                                   | answers           |
-      | [geografie] Which countries are in Europe? | Italy (*), Canada |
-    Then I see question in list "[geografie] Which countries are in Europe?"
-
-  Scenario: Brackets not at the start are not treated as a tag in workspace
-    Given workspace "Workspace" with questions
-      | question                                    | answers           |
-      | Which [geografie] countries are in Europe?  | Italy (*), Canada |
-    Then I see question in list "Which [geografie] countries are in Europe?"

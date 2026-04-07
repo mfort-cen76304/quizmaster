@@ -23,6 +23,7 @@ export interface Question {
     readonly questionType: QuestionType
     workspaceGuid: string | null
     isEasy: boolean
+    readonly tags: string[]
 }
 
 export interface Answers {

@@ -4,7 +4,6 @@ import type { AiAssistantResponse } from '#api/ai-assistant.ts'
 import type { QuestionApiData } from '#api/question.ts'
 import { updated } from '#fe/helpers.ts'
 import type { Question, QuestionType } from '#model/question.ts'
-import { parseTag } from '#model/tag.ts'
 
 export interface AnswerState {
     readonly id: number
@@ -38,7 +37,8 @@ export type { QuestionType }
 export const useQuestionFormState = (question?: Question) => {
     const isQuestionNumerical = question?.questionType === 'numerical'
 
-    const { tag: initialTag, title: initialTitle } = parseTag(question?.question || '')
+    const initialTag = question?.tags[0] || ''
+    const initialTitle = question?.question || ''
 
     const [aiPromptText, setAiPromptText] = useState('')
     const [questionText, setQuestionText] = useState<string>(initialTitle)
@@ -169,9 +169,9 @@ export const useQuestionFormState = (question?: Question) => {
     }
 }
 
-const buildQuestionTitle = (tagText: string, questionText: string): string => {
+const buildTags = (tagText: string): string[] => {
     const tag = tagText.trim()
-    return tag ? `[${tag}] ${questionText}` : questionText
+    return tag ? [tag] : []
 }
 
 export const stateToQuestionApiData = (state: QuestionFormState): QuestionApiData => {
@@ -179,7 +179,7 @@ export const stateToQuestionApiData = (state: QuestionFormState): QuestionApiDat
         const normalizedTolerance = state.tolerance.trim()
         const parsedTolerance = normalizedTolerance === '' ? undefined : Number.parseFloat(normalizedTolerance)
         return {
-            question: buildQuestionTitle(state.tagText, state.questionText),
+            question: state.questionText,
             answers: [state.numericalAnswer.trim()],
             correctAnswers: [0],
             explanations: [''],
@@ -187,11 +187,12 @@ export const stateToQuestionApiData = (state: QuestionFormState): QuestionApiDat
             questionType: state.questionType,
             isEasy: false,
             tolerance: Number.isNaN(parsedTolerance) ? undefined : parsedTolerance,
+            tags: buildTags(state.tagText),
         }
     }
 
     return {
-        question: buildQuestionTitle(state.tagText, state.questionText),
+        question: state.questionText,
         answers: Array.from(state.answers),
         correctAnswers: Array.from(state.correctAnswers),
         explanations: Array.from(state.explanations),
@@ -199,5 +200,6 @@ export const stateToQuestionApiData = (state: QuestionFormState): QuestionApiDat
         questionType: state.questionType,
         isEasy: state.isEasy,
         imageUrl: state.imageUrl || undefined,
+        tags: buildTags(state.tagText),
     }
 }

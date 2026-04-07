@@ -11,7 +11,8 @@ public record QuestionRequest(
     boolean isEasy,
     String imageUrl,
     String questionType,
-    Double tolerance
+    Double tolerance,
+    String[] tags
 ) {
     public Question toEntity(String workspaceGuid) {
         return Question.builder()
@@ -25,6 +26,7 @@ public record QuestionRequest(
             .imageUrl(imageUrl)
             .tolerance(tolerance)
             .questionType(resolveQuestionType())
+            .tags(tags != null ? tags : new String[0])
             .build();
     }
 

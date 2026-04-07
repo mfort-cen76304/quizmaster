@@ -12,6 +12,7 @@ export interface Question {
     explanation: string
     imageUrl?: string
     isNumerical?: boolean
+    tags: string[]
 }
 
-export const emptyQuestion = (): Question => ({ question: '', answers: [], explanation: '' })
+export const emptyQuestion = (): Question => ({ question: '', answers: [], explanation: '', tags: [] })

@@ -3,4 +3,5 @@ export interface QuestionListItem {
     readonly question: string
     readonly isInAnyQuiz: boolean
     readonly imageUrl?: string
+    readonly tags: string[]
 }

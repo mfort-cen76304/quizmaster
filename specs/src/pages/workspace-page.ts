@@ -16,10 +16,7 @@ export class WorkspacePage {
     // ── Question list ────────────────────────────────
 
     private questionsLocator = () => this.page.locator('.question-item')
-    private questionLocator = (question: string) => {
-        const title = question.replace(/^\[[^\]]+\]\s*/, '')
-        return this.questionsLocator().filter({ hasText: title })
-    }
+    private questionLocator = (question: string) => this.questionsLocator().filter({ hasText: question })
 
     expectQuestionCount = (count: number) => expect(this.questionsLocator()).toHaveCount(count)
     expectHasQuestions = () => expect(this.questionsLocator().first()).toBeVisible()

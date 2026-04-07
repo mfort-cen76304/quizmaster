@@ -1,8 +1,3 @@
-export const parseTag = (raw: string): { tag: string; title: string } => {
-    const match = /^\[([^\]]+)\] (.+)$/.exec(raw)
-    return match ? { tag: match[1], title: match[2] } : { tag: '', title: raw }
-}
-
 export const tagToColor = (tag: string): string => {
     let hash = 0
     for (let i = 0; i < tag.length; i++) {
