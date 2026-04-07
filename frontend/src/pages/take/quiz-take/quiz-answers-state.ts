@@ -1,28 +1,26 @@
 import { useState } from 'react'
 
 import { updated } from '#fe/helpers.ts'
-import type { AnswerIdxs } from '#model/question.ts'
-
-export type SelectedAnswers = readonly AnswerIdxs[]
+import type { QuestionAnswer } from '#model/question.ts'
 
 export type QuizAnswers = {
-    readonly firstAnswers: SelectedAnswers
-    readonly finalAnswers: SelectedAnswers
+    readonly firstAnswers: readonly QuestionAnswer[]
+    readonly finalAnswers: readonly QuestionAnswer[]
 }
 
 export interface QuizAnswersState {
     readonly quizAnswers: QuizAnswers
-    readonly answerQuestion: (questionIdx: number, answerIdxs: AnswerIdxs) => void
+    readonly answerQuestion: (questionIdx: number, answer: QuestionAnswer) => void
 }
 
 export const useQuizAnswersState = (): QuizAnswersState => {
-    const [firstAnswers, setFirstAnswers] = useState<SelectedAnswers>([])
-    const [finalAnswers, setFinalAnswers] = useState<SelectedAnswers>([])
+    const [firstAnswers, setFirstAnswers] = useState<readonly QuestionAnswer[]>([])
+    const [finalAnswers, setFinalAnswers] = useState<readonly QuestionAnswer[]>([])
 
-    const answerQuestion = (questionIdx: number, answerIdxs: AnswerIdxs) => {
-        if (firstAnswers[questionIdx] === undefined) setFirstAnswers(updated(firstAnswers, questionIdx, answerIdxs))
+    const answerQuestion = (questionIdx: number, answer: QuestionAnswer) => {
+        if (firstAnswers[questionIdx] === undefined) setFirstAnswers(updated(firstAnswers, questionIdx, answer))
 
-        setFinalAnswers(updated(finalAnswers, questionIdx, answerIdxs))
+        setFinalAnswers(updated(finalAnswers, questionIdx, answer))
     }
 
     return { quizAnswers: { firstAnswers, finalAnswers }, answerQuestion }

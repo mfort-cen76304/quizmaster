@@ -2,8 +2,8 @@ import './quiz.scss'
 import { useRef, useState } from 'react'
 
 import { patchAttempt } from '#api/stats.ts'
-import { getQuizRunId, updated } from '#fe/helpers.ts'
-import { compareAnswers, isAnsweredCorrectly, type AnswerIdxs } from '#model/question.ts'
+import { getQuizRunId } from '#fe/helpers.ts'
+import { type AnswerIdxs, type QuestionAnswer, evaluateAnswer } from '#model/question.ts'
 import type { Quiz } from '#model/quiz.ts'
 import { QuestionForm as StandaloneQuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
 
@@ -20,22 +20,20 @@ interface QuestionProps {
     readonly onEvaluate: (quizAnswers: QuizAnswers, timedOut?: boolean) => void
 }
 
-export type QuizState = readonly AnswerIdxs[]
-
 export const QuestionForm = (props: QuestionProps) => {
     const { quizAnswers, answerQuestion } = useQuizAnswersState()
     const nav = useQuizNavigationState(props.quiz)
     const bookmarks = useQuizBookmarkState()
-    const [selectedAnswers, setSelectedAnswers] = useState<AnswerIdxs | undefined>(undefined)
+    const [selectedAnswerIdxs, setSelectedAnswerIdxs] = useState<AnswerIdxs | undefined>(undefined)
     const answerCounts = useRef({ correct: 0, incorrect: 0 })
 
-    const answer = (selectedAnswerIdxs: AnswerIdxs) => {
-        answerQuestion(nav.currentQuestionIdx, selectedAnswerIdxs)
+    const answer = (questionAnswer: QuestionAnswer) => {
+        answerQuestion(nav.currentQuestionIdx, questionAnswer)
         nav.unskip()
     }
 
-    const answerAndNext = (selectedAnswerIdxs: AnswerIdxs) => {
-        answer(selectedAnswerIdxs)
+    const answerAndNext = (questionAnswer: QuestionAnswer) => {
+        answer(questionAnswer)
         if (!nav.isLastQuestion) {
             nav.next()
         }
@@ -63,9 +61,9 @@ export const QuestionForm = (props: QuestionProps) => {
     }
 
     const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
-    const currentAnswers = quizAnswers.finalAnswers[nav.currentQuestionIdx]
-    const isAnswered = currentAnswers !== undefined
-    const hasSelectedAnswer = selectedAnswers !== undefined && selectedAnswers.length > 0
+    const currentAnswer = quizAnswers.finalAnswers[nav.currentQuestionIdx]
+    const isAnswered = currentAnswer !== undefined
+    const hasSelectedAnswer = selectedAnswerIdxs !== undefined && selectedAnswerIdxs.length > 0
 
     const handleNextButton = () => {
         if (!hasSelectedAnswer) {
@@ -74,30 +72,24 @@ export const QuestionForm = (props: QuestionProps) => {
             }
             nav.skip()
         } else {
-            answer(selectedAnswers)
-            const updatedQuizAnswers: QuizAnswers = {
-                firstAnswers: quizAnswers.firstAnswers,
-                finalAnswers: updated(quizAnswers.finalAnswers, nav.currentQuestionIdx, selectedAnswers),
-            }
+            const questionAnswer: QuestionAnswer = { type: 'choice', selectedIdxs: selectedAnswerIdxs }
+            answer(questionAnswer)
+            const updatedFinalAnswers = [...quizAnswers.finalAnswers]
+            updatedFinalAnswers[nav.currentQuestionIdx] = questionAnswer
 
-            const allAnswered = props.quiz.questions.every(
-                (_, idx) => updatedQuizAnswers.finalAnswers[idx] !== undefined,
-            )
+            const allAnswered = props.quiz.questions.every((_, idx) => updatedFinalAnswers[idx] !== undefined)
 
             if (allAnswered) {
-                props.onEvaluate(updatedQuizAnswers, false)
+                props.onEvaluate({ firstAnswers: quizAnswers.firstAnswers, finalAnswers: updatedFinalAnswers }, false)
             } else {
                 nav.next()
             }
         }
     }
 
-    const handleAnswerSubmitted = (answers: AnswerIdxs) => {
-        setSelectedAnswers(answers)
-
-        const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
-        const comparison = compareAnswers(answers, currentQuestion.correctAnswers)
-        if (isAnsweredCorrectly(comparison)) {
+    const handleAnswerSubmitted = (questionAnswer: QuestionAnswer) => {
+        const result = evaluateAnswer(currentQuestion, questionAnswer)
+        if (result.correct) {
             answerCounts.current.correct++
         } else {
             answerCounts.current.incorrect++
@@ -108,9 +100,9 @@ export const QuestionForm = (props: QuestionProps) => {
         })
 
         if (props.quiz.mode === 'learn') {
-            answer(answers)
+            answer(questionAnswer)
         } else {
-            answerAndNext(answers)
+            answerAndNext(questionAnswer)
         }
     }
 
@@ -127,10 +119,10 @@ export const QuestionForm = (props: QuestionProps) => {
 
             <QuizQuestionProvider
                 value={{
-                    selectedAnswerIdxs: quizAnswers.finalAnswers[nav.currentQuestionIdx] ?? [],
+                    selectedAnswerIdxs: currentAnswer?.type === 'choice' ? currentAnswer.selectedIdxs : [],
                     onSubmitted: handleAnswerSubmitted,
-                    onAnswerSelected: answers => {
-                        setSelectedAnswers(answers)
+                    onAnswerSelected: idxs => {
+                        setSelectedAnswerIdxs(idxs)
                     },
                     showFeedbackOnSubmit: props.quiz.mode === 'learn',
                     difficulty: props.quiz.difficulty,

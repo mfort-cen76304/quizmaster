@@ -1,4 +1,4 @@
-import { compareAnswers, isAnsweredCorrectly, calculateScore } from '#model/question.ts'
+import { type Question, type QuestionAnswer, type QuestionResult, evaluateAnswer } from '#model/question.ts'
 import type { Quiz } from '#model/quiz.ts'
 
 import type { QuizAnswers } from './quiz-answers-state'
@@ -10,17 +10,19 @@ export interface QuizScore {
     readonly score: number
 }
 
+// Unanswered questions don't get evaluated; the caller decides what absence
+// means (here: doesn't contribute to score, doesn't count as correct).
+const evalOrSkip = (question: Question, answer: QuestionAnswer | undefined): QuestionResult | undefined =>
+    answer && evaluateAnswer(question, answer)
+
 export const evaluate = (quiz: Quiz, quizAnswers: QuizAnswers): QuizScore => {
-    const comparisons = quiz.questions.map((question, idx) =>
-        compareAnswers(quizAnswers.finalAnswers[idx], question.correctAnswers),
-    )
+    const finalResults = quiz.questions.map((q, i) => evalOrSkip(q, quizAnswers.finalAnswers[i]))
+    const firstResults = quiz.questions.map((q, i) => evalOrSkip(q, quizAnswers.firstAnswers[i]))
 
     return {
-        correct: comparisons.filter(isAnsweredCorrectly).length,
-        firstCorrect: quiz.questions.filter((question, idx) =>
-            isAnsweredCorrectly(compareAnswers(quizAnswers.firstAnswers[idx], question.correctAnswers)),
-        ).length,
+        correct: finalResults.filter(r => r?.correct).length,
+        firstCorrect: firstResults.filter(r => r?.correct).length,
         total: quiz.questions.length,
-        score: comparisons.map(calculateScore).reduce((a, b) => a + b, 0),
+        score: finalResults.reduce((sum, r) => sum + (r?.score ?? 0), 0),
     }
 }

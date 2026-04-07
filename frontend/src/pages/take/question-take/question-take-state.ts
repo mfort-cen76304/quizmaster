@@ -3,9 +3,11 @@ import React from 'react'
 import {
     type AnswerIdxs,
     type Question,
-    compareAnswers,
-    compareNumericalAnswer,
-    calculateScore,
+    type QuestionAnswer,
+    type QuestionResult,
+    choiceAnswer,
+    evaluateAnswer,
+    numericalAnswer,
 } from '#model/question.ts'
 
 import { shouldShowAnswerCount } from './question-display.ts'
@@ -39,26 +41,23 @@ export const useQuestionTakeState = (question: Question): QuestionTakeState => {
 
     const isNumerical = question.questionType === 'numerical'
     const isMultipleChoice = question.correctAnswers.length > 1
-    const correctNumericalAnswer = question.answers[0] ?? ''
 
     const [selectedAnswerIdxs, setSelectedAnswerIdxs] = React.useState<AnswerIdxs>(initialAnswerIdxs)
-    const [numericalAnswer, setNumericalAnswer] = React.useState('')
+    const [numericalInput, setNumericalInput] = React.useState('')
     const [submitted, setSubmitted] = React.useState(false)
 
-    const tolerance = question.tolerance ?? 0
+    const currentAnswer: QuestionAnswer | undefined = isNumerical
+        ? numericalAnswer(numericalInput)
+        : choiceAnswer(selectedAnswerIdxs)
 
-    const comparison = isNumerical
-        ? compareNumericalAnswer(numericalAnswer, correctNumericalAnswer, tolerance)
-        : compareAnswers(selectedAnswerIdxs, question.correctAnswers)
-
-    const score = calculateScore(comparison)
+    const hasAnswer = currentAnswer !== undefined
+    const result: QuestionResult | undefined = currentAnswer && evaluateAnswer(question, currentAnswer)
 
     const showFeedback = (idx: number) =>
         submitted && showFeedbackOnSubmit && (isMultipleChoice || selectedAnswerIdxs[0] === idx)
 
     const isAnswerChecked = (idx: number) => selectedAnswerIdxs.includes(idx)
 
-    const hasAnswer = isNumerical ? numericalAnswer.trim() !== '' : selectedAnswerIdxs.length > 0
     const showResultFeedback = submitted && showFeedbackOnSubmit
     const showAnswerCount = shouldShowAnswerCount(
         isMultipleChoice,
@@ -67,17 +66,25 @@ export const useQuestionTakeState = (question: Question): QuestionTakeState => {
     )
 
     const submit = React.useCallback(() => {
-        const finalIdxs = isNumerical ? (comparison.missedCorrect === 0 ? [0] : [1]) : selectedAnswerIdxs
+        if (!currentAnswer || !result) return
+        // HACK: Numerical answers also poke selectedAnswerIdxs so the parent's
+        // onAnswerSelected effect signals "has selection" via [0]/[1]. To be
+        // removed once the parent stops piggybacking on AnswerIdxs for the
+        // has-selection signal. Covered by the upcoming Quiz.Mode.feature
+        // "Learn mode - Numerical question" scenario.
+        const finalIdxs = isNumerical ? (result.correct ? [0] : [1]) : selectedAnswerIdxs
         setSelectedAnswerIdxs(finalIdxs)
         setSubmitted(true)
-        onSubmitted?.(finalIdxs)
-    }, [isNumerical, comparison, selectedAnswerIdxs, onSubmitted])
+        onSubmitted?.(currentAnswer)
+    }, [isNumerical, result, currentAnswer, selectedAnswerIdxs, onSubmitted])
 
     const selectAndSubmit = React.useCallback(
         (idx: number) => {
+            const answer = choiceAnswer([idx])
+            if (!answer) return
             setSelectedAnswerIdxs([idx])
             setSubmitted(true)
-            onSubmitted?.([idx])
+            onSubmitted?.(answer)
         },
         [onSubmitted],
     )
@@ -95,18 +102,18 @@ export const useQuestionTakeState = (question: Question): QuestionTakeState => {
     }, [selectedAnswerIdxs, onAnswerSelected])
 
     const onNumericalAnswerChange = (value: string) => {
-        setNumericalAnswer(value)
+        setNumericalInput(value)
     }
 
     return {
         isMultipleChoice,
         isNumerical,
         showAnswerCount,
-        numericalAnswer,
+        numericalAnswer: numericalInput,
         selectedAnswerIdxs,
         submitted,
         hasAnswer,
-        score,
+        score: result?.score ?? 0,
         showResultFeedback,
         isAnswerChecked,
         showFeedback,
