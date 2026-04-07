@@ -52,10 +52,17 @@ export const evaluateAnswer = (question: Question, answer: QuestionAnswer): Ques
 
 // --- private ---
 
+// Tiny slack on the tolerance comparison to absorb IEEE 754 noise:
+// e.g. Math.abs(3.13 - 3.14) is actually 0.010000000000000231, not 0.01,
+// which would otherwise reject a value sitting exactly on a 0.01 boundary.
+// 1e-9 is far larger than typical accumulation error for quiz-scale values
+// and far smaller than any meaningful tolerance. See backlog/numerical-question.md.
+const FLOAT_EPSILON = 1e-9
+
 const scoreNumerical = (userValue: number, correctAnswer: string, tolerance: number): QuestionResult => {
     // Question data is trusted: correctAnswer is guaranteed parseable upstream.
     const correct = Number.parseFloat(correctAnswer)
-    const inTolerance = Math.abs(userValue - correct) <= tolerance
+    const inTolerance = Math.abs(userValue - correct) <= tolerance + FLOAT_EPSILON
     return { correct: inTolerance, score: inTolerance ? 1 : 0 }
 }
 

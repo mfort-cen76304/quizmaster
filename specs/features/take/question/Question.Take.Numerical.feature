@@ -13,7 +13,6 @@ Feature: Take a numerical question
       | 56     | Correct!   |
       | 57     | Incorrect! |
 
-  @skip
   Scenario: Tolerance widens the accepted range, boundaries inclusive
     Given a numerical question "Value of π to two decimal places?" with correct answer "3.14" and tolerance "0.01" bookmarked as "pi"
     When I take question "pi"
