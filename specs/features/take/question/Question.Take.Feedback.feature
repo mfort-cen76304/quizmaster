@@ -81,16 +81,3 @@ Feature: Question answer feedback
       | Mars, Pluto               | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | ◼️◼️◼️ |
       | Mars, Pluto, Venus, Titan | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | 🟥🟥🟥 |
       | Pluto, Titan              | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | 🟥🟥🟥 |
-
-
-  Scenario Outline: Numeric question feedback
-    Question is answered correctly if the correct answer is selected
-
-    Given a numerical question "One and only correct numerical answer" with correct answer "54" bookmarked as "Numbers"
-    When I take question "Numbers"
-    And I enter "<answer>"
-    Then I see feedback "<feedback>"
-    Examples:
-      | answer   | feedback   |
-      | 14       | Incorrect! |
-      | 54       | Correct!   |

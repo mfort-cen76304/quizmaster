@@ -8,7 +8,9 @@ Background:
       | bookmark  | question                              | answers                           |
       | Single    | Which country is in Europe?           | Italy (*), Mexico, Morocco, USA, Canada, Iran, China, Japan, Israel, Kuwait |
       | Multiple  | Which countries are in Europe?        | Italy (*), Mexico, Germany (*), USA, Canada, Iran, China, Japan, Israel, Kuwait |
-  And a numerical question "How many regions does Czechia have?" with correct answer "14" bookmarked as "Numerical"
+    And a question "How many regions does Czechia have?"
+      * with numerical answer "14"
+      * saved and bookmarked as "Numerical"
 
 
   Scenario Outline: Single choice question - numeric key selects an answer

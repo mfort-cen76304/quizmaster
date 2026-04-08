@@ -30,19 +30,24 @@ const addAnswers = async (world: QuizmasterWorld, answers: AnswerSpec[]) => {
 }
 
 export const createQuestion = async (world: QuizmasterWorld, spec: QuestionSpec) => {
-    if (isNumericalSpec(spec)) {
-        throw new Error('createQuestion: numerical questions not yet supported (Step 2)')
-    }
-
     await ensureWorkspace(world)
     await navigateToWorkspace(world)
     await world.workspacePage.createNewQuestion()
     world.questionWip = emptyQuestion()
 
     await enterQuestion(world, spec.text)
-    if (spec.tag) await enterTag(world, spec.tag)
-    await addAnswers(world, spec.answers)
-    if (spec.easy) await world.questionEditPage.setEasy()
+
+    if (isNumericalSpec(spec)) {
+        await world.questionEditPage.setNumericalChoice()
+        await world.questionEditPage.enterNumericalCorrectAnswer(spec.numericalAnswer as string)
+        if (spec.tolerance) await world.questionEditPage.enterNumericalTolerance(spec.tolerance)
+        world.questionWip.isNumerical = true
+    } else {
+        if (spec.tag) await enterTag(world, spec.tag)
+        await addAnswers(world, spec.answers)
+        if (spec.easy) await world.questionEditPage.setEasy()
+    }
+
     if (spec.explanation) await enterQuestionExplanation(world, spec.explanation)
     if (spec.image) await enterImageUrl(world, spec.image)
 

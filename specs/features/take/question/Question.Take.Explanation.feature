@@ -50,7 +50,10 @@ Feature: Question explanations after answering
   Scenario: Numerical question explanation
     Explanation is displayed after answering a numerical question
     - for the whole question
-    Given a numerical question "One and only correct numerical answer" with correct answer "54" bookmarked as "Numbers" with explanation "54 is the correct answer because of reasons."
+    Given a question "One and only correct numerical answer"
+      * with numerical answer "54"
+      * with explanation "54 is the correct answer because of reasons."
+      * saved and bookmarked as "Numbers"
     When I take question "Numbers"
     And I enter "14"
     Then I see the question explanation

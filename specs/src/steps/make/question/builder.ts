@@ -23,6 +23,14 @@ Given('with image {string}', function (imageUrl: string) {
     requireSpec(this).image = imageUrl
 })
 
+Given('with numerical answer {string}', function (value: string) {
+    requireSpec(this).numericalAnswer = value
+})
+
+Given('with tolerance {string}', function (value: string) {
+    requireSpec(this).tolerance = value
+})
+
 Given('with tag {string}', function (tag: string) {
     requireSpec(this).tag = tag
 })

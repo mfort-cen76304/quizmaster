@@ -5,7 +5,9 @@ Feature: Take a numerical question
   The user can retake the same question by entering a different value.
 
   Scenario: Without tolerance, only the exact answer is accepted
-    Given a numerical question "What is 7 × 8?" with correct answer "56" bookmarked as "multiplication"
+    Given a question "What is 7 × 8?"
+      * with numerical answer "56"
+      * saved and bookmarked as "multiplication"
     When I take question "multiplication"
     And I retake with answers:
       | answer | feedback   |
@@ -14,7 +16,10 @@ Feature: Take a numerical question
       | 57     | Incorrect! |
 
   Scenario: Tolerance widens the accepted range, boundaries inclusive
-    Given a numerical question "Value of π to two decimal places?" with correct answer "3.14" and tolerance "0.01" bookmarked as "pi"
+    Given a question "Value of π to two decimal places?"
+      * with numerical answer "3.14"
+      * with tolerance "0.01"
+      * saved and bookmarked as "pi"
     When I take question "pi"
     And I retake with answers:
       | answer | feedback   |
