@@ -73,7 +73,7 @@ Feature: Generate question using AI
     And at least 2 answers are marked correct
 
   Scenario: AI section is not available when editing
-    Given a question "What is the capital of Czech Republic?"
+    Given question "What is the capital of Czech Republic?"
       * with answers:
         | Brno   |   | No Brno |
         | Prague | * | Yes     |

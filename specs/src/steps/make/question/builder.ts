@@ -12,7 +12,7 @@ const requireSpec = (world: QuizmasterWorld): QuestionSpec => {
     return world.questionSpecWip
 }
 
-Given('a question {string}', function (question: string) {
+Given('question {string}', function (question: string) {
     this.questionSpecWip = {
         text: question,
         answers: [],

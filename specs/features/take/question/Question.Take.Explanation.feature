@@ -9,7 +9,7 @@ Feature: Question explanations after answering
     - for the selected answer only
     - for the whole question
 
-    Given a question "What is capital of Italy?"
+    Given question "What is capital of Italy?"
     * with answers:
       | Rome     | * | Rome is the capital of Italy              |
       | Naples   |   | Naples is the capital of Campania region  |
@@ -27,7 +27,7 @@ Feature: Question explanations after answering
     - for all answers individually, selected or not
     - for the whole question
 
-    Given a question "Which of these countries are in Europe?"
+    Given question "Which of these countries are in Europe?"
     * with answers:
       | Italy   | * | Located on the Apennine Peninsula, which is part of the European continent. |
       | France  | * | One of the founders of the European Union.                                  |
@@ -50,7 +50,7 @@ Feature: Question explanations after answering
   Scenario: Numerical question explanation
     Explanation is displayed after answering a numerical question
     - for the whole question
-    Given a question "One and only correct numerical answer"
+    Given question "One and only correct numerical answer"
       * with numerical answer "54"
       * with explanation "54 is the correct answer because of reasons."
       * saved and bookmarked as "Numbers"

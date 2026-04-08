@@ -5,7 +5,7 @@ Feature: Edit question form
   The explanation toggle reflects whether the question has existing explanations.
 
   Scenario: Prepopulated form fields
-    Given a question "What is the capital of Czech Republic?"
+    Given question "What is the capital of Czech Republic?"
       * with tag "geography"
       * with answers:
         | Brno   |   | No Brno |
@@ -24,7 +24,7 @@ Feature: Edit question form
       * I see question explanation "Czechia is a country in Europe. Czechs love beer."
 
   Scenario: Edit all fields
-    Given a question "What is the capital of Czech Republic?"
+    Given question "What is the capital of Czech Republic?"
       * with answers:
         | Brno   |   | No Brno |
         | Prague | * | Yes     |
@@ -52,7 +52,7 @@ Feature: Edit question form
       * I see question explanation "Slovakia is a country in Europe. Slovaks love borovička."
 
   Scenario: Change single choice to multiple choice
-    Given a question "What is the capital of Czech Republic?"
+    Given question "What is the capital of Czech Republic?"
       * with answers:
         | Brno   |   | No Brno |
         | Prague | * | Yes     |
@@ -69,7 +69,7 @@ Feature: Edit question form
       * I see answer 3 as incorrect
 
   Scenario: Delete one of the prepopulated form fields
-    Given a question "What is the capital of Czech Republic?"
+    Given question "What is the capital of Czech Republic?"
       * with answers:
       | Brno   |   | No Brno |
       | Prague | * | Yes     |
@@ -85,7 +85,7 @@ Feature: Edit question form
         | Prague | * | Yes     |
 
   Scenario: Explanation fields are visible by default
-    Given a question "What is the capital of Cambodia?"
+    Given question "What is the capital of Cambodia?"
       * with answers:
         | Brno   |   | No Brno |
         | Prague | * | Yes     |
@@ -96,7 +96,7 @@ Feature: Edit question form
     And I see explanation fields
 
   Scenario: Explanation fields are hidden when disabling explanations
-    Given a question "What is the capital of Cambodia?"
+    Given question "What is the capital of Cambodia?"
     * with answers:
       | Brno   |   | No Brno |
       | Prague | * | Yes     |
@@ -108,7 +108,7 @@ Feature: Edit question form
     And I do not see explanation fields
 
   Scenario: Explanation fields are hidden when explanations are empty
-    Given a question "What is the capital of Cambodia?"
+    Given question "What is the capital of Cambodia?"
     * with answers:
       | Brno   |   |
       | Prague | * |
@@ -119,7 +119,7 @@ Feature: Edit question form
     And I do not see explanation fields
 
   Scenario: Update question from multiple choice to numerical
-    Given a question "What are cities of Czech Republic?"
+    Given question "What are cities of Czech Republic?"
       * with answers:
         | Brno     | * | Yes |
         | Prague   | * | Yes |

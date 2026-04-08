@@ -6,7 +6,7 @@ Feature: Take an easy question
   - Single choice: not applicable (always one correct answer)
 
   Scenario: Multiple choice easy question - correct answers is 3
-    Given a question "Which of these countries are in Europe?"
+    Given question "Which of these countries are in Europe?"
     * with answers:
       | Italy   | * |
       | France  | * |
@@ -20,7 +20,7 @@ Feature: Take an easy question
     Then I see that the question has 3 correct answers
 
   Scenario: Multiple choice easy question - correct answers is 2
-    Given a question "Which of these countries are in Europe?"
+    Given question "Which of these countries are in Europe?"
     * with answers:
       | Italy   | * |
       | France  | * |
@@ -34,7 +34,7 @@ Feature: Take an easy question
     Then I see that the question has 2 correct answers
 
   Scenario: Multiple choice question not easy - no correct answers count
-    Given a question "Which of these countries are in Europe?"
+    Given question "Which of these countries are in Europe?"
     * with answers:
       | Italy   | * |
       | France  | * |
@@ -47,7 +47,7 @@ Feature: Take an easy question
     Then I do not see correct answers count
 
   Scenario: Single choice question - no correct answers count
-    Given a question "Which of these countries is not in Europe?"
+    Given question "Which of these countries is not in Europe?"
     * with answers:
       | Italy   |   |
       | France  |   |

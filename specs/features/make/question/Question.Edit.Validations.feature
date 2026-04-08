@@ -6,7 +6,7 @@ Feature: Edit question - validations
   - Answer explanations: either all or none
 
   Scenario: Empty single choice question form
-    Given a question "What is the capital of Czech Republic?"
+    Given question "What is the capital of Czech Republic?"
     * with answers:
       | Brno   |   | No Brno |
       | Prague | * | Yes     |
@@ -24,7 +24,7 @@ Feature: Edit question - validations
       | empty-answer-explanation |
 
   Scenario: Empty multiple choice question form
-    Given a question "What are cities of Czech Republic?"
+    Given question "What are cities of Czech Republic?"
     * with answers:
       | Brno     | * | No Brno |
       | Brussels |   | Yes     |

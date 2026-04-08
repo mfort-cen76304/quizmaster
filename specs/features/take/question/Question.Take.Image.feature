@@ -3,7 +3,7 @@ Feature: Displaying an image for a question
   the image is displayed to the quiz taker.
 
   Scenario: User sees the question image when answering
-    Given a question "Which animal is on the picture?"
+    Given question "Which animal is on the picture?"
       * with image "https://placekitten.com/300/200.jpg"
       * with answers:
         | Cat | * |
@@ -13,7 +13,7 @@ Feature: Displaying an image for a question
     Then I see the question image
 
   Scenario: No image when question has no image URL
-    Given a question "2 + 2 = ?"
+    Given question "2 + 2 = ?"
       * with answers:
         | 4 | * |
         | 5 |   |

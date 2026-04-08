@@ -10,7 +10,7 @@ Feature: Question answer feedback
   Scenario Outline: Single choice question feedback
     Question is answered correctly if the correct answer is selected
 
-    Given a question "What's the capital city of Australia?"
+    Given question "What's the capital city of Australia?"
     * with answers:
       | Sydney    |   |
       | Canberra  | * |
@@ -31,7 +31,7 @@ Feature: Question answer feedback
     - 0.5 points, partially correct: with one mistake (either one missing correct answer or one incorrect answer selected)
     - 0 points, incorrect: with two or more mistakes
 
-    Given a question "Which of the following are planets?"
+    Given question "Which of the following are planets?"
     * with answers:
       | Mars    | * |
       | Pluto   |   |
@@ -58,7 +58,7 @@ Feature: Question answer feedback
     - 🟥 red if the answer is selected while incorrect
     - ◼️ no color if the answer is not selected while incorrect
 
-    Given a question "Which of the following are planets?"
+    Given question "Which of the following are planets?"
     * with answers:
       | Mars    | * |
       | Pluto   |   |
