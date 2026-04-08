@@ -217,8 +217,15 @@ When('I enter question {string}', async function (question: string) {
 
 When('I ask AI:', async function (dataTable: DataTable) {
     await enterAIPrompt(this, toText(dataTable))
-    await this.questionEditPage.clickAiAssist()
-    await this.questionEditPage.expectQuestionValueNotEmpty()
+    // Wait on the actual API response, not the textarea content. The latter
+    // is unreliable on regenerate (the previous response makes "not empty"
+    // resolve immediately, before the new response arrives).
+    await Promise.all([
+        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+            timeout: 60_000,
+        }),
+        this.questionEditPage.clickAiAssist(),
+    ])
 })
 
 When(/I mark the question as (single|multiple|numerical) choice/, async function (choice: string) {

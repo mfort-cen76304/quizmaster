@@ -24,7 +24,7 @@ Feature: Generate question using AI
     And I see at least 4 answers
     And at least 2 answers are marked correct
 
-  @ai
+  @ai @slow
   Scenario: Generate a question with explanations
     Given I start creating a question
     When I ask AI:
