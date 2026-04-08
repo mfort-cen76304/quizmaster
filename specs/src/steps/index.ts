@@ -1,6 +1,7 @@
 import './browser.ts'
 import './common.ts'
 import './home.ts'
+import './make/question/builder.ts'
 import './question/question-create.ts'
 import './question/question-edit-gui.ts'
 import './question/question-take.ts'

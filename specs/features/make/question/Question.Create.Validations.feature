@@ -105,7 +105,7 @@ Feature: Create question - validations
   Scenario: Create multiple choice question without correct answer
     Given I start creating a question
     * I enter question "What are cities of Czech Republic?"
-    * with answers:
+    * I enter answers
       | Brno     |  |
       | Brussels |  |
       | Prague   |  |
@@ -117,7 +117,7 @@ Feature: Create question - validations
   Scenario: Create multiple choice question with one correct answer
     Given I start creating a question
     * I enter question "What are cities of Czech Republic?"
-    * with answers:
+    * I enter answers
       | Brno     |  |
       | Brussels |  |
       | Prague   |  |
@@ -131,7 +131,7 @@ Feature: Create question - validations
   Scenario: Create multiple choice question with all correct answers
     Given I start creating a question
     * I enter question "What are cities of Czech Republic?"
-    * with answers:
+    * I enter answers
       | Brno     |  |
       | Brussels |  |
       | Prague   |  |

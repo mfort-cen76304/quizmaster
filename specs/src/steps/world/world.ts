@@ -12,6 +12,7 @@ import {
     QuizStatsPage,
     TakeQuestionPage,
 } from '#pages/index.ts'
+import type { QuestionSpec } from '#steps/shared/specs.ts'
 
 import { emptyQuestion, type Question } from './question.ts'
 import { emptyQuiz, type Quiz, type QuizBookmark } from './quiz.ts'
@@ -48,12 +49,21 @@ export class QuizmasterWorld {
     quizId = ''
 
     questionWip: Question = emptyQuestion()
+    questionSpecWip: QuestionSpec | undefined = undefined
     quizWip: Quiz = emptyQuiz()
     nextAnswerIdx = 0
     questionBookmarks: Record<string, Question> = {}
     activeQuestionBookmark = ''
     get activeQuestion() {
         return this.questionBookmarks[this.activeQuestionBookmark]
+    }
+
+    bookmarkQuestion(key: string, question: Question) {
+        if (this.questionBookmarks[key] !== undefined) {
+            throw new Error(`Duplicate question bookmark: "${key}"`)
+        }
+        this.questionBookmarks[key] = question
+        this.activeQuestionBookmark = key
     }
 
     quizBookmarks: Record<string, QuizBookmark> = {}
