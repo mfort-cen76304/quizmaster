@@ -22,7 +22,7 @@ export const createWorkspace = async (world: QuizmasterWorld, name: string) => {
 
 export const ensureWorkspace = async (world: QuizmasterWorld) => {
     if (!world.workspaceGuid) {
-        await createWorkspace(world, 'Auto Workspace')
+        await createWorkspace(world, 'Default Workspace')
     }
 }
 
