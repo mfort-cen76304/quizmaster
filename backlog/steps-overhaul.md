@@ -185,7 +185,28 @@ Each numbered step is one logical change; most expand into 2–3 small commits p
 
 ---
 
-### Step 8 — Quiz: introduce `QuizSpec` + `createQuiz(spec)`; migrate `Given a quiz ...`
+### Step 8 — Page-object precondition guards (pilot on question side)
+
+**Goal:** Replace opaque "10s timeout waiting for `#some-button`" failures with clear "expected to be on workspace page, got `/question/42`" errors. Pilot the pattern on the question side, where Steps 1–7 have just landed everything in its final shape, before propagating to quiz and workspace in Steps 9–10.
+
+- Add `expectActive()` to `WorkspacePage` and `QuestionEditPage`. Check both URL pattern and a signature element being visible — URL alone races mid-navigation, element alone misses ID-bearing distinctions between same-template pages.
+- Decide the naming convention here, once: `expectActive` vs `expectVisible` vs `assertActive`. Document the choice in the page-object style guide so Steps 9–10 don't bikeshed.
+- Wire the call into every step in `make/question/**` and `take/question/**` that **acts on** the current page. Skip steps that **navigate** to a page (they're establishing the precondition for the next step, not consuming one).
+- Pick one pre-existing scenario whose failure mode today is opaque, deliberately break it locally, confirm the new error message reads clearly, then unbreak.
+- Decide cost-of-noise: if `expectActive` adds ≥100 ms per step, audit which checks are actually pulling weight and trim.
+
+**Out of scope here (Steps 9 / 10 absorb these):**
+- `QuizCreatePage.expectActive()` — added when Step 9 refactors quiz steps.
+- Remaining `WorkspacePage` callers in `take/quiz/**`, `quiz/**`, etc. — added when those step files are touched in Steps 9–10.
+- Folding the check into action methods on the page object. Keep it explicit at the **step** level. The orchestration layer is where contracts belong; coupling actions to preconditions doubles the cost when steps chain multiple actions and obscures where the check came from.
+
+**Verification:** full suite green. The deliberately-broken scratch scenario produces a clear error and not a Playwright timeout.
+
+**Commits:** (a) add `expectActive` to the two page objects + wire into make/question/** callers, (b) wire into take/question/** callers.
+
+---
+
+### Step 9 — Quiz: introduce `QuizSpec` + `createQuiz(spec)`; migrate `Given a quiz ...`
 
 **Goal:** Apply the same single-point pattern to quizzes.
 
@@ -195,14 +216,15 @@ Each numbered step is one logical change; most expand into 2–3 small commits p
 - Validate property DataTable keys — unknown keys must error (currently silent failure).
 - Move quiz GUI steps to `make/quiz/gui.ts` (relocation only, like Step 3 for question).
 - Drop article: `Given a quiz` → `Given quiz` if not already done in Step 5.
+- Add `QuizCreatePage.expectActive()` and wire it into the new `make/quiz/**` step files as they're written, following the convention settled in Step 8.
 
 **Verification:** quiz make + take scenarios pass.
 
-**Commits:** (a) introduce QuizSpec + createQuiz, (b) migrate builder, (c) move GUI steps, (d) rename if needed.
+**Commits:** (a) introduce QuizSpec + createQuiz, (b) migrate builder, (c) move GUI steps + wire `expectActive`, (d) rename if needed.
 
 ---
 
-### Step 9 — Workspace single-point + final tree cleanup
+### Step 10 — Workspace single-point + final tree cleanup
 
 **Goal:** Finish the entity trio and lock in the new layout.
 
@@ -211,10 +233,11 @@ Each numbered step is one logical change; most expand into 2–3 small commits p
 - Delete legacy files in `specs/src/steps/{workspace,question,quiz}/` if empty.
 - Move `take/` step files to `specs/src/steps/take/<entity>/` mirroring features.
 - Update any import paths.
+- Wire `expectActive` (Step 8 convention) into any remaining `make/workspace/**` and `take/**` step files touched here that don't already have it.
 
 **Verification:** full suite green; `specs/src/steps/` now mirrors `specs/features/` cleanly.
 
-**Commits:** (a) workspace single-point + GUI move, (b) take/ relocation, (c) delete-empty-legacy-files.
+**Commits:** (a) workspace single-point + GUI move, (b) take/ relocation + remaining `expectActive` wiring, (c) delete-empty-legacy-files.
 
 ---
 
@@ -222,7 +245,7 @@ Each numbered step is one logical change; most expand into 2–3 small commits p
 
 - **Bookmark collisions** during Step 1 — running scenarios may reveal scenarios that today get away with duplicate question text. Fix per-scenario as they fail.
 - **`world.questionWip`** is shared mutable state. Once builder accumulates a fresh `QuestionSpec` per chain, decide whether `wip` is still needed at all (the GUI steps still need form-state tracking).
-- **Quiz creation still goes via UI** through Step 9 and beyond. Quiz scenarios depend on form prefilling defaults — do not break this path until the deferred default-value problem is solved.
+- **Quiz creation still goes via UI** through Step 10 and beyond. Quiz scenarios depend on form prefilling defaults — do not break this path until the deferred default-value problem is solved.
 - **`@skip` and `@ai` scenarios** carry forward untouched.
 - **Per-commit hygiene:** check `git status` after every `pnpm code` run — auto-formatted files must land in the same commit.
 - **Vertical slices:** every commit must introduce *and use* the new step / spec / function in the same diff — never land infrastructure without wiring.
