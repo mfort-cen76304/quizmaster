@@ -277,6 +277,10 @@ When('I add another answer', async function () {
     await this.questionEditPage.addAdditionalAnswer()
 })
 
+When('I mark the question easy', async function () {
+    await this.questionEditPage.setEasy()
+})
+
 When('I enter question explanation {string}', async function (explanation: string) {
     await enterQuestionExplanation(this, explanation)
 })

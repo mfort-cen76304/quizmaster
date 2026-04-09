@@ -62,11 +62,13 @@ Feature: Edit question form
     When I start editing question "Czechia"
       * I mark the question as multiple choice
       * I mark answer 1 as correct
+      * I mark the question easy
       * I submit the question
       * I start editing question "Czechia"
     Then I see answer 1 as correct
       * I see answer 2 as correct
       * I see answer 3 as incorrect
+      * easy is on
 
   Scenario: Delete one of the prepopulated form fields
     Given question "What is the capital of Czech Republic?"
