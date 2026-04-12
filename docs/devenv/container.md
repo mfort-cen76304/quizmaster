@@ -1,25 +1,14 @@
 # Run in a local Docker/Podman container
 
-- [Prerequisites](#prerequisites)
-- [Create a Dev Environment Container](#create-a-dev-environment-container)
-
 ## Prerequisites
 
 0. On Windows, make sure you have [WSL2 installed](https://learn.microsoft.com/en-us/windows/wsl/install):
 
-    ```sh
-    wsl --install
-    ```
+1. One of the following:
+    - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+    - [Podman Desktop](https://podman-desktop.io/)
 
-1. Install either Docker (Mac/Win) or Podman (Win) on your machine.
-2. Optionally install Podman Desktop if you prefer a GUI.
-3. On Windows, reboot after installation.
-4. If you use Podman, create and start a Podman machine:
-
-    ```sh
-    podman machine init
-    podman machine start
-    ```
+        Make sure to install Podman Compose, and setup the Podman Machine **rootfull**.
 
 ## Create a Dev Environment Container
 

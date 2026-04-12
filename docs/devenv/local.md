@@ -10,7 +10,7 @@ to troubleshoot any potential deviation in your local settings.
 You need to have the following software installed on your machine:
 
 - [Java JDK 21](https://www.oracle.com/java/technologies/downloads/#java21)
-- [Node.js 22](https://nodejs.org/en/download)
+- [Node.js 24](https://nodejs.org/en/download)
 - [pnpm](https://pnpm.io/installation)
 - [PostgreSQL 16](https://www.postgresql.org/download/)
 

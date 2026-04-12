@@ -6,15 +6,15 @@
 
     ![Create a codespace in GitHub](img/create-codespace.png)
 
-2. Depending on what IDE you want to use, select corresponding machine type:
-
-    - VS Code - 2 cores / 8GB
-    - IntelliJ - 4 cores / 16GB
+2. Select machine type: 4 cores / 16GB
 
 3. The codespace opens a web version of VS Code in a new browser tab.
 
 Congratulations, you're good to go! You can either work from the browser window,
 or open the codespace from your VS Code.
+
+> GitHub Codespaces is **paid** service, however the first 120 core-hours per month are free. You can run 4-core codespace for 30 hours. \
+The codespace stops after an hour of inactivity. **Make sure you don't have any active SSH connection to the codespace, as it keeps it alive!**
 
 ## ⚠️ Troubleshooting
 
