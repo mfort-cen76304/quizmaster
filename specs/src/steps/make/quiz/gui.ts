@@ -121,3 +121,19 @@ Then('form reacts correctly to all given inputs', async function (data: DataTabl
         await expect(this.quizCreatePage.formattedTimeLimitLabel()).toHaveText(row.formattedTimeLimit)
     }
 })
+
+// Quiz create page assertions (from quiz-create.ts)
+
+Then('I see selected question count {int}', async function (expectedCount: number) {
+    await this.quizCreatePage.expectSelectedQuestionCount(expectedCount)
+})
+
+Then('I see total question count {int}', async function (expectedCount: number) {
+    await this.quizCreatePage.expectTotalQuestionCount(expectedCount)
+})
+
+// Quiz edit navigation
+
+When('I navigate to edit quiz {string}', async function (quizName: string) {
+    await this.workspacePage.editQuiz(quizName)
+})
