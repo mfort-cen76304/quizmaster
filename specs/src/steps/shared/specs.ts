@@ -25,3 +25,15 @@ export const isNumericalSpec = (spec: QuestionSpec): boolean => spec.numericalAn
 export const isMultipleChoiceSpec = (answers: AnswerSpecs): boolean => answers.filter(a => a.correct).length > 1
 
 export const hasExplanations = (answers: AnswerSpecs): boolean => answers.some(a => a.explanation !== undefined)
+
+export interface QuizSpec {
+    name: string
+    questions: string[]
+    description?: string
+    mode?: string
+    passScore?: string
+    timeLimit?: string
+    difficulty?: string
+    size?: string
+    bookmark?: string
+}

@@ -1,13 +1,4 @@
-import type { TableOf } from '#steps/common.ts'
-import {
-    addAnswers,
-    type AnswerRaw,
-    enterImageUrl,
-    enterQuestion,
-    enterQuestionExplanation,
-    enterTag,
-} from '#steps/question/ops.ts'
-import { emptyQuestion, type QuizmasterWorld } from '#steps/world'
+import type { QuizmasterWorld } from '#steps/world'
 
 export const openCreateWorkspacePage = async (world: QuizmasterWorld) => {
     await world.workspaceCreatePage.gotoNew()
@@ -28,46 +19,4 @@ export const ensureWorkspace = async (world: QuizmasterWorld) => {
 
 export const navigateToWorkspace = async (world: QuizmasterWorld) => {
     await world.workspacePage.goto(world.workspaceGuid)
-}
-
-export const createQuestionInWorkspace = async (
-    world: QuizmasterWorld,
-    bookmark: string,
-    question: string,
-    answerRawTable: TableOf<AnswerRaw>,
-    isEasy?: boolean,
-    explanation?: string,
-    imageUrl?: string,
-    tag?: string,
-) => {
-    await world.workspacePage.createNewQuestion()
-    world.questionWip = emptyQuestion()
-    await enterQuestion(world, question)
-    if (tag) {
-        await enterTag(world, tag)
-    }
-    await addAnswers(world, answerRawTable)
-    if (isEasy) {
-        await world.questionEditPage.setEasy()
-    }
-    if (explanation) {
-        await enterQuestionExplanation(world, explanation)
-    }
-    if (imageUrl) {
-        await enterImageUrl(world, imageUrl)
-    }
-    world.questionBookmarks[bookmark] = world.questionWip
-    await world.questionEditPage.submit()
-}
-
-export const createTrivialQuestions = async (world: QuizmasterWorld, n: number) => {
-    for (let i = 1; i <= n; i++) {
-        const answerRawTable: TableOf<AnswerRaw> = {
-            raw: () => [
-                ['A', '*', undefined],
-                ['B', '', undefined],
-            ],
-        }
-        await createQuestionInWorkspace(world, `Q${i}`, `Question ${i}?`, answerRawTable)
-    }
 }

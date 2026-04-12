@@ -68,6 +68,14 @@ export class QuizmasterWorld {
 
     quizBookmarks: Record<string, QuizBookmark> = {}
     activeQuizBookmark = ''
+
+    bookmarkQuiz(key: string, bookmark: QuizBookmark) {
+        if (this.quizBookmarks[key] !== undefined) {
+            throw new Error(`Duplicate quiz bookmark: "${key}"`)
+        }
+        this.quizBookmarks[key] = bookmark
+        this.activeQuizBookmark = key
+    }
     correctAnswersCounts: Record<string, string> = {}
     clockInstalled = false
     lastAnsweredTitle?: string
