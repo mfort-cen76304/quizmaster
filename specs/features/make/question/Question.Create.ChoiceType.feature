@@ -5,7 +5,7 @@ Feature: Create question - single/multiple choice
   on whether the current state is valid for the target mode.
 
   Background:
-    Given I start creating a question
+    Given I start creating a new question
 
   Scenario: Default is single choice
     Then the question is single choice

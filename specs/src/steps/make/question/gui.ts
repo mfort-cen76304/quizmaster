@@ -26,7 +26,7 @@ import {
 } from '#steps/question/expects.ts'
 import { parseAnswerTable } from '#steps/shared/parsers.ts'
 
-Given('I start creating a question', async function () {
+Given('I start creating a new question', async function () {
     await ensureWorkspace(this)
     await this.workspacePage.createNewQuestion()
     this.questionWip = { text: '', answers: [] }
@@ -34,10 +34,6 @@ Given('I start creating a question', async function () {
 
 Given('page {string}', async () => {
     // marker step used in some scenarios for readability
-})
-
-When('I start creating a new question', async function () {
-    await this.workspacePage.createNewQuestion()
 })
 
 Given('I start editing question {string}', async function (bookmark: string) {

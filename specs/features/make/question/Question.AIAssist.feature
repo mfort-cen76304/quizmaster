@@ -2,7 +2,7 @@ Feature: Generate question using AI
 
   @ai @slow
   Scenario: Generate a single-choice question
-    Given I start creating a question
+    Given I start creating a new question
     When I ask AI:
       | Generate a question about capital cities |
       | with 1 correct answer                   |
@@ -14,7 +14,7 @@ Feature: Generate question using AI
 
   @ai @slow
   Scenario: Generate a multiple-choice question
-    Given I start creating a question
+    Given I start creating a new question
     When I ask AI:
       | Generate a question about European capitals |
       | with 2 correct answers                      |
@@ -26,7 +26,7 @@ Feature: Generate question using AI
 
   @ai @slow
   Scenario: Generate a question with explanations
-    Given I start creating a question
+    Given I start creating a new question
     When I ask AI:
       | Generate a question about European capitals |
       | with 2 correct answers                      |
@@ -38,7 +38,7 @@ Feature: Generate question using AI
 
   @ai @slow
   Scenario: Save an AI-generated question
-    Given I start creating a question
+    Given I start creating a new question
     When I ask AI:
       | Generate a question about capital cities |
       | with 1 correct answer                   |
@@ -48,7 +48,7 @@ Feature: Generate question using AI
 
   @ai @slow
   Scenario: Edit an AI-generated question before saving
-    Given I start creating a question
+    Given I start creating a new question
     When I ask AI:
       | Generate a question about capital cities |
       | with 1 correct answer                   |
@@ -59,7 +59,7 @@ Feature: Generate question using AI
 
   @ai @slow
   Scenario: Regenerate replaces previous AI response
-    Given I start creating a question
+    Given I start creating a new question
     When I ask AI:
       | Generate a question about capital cities |
       | with 1 correct answer                   |
