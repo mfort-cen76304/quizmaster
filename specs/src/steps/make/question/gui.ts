@@ -4,7 +4,7 @@ import { expect } from '@playwright/test'
 import { toText } from '#steps/common.ts'
 import { Given, Then, When } from '#steps/fixture.ts'
 import {
-    addAnswers,
+    enterAnswers,
     enterAIPrompt,
     enterAnswer,
     enterAnswerExplanation,
@@ -30,6 +30,7 @@ Given('I start creating a question', async function () {
     await ensureWorkspace(this)
     await navigateToWorkspace(this)
     await this.workspacePage.createNewQuestion()
+    this.questionWip = { text: '', answers: [] }
 })
 
 Given('page {string}', async () => {
@@ -269,7 +270,7 @@ When(
 )
 
 Given('I enter answers', async function (data: DataTable) {
-    await addAnswers(this, parseAnswerTable(data.raw()))
+    await enterAnswers(this, parseAnswerTable(data.raw()))
 })
 
 When('I add another answer', async function () {

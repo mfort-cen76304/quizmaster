@@ -12,7 +12,7 @@ import {
     QuizStatsPage,
     TakeQuestionPage,
 } from '#pages/index.ts'
-import type { QuestionSpec } from '#steps/shared/specs.ts'
+import type { AnswerSpec, QuestionSpec } from '#steps/shared/specs.ts'
 
 export class QuizmasterWorld {
     constructor(
@@ -49,6 +49,16 @@ export class QuizmasterWorld {
     activeQuestionBookmark = ''
     get activeQuestion() {
         return this.questionBookmarks[this.activeQuestionBookmark]
+    }
+
+    updateQuestionWip(patch: Partial<QuestionSpec>) {
+        if (!this.questionWip) throw new Error('No question WIP active')
+        Object.assign(this.questionWip, patch)
+    }
+
+    updateAnswerWip(index: number, patch: Partial<AnswerSpec>) {
+        if (!this.questionWip) throw new Error('No question WIP active')
+        this.questionWip.answers[index] = { ...this.questionWip.answers[index], ...patch }
     }
 
     bookmarkQuestion(key: string, question: QuestionSpec) {

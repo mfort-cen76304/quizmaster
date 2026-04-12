@@ -46,6 +46,7 @@ When('I take question {string} from the list', async function (question: string)
 })
 
 When('I edit question {string} from the list', async function (question: string) {
+    this.questionWip = this.questionBookmarks[question]
     this.activeQuestionBookmark = question
     await this.workspacePage.editQuestion(question)
 })
