@@ -1,8 +1,21 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import { type TableOf, toText } from '#steps/common.ts'
+import { toText } from '#steps/common.ts'
 import { Given, Then, When } from '#steps/fixture.ts'
+import {
+    addAnswers,
+    enterAIPrompt,
+    enterAnswer,
+    enterAnswerExplanation,
+    enterAnswerText,
+    enterImageUrl,
+    enterQuestion,
+    enterQuestionExplanation,
+    markAnswerCorrectness,
+    submitQuestion,
+    enterTag,
+} from '#steps/make/question/ops.ts'
 import { ensureWorkspace, navigateToWorkspace } from '#steps/make/workspace/ops.ts'
 import {
     expectAnswer,
@@ -11,20 +24,7 @@ import {
     expectErrorCount,
     expectErrorMessages,
 } from '#steps/question/expects.ts'
-import {
-    addAnswers,
-    type AnswerRaw,
-    enterAnswer,
-    enterAnswerExplanation,
-    enterTag,
-    enterAnswerText,
-    enterImageUrl,
-    enterQuestion,
-    enterQuestionExplanation,
-    markAnswerCorrectness,
-    submitQuestion,
-    enterAIPrompt,
-} from '#steps/question/ops.ts'
+import { parseAnswerTable } from '#steps/shared/parsers.ts'
 import { emptyQuestion } from '#steps/world'
 
 Given('I start creating a question', async function () {
@@ -170,7 +170,7 @@ Then(/I see answer (\d+) as (correct|incorrect)/, async function (index: number,
     }
 })
 
-Then('I see the answers fields', async function (data: TableOf<AnswerRaw>) {
+Then('I see the answers fields', async function (data: DataTable) {
     const answers = data.raw()
 
     await this.questionEditPage.expectAnswerRowCount(answers.length)
@@ -269,8 +269,8 @@ When(
     },
 )
 
-Given('I enter answers', async function (answerRawTable: TableOf<AnswerRaw>) {
-    await addAnswers(this, answerRawTable)
+Given('I enter answers', async function (data: DataTable) {
+    await addAnswers(this, parseAnswerTable(data.raw()))
 })
 
 When('I add another answer', async function () {
@@ -323,9 +323,7 @@ Then('I do not see image preview', async function () {
 // Save question
 
 When('I attempt to submit the question', submitQuestion)
-When('I submit the question', async function () {
-    await this.questionEditPage.submit()
-})
+When('I submit the question', submitQuestion)
 
 // Error messages assertions
 

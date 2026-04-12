@@ -4,7 +4,7 @@ import { expect } from '@playwright/test'
 import { expectTextToBe } from '#steps/common.ts'
 import { Then, When } from '#steps/fixture.ts'
 import { expectColorFeedback, expectQuestion } from '#steps/question/expects.ts'
-import { answerQuestion } from '#steps/question/ops.ts'
+import { answerQuestion } from '#steps/take/question/ops.ts'
 
 When('I take question {string}', async function (bookmark: string) {
     await this.workspacePage.goto(this.workspaceGuid)

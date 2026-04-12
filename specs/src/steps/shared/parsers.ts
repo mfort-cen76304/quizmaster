@@ -21,6 +21,13 @@ const parseAnswers = (answersStr: string): QuestionAnswersSpec => {
     return numericalAnswer ? { answers: [], numericalAnswer, tolerance } : { answers: parseChoiceAnswers(answersStr) }
 }
 
+export const parseAnswerTable = (rows: string[][]): AnswerSpec[] =>
+    rows.map(([text, correct, explanation]) => ({
+        text,
+        correct: correct === '*',
+        explanation: explanation || undefined,
+    }))
+
 export const parseQuestionRow = (row: Record<string, string | undefined>): QuestionSpec => {
     const text = row.question ?? ''
 
