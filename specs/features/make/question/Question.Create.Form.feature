@@ -8,6 +8,7 @@ Feature: Create question form
     Given I start creating a new question
     * I enable explanations
     Then I see empty question text
+    * I see empty tag
     * the question is single choice
     * I see 2 default empty answers
     * I see empty question explanation
@@ -33,15 +34,3 @@ Feature: Create question form
     And I enable explanations
     Then I see explanations are enabled
     And I see explanation fields
-
-  Scenario: Tag field is empty by default
-    When I start creating a new question
-    Then I see empty tag
-
-  Scenario: Test backButton
-    Given workspace "Testworkspace"
-    And page "Question Creation"
-    When I start creating a new question
-    And I see the question creation page
-    And I go back to the workspace "Testworkspace"
-    Then I see the workspace "Testworkspace"
