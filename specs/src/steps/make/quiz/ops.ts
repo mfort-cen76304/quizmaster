@@ -1,5 +1,5 @@
+import { ensureWorkspace, navigateToWorkspace } from '#steps/make/workspace/ops.ts'
 import type { QuizSpec } from '#steps/shared/specs.ts'
-import { ensureWorkspace, navigateToWorkspace } from '#steps/workspace/ops.ts'
 import { type Difficulty, type QuizMode, emptyQuizBookmark, type QuizmasterWorld } from '#steps/world'
 
 const toDifficulty = (difficulty: string): Difficulty => {

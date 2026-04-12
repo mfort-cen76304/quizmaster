@@ -3,6 +3,7 @@ import { expect } from '@playwright/test'
 
 import { type TableOf, toText } from '#steps/common.ts'
 import { Given, Then, When } from '#steps/fixture.ts'
+import { ensureWorkspace, navigateToWorkspace } from '#steps/make/workspace/ops.ts'
 import {
     expectAnswer,
     expectDeleteButtonsState,
@@ -24,7 +25,6 @@ import {
     submitQuestion,
     enterAIPrompt,
 } from '#steps/question/ops.ts'
-import { ensureWorkspace, navigateToWorkspace } from '#steps/workspace/ops.ts'
 import { emptyQuestion } from '#steps/world'
 
 Given('I start creating a question', async function () {

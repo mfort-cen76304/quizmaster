@@ -1,3 +1,4 @@
+import { ensureWorkspace, navigateToWorkspace } from '#steps/make/workspace/ops.ts'
 import { enterAnswer, enterImageUrl, enterQuestion, enterQuestionExplanation, enterTag } from '#steps/question/ops.ts'
 import {
     hasExplanations,
@@ -6,7 +7,6 @@ import {
     type AnswerSpec,
     type QuestionSpec,
 } from '#steps/shared/specs.ts'
-import { ensureWorkspace, navigateToWorkspace } from '#steps/workspace/ops.ts'
 import { emptyQuestion, type QuizmasterWorld } from '#steps/world'
 
 // Mirrors the default count of empty answer rows shown by the question form.
