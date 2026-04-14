@@ -31,8 +31,9 @@ const buildAiPrompt = (prompt: string, questionType: QuestionType) => {
     const trimmedPrompt = prompt.trim()
     const typeInstructionByQuestionType: Record<QuestionType, string> = {
         single: 'This must be a single choice question with exactly 1 correct answer.',
-        multiple: 'This must be a multiple choice question with at least 2 correct answers. Never return exactly 1 correct answer.',
-        numerical: ''
+        multiple:
+            'This must be a multiple choice question with at least 2 correct answers. Never return exactly 1 correct answer.',
+        numerical: '',
     }
 
     const typeInstruction = typeInstructionByQuestionType[questionType]
