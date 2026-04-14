@@ -6,6 +6,8 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Getter
 @Setter
@@ -21,6 +23,8 @@ public class Quiz {
 
     private String title;
     private String description;
+    private LocalDateTime startAt;
+    private LocalDateTime endAt;
 
     @Column(name = "questions", columnDefinition = "int[]")
     @JdbcTypeCode(SqlTypes.ARRAY)

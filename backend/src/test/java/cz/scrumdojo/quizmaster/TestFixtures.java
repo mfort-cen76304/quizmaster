@@ -6,9 +6,9 @@ import cz.scrumdojo.quizmaster.attempt.AttemptRequest;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
+import cz.scrumdojo.quizmaster.quiz.Difficulty;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizMode;
-import cz.scrumdojo.quizmaster.quiz.Difficulty;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
@@ -102,6 +102,8 @@ public class TestFixtures {
         return new QuizRequest(
             "Test Quiz",
             "Test Description",
+            null,
+            null,
             questionIds,
             QuizMode.LEARN,
             Difficulty.KEEP_QUESTION,
@@ -139,6 +141,8 @@ public class TestFixtures {
         return Quiz.builder()
             .title("Test Quiz")
             .description("Test Description")
+            .startAt(null)
+            .endAt(null)
             .mode(QuizMode.LEARN)
             .difficulty(Difficulty.KEEP_QUESTION)
             .passScore(85)

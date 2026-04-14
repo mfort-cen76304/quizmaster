@@ -2,9 +2,13 @@ package cz.scrumdojo.quizmaster.quiz;
 
 import jakarta.validation.constraints.NotBlank;
 
+import java.time.LocalDateTime;
+
 public record QuizRequest(
     @NotBlank String title,
     String description,
+    LocalDateTime startAt,
+    LocalDateTime endAt,
     int[] questionIds,
     QuizMode mode,
     Difficulty difficulty,
@@ -17,6 +21,8 @@ public record QuizRequest(
         return Quiz.builder()
             .title(title)
             .description(description)
+            .startAt(startAt)
+            .endAt(endAt)
             .questionIds(questionIds)
             .mode(mode)
             .difficulty(difficulty != null ? difficulty : Difficulty.KEEP_QUESTION)

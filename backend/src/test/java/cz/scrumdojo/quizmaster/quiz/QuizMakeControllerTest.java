@@ -12,6 +12,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,6 +32,9 @@ public class QuizMakeControllerTest {
     @Autowired
     private AttemptRepository attemptRepository;
 
+    @Autowired
+    private QuizRepository quizRepository;
+
     @Test
     public void createQuizInWorkspace() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
@@ -40,6 +46,8 @@ public class QuizMakeControllerTest {
                     {
                         "title": "New Quiz",
                         "description": "A quiz",
+                        "startAt": "2026-04-14T10:00",
+                        "endAt": "2026-04-14T23:00",
                         "questionIds": [%d],
                         "mode": "learn",
                         "passScore": 80,
@@ -49,6 +57,64 @@ public class QuizMakeControllerTest {
                     """.formatted(question.getId(), workspace.getGuid())))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").isNumber());
+
+        Quiz savedQuiz = latestQuiz();
+        assertThat(savedQuiz.getStartAt()).isEqualTo(LocalDateTime.of(2026, 4, 14, 10, 0));
+        assertThat(savedQuiz.getEndAt()).isEqualTo(LocalDateTime.of(2026, 4, 14, 23, 0));
+    }
+
+    @Test
+    public void createQuizInWorkspaceWithOnlyStartDate() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+
+        mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "title": "New Quiz",
+                        "description": "A quiz",
+                        "startAt": "2026-04-14T10:00",
+                        "questionIds": [%d],
+                        "mode": "learn",
+                        "passScore": 80,
+                        "workspaceGuid": "%s",
+                        "randomQuestionCount": 1
+                    }
+                    """.formatted(question.getId(), workspace.getGuid())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").isNumber());
+
+        Quiz savedQuiz = latestQuiz();
+        assertThat(savedQuiz.getStartAt()).isEqualTo(LocalDateTime.of(2026, 4, 14, 10, 0));
+        assertThat(savedQuiz.getEndAt()).isNull();
+    }
+
+    @Test
+    public void createQuizInWorkspaceWithOnlyEndDate() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+
+        mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "title": "New Quiz",
+                        "description": "A quiz",
+                        "endAt": "2026-04-14T23:00",
+                        "questionIds": [%d],
+                        "mode": "learn",
+                        "passScore": 80,
+                        "workspaceGuid": "%s",
+                        "randomQuestionCount": 1
+                    }
+                    """.formatted(question.getId(), workspace.getGuid())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").isNumber());
+
+        Quiz savedQuiz = latestQuiz();
+        assertThat(savedQuiz.getStartAt()).isNull();
+        assertThat(savedQuiz.getEndAt()).isEqualTo(LocalDateTime.of(2026, 4, 14, 23, 0));
     }
 
     @Test
@@ -63,6 +129,8 @@ public class QuizMakeControllerTest {
                     {
                         "title": "Updated Quiz",
                         "description": "Updated description",
+                        "startAt": "2026-04-15T08:30",
+                        "endAt": "2026-04-15T18:00",
                         "questionIds": [%d],
                         "mode": "exam",
                         "passScore": 90,
@@ -75,7 +143,9 @@ public class QuizMakeControllerTest {
 
         mockMvc.perform(get("/api/quiz/{id}", quiz.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title").value("Updated Quiz"));
+            .andExpect(jsonPath("$.title").value("Updated Quiz"))
+            .andExpect(jsonPath("$.startAt").value("2026-04-15T08:30:00"))
+            .andExpect(jsonPath("$.endAt").value("2026-04-15T18:00:00"));
     }
 
     @Test
@@ -172,5 +242,11 @@ public class QuizMakeControllerTest {
 
         mockMvc.perform(delete("/api/workspaces/{guid}/quizzes/{id}", workspace2.getGuid(), quiz.getId()))
             .andExpect(status().isNotFound());
+    }
+
+    private Quiz latestQuiz() {
+        return quizRepository.findAll().stream()
+            .max(Comparator.comparing(Quiz::getId))
+            .orElseThrow();
     }
 }

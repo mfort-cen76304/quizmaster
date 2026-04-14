@@ -40,11 +40,13 @@ public class QuizService {
         return new QuizResponse(
             quiz.getId(),
             quiz.getTitle(),
+            quiz.getDescription(),
+            quiz.getStartAt(),
+            quiz.getEndAt(),
             questionResponses,
             quiz.getMode(),
             quiz.getDifficulty(),
             quiz.getPassScore(),
-            quiz.getDescription(),
             quiz.getTimeLimit(),
             quiz.getRandomQuestionCount()
         );
