@@ -22,7 +22,12 @@ export function CreateQuestionPage() {
     }
 
     return (
-        <Page title="Create Question" id="create-question-page">
+        <Page
+            title="Create Question"
+            eyebrow="Workspace authoring"
+            subtitle="Draft a clean quiz question, refine the answers, and use AI as a starting point when it helps."
+            id="create-question-page"
+        >
             <QuestionEditForm onSubmit={handleSubmit} onBack={handleBack} />
         </Page>
     )

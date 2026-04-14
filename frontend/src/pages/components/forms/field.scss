@@ -1,13 +1,18 @@
 .field {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.7rem;
 
     .label {
-        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.94rem;
+        font-weight: 700;
+        color: var(--text-strong);
 
         .required {
-            color: red;
+            color: #dc2626;
         }
     }
 }

@@ -1,16 +1,94 @@
 .page {
-    max-width: 500px;
-    margin: 3rem auto;
-    padding: 2rem;
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+    max-width: 780px;
+    margin: 1.4rem auto;
+    padding: 1.55rem;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(248, 251, 255, 0.94) 100%),
+        linear-gradient(120deg, rgba(37, 99, 235, 0.06), rgba(249, 115, 22, 0.05));
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-lg);
+    backdrop-filter: blur(10px);
+}
 
-    h1 {
-        margin-bottom: 1.5rem;
-        font-size: 1.8rem;
-        font-weight: bold;
-        color: #333;
-        text-align: center;
+.page::before,
+.page::after {
+    content: '';
+    position: absolute;
+    border-radius: 999px;
+    pointer-events: none;
+    filter: blur(6px);
+}
+
+.page::before {
+    top: -8rem;
+    right: -4rem;
+    width: 15rem;
+    height: 15rem;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.18) 0%, rgba(37, 99, 235, 0) 70%);
+}
+
+.page::after {
+    bottom: -7rem;
+    left: -5rem;
+    width: 16rem;
+    height: 16rem;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.14) 0%, rgba(249, 115, 22, 0) 72%);
+}
+
+.page > * {
+    position: relative;
+    z-index: 1;
+}
+
+.page__header {
+    margin-bottom: 1.15rem;
+}
+
+.page__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 0.6rem;
+    padding: 0.38rem 0.8rem;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent-soft) 0%, var(--accent-warm-soft) 100%);
+    color: var(--accent-strong);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.page h1 {
+    margin: 0;
+    font-size: clamp(1.7rem, 2.4vw, 2.25rem);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    color: var(--text-strong);
+}
+
+.page__subtitle {
+    max-width: 42rem;
+    margin: 0.55rem 0 0;
+    color: var(--text-soft);
+    font-size: 0.96rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+    .page {
+        margin: 0.75rem;
+        padding: 1rem;
+        border-radius: 22px;
+    }
+
+    .page__header {
+        margin-bottom: 1.25rem;
+    }
+
+    .page__subtitle {
+        font-size: 0.96rem;
     }
 }

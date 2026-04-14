@@ -30,7 +30,12 @@ export function EditQuestionPage() {
     }
 
     return (
-        <Page title="Edit Question" id="edit-question-page">
+        <Page
+            title="Edit Question"
+            eyebrow="Workspace authoring"
+            subtitle="Tune the prompt, answers, and explanations until the question reads clearly and scores fairly."
+            id="edit-question-page"
+        >
             {question && <QuestionEditForm question={question} onSubmit={handleSubmit} onBack={handleBack} />}
         </Page>
     )
