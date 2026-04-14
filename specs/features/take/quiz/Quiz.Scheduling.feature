@@ -1,9 +1,9 @@
 Feature: Quiz scheduling
-  Before starting a quiz, the app checks whether the quiz is currently available based on its configured start and end date and time.
-  The Start button is disabled and grayed out when the quiz is unavailable.
+  Before a user starts a quiz, the app checks whether the quiz is within its configured availability window.
+  If the quiz is unavailable, the Start button is disabled and shown in a grayed-out state.
 
   @skip
-  Scenario: Quiz Available
+  Scenario: Quiz is available during the scheduled period
     Given workspace "Welcome" with questions
       | bookmark | question  | answers    |
       | Q1       | 1 + 1 = ? | 2 (*), 3  |
@@ -12,15 +12,15 @@ Feature: Quiz scheduling
       | description | Description A |
       | mode        | exam          |
       | pass score  | 66            |
-      | time limit  | 120s           |
-      | start date  | today - 1 |
-      | end date    | today + 1 |
+      | time limit  | 120s          |
+      | start date  | today - 1     |
+      | end date    | today + 1     |
     When I open quiz "Quiz"
     Then I see the welcome page
     * I can start the quiz
 
   @skip
-  Scenario: Quiz Unavailable
+  Scenario: Quiz is unavailable before the scheduled period starts
     Given workspace "Welcome" with questions
       | bookmark | question  | answers    |
       | Q1       | 1 + 1 = ? | 2 (*), 3  |
@@ -29,9 +29,9 @@ Feature: Quiz scheduling
       | description | Description B |
       | mode        | exam          |
       | pass score  | 66            |
-      | time limit  | 120s           |
-      | start date  | today + 1 |
-      | end date    | today + 2 |
+      | time limit  | 120s          |
+      | start date  | today + 1     |
+      | end date    | today + 2     |
     When I open quiz "Quiz"
     Then I see the welcome page
     * I cannot start the quiz
