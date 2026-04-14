@@ -87,6 +87,11 @@ When('I enter time limit {string}', async function (limit: string) {
     await this.quizCreatePage.timeLimitInput().fill(limit)
 })
 
+When('I set quiz availability start {string} and end {string}', async function (startDate: string, endDate: string) {
+    await this.quizCreatePage.enterStartDateTime(startDate)
+    await this.quizCreatePage.enterEndDateTime(endDate)
+})
+
 When('I filter questions by {string}', async function (s: string) {
     await this.quizCreatePage.enterFilterString(s)
 })

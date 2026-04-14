@@ -7,6 +7,8 @@ export interface Quiz {
     readonly id: number
     readonly title: string
     readonly description: string
+    readonly startAt: string | null
+    readonly endAt: string | null
     readonly questions: readonly Question[]
     readonly mode: QuizMode
     readonly difficulty: Difficulty

@@ -5,6 +5,8 @@ import { fetchJson, postJson, putJson, callDelete } from './helpers.ts'
 export interface QuizCreateRequest {
     readonly title: string
     readonly description: string
+    readonly startAt: string | null
+    readonly endAt: string | null
     readonly questionIds: readonly number[]
     readonly mode: QuizMode
     readonly difficulty: Difficulty

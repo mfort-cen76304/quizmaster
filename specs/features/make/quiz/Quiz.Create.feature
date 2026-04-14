@@ -99,7 +99,7 @@ Scenario: Quiz time limit formatting
       | 90S100m   | 1h 41m 30s         |
       |           | Not valid format   |
 
-Scenario: Quiz start and end date
+Scenario Outline: Quiz start and end date
   Given workspace "Testquizdates" with questions
       | question                       | answers            |
       | 2 + 2 = ?                      | 4 (*), 5           |
@@ -109,10 +109,12 @@ Scenario: Quiz start and end date
   * I enter quiz description "Very hard math quiz"
   * I select question "2 + 2 = ?"
   * I select question "3 * 3 = ?"
-  # * I set start date-time and end date-time
-  #     | startDate         | endDate           |
-  #     | "14.04.26 10:00"  | "14.04.26 23:00"  |
-  #     | "14.04.26 10:00"  | ""                |
-  #     | ""                | "14.04.26 23:00"  |
+  * I set quiz availability start "<startDate>" and end "<endDate>"
   * I submit the quiz
   Then I see the quiz "Math Quiz" in the workspace
+
+  Examples:
+      | startDate        | endDate          |
+      | 2026-04-14T10:00 | 2026-04-14T23:00 |
+      | 2026-04-14T10:00 |                  |
+      |                  | 2026-04-14T23:00 |

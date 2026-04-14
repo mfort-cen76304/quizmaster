@@ -82,6 +82,24 @@ export const QuizEditForm = ({ questions, onSubmit, quiz }: QuizEditFormProps) =
                 <TextArea id="quiz-description" value={state.description} onChange={state.setDescription} />
             </Field>
             <Row>
+                <Field label="Quiz start date and time">
+                    <input
+                        id="quiz-start-at"
+                        type="datetime-local"
+                        value={state.startAt}
+                        onChange={e => state.setStartAt(e.target.value)}
+                    />
+                </Field>
+                <Field label="Quiz end date and time">
+                    <input
+                        id="quiz-end-at"
+                        type="datetime-local"
+                        value={state.endAt}
+                        onChange={e => state.setEndAt(e.target.value)}
+                    />
+                </Field>
+            </Row>
+            <Row>
                 <Field label="Pass score (in %)">
                     <NumberInput id="pass-score" value={state.passScore} onChange={state.setPassScore} />
                     <ErrorMessage errorCode="score-above-max" />

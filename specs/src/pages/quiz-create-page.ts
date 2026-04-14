@@ -7,6 +7,8 @@ export class QuizCreatePage {
     timeLimitInput = () => this.page.locator('#time-limit')
     formattedTimeLimitLabel = () => this.page.locator('#formatted-time-limit')
     passScoreInput = () => this.page.locator('#pass-score')
+    startDateTimeInput = () => this.page.locator('#quiz-start-at')
+    endDateTimeInput = () => this.page.locator('#quiz-end-at')
     questionsInList = () => this.page.locator('.create-quiz > .question-item')
     getQuestion = (question: string) => this.page.locator('label', { hasText: question })
     selectQuestion = async (question: string) => this.page.locator('label', { hasText: question }).click()
@@ -25,6 +27,8 @@ export class QuizCreatePage {
     enterQuizFinalCount = (finalCount: string) =>
         this.page.locator('#quiz-randomQuestionCount').fill(finalCount.toString())
     enterDescription = (description: string) => this.page.locator('#quiz-description').fill(description)
+    enterStartDateTime = (startDateTime: string) => this.startDateTimeInput().fill(startDateTime)
+    enterEndDateTime = (endDateTime: string) => this.endDateTimeInput().fill(endDateTime)
     errorMessageLocator = () => this.page.locator('.alert.error')
     hasError = (errorTestId: string) => this.page.getByTestId(errorTestId).isVisible()
     clearTimeLimit = () => this.timeLimitInput().fill('')

@@ -8,9 +8,14 @@ import type { QuizMode, Difficulty } from '#model/quiz.ts'
 
 export type QuizEditFormData = QuizCreateRequest
 
+const formatDateTimeInputValue = (value?: string | null) => value?.slice(0, 16) ?? ''
+const toApiDateTimeValue = (value: string) => value || null
+
 export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: Quiz) => {
     const [title, setTitle] = useState(quiz?.title || '')
     const [description, setDescription] = useState(quiz?.description || '')
+    const [startAt, setStartAt] = useState(formatDateTimeInputValue(quiz?.startAt))
+    const [endAt, setEndAt] = useState(formatDateTimeInputValue(quiz?.endAt))
     const [selectedIds, toggleSelectedId] = useStateSet(quiz?.questions?.map(q => q.id))
     const [timeLimit, setTimeLimit] = useState(quiz?.timeLimit ?? 600)
     const [randomQuestionCount, setRandomQuestionCount] = useState(quiz?.randomQuestionCount ?? 0)
@@ -31,6 +36,8 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
     return {
         title,
         description,
+        startAt,
+        endAt,
         selectedIds,
         timeLimit,
         randomQuestionCount,
@@ -42,6 +49,8 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
         difficulty,
         setTitle,
         setDescription,
+        setStartAt,
+        setEndAt,
         toggleSelectedId,
         setTimeLimit,
         setRandomQuestionCount,
@@ -59,6 +68,8 @@ export const stateToQuizApiData = (
 ): QuizEditFormData => ({
     title: state.title,
     description: state.description,
+    startAt: toApiDateTimeValue(state.startAt),
+    endAt: toApiDateTimeValue(state.endAt),
     questionIds: Array.from(state.selectedIds),
     mode: state.feedbackMode,
     difficulty: state.difficulty,
