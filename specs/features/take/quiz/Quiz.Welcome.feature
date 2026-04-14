@@ -15,6 +15,8 @@ Feature: Quiz Welcome page
       | mode        | exam          |
       | pass score  | 66            |
       | time limit  | 120s           |
+      # | start date | 2026-04-14T10:00 |
+      # | end date | 2026-04-15T10:00 |
     And quiz "Quiz B" with questions "Q1, Q2, Q3, Q4"
       | description | Description B |
       | mode        | learn         |
@@ -28,6 +30,7 @@ Feature: Quiz Welcome page
     * I see time limit set to "<time limit>" seconds
     * I see pass score <score> %
     * I see feedback type "<mode>"
+    # * I see availability time "<period>"
 
     Examples:
       | quiz   | name   | description   | count | score | mode                | time limit |
