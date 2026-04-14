@@ -70,6 +70,19 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
 
     return (
         <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
+            <Row>
+                <Field label="Question type" required>
+                    <RadioSet
+                        name="question-type"
+                        value={state.questionType}
+                        onChange={state.selectQuestionType}
+                        options={{ single: 'Single choice', multiple: 'Multiple choice', numerical: 'Numerical' }}
+                    />
+                </Field>
+                {state.isMultipleChoice && (
+                    <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
+                )}
+            </Row>
             {!isEditing && !state.isNumerical && (
                 <Field label="AI Prompt">
                     <div className="question-input-with-action">
@@ -107,19 +120,6 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 </div>
                 <ErrorMessage errorCode="empty-question" />
             </Field>
-            <Row>
-                <Field label="Question type" required>
-                    <RadioSet
-                        name="question-type"
-                        value={state.questionType}
-                        onChange={state.selectQuestionType}
-                        options={{ single: 'Single choice', multiple: 'Multiple choice', numerical: 'Numerical' }}
-                    />
-                </Field>
-                {state.isMultipleChoice && (
-                    <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
-                )}
-            </Row>
             <Field label="Image URL">
                 <TextInput id="image-url" value={state.imageUrl} onChange={state.setImageUrl} />
                 {hasImageUrlTooLong && (
