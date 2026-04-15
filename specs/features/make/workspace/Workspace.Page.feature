@@ -5,6 +5,47 @@ Feature: Workspace page management
   - View updated question text after edits
   Questions used in a quiz cannot be deleted.
 
+  Scenario: Workspace summary shows zero questions and zero quizzes by default
+    Given workspace "Workspace"
+    Then I see workspace question count 0
+    And I see workspace quiz count 0
+
+  Scenario: Workspace summary shows one question after creating a question
+    Given workspace "Workspace" with questions
+      | question           | answers              |
+      | What is 2 + 2?     | 4 (*), 5             |
+    Then I see workspace question count 1
+    And I see workspace quiz count 0
+
+  Scenario: Workspace summary shows two questions and one quiz
+    Given workspace "Workspace" with questions
+      | question              | answers             |
+      | What is 2 + 2?        | 4 (*), 5            |
+      | What is 3 * 3?        | 9 (*), 6            |
+    And quiz "Math Quiz" with all questions
+    Then I see workspace question count 2
+    And I see workspace quiz count 1
+
+  Scenario: Workspace summary updates after removing a question
+    Given workspace "Workspace" with questions
+      | question              | answers             |
+      | What is 2 + 2?        | 4 (*), 5            |
+      | What is 3 * 3?        | 9 (*), 6            |
+    When I delete question "What is 2 + 2?" from the list
+    Then I see workspace question count 1
+    And I see workspace quiz count 0
+
+  Scenario: Workspace summary updates after removing a quiz
+    Given workspace "Workspace" with questions
+      | question              | answers             |
+      | What is 2 + 2?        | 4 (*), 5            |
+      | What is 3 * 3?        | 9 (*), 6            |
+    And quiz "Math Quiz" with all questions
+    When I delete quiz "Math Quiz" from the workspace
+    And I confirm the deletion
+    Then I see workspace question count 2
+    And I see workspace quiz count 0
+
   Scenario: Take question in a workspace
     Given workspace "Workspace" with questions
       | question  | answers  |

@@ -14,6 +14,22 @@ export class WorkspacePage {
 
     expectWorkspaceName = (name: string) => expect(this.workspaceNameLocator()).toHaveText(name)
 
+    // ── Workspace summary ────────────────────────────
+
+    private workspaceSummaryStatLocator = (index: number) => this.page.locator('.workspace-header__stat').nth(index)
+
+    expectWorkspaceQuestionSummaryCount = async (count: number) => {
+        const stat = this.workspaceSummaryStatLocator(0)
+        await expect(stat.locator('strong')).toHaveText(String(count))
+        await expect(stat.locator('span')).toHaveText(count === 1 ? 'question' : 'questions')
+    }
+
+    expectWorkspaceQuizSummaryCount = async (count: number) => {
+        const stat = this.workspaceSummaryStatLocator(1)
+        await expect(stat.locator('strong')).toHaveText(String(count))
+        await expect(stat.locator('span')).toHaveText(count === 1 ? 'quiz' : 'quizzes')
+    }
+
     // ── Question list ────────────────────────────────
 
     private questionsLocator = () => this.page.locator('.question-item')

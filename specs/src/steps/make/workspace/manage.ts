@@ -10,6 +10,14 @@ Then('I see an empty workspace', async function () {
     await this.workspacePage.expectQuestionCount(0)
 })
 
+Then('I see workspace question count {int}', async function (count: number) {
+    await this.workspacePage.expectWorkspaceQuestionSummaryCount(count)
+})
+
+Then('I see workspace quiz count {int}', async function (count: number) {
+    await this.workspacePage.expectWorkspaceQuizSummaryCount(count)
+})
+
 // ── Question management ─────────────────────────────────
 
 Then('the question is saved in the workspace', async function () {
