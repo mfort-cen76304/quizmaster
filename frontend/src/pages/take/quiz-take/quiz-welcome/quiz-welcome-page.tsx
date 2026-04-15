@@ -4,11 +4,11 @@ import { useNavigate, useParams } from 'react-router'
 import { useApi } from '#api/hooks.ts'
 import { fetchQuiz } from '#api/quiz.ts'
 import { createAttempt } from '#api/stats.ts'
-import { setQuizRun } from '#fe/helpers.ts'
 import { urls } from '#fe/urls.ts'
 import type { Quiz } from '#model/quiz.ts'
 
 import { isQuizAvailable } from '../quiz-availability.ts'
+import { storeQuizAnswers, setQuizRun } from '../quiz-session.ts'
 import { QuizDetails } from './quiz-details.tsx'
 
 export const QuizWelcomePage = () => {
@@ -25,7 +25,7 @@ export const QuizWelcomePage = () => {
         if (!quiz || !canStart) return
 
         setIsStarting(true)
-        sessionStorage.removeItem('quizAnswers')
+        storeQuizAnswers(null)
 
         try {
             const attempt = await createAttempt({

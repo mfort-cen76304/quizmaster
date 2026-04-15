@@ -42,20 +42,3 @@ export const updated = <T>(answers: readonly T[], questionIdx: number, answerIdx
     newAnswers[questionIdx] = answerIdxs
     return newAnswers
 }
-
-const quizRunIdKey = (quizId: number) => `quizRunId:${quizId}`
-
-export const setQuizRun = (runId: number, quizId: number) => {
-    sessionStorage.setItem(quizRunIdKey(quizId), runId.toString())
-}
-
-export const clearQuizRun = (quizId: number) => sessionStorage.removeItem(quizRunIdKey(quizId))
-
-export const getStoredQuizRunId = (quizId: number): number | null => {
-    const storedRunId = sessionStorage.getItem(quizRunIdKey(quizId))
-
-    if (!storedRunId) return null
-
-    const runId = Number.parseInt(storedRunId, 10)
-    return Number.isNaN(runId) ? null : runId
-}
