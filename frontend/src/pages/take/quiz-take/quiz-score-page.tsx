@@ -46,8 +46,7 @@ export const QuizScorePage = ({ quiz, quizAnswers }: QuizScorePageProps) => {
             <h2>Answer overview</h2>
             {quiz.questions.map((question, idx) => {
                 const answer = quizAnswers.finalAnswers[idx]
-                const selectedIdxs = answer?.type === 'choice' ? answer.selectedIdxs : undefined
-                return <QuestionFeedback key={question.id} question={question} selectedAnswerIdxs={selectedIdxs} />
+                return <QuestionFeedback key={question.id} question={question} answer={answer} />
             })}
         </>
     )

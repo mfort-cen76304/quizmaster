@@ -59,19 +59,19 @@ Feature: Quiz score page display
     * I evaluate the quiz
     Then I see user select "Blue" for question "Sky"
 
-@skip
-  Scenario: Show user selection for numeric selection
+  Scenario: Show user selection for numeric question
     Given workspace "Score Numeric Select" with questions
       | bookmark | question                            | answers                              | explanation |
       | Tooth    | How many teeth do healthy adults have? | 32 ± 0.3|8 Incisors, 4 Canines, 8 Premolars, and 12 Molars |
-      | Sky      | What is the standard colour of sky? | Red, Blue (*), Green, Black          | Rayleigh    |
-
+      | Leg    | How many legs does a dog have? | 4 ± 0.3| |
     And quiz "Numeric Select Quiz" with all questions
       | pass score | 100 |
     Given I start quiz "Numeric Select Quiz"
     When I answer "40"
-    * I answer "Blue"
+    * I answer "4"
     * I evaluate the quiz
     Then I see question explanation "8 Incisors, 4 Canines, 8 Premolars, and 12 Molars" for question "How many teeth do healthy adults have?"
     And I see correct answer "32" for question "How many teeth do healthy adults have?"
     And I see user select "40" for question "How many teeth do healthy adults have?"
+    And I see correct answer "4" for question "How many legs does a dog have?"
+    And I see user select "4" for question "How many legs does a dog have?"
