@@ -26,11 +26,15 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
     const [difficulty, setDifficulty] = useState<Difficulty>(quiz?.difficulty || 'keep-question')
 
     const filteredQuestions = useMemo(() => {
-        if (filter === '') return questions
-        const needle = filter.toLowerCase()
-        return questions.filter(
-            q => q.question.toLowerCase().includes(needle) || q.tags.some(t => t.toLowerCase().includes(needle)),
-        )
+        const normalizedFilter = filter.trim().toLowerCase()
+        if (normalizedFilter === '') return questions
+
+        const tokens = normalizedFilter.split(/\s+/).filter(Boolean)
+
+        return questions.filter(q => {
+            const searchableText = [q.question, ...q.tags].join(' ').toLowerCase()
+            return tokens.every(token => searchableText.includes(token))
+        })
     }, [filter, questions])
 
     return {

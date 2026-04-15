@@ -73,8 +73,8 @@ Feature: Create Quiz from Workspace
       | Ikea      | Jaký nábytek má Ikea? | Jaké nádobí má Ikea?           |             2 + 2 = ? |                      3 * 3 = ? |
       | nábytek   | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |             2 + 2 = ? |                      4 / 2 = ? |
       | nábyt     | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |             2 + 2 = ? |                      4 / 2 = ? |
-#      | má nádobí | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           |             2 + 2 = ? |                      4 / 2 = ? |
-#      | má nád    | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |
+      | má nádobí | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           |             2 + 2 = ? |                      4 / 2 = ? |
+      | má nád    | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |
 
   Scenario: Filter questions in quiz creation by tag
     Given workspace "Tags" with questions
