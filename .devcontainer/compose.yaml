@@ -2,11 +2,8 @@ services:
     quizmaster:
         image: ghcr.io/scrumdojo/dev-quizmaster:v4
         hostname: quizmaster
-        environment:
-            GITHUB_TOKEN: ${GITHUB_TOKEN:-}
-            OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
-            SSH_START: "true"
-            SSH_PUBKEY: ${SSH_PUBKEY:-}
+        ports:
+            - 2222:22
         volumes:
             - devhome:/home/dev
 
