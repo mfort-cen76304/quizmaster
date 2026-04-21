@@ -87,7 +87,19 @@ export const QuestionForm = (props: QuestionProps) => {
         }
     }
 
+    const revertPreviousAnswerCount = () => {
+        if (currentAnswer !== undefined) {
+            const previousResult = evaluateAnswer(currentQuestion, currentAnswer)
+            if (previousResult.correct) {
+                answerCounts.current.correct--
+            } else {
+                answerCounts.current.incorrect--
+            }
+        }
+    }
+
     const handleAnswerSubmitted = (questionAnswer: QuestionAnswer) => {
+        revertPreviousAnswerCount()
         const result = evaluateAnswer(currentQuestion, questionAnswer)
         if (result.correct) {
             answerCounts.current.correct++

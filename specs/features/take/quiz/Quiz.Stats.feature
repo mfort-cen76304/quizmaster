@@ -84,3 +84,79 @@ Feature: Show stats
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
       |       1 |        0 |          1 |       0 |
+
+  Scenario: Overwriting a correct answer with incorrect one updates statistics
+    Given quiz "Stats Quiz" with 2 questions
+      | time limit | 30s |
+
+    When I start the quiz
+    * I answer correctly
+    * I answer correctly
+    * I go back to previous question
+    * I answer incorrectly
+    * I finish the quiz in 10 seconds
+
+    When I open quiz "Stats Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
+      | 10s      | 1/2    | 1 (50%)         | 1 (50%)           | 50    | Finished |
+    And I see summary stats table
+      | Started | Finished | Unfinished | Timeout |
+      |       1 |        1 |          0 |       0 |
+
+  Scenario: Overwriting an incorrect answer with correct one updates statistics
+    Given quiz "Stats Quiz" with 2 questions
+      | time limit | 30s |
+
+    When I start the quiz
+    * I answer incorrectly
+    * I answer correctly
+    * I go back to previous question
+    * I answer correctly
+    * I finish the quiz in 10 seconds
+
+    When I open quiz "Stats Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
+      | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
+    And I see summary stats table
+      | Started | Finished | Unfinished | Timeout |
+      |       1 |        1 |          0 |       0 |
+
+    Scenario: Overwriting an incorrect answer with incorrect one updates statistics
+    Given quiz "Stats Quiz" with 2 questions
+      | time limit | 30s |
+
+    When I start the quiz
+    * I answer incorrectly
+    * I answer incorrectly
+    * I go back to previous question
+    * I answer incorrectly
+    * I finish the quiz in 10 seconds
+
+    When I open quiz "Stats Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
+      | 10s      | 0/2    | 0 (0%)          | 2 (100%)         | 0     | Finished |
+    And I see summary stats table
+      | Started | Finished | Unfinished | Timeout |
+      |       1 |        1 |          0 |       0 |
+
+  Scenario: Overwriting an correct answer with correct one updates statistics
+    Given quiz "Stats Quiz" with 2 questions
+      | time limit | 30s |
+
+    When I start the quiz
+    * I answer correctly
+    * I answer correctly
+    * I go back to previous question
+    * I answer correctly
+    * I finish the quiz in 10 seconds
+
+    When I open quiz "Stats Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
+      | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
+    And I see summary stats table
+      | Started | Finished | Unfinished | Timeout |
+      |       1 |        1 |          0 |       0 |
