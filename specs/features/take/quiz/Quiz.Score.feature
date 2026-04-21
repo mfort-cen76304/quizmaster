@@ -30,6 +30,32 @@ Feature: Evaluate quiz score
       | Naples  | Mars, Venus, Earth, Pluto    | 106     | 0.5    | 17         | failed |
       | Naples  | Pluto, Titan                 | 106     | 0      | 0          | failed |
 
+  Scenario Outline: Numerical answer within tolerance is shown as correct on the score page
+    A numerical answer that lies inside the tolerance band must be displayed
+    as the correct selection on the per-question feedback, not flagged as wrong.
+
+    Given workspace "Tolerance display" with questions
+      | bookmark | question                  | answers   |
+      | Boiling  | Boiling point of water?   | 100 ±5    |
+      | Pi       | Value of π?               | 1.01 ±0.01 |
+    And quiz "Tolerance Quiz" with all questions
+      | pass score | 100 |
+    When I start the quiz
+    * I answer "<boiling>"
+    * I answer "<pi>"
+    * I evaluate the quiz
+    Then I see the quiz result
+      | Correct Answers | Score | Result | Pass Score |
+      | 2 / 2           | 100   | passed | 100        |
+    And I see user select "100" for question "Boiling point of water?"
+    And I see user select "1.01" for question "Value of π?"
+
+    Examples:
+      | boiling | pi   |
+      | 100     | 1.01 |
+      | 95      | 1    |
+      | 105     | 1.02 |
+
   @skip
   Scenario: Quiz score in learning mode
     - In learning mode, quiz taker can retake questions

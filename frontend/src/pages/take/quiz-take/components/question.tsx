@@ -1,5 +1,5 @@
 import './question.scss'
-import type { Question, QuestionAnswer } from '#model/question.ts'
+import { type Question, type QuestionAnswer, evaluateAnswer } from '#model/question.ts'
 import { Answer } from '#pages/take/question-take'
 import { QuestionExplanation } from '#pages/take/question-take'
 
@@ -15,8 +15,10 @@ export const QuestionFeedback = ({ question, answer }: QuestionFeedbackProps) =>
     let answers = question.answers
     let isCorrect = (idx: number) => question.correctAnswers.includes(idx)
     let isAnswerChecked = (idx: number) => selectedIdxs?.includes(idx) ?? false
-    if (selectedValue) {
-        if (selectedValue.toString() === question.answers[0]) {
+    if (answer?.type === 'numerical' && selectedValue !== undefined) {
+        // Use tolerance-aware scoring (matches evaluateAnswer used for the
+        // overall score) so that values within tolerance display as correct.
+        if (evaluateAnswer(question, answer).correct) {
             isCorrect = () => true
             isAnswerChecked = () => true
         } else {
