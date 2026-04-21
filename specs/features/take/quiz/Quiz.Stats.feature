@@ -156,7 +156,7 @@ Scenario: Overwriting an correct answer with correct one updates statistics
     When I open quiz "Stats Quiz" statistics
     Then I see attempt stats table
       | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
-      | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 2     | Finished |
+      | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
       |       1 |        1 |          0 |       0 |
