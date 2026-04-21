@@ -38,6 +38,7 @@ export const repeatAsync = async (n: number, fn: () => Promise<void>) => {
 }
 
 export const finishQuizInSeconds = async (world: QuizmasterWorld, seconds: number) => {
+    await ensureFakeClockInstalled(world)
     await world.page.clock.fastForward(seconds * 1000)
     await world.questionPage.evaluateButtonLocator().click()
     await world.workspacePage.goto(world.workspaceGuid)

@@ -28,9 +28,10 @@ public class QuizStatsService {
     public Optional<QuizStatsResponse> getStats(String workspaceGuid, Integer quizId) {
         return quizRepository.findByIdAndWorkspaceGuid(quizId, workspaceGuid).map(quiz -> {
             int totalQuestions = getTotalQuestions(quiz);
+            Integer timeLimit = quiz.getTimeLimit();
             List<Attempt> attempts = attemptRepository.findByQuizIdOrderByStartedAtDesc(quizId);
             List<AttemptStatsRecord> records = attempts.stream()
-                    .map(attempt -> toRecord(totalQuestions, attempt))
+                    .map(attempt -> toRecord(totalQuestions, attempt, timeLimit))
                     .toList();
             SummaryStats summary = computeSummary(records);
             return new QuizStatsResponse(summary, records);
@@ -44,7 +45,7 @@ public class QuizStatsService {
         return quiz.getQuestionIds() != null ? quiz.getQuestionIds().length : 0;
     }
 
-    private AttemptStatsRecord toRecord(int totalQuestions, Attempt attempt) {
+    private AttemptStatsRecord toRecord(int totalQuestions, Attempt attempt, Integer timeLimit) {
         LocalDateTime endTime = attempt.getTimedOutAt() != null
                 ? attempt.getTimedOutAt()
                 : attempt.getFinishedAt();
@@ -62,7 +63,7 @@ public class QuizStatsService {
                 ? Math.round((float) correctAnswers / totalQuestions * 100)
                 : 0;
 
-        AttemptStatus status = deriveStatus(attempt);
+        AttemptStatus status = deriveStatus(attempt, timeLimit);
 
         return new AttemptStatsRecord(
                 attempt.getId(),
@@ -76,9 +77,14 @@ public class QuizStatsService {
         );
     }
 
-    private AttemptStatus deriveStatus(Attempt attempt) {
+    private AttemptStatus deriveStatus(Attempt attempt, Integer timeLimit) {
         boolean evaluated = attempt.getFinishedAt() != null;
         boolean timedOut = attempt.getTimedOutAt() != null;
+
+        if (!timedOut && !evaluated && timeLimit != null && timeLimit > 0) {
+           long elapsed = Duration.between(attempt.getStartedAt(), LocalDateTime.now()).getSeconds();
+           timedOut = elapsed >= timeLimit;
+        }
 
         if (evaluated && !timedOut) return AttemptStatus.FINISHED;
         if (evaluated && timedOut) return AttemptStatus.TIMEOUT;

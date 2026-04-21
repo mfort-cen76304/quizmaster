@@ -91,7 +91,7 @@ export const QuestionForm = (props: QuestionProps) => {
         const result = evaluateAnswer(currentQuestion, questionAnswer)
         if (result.correct) {
             answerCounts.current.correct++
-         } else if (result.score > 0) {          // ← partial: score is 0.5
+         } else if (result.score > 0.4 && result.score < 0.6) {          // ← partial: score is 0.5
           answerCounts.current.partiallyCorrect++ // add partial
         } else {
             answerCounts.current.incorrect++
