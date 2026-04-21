@@ -53,8 +53,9 @@ public class QuizStatsService {
                 : null;
 
         int correctAnswers = attempt.getCorrectAnswers();
+        int partiallyCorrectAnswers = attempt.getPartiallyCorrectAnswers();
         int incorrectAnswers = attempt.getFinishedAt() != null
-                ? totalQuestions - correctAnswers
+                ? totalQuestions - correctAnswers - partiallyCorrectAnswers
                 : attempt.getIncorrectAnswers();
 
         int score = totalQuestions > 0
@@ -67,6 +68,7 @@ public class QuizStatsService {
                 attempt.getId(),
                 durationSeconds,
                 correctAnswers,
+                partiallyCorrectAnswers,
                 incorrectAnswers,
                 totalQuestions,
                 score,

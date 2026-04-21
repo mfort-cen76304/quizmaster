@@ -7,6 +7,7 @@ public record AttemptStatsRecord(
         Integer durationSeconds,
         int correctAnswers,
         int incorrectAnswers,
+        int partiallyCorrectAnswers,
         int totalQuestions,
         int score,
         AttemptStatus status

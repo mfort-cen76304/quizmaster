@@ -33,6 +33,7 @@ const attemptRow = (a: AttemptStatsRecord): string[] => [
     a.durationSeconds != null ? formatDuration(a.durationSeconds) : '',
     `${a.correctAnswers}/${a.totalQuestions}`,
     pct(a.correctAnswers, a.totalQuestions),
+    pct(a.partiallyCorrectAnswers, a.totalQuestions),
     pct(a.incorrectAnswers, a.totalQuestions),
     String(a.score),
     statusLabels[a.status] ?? a.status,
@@ -50,7 +51,7 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => (
         <StatsTable
             testId="attempt-stats-table"
             caption="Attempts"
-            columns={['Duration', 'Points', 'Correct Answers', 'Incorrect Answers', 'Score', 'Status']}
+            columns={['Duration', 'Points', 'Correct Answers', 'Partially Correct Answers', 'Incorrect Answers', 'Score', 'Status']}
             rows={stats.attempts.map(attemptRow)}
         />
     </div>

@@ -6,6 +6,7 @@ export interface AttemptRequest {
 export interface AttemptPatchRequest {
     readonly correctAnswers?: number
     readonly incorrectAnswers?: number
+    readonly partiallyCorrectAnswers?: number
     readonly timedOutAt?: string
     readonly finishedAt?: string
 }
@@ -19,6 +20,7 @@ export interface AttemptStatsRecord {
     readonly durationSeconds: number | null
     readonly correctAnswers: number
     readonly incorrectAnswers: number
+    readonly partiallyCorrectAnswers: number
     readonly totalQuestions: number
     readonly score: number
     readonly status: string

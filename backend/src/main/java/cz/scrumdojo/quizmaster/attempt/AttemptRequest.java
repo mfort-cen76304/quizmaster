@@ -12,6 +12,7 @@ public record AttemptRequest(
                 .startedAt(startedAt)
                 .correctAnswers(0)
                 .incorrectAnswers(0)
+                .partiallyCorrectAnswers(0)
                 .build();
     }
 }

@@ -13,7 +13,12 @@ export const ensureFakeClockInstalled = async (world: QuizmasterWorld) => {
 }
 
 export const startQuiz = async (world: QuizmasterWorld, quizBookmark: string) => {
-    await ensureFakeClockInstalled(world)
+    await openQuiz(world, quizBookmark)
+    await world.quizWelcomePage.start()
+    world.activeQuizBookmark = quizBookmark
+}
+
+export const startQuiz2 = async (world: QuizmasterWorld, quizBookmark: string) => {
     await openQuiz(world, quizBookmark)
     await world.quizWelcomePage.start()
     world.activeQuizBookmark = quizBookmark

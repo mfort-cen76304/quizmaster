@@ -32,6 +32,9 @@ public class Attempt {
     @Column(name = "correct_answers", nullable = false)
     private Integer correctAnswers;
 
+    @Column(name = "partially_correct_answers", nullable = false)
+    private Integer partiallyCorrectAnswers;
+
     @Column(name = "incorrect_answers", nullable = false)
     private Integer incorrectAnswers;
 

@@ -43,11 +43,11 @@ Feature: Show stats
 
     When I open quiz "Stats Quiz" statistics
     Then I see attempt stats table
-      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
-      | 30s      | 0/2    | 0 (0%)          | 2 (100%)          | 0     | Timeout  |
-      | 30s      | 1/2    | 1 (50%)         | 1 (50%)           | 50    | Timeout  |
-      | 20s      | 1/2    | 1 (50%)         | 1 (50%)           | 50    | Finished |
-      | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
+      | Duration | Points | Correct Answers  | | Incorrect Answers | Score | Status   |
+      |       | 0/2    | 0 (0%)          |                   | 2 (100%)          | 0     | Timeout  |
+      | 30s      | 1/2    | 1 (50%)         |                    | 1 (50%)           | 50    | Timeout  |
+      | 20s      | 1/2    | 1 (50%)         |                   | 1 (50%)           | 50    | Finished |
+      | 10s      | 2/2    | 2 (100%)        |                   | 0 (0%)            | 100   | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
       |       4 |        2 |          0 |       2 |
@@ -62,8 +62,8 @@ Feature: Show stats
 
     When I open quiz "Stats Quiz" statistics
     Then I see attempt stats table
-      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status      |
-      |          | 1/2    | 1 (50%)         | 0 (0%)            | 50    | In Progress |
+      | Duration | Points | Correct Answers  |  | Incorrect Answers | Score | Status      |
+      |          | 1/2    | 1 (50%)  |       | 0 (0%)            | 50    | In Progress |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
       |       1 |        0 |          1 |       0 |
@@ -79,8 +79,30 @@ Feature: Show stats
 
     When I open quiz "Stats Quiz" statistics
     Then I see attempt stats table
-      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status    |
-      |          | 1/2    | 1 (50%)         | 0 (0%)            | 50    | Abandoned |
+      | Duration | Points | Correct Answers| Partially Correct Answers | Incorrect Answers | Score | Status    |
+      |          | 1/2    | 1 (50%)  | 0 (0%)       | 0 (0%)            | 50    | Abandoned |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
       |       1 |        0 |          1 |       0 |
+
+  Scenario Outline: Quiz stats score with mixed question types
+    Given workspace "Mixed" with questions
+      | bookmark | question                           | answers                                      |
+      | Capital  | What is the capital of Italy?       | Rome (*), Naples, Florence                   |
+      | Planets  | Which are planets in solar system?  | Mars (*), Pluto, Venus (*), Titan, Earth (*) |
+      | Boiling  | What is the boiling point of water? | 100 ±5                                       |
+    And quiz "Mixed Quiz 2" with all questions
+      | pass score | 66 |
+    When I start the quiz
+    * I answer "<capital>"
+    * I answer "<planets>"
+    * I answer "<boiling>"
+    * I evaluate the quiz
+    When I open quiz "Mixed Quiz 2" statistics
+    Then I see attempt stats table
+    |  |  | Correct Answers  | Partially Correct Answers | Incorrect Answers |
+    |  |  | 1 (33%)         | 1 (33%)                   | 1 (33%)           |
+
+    Examples:
+      | capital | planets                      | boiling | points | percentage | result |
+      | Rome    | Mars, Venus           | 80     | 1,5      | 50        | failed |

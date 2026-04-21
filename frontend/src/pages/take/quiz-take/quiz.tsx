@@ -25,7 +25,7 @@ export const QuestionForm = (props: QuestionProps) => {
     const nav = useQuizNavigationState(props.quiz)
     const bookmarks = useQuizBookmarkState()
     const [selectedAnswerIdxs, setSelectedAnswerIdxs] = useState<AnswerIdxs | undefined>(undefined)
-    const answerCounts = useRef({ correct: 0, incorrect: 0 })
+    const answerCounts = useRef({ correct: 0, incorrect: 0, partiallyCorrect: 0 })
 
     const answer = (questionAnswer: QuestionAnswer) => {
         answerQuestion(nav.currentQuestionIdx, questionAnswer)
@@ -91,12 +91,15 @@ export const QuestionForm = (props: QuestionProps) => {
         const result = evaluateAnswer(currentQuestion, questionAnswer)
         if (result.correct) {
             answerCounts.current.correct++
+         } else if (result.score > 0) {          // ← partial: score is 0.5
+          answerCounts.current.partiallyCorrect++ // add partial
         } else {
             answerCounts.current.incorrect++
         }
         patchAttempt(props.quizRunId, {
             correctAnswers: answerCounts.current.correct,
             incorrectAnswers: answerCounts.current.incorrect,
+            partiallyCorrectAnswers: answerCounts.current.partiallyCorrect,
         })
 
         if (props.quiz.mode === 'learn') {

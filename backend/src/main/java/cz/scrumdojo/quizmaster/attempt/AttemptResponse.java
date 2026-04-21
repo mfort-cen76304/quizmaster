@@ -9,6 +9,7 @@ public record AttemptResponse(
         LocalDateTime finishedAt,
         Integer correctAnswers,
         Integer incorrectAnswers,
+        Integer partiallyCorrectAnswers,
         LocalDateTime timedOutAt
 ) {
     public static AttemptResponse from(Attempt attempt) {
@@ -19,6 +20,7 @@ public record AttemptResponse(
                 attempt.getFinishedAt(),
                 attempt.getCorrectAnswers(),
                 attempt.getIncorrectAnswers(),
+                attempt.getPartiallyCorrectAnswers(),
                 attempt.getTimedOutAt()
         );
     }
