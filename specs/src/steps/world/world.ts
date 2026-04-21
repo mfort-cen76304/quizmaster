@@ -85,6 +85,7 @@ export class QuizmasterWorld {
     correctAnswersCounts: Record<string, string> = {}
     clockInstalled = false
     lastAnsweredTitle?: string
+    rememberedAnswerExplanations: Record<number, string> = {}
 
     parseAnswers(answersString: string) {
         return answersString.split(',').map(answer => answer.trim())

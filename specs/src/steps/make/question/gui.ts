@@ -9,6 +9,7 @@ import {
     enterAnswer,
     enterAnswerExplanation,
     enterAnswerText,
+    enterLastAnswerText,
     enterImageUrl,
     enterQuestion,
     enterQuestionExplanation,
@@ -235,6 +236,22 @@ When('I click Generate Explanations', async function () {
     await this.questionEditPage.clickGenerateExplanations()
 })
 
+When('I remember explanation for answer {int}', async function (index: number) {
+    this.rememberedAnswerExplanations[index - 1] = await this.questionEditPage.answerExplanation(index - 1)
+})
+
+Then('explanation for answer {int} has changed', async function (index: number) {
+    const answerIndex = index - 1
+    const previousExplanation = this.rememberedAnswerExplanations[answerIndex]
+    if (previousExplanation === undefined) {
+        throw new Error(`Missing remembered explanation for answer ${index}`)
+    }
+
+    const currentExplanation = await this.questionEditPage.answerExplanation(answerIndex)
+    expect(currentExplanation.trim().length).toBeGreaterThan(0)
+    expect(currentExplanation).not.toEqual(previousExplanation)
+})
+
 When(/I mark the question as (single|multiple|numerical) choice/, async function (choice: string) {
     if (choice === 'single') {
         await this.questionEditPage.setSingleChoice()
@@ -255,6 +272,10 @@ When('I set tolerance to {string}', async function (value: string) {
 
 When('I enter answer {int} text {string}', async function (index: number, answer: string) {
     await enterAnswerText(this, index - 1, answer)
+})
+
+When('I enter the last answer\'s text {string}', async function (answer: string) {
+    await enterLastAnswerText(this, answer)
 })
 
 When('I mark answer {int} as correct', async function (index: number) {

@@ -34,6 +34,12 @@ export const enterAnswerText = async (world: QuizmasterWorld, index: number, ans
     world.updateAnswerWip(index, { text: answer })
 }
 
+export const enterLastAnswerText = async (world: QuizmasterWorld, answer: string) => {
+    const index = world.questionWip?.answers.length ?? 0
+    await world.questionEditPage.enterAnswerText(index, answer)
+    world.updateAnswerWip(index, { text: answer })
+}
+
 export const markAnswerCorrectness = async (world: QuizmasterWorld, index: number, isCorrect: boolean) => {
     await world.questionEditPage.setAnswerCorrectness(index, isCorrect)
     world.updateAnswerWip(index, { correct: isCorrect })

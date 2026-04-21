@@ -32,6 +32,40 @@ Feature: Generate question using AI
     Then I see explanations are enabled
     And all answers have explanations
 
+  @ai @slow @skip
+  Scenario: Generate Explanations fills previously empty explanation fields
+    Given I start creating a new question
+    When I ask AI:
+      | Generate a question about nuclear physics |
+    And I enable explanations
+    Then all explanation fields are empty
+    When I click Generate Explanations
+    Then all answers have explanations
+
+  @ai @slow @skip
+  Scenario: Generate Explanations fills explanations after adding a new answer manually
+    Given I start creating a new question
+    When I ask AI:
+      | Generate a question about nuclear physics |
+    And I add another answer
+    And I enter the last answer's text "example"
+    And I enable explanations
+    Then all explanation fields are empty
+    When I click Generate Explanations
+    Then all answers have explanations
+
+  @ai @slow @skip
+  Scenario: Generate Explanations updates explanation after manual answer text change
+    Given I start creating a new question
+    When I ask AI:
+      | Generate a question about nuclear physics |
+    And I click Generate Explanations
+    And I remember explanation for answer 1
+    When I enter answer 1 text "manually changed answer"
+    And I click Generate Explanations
+    Then all answers have explanations
+    And explanation for answer 1 has changed
+
   @ai @slow
   Scenario: Generate a single-choice question
     Given I start creating a new question
