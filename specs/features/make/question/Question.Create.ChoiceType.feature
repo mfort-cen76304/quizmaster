@@ -103,6 +103,7 @@ Feature: Create question - single/multiple choice
     When I mark the question as numerical choice
     Then the question is numerical choice
     And I see numerical answer field
+    And I see AI section
     And I do not see answer fields
     And I do not see Add Answer button
     And easy is not available
@@ -122,6 +123,7 @@ Feature: Create question - single/multiple choice
     When I mark the question as numerical choice
     Then the question is numerical choice
     And I see numerical answer field
+    And I see AI section
     And I do not see answer fields
     And I do not see Add Answer button
     And easy is not available

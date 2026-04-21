@@ -34,7 +34,28 @@ export class QuizScorePage {
 
     answerListLocator = (question: string) => this.questionLocator(question).locator('[id^=question-answers-]')
 
-    answers = (question: string) => this.answerListLocator(question).locator('[id^=answer-label-]').allTextContents()
+    private numericalResultLocator = (question: string) => this.questionLocator(question).locator('.numerical-result')
+    correctAnswerBarLocator = (question: string) =>
+        this.numericalResultLocator(question).locator('[data-testid=correct-bar]')
+    userAnswerBarLocator = (question: string) => this.numericalResultLocator(question).locator('[data-testid=user-bar]')
+    numericalWithinToleranceBarLocator = (question: string) =>
+        this.numericalResultLocator(question).locator('.numerical-bar.within-tolerance')
+    numericalIncorrectBarLocator = (question: string) =>
+        this.numericalResultLocator(question).locator('.numerical-bar.incorrect')
+
+    private extractNumber = (text: string | null): string => {
+        const match = (text ?? '').match(/:\s*(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)/)
+        return match ? match[1] : ''
+    }
+
+    answers = async (question: string) => {
+        const numericalCount = await this.numericalResultLocator(question).count()
+        if (numericalCount > 0) {
+            const text = await this.correctAnswerBarLocator(question).textContent()
+            return [this.extractNumber(text)]
+        }
+        return this.answerListLocator(question).locator('[id^=answer-label-]').allTextContents()
+    }
 
     explanations = (question: string) =>
         this.answerAndExplanationLocator(question).locator('.explanationText').allTextContents()
@@ -43,8 +64,18 @@ export class QuizScorePage {
         this.questionLocator(question).locator('.question-explanation').textContent()
 
     private checkedUserSelectLocator = (question: string) => this.questionLocator(question).locator('input:checked')
-    checkedAnswerLabel = (question: string) =>
-        this.checkedUserSelectLocator(question).locator('..').locator('[id^=answer-label-]').textContent()
+    checkedAnswerLabel = async (question: string) => {
+        const numericalCount = await this.numericalResultLocator(question).count()
+        if (numericalCount > 0) {
+            const userCount = await this.userAnswerBarLocator(question).count()
+            const text =
+                userCount > 0
+                    ? await this.userAnswerBarLocator(question).textContent()
+                    : await this.correctAnswerBarLocator(question).textContent()
+            return this.extractNumber(text)
+        }
+        return this.checkedUserSelectLocator(question).locator('..').locator('[id^=answer-label-]').textContent()
+    }
 
     private questionAnswerLocator = (question: string, answer: string) =>
         this.answerAndExplanationLocator(question).getByText(answer)

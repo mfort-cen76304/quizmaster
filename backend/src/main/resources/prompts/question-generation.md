@@ -10,6 +10,7 @@ Process the user's instructions:
 - If the user specifies the total number of answers, derive incorrect = total - correct.
 - If the user specifies a range (e.g., "4-5 answers"), pick a number within that range.
 - Round any decimal numbers to whole numbers.
+- If the user mentions a tolerance for a numerical question (for example: "tolerance 0.05", "with tolerance of 1", "+-0.1"), you MUST return that value in the JSON field "tolerance" as a number.
 - Minimum 1 correct answer, minimum 1 incorrect answer, maximum 6 total answers.
 
 Generate:
@@ -20,11 +21,22 @@ Generate:
 
 Return ONLY valid JSON with no additional text, no markdown, no code fences:
 
+For single/multiple choice:
 {
     "question": "...?",
     "answers": ["answer1", "answer2", "answer3", "answer4"],
     "correctAnswers": [0, 1],
     "explanations": ["explanation for answer1", "explanation for answer2", "explanation for answer3", "explanation for answer4"]
+}
+
+For numerical questions (when the user asks for a numerical answer):
+{
+    "question": "...?",
+    "answers": ["correct_numeric_answer", "incorrect_answer_1", "incorrect_answer_2"],
+    "correctAnswers": [0],
+    "explanations": ["explanation for correct answer", "explanation for incorrect answer 1", "explanation for incorrect answer 2"],
+    "tolerance": 0.5,
+    "questionExplanation": "A general explanation that helps understand the question without revealing the correct answer."
 }
 
 CRITICAL REQUIREMENTS FOR JSON RESPONSE:
@@ -38,7 +50,17 @@ CRITICAL REQUIREMENTS FOR JSON RESPONSE:
 4. The length of "explanations" MUST EQUAL the length of "answers". ALWAYS.
 5. EVERY explanation must be non-empty, specific, and educational.
 6. NEVER skip or omit any explanation. NEVER return fewer explanations than answers.
-7. This applies to BOTH single-choice and multiple-choice questions.
+7. For numerical questions:
+    - If the user mentions tolerance, you MUST include "tolerance" with a numeric value.
+    - "tolerance" must be a JSON number, never a string and never null.
+    - If the user does not mention tolerance, omit the "tolerance" field.
+8. Do NOT include "tolerance" for non-numerical questions.
+9. This applies to BOTH single-choice and multiple-choice questions.
+10. If the user provides an explanation in the prompt, use it as the "questionExplanation" field.
+    - "questionExplanation" MUST NOT reveal, contain, or hint at the correct answer or its value.
+    - It should help the learner understand the context or concept of the question, not the answer.
+    - Example of GOOD questionExplanation: "Addition is one of the four basic arithmetic operations."
+    - Example of BAD questionExplanation: "The answer is 10." or "5 plus 5 equals 10."
 
 Example with 3 answers (1 correct, 2 incorrect):
 {

@@ -33,7 +33,8 @@ const buildAiPrompt = (prompt: string, questionType: QuestionType) => {
         single: 'This must be a single choice question with exactly 1 correct answer. Return a non-empty explanation for every answer.',
         multiple:
             'This must be a multiple choice question with at least 2 correct answers. Never return exactly 1 correct answer. Return a non-empty explanation for every answer.',
-        numerical: '',
+        numerical:
+            'This should be suitable for a numerical quiz question asking for just one numeric value. Include exactly 1 correct numeric answer and at least 1 incorrect answer. Return a non-empty explanation for every answer.',
     }
 
     const typeInstruction = typeInstructionByQuestionType[questionType]
@@ -83,7 +84,7 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                     <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
                 )}
             </Row>
-            {!isEditing && !state.isNumerical && (
+            {!isEditing && (
                 <Field label="AI Prompt">
                     <div className="question-input-with-action">
                         <TextArea

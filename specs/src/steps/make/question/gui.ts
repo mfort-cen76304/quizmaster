@@ -136,6 +136,10 @@ Then('I do not see AI section', async function () {
     await this.questionEditPage.expectAiBlockNotVisible()
 })
 
+Then('I see AI section', async function () {
+    await this.questionEditPage.expectAiBlockVisible()
+})
+
 Then('I see explanation fields', async function () {
     await this.questionEditPage.expectExplanationFieldsExist()
 })

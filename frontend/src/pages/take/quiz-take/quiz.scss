@@ -27,8 +27,8 @@
     margin-bottom: 20px;
 }
 
-@media (max-width: 720px) {
-    .quiz-page {
-        padding: 0 1rem;
-    }
+.quiz-take {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 0 1rem;
 }

@@ -101,12 +101,39 @@ export const useQuestionFormState = (question?: Question) => {
     }
 
     const applyAiResponse = (response: AiAssistantResponse) => {
+        if (questionType === 'numerical') {
+            const firstCorrectIndex = response.correctAnswers[0]
+            const selectedAnswer =
+                firstCorrectIndex != null && firstCorrectIndex >= 0 && firstCorrectIndex < response.answers.length
+                    ? response.answers[firstCorrectIndex]
+                    : ''
+
+            setQuestionText(response.question)
+            setQuestionExplanation(response.questionExplanation ?? '')
+            setQuestionType('numerical')
+            setNumericalAnswer(selectedAnswer)
+            // Apply tolerance from AI response if provided, otherwise leave as is
+            if (response.tolerance != null) {
+                setTolerance(String(response.tolerance))
+            }
+            setIsEasy(false)
+            setIsAiGenerated(false)
+            setAnswers(['', ''])
+            setExplanations(['', ''])
+            setGeneratedExplanations([])
+            setCorrectAnswers([])
+            setShowExplanations(false)
+            setAnswerIds([genId(), genId()])
+            return
+        }
+
         const responseExplanations =
             response.explanations?.length === response.answers.length
                 ? response.explanations.map(explanation => explanation ?? '')
                 : response.answers.map(() => '')
 
         setQuestionText(response.question)
+        setQuestionExplanation(response.questionExplanation ?? '')
         setQuestionType(response.correctAnswers.length > 1 ? 'multiple' : 'single')
         setAnswers(response.answers)
         setExplanations(response.answers.map(() => ''))

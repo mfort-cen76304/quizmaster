@@ -1,7 +1,8 @@
 import './question.scss'
-import { type Question, type QuestionAnswer, evaluateAnswer } from '#model/question.ts'
+import type { Question, QuestionAnswer } from '#model/question.ts'
 import { Answer } from '#pages/take/question-take'
 import { QuestionExplanation } from '#pages/take/question-take'
+import { NumericalResult } from '#pages/take/question-take/components/numerical-result.tsx'
 
 interface QuestionFeedbackProps {
     readonly question: Question
@@ -11,21 +12,10 @@ interface QuestionFeedbackProps {
 export const QuestionFeedback = ({ question, answer }: QuestionFeedbackProps) => {
     const isMultipleChoice = question.correctAnswers.length > 1
     const selectedIdxs = answer?.type === 'choice' ? answer.selectedIdxs : undefined
-    const selectedValue = answer?.type === 'numerical' ? answer.value : undefined
-    let answers = question.answers
-    let isCorrect = (idx: number) => question.correctAnswers.includes(idx)
-    let isAnswerChecked = (idx: number) => selectedIdxs?.includes(idx) ?? false
-    if (answer?.type === 'numerical' && selectedValue !== undefined) {
-        // Use tolerance-aware scoring (matches evaluateAnswer used for the
-        // overall score) so that values within tolerance display as correct.
-        if (evaluateAnswer(question, answer).correct) {
-            isCorrect = () => true
-            isAnswerChecked = () => true
-        } else {
-            answers = [...answers, selectedValue.toString()]
-            isAnswerChecked = (idx: number) => idx === 1
-        }
-    }
+    const isNumerical = question.questionType === 'numerical'
+    const numericalUserInput = answer?.type === 'numerical' ? answer.value.toString() : ''
+    const isCorrect = (idx: number) => question.correctAnswers.includes(idx)
+    const isAnswerChecked = (idx: number) => selectedIdxs?.includes(idx) ?? false
 
     return (
         <fieldset
@@ -37,23 +27,27 @@ export const QuestionFeedback = ({ question, answer }: QuestionFeedbackProps) =>
             <legend>
                 <strong id={`question-name-${question.id}`}>{question.question}</strong>
             </legend>
-            <ul id={`question-answers-${question.id}`} className="answers">
-                {answers.map((answer, idx) => (
-                    <Answer
-                        key={answer}
-                        isMultipleChoice={isMultipleChoice}
-                        idx={idx}
-                        questionId={question.id}
-                        answer={answer}
-                        isCorrect={isCorrect(idx)}
-                        explanation={question.explanations[idx]}
-                        showFeedback={true}
-                        onAnswerChange={() => {}}
-                        disabled={true}
-                        isAnswerChecked={isAnswerChecked}
-                    />
-                ))}
-            </ul>
+            {isNumerical ? (
+                <NumericalResult question={question} userInput={numericalUserInput} />
+            ) : (
+                <ul id={`question-answers-${question.id}`} className="answers">
+                    {question.answers.map((answer, idx) => (
+                        <Answer
+                            key={answer}
+                            isMultipleChoice={isMultipleChoice}
+                            idx={idx}
+                            questionId={question.id}
+                            answer={answer}
+                            isCorrect={isCorrect(idx)}
+                            explanation={question.explanations[idx]}
+                            showFeedback={true}
+                            onAnswerChange={() => {}}
+                            disabled={true}
+                            isAnswerChecked={isAnswerChecked}
+                        />
+                    ))}
+                </ul>
+            )}
             {question.questionExplanation && (
                 <div className="row">
                     Question explanation:{'\u00A0'}

@@ -119,7 +119,7 @@ export const QuestionForm = (props: QuestionProps) => {
     }
 
     return (
-        <div className="quiz-page">
+        <div className="quiz-take">
             <TimeLimit timeLimit={props.quiz.timeLimit} onTimeOut={handleTimeOut} onConfirm={evaluateTimedOut} />
             <h2>Quiz</h2>
             <div className="feedback-mode-row">

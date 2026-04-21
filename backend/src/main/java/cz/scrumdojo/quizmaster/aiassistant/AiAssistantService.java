@@ -87,7 +87,9 @@ public class AiAssistantService {
                 assistantResponse.question(),
                 assistantResponse.answers(),
                 assistantResponse.correctAnswers(),
-                explanations
+                explanations,
+                assistantResponse.tolerance(),
+                assistantResponse.questionExplanation()
             );
         } catch (ResponseStatusException e) {
             throw e;
@@ -134,5 +136,14 @@ public class AiAssistantService {
 
     private record Message(String role, String content) {}
 
-    record AssistantResponse(String question, String[] answers, int[] correctAnswers, String[] explanations) {}
+    record AssistantResponse(
+        String question,
+        String[] answers,
+        int[] correctAnswers,
+        String[] explanations,
+        @JsonProperty("tolerance")
+        Double tolerance,
+        @JsonProperty("questionExplanation")
+        String questionExplanation
+    ) {}
 }
