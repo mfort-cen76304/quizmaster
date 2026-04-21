@@ -10,7 +10,8 @@
             "#api/*": ["./src/api/*"],
             "#model/*": ["./src/model/*"],
             "#pages/*": ["./src/pages/*"],
-            "#fe/*": ["./src/*"]
+            "#fe/*": ["./src/*"],
+            "#shared/*": ["../shared/*"]
         },
         "moduleResolution": "bundler",
         "allowImportingTsExtensions": true,
@@ -28,6 +29,7 @@
         "noFallthroughCasesInSwitch": true
     },
     "include": [
-        "src"
+        "src",
+        "../shared"
     ]
 }

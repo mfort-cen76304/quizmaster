@@ -1,9 +1,10 @@
-export type AnswerIdxs = readonly number[]
+import type { Question } from '#shared/types/question.ts'
 
-export type QuestionType = 'single' | 'multiple' | 'numerical'
+export type { AnswerIdxs, QuestionType } from '#shared/types/enums.ts'
+export type { Question } from '#shared/types/question.ts'
 
 export type QuestionAnswer =
-    | { readonly type: 'choice'; readonly selectedIdxs: AnswerIdxs }
+    | { readonly type: 'choice'; readonly selectedIdxs: readonly number[] }
     | { readonly type: 'numerical'; readonly value: number }
 
 export interface QuestionResult {
@@ -11,23 +12,8 @@ export interface QuestionResult {
     readonly score: number
 }
 
-export interface Question {
-    readonly id: number
-    readonly question: string
-    readonly imageUrl?: string
-    readonly tolerance?: number
-    readonly answers: string[]
-    readonly explanations: string[]
-    readonly questionExplanation: string
-    readonly correctAnswers: AnswerIdxs
-    readonly questionType: QuestionType
-    workspaceGuid: string | null
-    isEasy: boolean
-    readonly tags: string[]
-}
-
 export interface Answers {
-    readonly correctAnswers: AnswerIdxs
+    readonly correctAnswers: readonly number[]
     readonly explanations: readonly string[]
     readonly questionExplanation: string
 }
@@ -35,7 +21,7 @@ export interface Answers {
 // Smart constructors. Return undefined when the input is not a valid answer
 // (no choices selected, or numerical input that does not parse as a number).
 // Callers test the result; do not pass undefined into evaluateAnswer.
-export const choiceAnswer = (selectedIdxs: AnswerIdxs): QuestionAnswer | undefined =>
+export const choiceAnswer = (selectedIdxs: readonly number[]): QuestionAnswer | undefined =>
     selectedIdxs.length === 0 ? undefined : { type: 'choice', selectedIdxs }
 
 export const numericalAnswer = (input: string): QuestionAnswer | undefined => {
@@ -71,7 +57,7 @@ interface ChoiceErrors {
     readonly selectedIncorrect: number
 }
 
-const choiceErrors = (selected: AnswerIdxs, correct: AnswerIdxs): ChoiceErrors => {
+const choiceErrors = (selected: readonly number[], correct: readonly number[]): ChoiceErrors => {
     const correctSet = new Set(correct)
     const matched = selected.filter(i => correctSet.has(i)).length
     return {
@@ -80,7 +66,7 @@ const choiceErrors = (selected: AnswerIdxs, correct: AnswerIdxs): ChoiceErrors =
     }
 }
 
-const scoreChoice = (selected: AnswerIdxs, correct: AnswerIdxs): QuestionResult => {
+const scoreChoice = (selected: readonly number[], correct: readonly number[]): QuestionResult => {
     const { missedCorrect, selectedIncorrect } = choiceErrors(selected, correct)
     if (missedCorrect === 0 && selectedIncorrect === 0) return { correct: true, score: 1 }
     if (missedCorrect + selectedIncorrect === 1) return { correct: false, score: 0.5 }

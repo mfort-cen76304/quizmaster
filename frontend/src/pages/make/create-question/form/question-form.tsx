@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { postAiAssistant } from '#api/ai-assistant.ts'
-import type { QuestionApiData } from '#api/question.ts'
+import type { QuestionRequest } from '#api/question.ts'
 import type { Question, QuestionType } from '#model/question.ts'
 import {
     SubmitButton,
@@ -23,7 +23,7 @@ import { validateQuestionFormState, errorMessage, isValidImageUrl } from './vali
 
 interface QuestionEditProps {
     readonly question?: Question
-    readonly onSubmit: (questionData: QuestionApiData) => void
+    readonly onSubmit: (questionData: QuestionRequest) => void
     readonly onBack?: () => void
 }
 

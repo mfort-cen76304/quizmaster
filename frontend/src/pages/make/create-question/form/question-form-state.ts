@@ -1,9 +1,12 @@
 import { useRef, useState } from 'react'
 
 import type { AiAssistantResponse } from '#api/ai-assistant.ts'
-import type { QuestionApiData } from '#api/question.ts'
+import type { QuestionRequest } from '#api/question.ts'
 import { updated } from '#fe/helpers.ts'
 import type { Question, QuestionType } from '#model/question.ts'
+import { NUM_DEFAULT_ANSWERS } from '#shared/defaults/question.ts'
+
+const emptyAnswerSlots = <T>(value: T): readonly T[] => Array(NUM_DEFAULT_ANSWERS).fill(value)
 
 export interface AnswerState {
     readonly id: number
@@ -56,10 +59,10 @@ export const useQuestionFormState = (question?: Question) => {
     const nextId = useRef(0)
     const genId = () => nextId.current++
     const [answerIds, setAnswerIds] = useState<readonly number[]>(() =>
-        (question?.answers || ['', '']).map(() => genId()),
+        (question?.answers || emptyAnswerSlots('')).map(() => genId()),
     )
-    const [answers, setAnswers] = useState<readonly string[]>(question?.answers || ['', ''])
-    const [explanations, setExplanations] = useState<readonly string[]>(question?.explanations || ['', ''])
+    const [answers, setAnswers] = useState<readonly string[]>(question?.answers || emptyAnswerSlots(''))
+    const [explanations, setExplanations] = useState<readonly string[]>(question?.explanations || emptyAnswerSlots(''))
     const [correctAnswers, setCorrectAnswers] = useState<readonly number[]>(question?.correctAnswers || [])
 
     const [questionExplanation, setQuestionExplanation] = useState(question?.questionExplanation || '')
@@ -118,12 +121,12 @@ export const useQuestionFormState = (question?: Question) => {
             }
             setIsEasy(false)
             setIsAiGenerated(false)
-            setAnswers(['', ''])
-            setExplanations(['', ''])
+            setAnswers(emptyAnswerSlots(''))
+            setExplanations(emptyAnswerSlots(''))
             setGeneratedExplanations([])
             setCorrectAnswers([])
             setShowExplanations(false)
-            setAnswerIds([genId(), genId()])
+            setAnswerIds(emptyAnswerSlots(0).map(() => genId()))
             return
         }
 
@@ -215,7 +218,7 @@ const buildTags = (tagText: string): string[] => {
     return tag ? [tag] : []
 }
 
-export const stateToQuestionApiData = (state: QuestionFormState): QuestionApiData => {
+export const stateToQuestionApiData = (state: QuestionFormState): QuestionRequest => {
     if (state.isNumerical) {
         const normalizedTolerance = state.tolerance.trim()
         const parsedTolerance = normalizedTolerance === '' ? undefined : Number.parseFloat(normalizedTolerance)

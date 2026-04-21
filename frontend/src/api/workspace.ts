@@ -1,19 +1,14 @@
 import type { QuestionListItem } from '#model/question-list-item.ts'
 import type { QuizListItem } from '#model/quiz-list-item.ts'
 import type { Workspace } from '#model/workspace.ts'
+import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
 
 import { postJson, fetchJson } from './helpers.ts'
 
-export type WorkspaceCreateRequest = {
-    readonly title: string
-}
+export type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
 
-export interface WorkspaceCreateResponse {
-    readonly guid: string
-}
-
-export const postWorkspace = async (workspaceApiData: WorkspaceCreateRequest) =>
-    await postJson<WorkspaceCreateRequest, WorkspaceCreateResponse>('/api/workspaces', workspaceApiData)
+export const postWorkspace = async (workspace: WorkspaceRequest) =>
+    await postJson<WorkspaceRequest, WorkspaceCreateResponse>('/api/workspaces', workspace)
 
 export const fetchWorkspace = async (guid: string) => await fetchJson<Workspace>(`/api/workspaces/${guid}`)
 

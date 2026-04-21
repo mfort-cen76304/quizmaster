@@ -7,6 +7,7 @@ import type { QuestionListItem } from '#model/question-list-item.ts'
 import type { Quiz } from '#model/quiz.ts'
 import { Field, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from '#pages/components'
 import { ErrorMessage, createValidator } from '#pages/components/forms/validations.tsx'
+import { parseTimeLimitToSeconds } from '#shared/parsers/time-limit.ts'
 
 import { QuestionCountInfo } from './components/question-count-info.tsx'
 import { QuestionSelect } from './components/question-select.tsx'
@@ -16,30 +17,6 @@ import { formatTimeLimit } from './utils/formatTimeLimit.ts'
 import { validateQuizForm, errorMessage } from './validations.ts'
 
 const TIME_LIMIT_PARTIAL_REGEX = /^(?:\d*|\d+m|\d+s|\d+m\d*|\d+s\d*|\d+m\d+s|\d+s\d+m)$/i
-
-const parseTimeLimitToSeconds = (value: string): number => {
-    const minutesAndSeconds = value.match(/^(\d+)m(\d+)s$/i)
-    if (minutesAndSeconds) {
-        return Number(minutesAndSeconds[1]) * 60 + Number(minutesAndSeconds[2])
-    }
-
-    const secondsAndMinutes = value.match(/^(\d+)s(\d+)m$/i)
-    if (secondsAndMinutes) {
-        return Number(secondsAndMinutes[1]) + Number(secondsAndMinutes[2]) * 60
-    }
-
-    const onlyMinutes = value.match(/^(\d+)m$/i)
-    if (onlyMinutes) {
-        return Number(onlyMinutes[1]) * 60
-    }
-
-    const onlySeconds = value.match(/^(\d+)s$/i)
-    if (onlySeconds) {
-        return Number(onlySeconds[1])
-    }
-
-    return Number.NaN
-}
 
 interface QuizEditFormProps {
     readonly questions: readonly QuestionListItem[]

@@ -1,26 +1,20 @@
-import type { Question } from '#model/question.ts'
+import type { IdResponse } from '#shared/types/id-response.ts'
+import type { Question, QuestionRequest } from '#shared/types/question.ts'
 
 import { fetchJson, postJson, patchJson, callDelete } from './helpers.ts'
+
+export type { QuestionRequest } from '#shared/types/question.ts'
 
 export const fetchQuestion = async (questionId: string) => await fetchJson<Question>(`/api/question/${questionId}`)
 
 export const fetchWorkspaceQuestion = async (workspaceGuid: string, questionId: string) =>
     await fetchJson<Question>(`/api/workspaces/${workspaceGuid}/questions/${questionId}`)
 
-export type QuestionApiData = Omit<Question, 'id' | 'workspaceGuid'>
+export const saveQuestion = async (workspaceGuid: string, question: QuestionRequest) =>
+    await postJson<QuestionRequest, IdResponse>(`/api/workspaces/${workspaceGuid}/questions`, question)
 
-export interface QuestionWriteResponse {
-    readonly id: number
-}
-
-export const saveQuestion = async (workspaceGuid: string, question: QuestionApiData) =>
-    await postJson<QuestionApiData, QuestionWriteResponse>(`/api/workspaces/${workspaceGuid}/questions`, question)
-
-export const updateQuestion = async (workspaceGuid: string, questionId: number, question: QuestionApiData) =>
-    await patchJson<QuestionApiData, QuestionWriteResponse>(
-        `/api/workspaces/${workspaceGuid}/questions/${questionId}`,
-        question,
-    )
+export const updateQuestion = async (workspaceGuid: string, questionId: number, question: QuestionRequest) =>
+    await patchJson<QuestionRequest, IdResponse>(`/api/workspaces/${workspaceGuid}/questions/${questionId}`, question)
 
 export const deleteQuestion = async (workspaceGuid: string, questionId: string) =>
     await callDelete(`/api/workspaces/${workspaceGuid}/questions/${questionId}`)

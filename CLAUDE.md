@@ -20,6 +20,8 @@ Built incrementally using thin slices of functionality — a key learning object
 
 **Key insight:** Frontend is built into backend — `pnpm test:e2e` handles this automatically.
 
+**`/shared` is the FE↔specs contract zone.** Types, parsers, and defaults that both the React app and the E2E spec layer must agree on live in `/shared/{types,parsers,defaults}/`. Both projects import via the `#shared/*` alias. Everything in `/shared` must be pure TypeScript with no framework dependencies — if something needs React or Playwright, it doesn't belong there. Type names match the backend (`QuestionRequest`, `QuizRequest`, `IdResponse`, …) so FE, specs, and BE share vocabulary. Currently hand-written; migrating to OpenAPI codegen is a viable future step.
+
 ## Tech Stack
 
 - **Backend:** Java 21, Spring Boot 3, Gradle (Kotlin DSL), Lombok

@@ -1,7 +1,7 @@
 import './create-question.scss'
 import { useNavigate } from 'react-router'
 
-import { type QuestionApiData, saveQuestion } from '#api/question.ts'
+import { type QuestionRequest, saveQuestion } from '#api/question.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 import { Page } from '#pages/components/page.tsx'
 
@@ -11,7 +11,7 @@ export function CreateQuestionPage() {
     const workspaceId = useWorkspaceId()
     const navigate = useNavigate()
 
-    const handleSubmit = (questionData: QuestionApiData) => {
+    const handleSubmit = (questionData: QuestionRequest) => {
         saveQuestion(workspaceId, questionData).then(() => {
             navigate(urls.workspace(workspaceId))
         })

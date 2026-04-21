@@ -1,12 +1,9 @@
 import type { QuestionEditPage } from '#pages/index.ts'
+import { NUM_DEFAULT_ANSWERS } from '#shared/defaults/question.ts'
 import { ensureWorkspaceGuid } from '#steps/make/workspace/ops.ts'
 import { createQuestionViaRest } from '#steps/shared/api.ts'
 import { hasExplanations, isMultipleChoiceSpec, type AnswerSpec, type QuestionSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
-
-// Mirrors the default count of empty answer rows shown by the question form.
-// If you change this, also change in frontend/src/pages/create-question/create-question.tsx
-const NUM_DEFAULT_ANSWERS = 2
 
 // ── Form helpers ────────────────────────────────────────
 

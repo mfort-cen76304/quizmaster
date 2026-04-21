@@ -1,4 +1,1 @@
-export interface Workspace {
-    readonly guid: string
-    readonly title: string
-}
+export type { Workspace } from '#shared/types/workspace.ts'
