@@ -47,8 +47,8 @@ Feature: Evaluate quiz score
     Then I see the quiz result
       | Correct Answers | Score | Result | Pass Score |
       | 2 / 2           | 100   | passed | 100        |
-    And I see user select "100" for question "Boiling point of water?"
-    And I see user select "1.01" for question "Value of π?"
+    And I see user select "<boiling>" for question "Boiling point of water?"
+    And I see user select "<pi>" for question "Value of π?"
 
     Examples:
       | boiling | pi   |

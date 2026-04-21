@@ -1,3 +1,4 @@
+import './quiz.scss'
 import type { Quiz } from '#model/quiz.ts'
 
 import { QuestionFeedback } from './components/question.tsx'
@@ -18,7 +19,7 @@ export const QuizScorePage = ({ quiz, quizAnswers }: QuizScorePageProps) => {
     const result = passed ? 'passed' : 'failed'
 
     return (
-        <>
+        <div className="quiz-take">
             <h1>Test result</h1>
             <div className="resultTable" id="results">
                 <div className="row header">
@@ -48,6 +49,6 @@ export const QuizScorePage = ({ quiz, quizAnswers }: QuizScorePageProps) => {
                 const answer = quizAnswers.finalAnswers[idx]
                 return <QuestionFeedback key={question.id} question={question} answer={answer} />
             })}
-        </>
+        </div>
     )
 }
