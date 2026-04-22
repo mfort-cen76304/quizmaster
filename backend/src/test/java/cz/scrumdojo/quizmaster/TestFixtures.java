@@ -209,6 +209,7 @@ public class TestFixtures {
         return Attempt.builder()
             .quizId(quiz.getId())
             .correctAnswers(0)
+            .partiallyCorrectAnswers(0)
             .incorrectAnswers(0)
             .startedAt(LocalDateTime.now().minusMinutes(5))
             .timedOutAt(LocalDateTime.now().minusMinutes(5).plusSeconds(300));
