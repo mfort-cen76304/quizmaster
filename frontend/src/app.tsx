@@ -1,5 +1,6 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 
+import { CrazyBackground } from '#fe/crazy-background.tsx'
 import { ROUTES } from '#fe/urls.ts'
 import { CreateQuestionPage } from '#pages/make/create-question/create-question-page.tsx'
 import { EditQuestionPage } from '#pages/make/create-question/edit-question-page.tsx'
@@ -16,28 +17,31 @@ import { QuizWelcomePage } from '#pages/take/quiz-take/quiz-welcome/quiz-welcome
 
 export const App = () => (
     <BrowserRouter>
-        <Routes>
-            <Route path={ROUTES.home} element={<HomePage />} />
+        <CrazyBackground />
+        <div style={{ position: 'relative', zIndex: 1 }}>
+            <Routes>
+                <Route path={ROUTES.home} element={<HomePage />} />
 
-            {/* Public question taking */}
-            <Route path={ROUTES.questionTake} element={<QuestionTakePage />} />
+                {/* Public question taking */}
+                <Route path={ROUTES.questionTake} element={<QuestionTakePage />} />
 
-            {/* Workspace */}
-            <Route path={ROUTES.workspaceNew} element={<WorkspaceCreatePage />} />
-            <Route path={ROUTES.workspace} element={<WorkspacePage />} />
-            <Route path={ROUTES.workspaceQuestionNew} element={<CreateQuestionPage />} />
-            <Route path={ROUTES.workspaceQuestionEdit} element={<EditQuestionPage />} />
+                {/* Workspace */}
+                <Route path={ROUTES.workspaceNew} element={<WorkspaceCreatePage />} />
+                <Route path={ROUTES.workspace} element={<WorkspacePage />} />
+                <Route path={ROUTES.workspaceQuestionNew} element={<CreateQuestionPage />} />
+                <Route path={ROUTES.workspaceQuestionEdit} element={<EditQuestionPage />} />
 
-            {/* Quiz management (workspace-scoped) */}
-            <Route path={ROUTES.workspaceQuizNew} element={<QuizEditPage />} />
-            <Route path={ROUTES.workspaceQuizEdit} element={<QuizEditPage />} />
-            <Route path={ROUTES.workspaceQuizStats} element={<QuizStatsPage />} />
-            <Route path={ROUTES.workspaceQuizDryRun} element={<QuizDryRunWelcomePage />} />
-            <Route path={ROUTES.workspaceQuizDryRunTake} element={<QuizDryRunTakePage />} />
+                {/* Quiz management (workspace-scoped) */}
+                <Route path={ROUTES.workspaceQuizNew} element={<QuizEditPage />} />
+                <Route path={ROUTES.workspaceQuizEdit} element={<QuizEditPage />} />
+                <Route path={ROUTES.workspaceQuizStats} element={<QuizStatsPage />} />
+                <Route path={ROUTES.workspaceQuizDryRun} element={<QuizDryRunWelcomePage />} />
+                <Route path={ROUTES.workspaceQuizDryRunTake} element={<QuizDryRunTakePage />} />
 
-            {/* Quiz taking (public) */}
-            <Route path={ROUTES.quizWelcome} element={<QuizWelcomePage />} />
-            <Route path={ROUTES.quizTake} element={<QuizTakePage />} />
-        </Routes>
+                {/* Quiz taking (public) */}
+                <Route path={ROUTES.quizWelcome} element={<QuizWelcomePage />} />
+                <Route path={ROUTES.quizTake} element={<QuizTakePage />} />
+            </Routes>
+        </div>
     </BrowserRouter>
 )
