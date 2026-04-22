@@ -237,7 +237,12 @@ When('I ask AI:', async function (dataTable: DataTable) {
 })
 
 When('I click Generate Explanations', async function () {
-    await this.questionEditPage.clickGenerateExplanations()
+    await Promise.all([
+        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+            timeout: 60_000,
+        }),
+        this.questionEditPage.clickGenerateExplanations(),
+    ])
 })
 
 When('I remember explanation for answer {int}', async function (index: number) {

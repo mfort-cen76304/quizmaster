@@ -41,10 +41,33 @@ const buildAiPrompt = (prompt: string, questionType: QuestionType) => {
     return typeInstruction ? `${trimmedPrompt}\n\n${typeInstruction}` : trimmedPrompt
 }
 
+const buildRegenerateExplanationsPrompt = (
+    questionText: string,
+    answers: readonly string[],
+    correctAnswers: readonly number[],
+    questionType: QuestionType,
+) => {
+    const serializedAnswers = answers.map((answer, index) => `${index}. ${answer}`).join('\n')
+    const serializedCorrectAnswers = correctAnswers.join(', ')
+
+    return [
+        'Regenerate explanations for this existing quiz question.',
+        'Keep question text exactly as provided.',
+        'Keep answers exactly as provided and in the same order.',
+        'Keep correctAnswers indexes exactly as provided.',
+        'Return a non-empty explanation for every answer.',
+        `questionType: ${questionType}`,
+        `question: ${questionText}`,
+        `answers:\n${serializedAnswers}`,
+        `correctAnswers: [${serializedCorrectAnswers}]`,
+    ].join('\n\n')
+}
+
 export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditProps) => {
     const isEditing = question != null
     const state = useQuestionFormState(question)
     const [aiLoading, setAiLoading] = useState(false)
+    const [explanationsLoading, setExplanationsLoading] = useState(false)
     const [aiError, setAiError] = useState('')
 
     const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
@@ -66,6 +89,28 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
             setAiError(message || 'AI assistant request failed.')
         } finally {
             setAiLoading(false)
+        }
+    }
+
+    const handleGenerateExplanationsClick = async () => {
+        setAiError('')
+        setExplanationsLoading(true)
+
+        try {
+            const response = await postAiAssistant(
+                buildRegenerateExplanationsPrompt(
+                    state.questionText,
+                    state.answers,
+                    state.correctAnswers,
+                    state.questionType,
+                ),
+            )
+            state.applyGeneratedExplanations(response.explanations)
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'AI assistant request failed.'
+            setAiError(message || 'AI assistant request failed.')
+        } finally {
+            setExplanationsLoading(false)
         }
     }
 
@@ -171,7 +216,8 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                     setShowExplanations={state.setShowExplanations}
                     showExplanations={state.showExplanations}
                     showGenerateExplanationsButton={state.isAiGenerated}
-                    generateExplanations={state.generateExplanations}
+                    generateExplanations={handleGenerateExplanationsClick}
+                    generateExplanationsLoading={explanationsLoading}
                     answerStates={state.answerStates}
                     isMultipleChoice={state.isMultipleChoice}
                     addAnswer={state.addAnswer}

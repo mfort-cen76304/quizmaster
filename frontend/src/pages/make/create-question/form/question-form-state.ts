@@ -36,6 +36,9 @@ export interface QuestionFormState {
     readonly isAiGenerated: boolean
 }
 
+const normalizeExplanations = (values: readonly string[], expectedLength: number): readonly string[] =>
+    Array.from({ length: expectedLength }, (_, index) => values[index] ?? '')
+
 export type { QuestionType }
 
 export const useQuestionFormState = (question?: Question) => {
@@ -150,8 +153,10 @@ export const useQuestionFormState = (question?: Question) => {
         setAnswerIds(response.answers.map(() => genId()))
     }
 
-    const generateExplanations = () => {
-        setExplanations(Array.from(generatedExplanations))
+    const applyGeneratedExplanations = (values: readonly string[]) => {
+        const normalized = normalizeExplanations(values, answers.length)
+        setGeneratedExplanations(normalized)
+        setExplanations(normalized)
         setShowExplanations(true)
     }
 
@@ -209,7 +214,7 @@ export const useQuestionFormState = (question?: Question) => {
         setShowExplanations,
         setImageUrl,
         applyAiResponse,
-        generateExplanations,
+        applyGeneratedExplanations,
     }
 }
 

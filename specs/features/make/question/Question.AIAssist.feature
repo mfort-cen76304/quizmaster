@@ -32,7 +32,7 @@ Feature: Generate question using AI
     Then I see explanations are enabled
     And all answers have explanations
 
-  @ai @slow @skip
+  @ai @slow
   Scenario: Generate Explanations fills previously empty explanation fields
     Given I start creating a new question
     When I ask AI:
@@ -42,7 +42,7 @@ Feature: Generate question using AI
     When I click Generate Explanations
     Then all answers have explanations
 
-  @ai @slow @skip
+  @ai @slow
   Scenario: Generate Explanations fills explanations after adding a new answer manually
     Given I start creating a new question
     When I ask AI:
@@ -54,7 +54,7 @@ Feature: Generate question using AI
     When I click Generate Explanations
     Then all answers have explanations
 
-  @ai @slow @skip
+  @ai @slow
   Scenario: Generate Explanations updates explanation after manual answer text change
     Given I start creating a new question
     When I ask AI:
