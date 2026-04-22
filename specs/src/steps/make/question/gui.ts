@@ -278,7 +278,7 @@ When('I enter answer {int} text {string}', async function (index: number, answer
     await enterAnswerText(this, index - 1, answer)
 })
 
-When('I enter the last answer\'s text {string}', async function (answer: string) {
+When("I enter the last answer's text {string}", async function (answer: string) {
     await enterLastAnswerText(this, answer)
 })
 
