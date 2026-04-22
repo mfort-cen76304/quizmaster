@@ -123,7 +123,8 @@ Feature: Show stats
       | Started | Finished | Unfinished | Timeout |
       |       1 |        1 |          0 |       0 |
 
-    Scenario: Overwriting an incorrect answer with incorrect one updates statistics
+  Scenario: Overwriting an incorrect answer with incorrect one updates statistics
+
     Given quiz "Stats Quiz" with 2 questions
       | time limit | 30s |
 
