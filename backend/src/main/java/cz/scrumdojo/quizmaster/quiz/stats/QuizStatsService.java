@@ -69,8 +69,8 @@ public class QuizStatsService {
                 attempt.getId(),
                 durationSeconds,
                 correctAnswers,
-                partiallyCorrectAnswers,
                 incorrectAnswers,
+                partiallyCorrectAnswers,
                 totalQuestions,
                 score,
                 status
