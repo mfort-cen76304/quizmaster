@@ -28,6 +28,16 @@ export const Answer = (props: AnswerProps) => {
 
     const className = props.isCorrect ? 'correctly-selected' : isChecked ? 'incorrect' : 'correctly-not-selected'
 
+    const barLabel = props.showFeedback
+        ? props.isCorrect
+            ? 'Correct answer:'
+            : isChecked
+              ? 'Your answer:'
+              : null
+        : null
+    const barLabelClass = props.isCorrect ? 'bar-label correct-label' : 'bar-label'
+    const barNote = props.showFeedback && props.isCorrect && !isChecked ? '(missed)' : null
+
     return (
         <li key={props.idx} id={`answer-row-${props.idx}`}>
             <div className={`answer-input-row ${props.showFeedback ? className : ''}`}>
@@ -40,9 +50,11 @@ export const Answer = (props: AnswerProps) => {
                     checked={isChecked}
                     disabled={disabled}
                 />
+                {barLabel && <span className={barLabelClass}>{barLabel}</span>}
                 <label htmlFor={answerId} id={`answer-label-${props.idx}`}>
                     {props.answer}
                 </label>
+                {barNote && <span className="bar-note">{barNote}</span>}
             </div>
             {props.showFeedback && props.explanation && <Explanation text={props.explanation} />}
         </li>

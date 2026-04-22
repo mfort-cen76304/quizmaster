@@ -20,7 +20,7 @@ export const NumericalResult = ({ question, userInput }: NumericalResultProps) =
         return (
             <div className="numerical-result">
                 <div className="numerical-bar correct" data-testid="correct-bar">
-                    <span className="bar-label">Correct answer:</span> {correctAnswer}
+                    <span className="bar-label correct-label">Correct answer:</span> {correctAnswer}
                 </div>
             </div>
         )
@@ -31,7 +31,8 @@ export const NumericalResult = ({ question, userInput }: NumericalResultProps) =
     return (
         <div className="numerical-result">
             <div className="numerical-bar correct" data-testid="correct-bar">
-                <span className="bar-label">Correct answer:</span> {correctAnswer}
+                <span className="bar-label correct-label">Correct answer:</span> {correctAnswer}
+                {!result.correct && <span className="bar-note"> (missed)</span>}
             </div>
             <div className={`numerical-bar ${userBarClass}`} data-testid="user-bar">
                 <span className="bar-label">Your answer:</span> {userValue}
