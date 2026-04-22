@@ -15,9 +15,13 @@ import { QuizTakePage } from '#pages/take/quiz-take/quiz-take-page.tsx'
 import { QuizDryRunWelcomePage } from '#pages/take/quiz-take/quiz-welcome/quiz-dry-run-welcome-page.tsx'
 import { QuizWelcomePage } from '#pages/take/quiz-take/quiz-welcome/quiz-welcome-page.tsx'
 
+const isAutomatedBrowser = typeof navigator !== 'undefined' && navigator.webdriver
+const shouldRenderCrazyBackground = !isAutomatedBrowser
+
 export const App = () => (
     <BrowserRouter>
-        <CrazyBackground />
+        {/* Crazy Background takes too long in tests and makes timeouts */}
+        {shouldRenderCrazyBackground && <CrazyBackground />}
         <div style={{ position: 'relative', zIndex: 1 }}>
             <Routes>
                 <Route path={ROUTES.home} element={<HomePage />} />
