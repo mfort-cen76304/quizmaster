@@ -52,3 +52,26 @@ Feature: Quiz dry run
     * I answer correctly
     * 5 seconds pass
     Then I see the timeout message
+
+
+  Scenario: Dry-run attempts are excluded from statistics
+    Given quiz "Quiz" with 2 questions
+
+    # A normal attempt that should count
+    When I start the quiz
+    * I answer 2 questions correctly
+    * I finish the quiz in 10 seconds
+
+    # A dry run that should NOT count
+    When I start a dry run of quiz "Quiz"
+    * I start the dry run
+    * I answer 2 questions incorrectly
+    * I finish the quiz in 20 seconds
+
+    When I open quiz "Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
+      | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
+    And I see summary stats table
+      | Started | Finished | Unfinished | Timeout |
+      |       1 |        1 |          0 |       0 |
