@@ -130,6 +130,7 @@ export class QuestionEditPage {
     expectNumericalCorrectAnswer = (value: string) => expect(this.numericalCorrectAnswerLocator()).toHaveValue(value)
     expectNumericalAnswerNote = (value: string) => expect(this.numericalAnswerFieldLocator()).toContainText(value)
     expectNumericalTolerance = (value: string) => expect(this.numericalToleranceLocator()).toHaveValue(value)
+    expectNumericalToleranceNotEmpty = () => expect(this.numericalToleranceLocator()).not.toHaveValue('')
     expectEasyChecked = () => expect(this.isEasyLocator()).toBeChecked()
     expectEasyUnchecked = () => expect(this.isEasyLocator()).not.toBeChecked()
     expectEasyVisible = () => expect(this.isEasyLocator()).toBeVisible()
@@ -151,6 +152,7 @@ export class QuestionEditPage {
     expectAnswerExplanation = (index: number, value: string) =>
         expect(this.answerExplanationLocator(index)).toHaveValue(value)
     expectQuestionExplanation = (value: string) => expect(this.questionExplanationLocator()).toHaveValue(value)
+    expectQuestionExplanationNotEmpty = () => expect(this.questionExplanationLocator()).not.toHaveValue('')
     expectAddAnswerNotVisible = () => expect(this.addAnswerButtonLocator()).not.toBeVisible()
     expectErrorCount = (n: number) => expect(this.errorsLocator()).toHaveCount(n)
 

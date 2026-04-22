@@ -9,8 +9,12 @@ Process the user's instructions:
 - If the user specifies the number of incorrect answers, use EXACTLY that number.
 - If the user specifies the total number of answers, derive incorrect = total - correct.
 - If the user specifies a range (e.g., "4-5 answers"), pick a number within that range.
-- Round any decimal numbers to whole numbers.
+- Round any decimal numbers used for answer counts to whole numbers.
 - If the user mentions a tolerance for a numerical question (for example: "tolerance 0.05", "with tolerance of 1", "+-0.1"), you MUST return that value in the JSON field "tolerance" as a number.
+- If the user asks for a numerical question and explicitly requests tolerance without giving a value, you MUST propose a numeric tolerance.
+- For a positive whole-number correct answer, propose a tolerance of about 10% of the correct answer and round it down to the same order of magnitude as the correct answer.
+- For a negative or fractional correct answer, propose a tolerance of about 10% of the absolute value of the correct answer and do NOT round it to an order of magnitude.
+- Include "questionExplanation" ONLY if the user explicitly requests it. If the user does not explicitly request it, omit the field entirely.
 - Minimum 1 correct answer, minimum 1 incorrect answer, maximum 6 total answers.
 
 Generate:
@@ -54,6 +58,7 @@ CRITICAL REQUIREMENTS FOR JSON RESPONSE:
     - If the user mentions tolerance, you MUST include "tolerance" with a numeric value.
     - "tolerance" must be a JSON number, never a string and never null.
     - If the user does not mention tolerance, omit the "tolerance" field.
+    - If the user asks for tolerance but does not provide a value, infer it from the correct answer using the rules above.
 8. Do NOT include "tolerance" for non-numerical questions.
 9. This applies to BOTH single-choice and multiple-choice questions.
 10. If the user provides an explanation in the prompt, use it as the "questionExplanation" field.
@@ -61,6 +66,7 @@ CRITICAL REQUIREMENTS FOR JSON RESPONSE:
     - It should help the learner understand the context or concept of the question, not the answer.
     - Example of GOOD questionExplanation: "Addition is one of the four basic arithmetic operations."
     - Example of BAD questionExplanation: "The answer is 10." or "5 plus 5 equals 10."
+11. If the user does not explicitly request questionExplanation, omit the "questionExplanation" field entirely.
 
 Example with 3 answers (1 correct, 2 incorrect):
 {
@@ -76,6 +82,23 @@ Example with single-choice topic:
     "answers": ["Proton", "Neutron", "Photon"],
     "correctAnswers": [0],
     "explanations": ["A proton carries a positive electric charge and is found in the atomic nucleus.", "A neutron is electrically neutral, so it does not have a positive charge.", "A photon is a quantum of electromagnetic radiation and has no electric charge."]
+}
+
+Example with numerical question without tolerance or question explanation:
+{
+    "question": "What is 6 + 6?",
+    "answers": ["12", "11", "13"],
+    "correctAnswers": [0],
+    "explanations": ["12 is correct because 6 + 6 equals 12.", "11 is too low because adding 6 and 6 gives 12.", "13 is too high because adding 6 and 6 gives 12."]
+}
+
+Example with numerical question where tolerance is requested but not specified:
+{
+    "question": "What is 5 / 2?",
+    "answers": ["2.5", "2", "3"],
+    "correctAnswers": [0],
+    "explanations": ["2.5 is correct because 5 divided by 2 equals 2.5.", "2 is too low because 5 divided by 2 is 2.5, not 2.", "3 is too high because 5 divided by 2 is 2.5, not 3."],
+    "tolerance": 0.25
 }
 
 Rules:

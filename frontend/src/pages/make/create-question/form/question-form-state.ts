@@ -118,10 +118,7 @@ export const useQuestionFormState = (question?: Question) => {
             setQuestionExplanation(response.questionExplanation ?? '')
             setQuestionType('numerical')
             setNumericalAnswer(selectedAnswer)
-            // Apply tolerance from AI response if provided, otherwise leave as is
-            if (response.tolerance != null) {
-                setTolerance(String(response.tolerance))
-            }
+            setTolerance(response.tolerance != null ? String(response.tolerance) : '')
             setIsEasy(false)
             setIsAiGenerated(false)
             setAnswers(emptyAnswerSlots(''))

@@ -113,6 +113,10 @@ Then('I see tolerance {string}', async function (value: string) {
     await this.questionEditPage.expectNumericalTolerance(value)
 })
 
+Then('I see non-empty tolerance', async function () {
+    await this.questionEditPage.expectNumericalToleranceNotEmpty()
+})
+
 Then('I see note {string}', async function (value: string) {
     await this.questionEditPage.expectNumericalAnswerNote(value)
 })
@@ -191,6 +195,10 @@ Then('I see empty question explanation', async function () {
 
 Then('I see question explanation {string}', async function (explanation: string) {
     await this.questionEditPage.expectQuestionExplanation(explanation)
+})
+
+Then('I see non-empty question explanation', async function () {
+    await this.questionEditPage.expectQuestionExplanationNotEmpty()
 })
 
 Then('I see at least {int} answers', async function (count: number) {
