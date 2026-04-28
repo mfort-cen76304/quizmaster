@@ -34,6 +34,7 @@ export interface QuestionFormState {
     readonly showExplanations: boolean
     readonly imageUrl: string
     readonly isAiGenerated: boolean
+    readonly hasPreviousVersion: boolean
 }
 
 const normalizeExplanations = (values: readonly string[], expectedLength: number): readonly string[] =>
@@ -58,6 +59,19 @@ export const useQuestionFormState = (question?: Question) => {
         question?.explanations?.some(explanation => !!explanation) ?? false,
     )
     const [isAiGenerated, setIsAiGenerated] = useState(false)
+    const [hasPreviousVersion, setHasPreviousVersion] = useState(false)
+    const [previousSnapshot, setPreviousSnapshot] = useState<null | {
+        questionText: string
+        questionType: QuestionType
+        answers: readonly string[]
+        explanations: readonly string[]
+        correctAnswers: readonly number[]
+        questionExplanation: string
+        isEasy: boolean
+        showExplanations: boolean
+        numericalAnswer: string
+        tolerance: string
+    }>(null)
     const [generatedExplanations, setGeneratedExplanations] = useState<readonly string[]>([])
     const nextId = useRef(0)
     const genId = () => nextId.current++
@@ -107,6 +121,20 @@ export const useQuestionFormState = (question?: Question) => {
     }
 
     const applyAiResponse = (response: AiAssistantResponse) => {
+        setPreviousSnapshot({
+            questionText,
+            questionType,
+            answers,
+            explanations,
+            correctAnswers,
+            questionExplanation,
+            isEasy,
+            showExplanations,
+            numericalAnswer,
+            tolerance,
+        })
+        setHasPreviousVersion(true)
+
         if (questionType === 'numerical') {
             const firstCorrectIndex = response.correctAnswers[0]
             const selectedAnswer =
@@ -157,6 +185,24 @@ export const useQuestionFormState = (question?: Question) => {
         setShowExplanations(true)
     }
 
+    const restorePreviousVersion = () => {
+        if (!previousSnapshot) return
+        setQuestionText(previousSnapshot.questionText)
+        setQuestionType(previousSnapshot.questionType)
+        setAnswers(previousSnapshot.answers)
+        setExplanations(previousSnapshot.explanations)
+        setCorrectAnswers(previousSnapshot.correctAnswers)
+        setQuestionExplanation(previousSnapshot.questionExplanation)
+        setIsEasy(previousSnapshot.isEasy)
+        setShowExplanations(previousSnapshot.showExplanations)
+        setNumericalAnswer(previousSnapshot.numericalAnswer)
+        setTolerance(previousSnapshot.tolerance)
+        setIsAiGenerated(false)
+        setHasPreviousVersion(false)
+        setPreviousSnapshot(null)
+        setAnswerIds(previousSnapshot.answers.map(() => genId()))
+    }
+
     const removeAnswer = (idx: number) => {
         setAnswers(answers.filter((_, i) => i !== idx))
         setExplanations(explanations.filter((_, i) => i !== idx))
@@ -198,6 +244,7 @@ export const useQuestionFormState = (question?: Question) => {
         showExplanations,
         imageUrl,
         isAiGenerated,
+        hasPreviousVersion,
         setQuestionText,
         setTagText,
         setAiPromptText,
@@ -212,6 +259,7 @@ export const useQuestionFormState = (question?: Question) => {
         setImageUrl,
         applyAiResponse,
         applyGeneratedExplanations,
+        restorePreviousVersion,
     }
 }
 

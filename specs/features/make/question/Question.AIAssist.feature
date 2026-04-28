@@ -152,3 +152,8 @@ Feature: Generate question using AI
       * saved and bookmarked as "Czechia"
     When I start editing question "Czechia"
     Then I do not see AI section
+ @ai @slow
+ Scenario: After question is generated button previous version is shown
+   Given I start creating a new question
+   When I generated a question by AI
+   Then button to see previous version is shown

@@ -148,6 +148,15 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                             {aiLoading ? 'Loading...' : 'Generate'}
                         </Button>
                     </div>
+                    {state.hasPreviousVersion && (
+                        <Button
+                            id="previous-version-button"
+                            className="secondary button"
+                            onClick={state.restorePreviousVersion}
+                        >
+                            Previous version
+                        </Button>
+                    )}
                     <span className="example">Example: "What is the capital of France? Generate 6 answers."</span>
                     {aiError && <Alert type="error">{aiError}</Alert>}
                 </Field>

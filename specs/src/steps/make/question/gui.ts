@@ -161,6 +161,10 @@ Then('I see Generate Explanations button', async function () {
     await this.questionEditPage.expectGenerateExplanationsButtonVisible()
 })
 
+Then('button to see previous version is shown', async function () {
+    await this.questionEditPage.expectPreviousVersionButtonVisible()
+})
+
 Then('I see 2 default empty answers', async function () {
     await this.questionEditPage.expectAnswerRowCount(2)
 
@@ -236,6 +240,16 @@ When('I ask AI:', async function (dataTable: DataTable) {
     // Wait on the actual API response, not the textarea content. The latter
     // is unreliable on regenerate (the previous response makes "not empty"
     // resolve immediately, before the new response arrives).
+    await Promise.all([
+        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+            timeout: 60_000,
+        }),
+        this.questionEditPage.clickAiAssist(),
+    ])
+})
+
+When('I generated a question by AI', async function () {
+    await this.questionEditPage.enterAIPrompt('Generate a question about capital cities with 1 correct answer and 2 incorrect answers')
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
             timeout: 60_000,

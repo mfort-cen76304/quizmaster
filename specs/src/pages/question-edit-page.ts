@@ -26,6 +26,11 @@ export class QuestionEditPage {
     clickAiAssist = () => this.aiAssistButtonLocator().click()
     clickGenerateExplanations = () => this.generateExplanationsButtonLocator().click()
 
+    private previousVersionButtonLocator = () => this.page.locator('#previous-version-button')
+    clickPreviousVersion = () => this.previousVersionButtonLocator().click()
+    expectPreviousVersionButtonVisible = () => expect(this.previousVersionButtonLocator()).toBeVisible()
+    expectPreviousVersionButtonNotVisible = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
+
     private showExplanationLocator = () => this.page.locator('#show-explanation')
     private generateExplanationsButtonLocator = () => this.page.locator('#generate-explanations')
     explanationsEnabled = () => this.showExplanationLocator().isChecked()
