@@ -16,13 +16,20 @@ export class QuestionEditPage {
     expectTagValue = (value: string) => expect(this.tagLocator()).toHaveValue(value)
     expectEmptyTag = () => expect(this.tagLocator()).toHaveValue('')
 
-    private aiPromptLocator = () => this.page.locator('#ai-prompt-text')
+    private aiPromptLocator = () => this.page.locator('#robin-prompt-text')
     enterQuestion = (question: string) => this.questionLocator().fill(question)
 
     enterAIPrompt = (prompt: string) => this.aiPromptLocator().fill(prompt)
     questionValue = () => this.questionLocator().inputValue()
 
-    private aiAssistButtonLocator = () => this.page.locator('#question-ai-assistant-button')
+    private robinButtonLocator = () => this.page.locator('.robin-button')
+    clickRobinButton = async () => {
+        await this.robinButtonLocator().click()
+        // Wait for the Robin sheet to open
+        await this.aiPromptLocator().waitFor({ state: 'visible' })
+    }
+
+    private aiAssistButtonLocator = () => this.page.locator('#robin-generate-button')
     clickAiAssist = () => this.aiAssistButtonLocator().click()
     clickGenerateExplanations = () => this.generateExplanationsButtonLocator().click()
 

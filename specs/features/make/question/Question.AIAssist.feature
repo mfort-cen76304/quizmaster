@@ -7,7 +7,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Generate Explanations button appears after clicking Generate in AI Prompt
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about nuclear physics |
     Then I see Generate Explanations button
     And I do not see explanation fields
@@ -15,7 +16,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Explanations stay empty after enabling explanation fields
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about nuclear physics |
     Then I see Generate Explanations button
     When I enable explanations
@@ -25,7 +27,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Clicking Generate Explanations shows generated explanations
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about nuclear physics |
     Then I see Generate Explanations button
     When I click Generate Explanations
@@ -35,7 +38,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Generate Explanations fills previously empty explanation fields
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about nuclear physics |
     And I enable explanations
     Then all explanation fields are empty
@@ -45,7 +49,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Generate Explanations fills explanations after adding a new answer manually
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about nuclear physics |
     And I add another answer
     And I enter the last answer's text "example"
@@ -57,7 +62,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Generate Explanations updates explanation after manual answer text change
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about nuclear physics |
     And I click Generate Explanations
     And I remember explanation for answer 1
@@ -70,7 +76,8 @@ Feature: Generate question using AI
   Scenario: Generate a single-choice question
     Given I start creating a new question
     And the question is single choice
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about capital cities |
       | and 2 incorrect answers                 |
     Then Question field is not empty
@@ -82,7 +89,8 @@ Feature: Generate question using AI
   Scenario: Generate a multiple-choice question
     Given I start creating a new question
     And I mark the question as multiple choice
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about European capitals |
       | and 2 incorrect answers                     |
     Then Question field is not empty
@@ -93,7 +101,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Generate a question with explanations
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about European capitals |
       | with 2 correct answers                      |
       | and 2 incorrect answers                     |
@@ -108,7 +117,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Save an AI-generated question
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about capital cities |
       | with 1 correct answer                   |
       | and 2 incorrect answers                 |
@@ -118,7 +128,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Edit an AI-generated question before saving
     Given I start creating a new question
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about capital cities |
       | with 1 correct answer                   |
       | and 2 incorrect answers                 |
@@ -130,12 +141,14 @@ Feature: Generate question using AI
   Scenario: Regenerate replaces previous AI response
     Given I start creating a new question
     And the question is single choice
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about capital cities |
       | and 2 incorrect answers                 |
     Then the question is single choice
     And I mark the question as multiple choice
-    When I ask AI:
+    When I open Robin AI
+    And I ask AI:
       | Generate a question about European capitals |
       | with 2 correct answers                      |
       | and 2 incorrect answers                     |
@@ -155,11 +168,14 @@ Feature: Generate question using AI
  @ai @slow
  Scenario: After question is generated button previous version is shown
    Given I start creating a new question
-   When I generated a question by AI
+   When I open Robin AI
+   And I generated a question by AI
    Then button to see previous version is shown
  @ai @slow
  Scenario: After I clicked on button "previous version" I see the previous generated version
    Given I start creating a new question when I already have generated content
-   When I generated a new question by AI
+   When I open Robin AI
+   And I ask AI:
+     | Generate a new question about a different topic |
    And I click on previous version button
    Then I see the previous generated version
