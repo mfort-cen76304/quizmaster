@@ -235,6 +235,10 @@ When('I enter question {string}', async function (question: string) {
     await enterQuestion(this, question)
 })
 
+When('I open Robin AI', async function () {
+    await this.questionEditPage.clickRobinButton()
+})
+
 When('I ask AI:', async function (dataTable: DataTable) {
     await enterAIPrompt(this, toText(dataTable))
     // Wait on the actual API response, not the textarea content. The latter
@@ -252,7 +256,8 @@ Given('I start creating a new question when I already have generated content', a
     await ensureWorkspace(this)
     await this.workspacePage.createNewQuestion()
     this.questionWip = { text: '', answers: [] }
-    // Generate first AI question and remember its content
+    // Open Robin AI and generate first AI question
+    await this.questionEditPage.clickRobinButton()
     await this.questionEditPage.enterAIPrompt(
         'Generate a question about capital cities with 1 correct answer and 2 incorrect answers',
     )

@@ -1,7 +1,9 @@
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { postAiAssistant } from '#api/ai-assistant.ts'
 import type { QuestionRequest } from '#api/question.ts'
+import robinIcon from '#fe/assets/icons/Robin.svg'
 import type { Question, QuestionType } from '#model/question.ts'
 import {
     SubmitButton,
@@ -34,7 +36,7 @@ const buildAiPrompt = (prompt: string, questionType: QuestionType) => {
         multiple:
             'This must be a multiple choice question with at least 2 correct answers. Never return exactly 1 correct answer. Return a non-empty explanation for every answer.',
         numerical:
-            'This should be suitable for a numerical quiz question asking for just one numeric value. Include exactly 1 correct numeric answer and at least 1 incorrect answer. Return a non-empty explanation for every answer.',
+            'This should be suitable for a numerical quiz question asking for just one numeric value. Include exactly 1 correct numeric answer and at least 1 incorrect answer. Return a non-empty explanation for every answer and return non-empty questionExplanation when requested.',
     }
 
     const typeInstruction = typeInstructionByQuestionType[questionType]
@@ -69,6 +71,7 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
     const [aiLoading, setAiLoading] = useState(false)
     const [explanationsLoading, setExplanationsLoading] = useState(false)
     const [aiError, setAiError] = useState('')
+    const [robinSheetOpen, setRobinSheetOpen] = useState(false)
 
     const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
     const hasImagePreview = state.imageUrl.trim() !== '' && isValidImageUrl(state.imageUrl)
@@ -84,6 +87,7 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
         try {
             const response = await postAiAssistant(buildAiPrompt(state.aiPromptText, state.questionType))
             state.applyAiResponse(response)
+            setRobinSheetOpen(false)
         } catch (error) {
             const message = error instanceof Error ? error.message : 'AI assistant request failed.'
             setAiError(message || 'AI assistant request failed.')
@@ -115,39 +119,164 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
     }
 
     return (
-        <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
-            <Row>
-                <Field label="Question type" required>
-                    <RadioSet
-                        name="question-type"
-                        value={state.questionType}
-                        onChange={state.selectQuestionType}
-                        options={{ single: 'Single choice', multiple: 'Multiple choice', numerical: 'Numerical' }}
-                    />
-                </Field>
-                {state.isMultipleChoice && (
-                    <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
-                )}
-            </Row>
-            {!isEditing && (
-                <Field label="AI Prompt">
+        <>
+            <style>{`
+                @keyframes blink {
+                    0%, 90%, 100% {
+                        filter: brightness(1);
+                    }
+                    93%, 97% {
+                        filter: brightness(0.3);
+                    }
+                }
+                .robin-icon {
+                    animation: blink 3s infinite;
+                }
+                @keyframes slideUp {
+                    from { transform: translateY(100%); }
+                    to { transform: translateY(0); }
+                }
+            `}</style>
+            {createPortal(
+                <>
+                    <div
+                        style={{
+                            position: 'fixed',
+                            bottom: '20px',
+                            right: '20px',
+                            zIndex: 9999,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            gap: '8px',
+                        }}
+                    >
+                        <div
+                            style={{
+                                background: 'white',
+                                color: '#7c3aed',
+                                padding: '6px 12px',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                fontWeight: 'bold',
+                                whiteSpace: 'nowrap',
+                            }}
+                        >
+                            AI Helper
+                        </div>
+                        <button
+                            type="button"
+                            className="robin-button"
+                            onClick={() => setRobinSheetOpen(true)}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                            }}
+                        >
+                            <img
+                                src={robinIcon}
+                                alt="Robin"
+                                className="robin-icon"
+                                style={{ width: '72px', height: '72px' }}
+                            />
+                        </button>
+                    </div>
+                    {robinSheetOpen && (
+                        <div
+                            style={{
+                                position: 'fixed',
+                                bottom: 0,
+                                left: 0,
+                                right: 0,
+                                height: '50vh',
+                                background: 'white',
+                                zIndex: 10000,
+                                boxShadow: '0 -4px 24px rgba(0,0,0,0.18)',
+                                borderRadius: '16px 16px 0 0',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                padding: '20px',
+                                gap: '16px',
+                                animation: 'slideUp 0.3s ease-out',
+                            }}
+                        >
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#7c3aed' }}>
+                                    Ask Robin AI
+                                </span>
+                                <button
+                                    type="button"
+                                    onClick={() => setRobinSheetOpen(false)}
+                                    style={{
+                                        background: 'none',
+                                        border: 'none',
+                                        fontSize: '20px',
+                                        cursor: 'pointer',
+                                        lineHeight: 1,
+                                        color: '#666',
+                                    }}
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <TextArea
+                                id="robin-prompt-text"
+                                placeholder="What do you want to ask?"
+                                value={state.aiPromptText}
+                                onChange={state.setAiPromptText}
+                            />
+                            <span style={{ fontSize: '12px', color: '#888' }}>
+                                Example: "What is the capital of France? Generate 6 answers."
+                            </span>
+                            {aiError && (
+                                <Alert type="error" dataTestId="ai-assistant-error">
+                                    {aiError}
+                                </Alert>
+                            )}
+                            <Button
+                                id="robin-generate-button"
+                                className="secondary button"
+                                onClick={() => {
+                                    void handleAiAssistantClick()
+                                }}
+                                disabled={aiLoading}
+                            >
+                                {aiLoading ? 'Loading...' : 'Generate'}
+                            </Button>
+                        </div>
+                    )}
+                </>,
+                document.body,
+            )}
+            <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
+                <Row>
+                    <Field label="Question type" required>
+                        <RadioSet
+                            name="question-type"
+                            value={state.questionType}
+                            onChange={state.selectQuestionType}
+                            options={{ single: 'Single choice', multiple: 'Multiple choice', numerical: 'Numerical' }}
+                        />
+                    </Field>
+                    {state.isMultipleChoice && (
+                        <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
+                    )}
+                </Row>
+                <Field label="Question" required>
                     <div className="question-input-with-action">
                         <TextArea
-                            id="ai-prompt-text"
+                            id="question-text"
                             className="question-textarea-with-action"
-                            placeholder="What do you want ask?"
-                            value={state.aiPromptText}
-                            onChange={state.setAiPromptText}
+                            value={state.questionText}
+                            onChange={state.setQuestionText}
                         />
-                        <Button
-                            id="question-ai-assistant-button"
-                            className="secondary button question-ai-assistant-button"
-                            onClick={handleAiAssistantClick}
-                            disabled={aiLoading}
-                        >
-                            {aiLoading ? 'Loading...' : 'Generate'}
-                        </Button>
                     </div>
+                    <ErrorMessage errorCode="empty-question" />
                     {state.hasPreviousVersion && (
                         <Button
                             id="previous-version-button"
@@ -158,96 +287,89 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                         </Button>
                     )}
                     <span className="example">Example: "What is the capital of France? Generate 6 answers."</span>
-                    {aiError && <Alert type="error">{aiError}</Alert>}
+                    {aiError && !robinSheetOpen && (
+                        <Alert type="error" dataTestId="ai-assistant-error">
+                            {aiError}
+                        </Alert>
+                    )}
                 </Field>
-            )}
-            <Field label="Tag">
-                <TextInput id="question-tag" value={state.tagText} onChange={state.setTagText} />
-            </Field>
-            <Field label="Question" required>
-                <div className="question-input-with-action">
-                    <TextArea
-                        id="question-text"
-                        className="question-textarea-with-action"
-                        value={state.questionText}
-                        onChange={state.setQuestionText}
+                <Field label="Image URL">
+                    <TextInput id="image-url" value={state.imageUrl} onChange={state.setImageUrl} />
+                    {hasImageUrlTooLong && (
+                        <Alert type="error" dataTestId="image-url-too-long">
+                            {errorMessage['image-url-too-long']}
+                        </Alert>
+                    )}
+                    {hasInvalidImageUrl && !hasImageUrlTooLong && (
+                        <Alert type="error" dataTestId="invalid-image-url">
+                            {errorMessage['invalid-image-url']}
+                        </Alert>
+                    )}
+                    {hasImagePreview && <img src={state.imageUrl} alt="preview" className="image-preview" />}
+                </Field>
+                {state.isNumerical ? (
+                    <>
+                        <Field label="Correct numerical answer" required>
+                            <input
+                                type="text"
+                                inputMode="decimal"
+                                id="numerical-correct-answer"
+                                value={state.numericalAnswer}
+                                onChange={e => state.setNumericalAnswer(e.target.value)}
+                            />
+                            <ErrorMessage errorCode="empty-numerical-answer" />
+                            <ErrorMessage errorCode="invalid-numerical-answer" />
+                            {(() => {
+                                const dotIndex = state.numericalAnswer.indexOf('.')
+                                if (dotIndex === -1) return null
+                                const decimalDigits = state.numericalAnswer.length - dotIndex - 1
+                                if (decimalDigits <= 0) return null
+                                return <p>{decimalDigits} decimal digits will be required in the answer.</p>
+                            })()}
+                        </Field>
+                        <Field label="Tolerance">
+                            <input
+                                type="number"
+                                id="numerical-tolerance"
+                                min="0"
+                                step="any"
+                                value={state.tolerance}
+                                onChange={e => state.setTolerance(e.target.value)}
+                            />
+                        </Field>
+                    </>
+                ) : (
+                    <AnswersEdit
+                        setShowExplanations={state.setShowExplanations}
+                        showExplanations={state.showExplanations}
+                        showGenerateExplanationsButton={state.isAiGenerated}
+                        generateExplanations={handleGenerateExplanationsClick}
+                        generateExplanationsLoading={explanationsLoading}
+                        answerStates={state.answerStates}
+                        isMultipleChoice={state.isMultipleChoice}
+                        addAnswer={state.addAnswer}
+                        removeAnswer={state.removeAnswer}
                     />
-                </div>
-                <ErrorMessage errorCode="empty-question" />
-            </Field>
-            <Field label="Image URL">
-                <TextInput id="image-url" value={state.imageUrl} onChange={state.setImageUrl} />
-                {hasImageUrlTooLong && (
-                    <Alert type="error" dataTestId="image-url-too-long">
-                        {errorMessage['image-url-too-long']}
-                    </Alert>
                 )}
-                {hasInvalidImageUrl && !hasImageUrlTooLong && (
-                    <Alert type="error" dataTestId="invalid-image-url">
-                        {errorMessage['invalid-image-url']}
-                    </Alert>
-                )}
-                {hasImagePreview && <img src={state.imageUrl} alt="preview" className="image-preview" />}
-            </Field>
-            {state.isNumerical ? (
-                <>
-                    <Field label="Correct numerical answer" required>
-                        <input
-                            type="text"
-                            inputMode="decimal"
-                            id="numerical-correct-answer"
-                            value={state.numericalAnswer}
-                            onChange={e => state.setNumericalAnswer(e.target.value)}
-                        />
-                        <ErrorMessage errorCode="empty-numerical-answer" />
-                        <ErrorMessage errorCode="invalid-numerical-answer" />
-                        {(() => {
-                            const dotIndex = state.numericalAnswer.indexOf('.')
-                            if (dotIndex === -1) return null
-                            const decimalDigits = state.numericalAnswer.length - dotIndex - 1
-                            if (decimalDigits <= 0) return null
-                            return <p>{decimalDigits} decimal digits will be required in the answer.</p>
-                        })()}
-                    </Field>
-                    <Field label="Tolerance">
-                        <input
-                            type="number"
-                            id="numerical-tolerance"
-                            min="0"
-                            step="any"
-                            value={state.tolerance}
-                            onChange={e => state.setTolerance(e.target.value)}
-                        />
-                    </Field>
-                </>
-            ) : (
-                <AnswersEdit
-                    setShowExplanations={state.setShowExplanations}
-                    showExplanations={state.showExplanations}
-                    showGenerateExplanationsButton={state.isAiGenerated}
-                    generateExplanations={handleGenerateExplanationsClick}
-                    generateExplanationsLoading={explanationsLoading}
-                    answerStates={state.answerStates}
-                    isMultipleChoice={state.isMultipleChoice}
-                    addAnswer={state.addAnswer}
-                    removeAnswer={state.removeAnswer}
-                />
-            )}
-            <Field label="Question explanation">
-                <TextArea
-                    id="question-explanation"
-                    value={state.questionExplanation}
-                    onChange={state.setQuestionExplanation}
-                />
-            </Field>
-            <Row>
-                {onBack && (
-                    <Button id="back" className="primary button" onClick={onBack}>
-                        Back
-                    </Button>
-                )}
-                <SubmitButton />
-            </Row>
-        </Form>
+                <Field label="Question explanation">
+                    <TextArea
+                        id="question-explanation"
+                        value={state.questionExplanation}
+                        onChange={state.setQuestionExplanation}
+                    />
+                </Field>
+                <Field label="Tag">
+                    <TextInput id="question-tag" value={state.tagText} onChange={state.setTagText} />
+                </Field>
+                <Row>
+                    {onBack && (
+                        <Button id="back" className="primary button" onClick={onBack}>
+                            Back
+                        </Button>
+                    )}
+                    <SubmitButton />
+                </Row>
+            </Form>
+        </>
     )
 }

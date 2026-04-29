@@ -27,7 +27,7 @@ export const enterAnswerText = async (world: QuizmasterWorld, index: number, ans
 }
 
 export const enterLastAnswerText = async (world: QuizmasterWorld, answer: string) => {
-    const index = world.questionWip?.answers.length ?? 0
+    const index = (await world.questionEditPage.answerRowCount()) - 1
     await world.questionEditPage.enterAnswerText(index, answer)
     world.updateAnswerWip(index, { text: answer })
 }
