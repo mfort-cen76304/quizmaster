@@ -161,3 +161,19 @@ Feature: Show stats
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
       |       1 |        1 |          0 |       0 |
+
+  Scenario: Partially correct answer is reflected in stats
+    Given workspace "Mixed" with questions
+      | bookmark | question                           | answers                                      |
+      | Capital  | What is the capital of Italy?      | Rome (*), Naples, Florence                   |
+      | Planets  | Which are planets in solar system? | Mars (*), Pluto, Venus (*), Titan, Earth (*) |
+    And quiz "Partial Quiz" with all questions
+    When I start the quiz
+    * I answer "Rome"
+    * I answer "Mars, Venus"
+    * I finish the quiz in 5 seconds
+
+    When I open quiz "Partial Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   | Partially Correct Answers |
+      | 5s       | 1.5/2  | 1 (50%)         | 0 (0%)            | 75    | Finished | 1 (50%)                   |

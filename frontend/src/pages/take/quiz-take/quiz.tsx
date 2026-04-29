@@ -26,7 +26,7 @@ export const QuestionForm = (props: QuestionProps) => {
     const nav = useQuizNavigationState(props.quiz, props.questionsBaseUrl)
     const bookmarks = useQuizBookmarkState()
     const [selectedAnswerIdxs, setSelectedAnswerIdxs] = useState<AnswerIdxs | undefined>(undefined)
-    const answerCounts = useRef({ correct: 0, incorrect: 0 })
+    const answerCounts = useRef({ correct: 0, partial: 0, incorrect: 0 })
 
     const answer = (questionAnswer: QuestionAnswer) => {
         answerQuestion(nav.currentQuestionIdx, questionAnswer)
@@ -89,28 +89,27 @@ export const QuestionForm = (props: QuestionProps) => {
         }
     }
 
+    const adjustCount = (score: number, delta: 1 | -1) => {
+        if (score === 1) answerCounts.current.correct += delta
+        else if (score === 0.5) answerCounts.current.partial += delta
+        else answerCounts.current.incorrect += delta
+    }
+
     const revertPreviousAnswerCount = () => {
         if (currentAnswer !== undefined) {
             const previousResult = evaluateAnswer(currentQuestion, currentAnswer)
-            if (previousResult.correct) {
-                answerCounts.current.correct--
-            } else {
-                answerCounts.current.incorrect--
-            }
+            adjustCount(previousResult.score, -1)
         }
     }
 
     const handleAnswerSubmitted = (questionAnswer: QuestionAnswer) => {
         revertPreviousAnswerCount()
         const result = evaluateAnswer(currentQuestion, questionAnswer)
-        if (result.correct) {
-            answerCounts.current.correct++
-        } else {
-            answerCounts.current.incorrect++
-        }
+        adjustCount(result.score, 1)
         if (props.quizRunId !== null) {
             patchAttempt(props.quizRunId, {
                 correctAnswers: answerCounts.current.correct,
+                partiallyCorrectAnswers: answerCounts.current.partial,
                 incorrectAnswers: answerCounts.current.incorrect,
             })
         }

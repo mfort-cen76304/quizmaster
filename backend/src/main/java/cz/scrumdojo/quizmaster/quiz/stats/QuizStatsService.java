@@ -53,16 +53,16 @@ public class QuizStatsService {
                 : null;
 
         int correctAnswers = attempt.getCorrectAnswers();
-        int incorrectAnswers = attempt.getFinishedAt() != null
-                ? totalQuestions - correctAnswers
-                : attempt.getIncorrectAnswers();
-
         int partiallyCorrectAnswers = attempt.getPartiallyCorrectAnswers() != null
                 ? attempt.getPartiallyCorrectAnswers()
                 : 0;
+        int incorrectAnswers = attempt.getFinishedAt() != null
+                ? totalQuestions - correctAnswers - partiallyCorrectAnswers
+                : attempt.getIncorrectAnswers();
 
+        float earnedPoints = correctAnswers + 0.5f * partiallyCorrectAnswers;
         int score = totalQuestions > 0
-                ? Math.round((float) correctAnswers / totalQuestions * 100)
+                ? Math.round(earnedPoints / totalQuestions * 100)
                 : 0;
 
         AttemptStatus status = deriveStatus(attempt);

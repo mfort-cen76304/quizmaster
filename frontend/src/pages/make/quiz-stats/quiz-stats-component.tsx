@@ -22,6 +22,10 @@ const pct = (value: number, total: number): string => {
     return `${value} (${percentage}%)`
 }
 
+// Drop the trailing zero so whole point totals stay "2/2" while half points
+// render as "1.5/2". Matches what students see on the score page.
+const formatPoints = (earned: number): string => (Number.isInteger(earned) ? String(earned) : earned.toFixed(1))
+
 const summaryRow = (s: SummaryStats): string[] => [
     String(s.started),
     String(s.finished),
@@ -29,14 +33,18 @@ const summaryRow = (s: SummaryStats): string[] => [
     String(s.timeout),
 ]
 
-const attemptRow = (a: AttemptStatsRecord): string[] => [
-    a.durationSeconds != null ? formatDuration(a.durationSeconds) : '',
-    `${a.correctAnswers}/${a.totalQuestions}`,
-    pct(a.correctAnswers, a.totalQuestions),
-    pct(a.incorrectAnswers, a.totalQuestions),
-    String(a.score),
-    statusLabels[a.status] ?? a.status,
-]
+const attemptRow = (a: AttemptStatsRecord): string[] => {
+    const earnedPoints = a.correctAnswers + 0.5 * a.partiallyCorrectAnswers
+    return [
+        a.durationSeconds != null ? formatDuration(a.durationSeconds) : '',
+        `${formatPoints(earnedPoints)}/${a.totalQuestions}`,
+        pct(a.correctAnswers, a.totalQuestions),
+        pct(a.incorrectAnswers, a.totalQuestions),
+        String(a.score),
+        statusLabels[a.status] ?? a.status,
+        pct(a.partiallyCorrectAnswers, a.totalQuestions),
+    ]
+}
 
 export const QuizStats = ({ quiz, stats }: QuizStatsProps) => (
     <div className="quiz-stats">
@@ -57,7 +65,7 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => (
                 'Incorrect Answers',
                 'Score',
                 'Status',
-                'Partially Correct answers',
+                'Partially Correct Answers',
             ]}
             rows={stats.attempts.map(attemptRow)}
         />
