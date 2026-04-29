@@ -66,7 +66,6 @@ const buildRegenerateExplanationsPrompt = (
 }
 
 export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditProps) => {
-    const isEditing = question != null
     const state = useQuestionFormState(question)
     const [aiLoading, setAiLoading] = useState(false)
     const [explanationsLoading, setExplanationsLoading] = useState(false)
