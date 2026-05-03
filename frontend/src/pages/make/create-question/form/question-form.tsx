@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { createPortal } from 'react-dom'
 
 import { postAiAssistant } from '#api/ai-assistant.ts'
 import type { QuestionRequest } from '#api/question.ts'
-import robinIcon from '#fe/assets/icons/Robin.svg'
 import type { Question, QuestionType } from '#model/question.ts'
 import {
     SubmitButton,
@@ -21,6 +19,7 @@ import { ErrorMessage, createValidator } from '#pages/components/forms/validatio
 import { AnswersEdit, stateToQuestionApiData } from '#pages/make/create-question/form'
 
 import { useQuestionFormState } from './question-form-state.ts'
+import { RobinAiHelper } from './robin-ai-helper.tsx'
 import { validateQuestionFormState, errorMessage, isValidImageUrl } from './validators.ts'
 
 interface QuestionEditProps {
@@ -119,139 +118,16 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
 
     return (
         <>
-            <style>{`
-                @keyframes blink {
-                    0%, 90%, 100% {
-                        filter: brightness(1);
-                    }
-                    93%, 97% {
-                        filter: brightness(0.3);
-                    }
-                }
-                .robin-icon {
-                    animation: blink 3s infinite;
-                }
-                @keyframes slideUp {
-                    from { transform: translateY(100%); }
-                    to { transform: translateY(0); }
-                }
-            `}</style>
-            {createPortal(
-                <>
-                    <div
-                        style={{
-                            position: 'fixed',
-                            bottom: '20px',
-                            right: '20px',
-                            zIndex: 9999,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            gap: '8px',
-                        }}
-                    >
-                        <div
-                            style={{
-                                background: 'white',
-                                color: '#7c3aed',
-                                padding: '6px 12px',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: 'bold',
-                                whiteSpace: 'nowrap',
-                            }}
-                        >
-                            AI Helper
-                        </div>
-                        <button
-                            type="button"
-                            className="robin-button"
-                            onClick={() => setRobinSheetOpen(true)}
-                            style={{
-                                background: 'transparent',
-                                border: 'none',
-                                cursor: 'pointer',
-                                padding: 0,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                            }}
-                        >
-                            <img
-                                src={robinIcon}
-                                alt="Robin"
-                                className="robin-icon"
-                                style={{ width: '72px', height: '72px' }}
-                            />
-                        </button>
-                    </div>
-                    {robinSheetOpen && (
-                        <div
-                            style={{
-                                position: 'fixed',
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                height: '50vh',
-                                background: 'white',
-                                zIndex: 10000,
-                                boxShadow: '0 -4px 24px rgba(0,0,0,0.18)',
-                                borderRadius: '16px 16px 0 0',
-                                display: 'flex',
-                                flexDirection: 'column',
-                                padding: '20px',
-                                gap: '16px',
-                                animation: 'slideUp 0.3s ease-out',
-                            }}
-                        >
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontWeight: 'bold', fontSize: '16px', color: '#7c3aed' }}>
-                                    Ask Robin AI
-                                </span>
-                                <button
-                                    type="button"
-                                    onClick={() => setRobinSheetOpen(false)}
-                                    style={{
-                                        background: 'none',
-                                        border: 'none',
-                                        fontSize: '20px',
-                                        cursor: 'pointer',
-                                        lineHeight: 1,
-                                        color: '#666',
-                                    }}
-                                >
-                                    ✕
-                                </button>
-                            </div>
-                            <TextArea
-                                id="robin-prompt-text"
-                                placeholder="What do you want to ask?"
-                                value={state.aiPromptText}
-                                onChange={state.setAiPromptText}
-                            />
-                            <span style={{ fontSize: '12px', color: '#888' }}>
-                                Example: "What is the capital of France? Generate 6 answers."
-                            </span>
-                            {aiError && (
-                                <Alert type="error" dataTestId="ai-assistant-error">
-                                    {aiError}
-                                </Alert>
-                            )}
-                            <Button
-                                id="robin-generate-button"
-                                className="secondary button"
-                                onClick={() => {
-                                    void handleAiAssistantClick()
-                                }}
-                                disabled={aiLoading}
-                            >
-                                {aiLoading ? 'Loading...' : 'Generate'}
-                            </Button>
-                        </div>
-                    )}
-                </>,
-                document.body,
-            )}
+            <RobinAiHelper
+                open={robinSheetOpen}
+                onOpen={() => setRobinSheetOpen(true)}
+                onClose={() => setRobinSheetOpen(false)}
+                promptText={state.aiPromptText}
+                onPromptTextChange={state.setAiPromptText}
+                onGenerate={() => void handleAiAssistantClick()}
+                loading={aiLoading}
+                error={aiError}
+            />
             <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
                 <Row>
                     <Field label="Question type" required>

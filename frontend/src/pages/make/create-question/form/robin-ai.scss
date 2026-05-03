@@ -1,0 +1,24 @@
+@keyframes blink {
+    0%,
+    90%,
+    100% {
+        filter: brightness(1);
+    }
+    93%,
+    97% {
+        filter: brightness(0.3);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+    }
+    to {
+        transform: translateY(0);
+    }
+}
+
+.robin-icon {
+    animation: blink 3s infinite;
+}
