@@ -1,7 +1,8 @@
 import { createPortal } from 'react-dom'
 
 import robinIcon from '#fe/assets/icons/Robin.svg'
-import { Alert, Button, TextArea } from '#pages/components'
+import type { QuestionType } from '#model/question.ts'
+import { Alert, Button, Field, QuestionTypeRadioSet, TextArea } from '#pages/components'
 import './robin-ai.scss'
 
 interface RobinAiHelperProps {
@@ -10,6 +11,8 @@ interface RobinAiHelperProps {
     readonly onClose: () => void
     readonly promptText: string
     readonly onPromptTextChange: (value: string) => void
+    readonly questionType: QuestionType
+    readonly onQuestionTypeChange: (value: QuestionType) => void
     readonly onGenerate: () => void
     readonly loading: boolean
     readonly error: string
@@ -23,6 +26,8 @@ export const RobinAiHelper = ({
     onClose,
     promptText,
     onPromptTextChange,
+    questionType,
+    onQuestionTypeChange,
     onGenerate,
     loading,
     error,
@@ -45,6 +50,13 @@ export const RobinAiHelper = ({
                             ✕
                         </button>
                     </div>
+                    <Field label="Question type" required>
+                        <QuestionTypeRadioSet
+                            name="robin-question-type"
+                            value={questionType}
+                            onChange={onQuestionTypeChange}
+                        />
+                    </Field>
                     <TextArea
                         id="robin-prompt-text"
                         placeholder="What do you want to ask?"

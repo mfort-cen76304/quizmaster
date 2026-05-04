@@ -18,7 +18,7 @@ export const enterTag = async (world: QuizmasterWorld, tag: string) => {
 }
 
 export const enterAIPrompt = async (world: QuizmasterWorld, prompt: string) => {
-    await world.questionEditPage.enterAIPrompt(prompt)
+    await world.robinSheetPage.enterPrompt(prompt)
 }
 
 export const enterAnswerText = async (world: QuizmasterWorld, index: number, answer: string) => {

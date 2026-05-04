@@ -5,6 +5,7 @@ import {
     WorkspaceCreatePage,
     HomePage,
     QuestionEditPage,
+    RobinSheetPage,
     WorkspacePage,
     QuizCreatePage,
     QuestionPage,
@@ -22,6 +23,7 @@ export class QuizmasterWorld {
     ) {
         this.pageNavigation = new PageNavigation(this.page)
         this.questionEditPage = new QuestionEditPage(this.page)
+        this.robinSheetPage = new RobinSheetPage(this.page)
         this.workspaceCreatePage = new WorkspaceCreatePage(this.page)
         this.takeQuestionPage = new TakeQuestionPage(this.page)
         this.questionPage = new QuestionPage(this.page)
@@ -35,6 +37,7 @@ export class QuizmasterWorld {
 
     readonly pageNavigation: PageNavigation
     readonly questionEditPage: QuestionEditPage
+    readonly robinSheetPage: RobinSheetPage
     readonly workspaceCreatePage: WorkspaceCreatePage
     readonly takeQuestionPage: TakeQuestionPage
     readonly questionPage: QuestionPage

@@ -16,26 +16,8 @@ export class QuestionEditPage {
     expectTagValue = (value: string) => expect(this.tagLocator()).toHaveValue(value)
     expectEmptyTag = () => expect(this.tagLocator()).toHaveValue('')
 
-    private aiPromptLocator = () => this.page.locator('#robin-prompt-text')
     enterQuestion = (question: string) => this.questionLocator().fill(question)
-
-    enterAIPrompt = (prompt: string) => this.aiPromptLocator().fill(prompt)
     questionValue = () => this.questionLocator().inputValue()
-
-    private robinButtonLocator = () => this.page.locator('.robin-fab .trigger')
-    clickRobinButton = async () => {
-        await this.robinButtonLocator().click()
-        // Wait for the Robin sheet to open
-        await this.aiPromptLocator().waitFor({ state: 'visible' })
-    }
-
-    private aiAssistButtonLocator = () => this.page.locator('#robin-generate-button')
-    clickAiAssist = () => this.aiAssistButtonLocator().click()
-
-    private previousVersionButtonLocator = () => this.page.locator('#previous-version-button')
-    restorePreviousVersion = () => this.previousVersionButtonLocator().click()
-    expectPreviousVersionAvailable = () => expect(this.previousVersionButtonLocator()).toBeVisible()
-    expectPreviousVersionNotAvailable = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
 
     private showExplanationLocator = () => this.page.locator('#show-explanation')
     explanationsEnabled = () => this.showExplanationLocator().isChecked()
@@ -145,8 +127,6 @@ export class QuestionEditPage {
     expectEasyNotVisible = () => expect(this.isEasyLocator()).not.toBeVisible()
     expectExplanationFieldsExist = () => expect(this.explanationFieldsLocator().first()).toBeVisible()
 
-    expectAiBlockVisible = () => expect(this.aiPromptLocator().first()).toBeVisible()
-    expectAiBlockNotVisible = () => expect(this.aiPromptLocator().first()).not.toBeVisible()
     expectNoExplanationFields = () => expect(this.explanationFieldsLocator()).toHaveCount(0)
     expectAnswerRowCount = (count: number) => expect(this.answerRowsLocator()).toHaveCount(count)
     expectAnswerRowCountGreaterThanOrEqual = async (count: number) =>

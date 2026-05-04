@@ -6,6 +6,7 @@ export * from './page.tsx'
 export * from './row.tsx'
 
 export * from './forms/checkbox.tsx'
+export * from './forms/question-type-radio-set.tsx'
 export * from './forms/radio-set.tsx'
 export * from './forms/field.tsx'
 export * from './forms/form.tsx'

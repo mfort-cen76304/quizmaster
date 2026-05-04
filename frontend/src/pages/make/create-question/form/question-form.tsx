@@ -1,6 +1,16 @@
 import type { QuestionRequest } from '#api/question.ts'
 import type { Question } from '#model/question.ts'
-import { SubmitButton, Form, Field, TextArea, TextInput, CheckField, Row, Button, RadioSet } from '#pages/components'
+import {
+    SubmitButton,
+    Form,
+    Field,
+    TextArea,
+    TextInput,
+    CheckField,
+    Row,
+    Button,
+    QuestionTypeRadioSet,
+} from '#pages/components'
 import { ErrorMessage, createValidator } from '#pages/components/forms/validations.tsx'
 import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#pages/make/create-question/form'
 import { RobinAiHelper, useRobinAi } from '#pages/make/create-question/robin-ai'
@@ -30,6 +40,8 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 onClose={robin.close}
                 promptText={robin.promptText}
                 onPromptTextChange={robin.setPromptText}
+                questionType={robin.questionType}
+                onQuestionTypeChange={robin.setQuestionType}
                 onGenerate={() => void robin.generate()}
                 loading={robin.loading}
                 error={robin.error}
@@ -37,19 +49,6 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 onRestorePreviousVersion={robin.restorePreviousVersion}
             />
             <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
-                <Row>
-                    <Field label="Question type" required>
-                        <RadioSet
-                            name="question-type"
-                            value={state.questionType}
-                            onChange={state.selectQuestionType}
-                            options={{ single: 'Single choice', multiple: 'Multiple choice', numerical: 'Numerical' }}
-                        />
-                    </Field>
-                    {state.isMultipleChoice && (
-                        <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
-                    )}
-                </Row>
                 <Field label="Question" required>
                     <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
                     <ErrorMessage errorCode="empty-question" />
@@ -60,6 +59,18 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                         <img src={state.imageUrl} alt="preview" className="image-preview" />
                     )}
                 </Field>
+                <Row>
+                    <Field label="Question type" required>
+                        <QuestionTypeRadioSet
+                            name="question-type"
+                            value={state.questionType}
+                            onChange={state.selectQuestionType}
+                        />
+                    </Field>
+                    {state.isMultipleChoice && (
+                        <CheckField id="is-easy" label="Easy" checked={state.isEasy} onToggle={state.setIsEasy} />
+                    )}
+                </Row>
                 {state.isNumerical ? (
                     <NumericalAnswerEdit
                         answer={state.numericalAnswer}

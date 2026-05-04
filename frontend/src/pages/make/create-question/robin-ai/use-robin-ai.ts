@@ -68,15 +68,21 @@ export const useRobinAi = (formState: QuestionFormStateApi) => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [sheetOpen, setSheetOpen] = useState(false)
+    const [questionType, setQuestionType] = useState<QuestionType>(formState.questionType)
     const [previousSnapshot, setPreviousSnapshot] = useState<QuestionFormStatePatch | null>(null)
+
+    const open = () => {
+        setQuestionType(formState.questionType)
+        setSheetOpen(true)
+    }
 
     const generate = async () => {
         setError('')
         setLoading(true)
         try {
-            const response = await postAiAssistant(buildAiPrompt(promptText, formState.questionType))
+            const response = await postAiAssistant(buildAiPrompt(promptText, questionType))
             const snap = formState.snapshot()
-            formState.applyPatch(responseToPatch(response, formState.questionType))
+            formState.applyPatch(responseToPatch(response, questionType))
             setPreviousSnapshot(snap)
             setSheetOpen(false)
         } catch (e) {
@@ -99,7 +105,9 @@ export const useRobinAi = (formState: QuestionFormStateApi) => {
         loading,
         error,
         sheetOpen,
-        open: () => setSheetOpen(true),
+        questionType,
+        setQuestionType,
+        open,
         close: () => setSheetOpen(false),
         generate,
         hasPreviousVersion: previousSnapshot !== null,

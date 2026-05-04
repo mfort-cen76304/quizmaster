@@ -26,8 +26,8 @@ Feature: Generate question using AI
   @ai @slow
   Scenario: Generate a multiple-choice question
     Given I start creating a new question
-    And I mark the question as multiple choice
     When I open Robin AI
+    And I ask AI for multiple choice question
     And I ask AI:
       | Generate a question about European capitals |
       | and 2 incorrect answers                     |
@@ -68,8 +68,8 @@ Feature: Generate question using AI
       | Generate a question about capital cities |
       | and 2 incorrect answers                 |
     Then the question is single choice
-    And I mark the question as multiple choice
     When I open Robin AI
+    And I ask AI for multiple choice question
     And I ask AI:
       | Generate a question about European capitals |
       | with 2 correct answers                      |

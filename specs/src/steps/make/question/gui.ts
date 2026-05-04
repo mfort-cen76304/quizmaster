@@ -138,11 +138,11 @@ Then(/easy is (available|not available)/, async function (value: string) {
 })
 
 Then('I do not see AI section', async function () {
-    await this.questionEditPage.expectAiBlockNotVisible()
+    await this.robinSheetPage.expectPromptNotVisible()
 })
 
 Then('I see AI section', async function () {
-    await this.questionEditPage.expectAiBlockVisible()
+    await this.robinSheetPage.expectPromptVisible()
 })
 
 Then('I see explanation fields', async function () {
@@ -154,7 +154,7 @@ Then('I do not see explanation fields', async function () {
 })
 
 Then('I can restore the previous version', async function () {
-    await this.questionEditPage.expectPreviousVersionAvailable()
+    await this.robinSheetPage.expectPreviousVersionAvailable()
 })
 
 Then('I see 2 default empty answers', async function () {
@@ -228,7 +228,13 @@ When('I enter question {string}', async function (question: string) {
 })
 
 When('I open Robin AI', async function () {
-    await this.questionEditPage.clickRobinButton()
+    await this.robinSheetPage.open()
+})
+
+When(/I ask AI for (single choice|multiple choice|numerical) question/, async function (choice: string) {
+    if (choice === 'single choice') await this.robinSheetPage.askForSingleChoice()
+    else if (choice === 'multiple choice') await this.robinSheetPage.askForMultipleChoice()
+    else await this.robinSheetPage.askForNumericalChoice()
 })
 
 When('I ask AI:', async function (dataTable: DataTable) {
@@ -240,7 +246,7 @@ When('I ask AI:', async function (dataTable: DataTable) {
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
             timeout: 60_000,
         }),
-        this.questionEditPage.clickAiAssist(),
+        this.robinSheetPage.generate(),
     ])
 })
 
@@ -249,45 +255,45 @@ Given('I start creating a new question when I already have generated content', a
     await this.workspacePage.createNewQuestion()
     this.questionWip = { text: '', answers: [] }
     // Open Robin AI and generate first AI question
-    await this.questionEditPage.clickRobinButton()
-    await this.questionEditPage.enterAIPrompt(
+    await this.robinSheetPage.open()
+    await this.robinSheetPage.enterPrompt(
         'Generate a question about capital cities with 1 correct answer and 2 incorrect answers',
     )
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
             timeout: 60_000,
         }),
-        this.questionEditPage.clickAiAssist(),
+        this.robinSheetPage.generate(),
     ])
     this.rememberedAiQuestion = await this.questionEditPage.questionValue()
 })
 
 When('I generated a question by AI', async function () {
-    await this.questionEditPage.enterAIPrompt(
+    await this.robinSheetPage.enterPrompt(
         'Generate a question about capital cities with 1 correct answer and 2 incorrect answers',
     )
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
             timeout: 60_000,
         }),
-        this.questionEditPage.clickAiAssist(),
+        this.robinSheetPage.generate(),
     ])
 })
 
 When('I generated a new question by AI', async function () {
-    await this.questionEditPage.enterAIPrompt(
+    await this.robinSheetPage.enterPrompt(
         'Generate a question about European history with 1 correct answer and 2 incorrect answers',
     )
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
             timeout: 60_000,
         }),
-        this.questionEditPage.clickAiAssist(),
+        this.robinSheetPage.generate(),
     ])
 })
 
 When('I restore the previous version', async function () {
-    await this.questionEditPage.restorePreviousVersion()
+    await this.robinSheetPage.restorePreviousVersion()
 })
 
 Then('I see the previous generated version', async function () {

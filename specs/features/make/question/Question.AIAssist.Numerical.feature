@@ -5,8 +5,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: Create a numerical question using AI
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question |
       | asking "What is 7 + 7?"       |
@@ -22,8 +22,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: AI-generated numerical question with tolerance in prompt
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question   |
       | asking "What is 5 + 5?"         |
@@ -40,8 +40,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: AI-generated numerical question with Question explanation in prompt
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question   |
       | asking "What is 5 + 5?"         |
@@ -57,8 +57,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: AI-generated numerical question defaults tolerance to 0 when not requested
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question |
       | asking "What is 6 + 6?"      |
@@ -71,8 +71,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: AI-generated numerical question fills question explanation by default
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question |
       | asking "What is 8 + 8?"      |
@@ -85,8 +85,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: AI-generated numerical question resets tolerance to 0 when the next prompt does not ask for it
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question |
       | asking "What is 5 + 5?"      |
@@ -106,8 +106,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: AI-generated numerical question clears existing question explanation when the next prompt does not ask for it
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question |
       | asking "What is 5 + 5?"      |
@@ -127,8 +127,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: AI-generated numerical question proposes tolerance when requested without a specific value
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question |
       | asking "What is 70 + 70?"    |
@@ -142,8 +142,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario: AI-generated numerical question proposes question explanation when requested without a specific text
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question   |
       | asking "What is 9 + 9?"        |
@@ -157,8 +157,8 @@ Feature: Generate numerical question using AI
   @ai @slow
   Scenario Outline: AI-generated numerical question proposes unrounded tolerance for fractional or negative answers
     Given I start creating a new question
-    And I mark the question as numerical choice
     When I open Robin AI
+    And I ask AI for numerical question
     And I ask AI:
       | Generate a numerical question |
       | asking <prompt>               |
