@@ -143,14 +143,7 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                     )}
                 </Row>
                 <Field label="Question" required>
-                    <div className="question-input-with-action">
-                        <TextArea
-                            id="question-text"
-                            className="question-textarea-with-action"
-                            value={state.questionText}
-                            onChange={state.setQuestionText}
-                        />
-                    </div>
+                    <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
                     <ErrorMessage errorCode="empty-question" />
                     {state.hasPreviousVersion && (
                         <Button
@@ -161,7 +154,6 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                             Previous version
                         </Button>
                     )}
-                    <span className="example">Example: "What is the capital of France? Generate 6 answers."</span>
                     {aiError && !robinSheetOpen && (
                         <Alert type="error" dataTestId="ai-assistant-error">
                             {aiError}

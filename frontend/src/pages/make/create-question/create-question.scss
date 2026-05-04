@@ -4,27 +4,6 @@
 }
 
 #question-create-form {
-    > .field,
-    > .row {
-        padding: 0.85rem;
-        border: 1px solid var(--border-subtle);
-        border-radius: 16px;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(244, 248, 255, 0.82) 100%);
-        box-shadow: var(--shadow-sm);
-    }
-
-    > .field:first-child {
-        background:
-            linear-gradient(135deg, rgba(219, 234, 254, 0.92) 0%, rgba(255, 237, 213, 0.82) 100%),
-            rgba(255, 255, 255, 0.92);
-        border-color: rgba(59, 130, 246, 0.24);
-    }
-
-    > .field:nth-child(4),
-    > .field:nth-child(6) {
-        background: linear-gradient(180deg, rgba(236, 253, 245, 0.9) 0%, rgba(244, 248, 255, 0.82) 100%);
-    }
-
     > .row > .field {
         flex: 1 1 auto;
     }
@@ -44,25 +23,6 @@
         gap: 0.75rem;
     }
 
-    .question-input-with-action {
-        position: relative;
-    }
-
-    .question-textarea-with-action {
-        min-height: 6.4rem;
-        padding-right: 8.3rem;
-    }
-
-    .question-ai-assistant-button {
-        position: absolute;
-        top: 0.65rem;
-        right: 0.65rem;
-        min-width: 6.6rem;
-        background: linear-gradient(135deg, var(--accent-strong) 0%, var(--accent-warm) 100%);
-        border: none;
-        color: #fff;
-    }
-
     .image-preview {
         max-width: min(100%, 380px);
         display: block;
@@ -77,10 +37,6 @@
         grid-template-columns: auto minmax(0, 1fr) auto;
         align-items: start;
         gap: 0.7rem;
-        padding: 0.78rem;
-        border: 1px solid rgba(148, 163, 184, 0.22);
-        border-radius: 18px;
-        background: linear-gradient(180deg, rgba(255, 255, 255, 0.88) 0%, rgba(239, 246, 255, 0.76) 100%);
     }
 
     .answer-row + .answer-row {
@@ -98,36 +54,9 @@
         min-width: 0;
     }
 
-    .example {
-        display: block;
-        margin-top: 0.2rem;
-        color: var(--text-soft);
-        font-size: 0.84rem;
-        line-height: 1.4;
-    }
-
     #show-explanation {
         margin-right: 0.2rem;
     }
-
-    > .row:last-child {
-        padding: 0;
-        border: 0;
-        background: transparent;
-        box-shadow: none;
-        justify-content: space-between;
-
-        > * {
-            flex: initial;
-        }
-    }
-}
-
-#question-link,
-#question-edit-link {
-    margin-top: 15px;
-    display: block;
-    font-size: larger;
 }
 
 @media (max-width: 720px) {
@@ -145,19 +74,6 @@
 
         .answer-controls {
             align-items: stretch;
-        }
-
-        .question-textarea-with-action {
-            padding-right: 1rem;
-            padding-bottom: 4.6rem;
-        }
-
-        .question-ai-assistant-button {
-            top: auto;
-            right: 0.8rem;
-            bottom: 0.8rem;
-            left: 0.8rem;
-            width: calc(100% - 1.6rem);
         }
 
         .answer-row {
