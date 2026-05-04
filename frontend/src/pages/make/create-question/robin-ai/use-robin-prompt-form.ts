@@ -5,6 +5,7 @@ import type { QuestionType } from '#model/question.ts'
 import { NUM_DEFAULT_ANSWERS } from '#shared/defaults/question.ts'
 
 import type { QuestionFormStatePatch } from '../form/question-form-state.ts'
+import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'
 
 export interface RobinFormBinding {
     readonly snapshot: () => QuestionFormStatePatch
@@ -68,25 +69,26 @@ const responseToPatch = (response: AiAssistantResponse, requestedType: QuestionT
     }
 }
 
-export const useRobinAi = (form: RobinFormBinding) => {
+interface UseRobinPromptFormArgs {
+    readonly form: RobinFormBinding
+    readonly undo: RobinUndoBuffer
+    readonly questionType: QuestionType
+    readonly onClose: () => void
+}
+
+export const useRobinPromptForm = ({ form, undo, questionType, onClose }: UseRobinPromptFormArgs) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const [sheetOpen, setSheetOpen] = useState(false)
-    const [questionType, setQuestionType] = useState<QuestionType>('single')
-    const [previousSnapshot, setPreviousSnapshot] = useState<QuestionFormStatePatch | null>(null)
-
-    const open = () => setSheetOpen(true)
 
     const generate = async () => {
         setError('')
         setLoading(true)
         try {
             const response = await postAiAssistant(buildAiPrompt(promptText, questionType))
-            const snap = form.snapshot()
+            undo.capture()
             form.applyPatch(responseToPatch(response, questionType))
-            setPreviousSnapshot(snap)
-            setSheetOpen(false)
+            onClose()
         } catch (e) {
             const message = e instanceof Error ? e.message : 'AI assistant request failed.'
             setError(message || 'AI assistant request failed.')
@@ -95,24 +97,5 @@ export const useRobinAi = (form: RobinFormBinding) => {
         }
     }
 
-    const restorePreviousVersion = () => {
-        if (!previousSnapshot) return
-        form.applyPatch(previousSnapshot)
-        setPreviousSnapshot(null)
-    }
-
-    return {
-        promptText,
-        setPromptText,
-        loading,
-        error,
-        sheetOpen,
-        questionType,
-        setQuestionType,
-        open,
-        close: () => setSheetOpen(false),
-        generate,
-        hasPreviousVersion: previousSnapshot !== null,
-        restorePreviousVersion,
-    }
+    return { promptText, setPromptText, loading, error, generate }
 }

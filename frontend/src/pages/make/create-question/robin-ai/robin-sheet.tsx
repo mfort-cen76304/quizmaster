@@ -1,0 +1,61 @@
+import type { QuestionType } from '#model/question.ts'
+import { Alert, Button, Field, QuestionTypeRadioSet, TextArea } from '#pages/components'
+
+import { type RobinFormBinding, useRobinPromptForm } from './use-robin-prompt-form.ts'
+import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'
+
+interface RobinSheetProps {
+    readonly form: RobinFormBinding
+    readonly undo: RobinUndoBuffer
+    readonly questionType: QuestionType
+    readonly onQuestionTypeChange: (type: QuestionType) => void
+    readonly onClose: () => void
+}
+
+export const RobinSheet = ({ form, undo, questionType, onQuestionTypeChange, onClose }: RobinSheetProps) => {
+    const { promptText, setPromptText, loading, error, generate } = useRobinPromptForm({
+        form,
+        undo,
+        questionType,
+        onClose,
+    })
+
+    return (
+        <div className="robin-sheet">
+            <div className="header">
+                <span className="title">Ask Robin AI</span>
+                <button type="button" className="close-button" onClick={onClose}>
+                    ✕
+                </button>
+            </div>
+            <Field label="Question type" required>
+                <QuestionTypeRadioSet name="robin-question-type" value={questionType} onChange={onQuestionTypeChange} />
+            </Field>
+            <TextArea
+                id="robin-prompt-text"
+                placeholder="What do you want to ask?"
+                value={promptText}
+                onChange={setPromptText}
+            />
+            <span className="example">Example: "What is the capital of France? Generate 6 answers."</span>
+            {error && (
+                <Alert type="error" dataTestId="ai-assistant-error">
+                    {error}
+                </Alert>
+            )}
+            {undo.hasPrevious && (
+                <Button id="previous-version-button" className="secondary button" onClick={undo.restore}>
+                    Previous version
+                </Button>
+            )}
+            <Button
+                id="robin-generate-button"
+                className="secondary button"
+                onClick={() => void generate()}
+                disabled={loading}
+            >
+                {loading ? 'Loading...' : 'Generate'}
+            </Button>
+        </div>
+    )
+}
