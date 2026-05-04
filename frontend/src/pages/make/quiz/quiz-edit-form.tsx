@@ -1,8 +1,7 @@
 import './quiz-edit-form.scss'
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
 
-import { urls, useWorkspaceId } from '#fe/urls.ts'
+import { useWorkspaceId } from '#fe/urls.ts'
 import type { QuestionListItem } from '#model/question-list-item.ts'
 import type { Quiz } from '#model/quiz.ts'
 import { Field, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from '#pages/components'
@@ -25,15 +24,10 @@ interface QuizEditFormProps {
 }
 export const QuizEditForm = ({ questions, onSubmit, quiz }: QuizEditFormProps) => {
     const workspaceId = useWorkspaceId()
-    const navigate = useNavigate()
     const state = useQuizFormState(questions, quiz)
     const [timeLimitText, setTimeLimitText] = useState(`${state.timeLimit}s`)
 
     const validator = createValidator(() => validateQuizForm(state), errorMessage)
-
-    const onBack = () => {
-        navigate(urls.workspace(workspaceId))
-    }
 
     const onTimeLimitTextChange = (value: string) => {
         const inputIsValid = TIME_LIMIT_PARTIAL_REGEX.test(value)
@@ -127,12 +121,7 @@ export const QuizEditForm = ({ questions, onSubmit, quiz }: QuizEditFormProps) =
                 count={state.randomQuestionCount}
                 onCountChange={state.setRandomQuestionCount}
             />
-            <div className="flex-container">
-                <button id="back" type="button" className="primary button" onClick={onBack}>
-                    Back
-                </button>
-                <SubmitButton />
-            </div>
+            <SubmitButton />
         </Form>
     )
 }

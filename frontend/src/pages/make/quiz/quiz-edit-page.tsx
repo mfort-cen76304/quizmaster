@@ -40,7 +40,7 @@ export const QuizEditPage = () => {
     const pageId = isEdit ? 'edit-quiz-page' : 'create-quiz-page'
 
     return (
-        <Page title={title} id={pageId}>
+        <Page title={title} id={pageId} back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}>
             {(!isEdit || quiz) && (
                 <QuizEditForm key={quiz?.id} quiz={quiz} questions={workspaceQuestions} onSubmit={onSubmit} />
             )}

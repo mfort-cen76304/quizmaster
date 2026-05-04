@@ -97,7 +97,7 @@ export class QuestionEditPage {
 
     submit = () => this.page.locator('button[type="submit"]').click()
 
-    private backButtonLocator = () => this.page.locator('button#back')
+    private backButtonLocator = () => this.page.locator('#back')
     back = () => this.backButtonLocator().click()
 
     errorsLocator = () => this.page.locator('.alert.error')

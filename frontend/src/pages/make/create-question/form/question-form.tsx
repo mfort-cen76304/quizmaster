@@ -8,7 +8,6 @@ import {
     TextInput,
     CheckField,
     Row,
-    Button,
     QuestionTypeRadioSet,
 } from '#pages/components'
 import { ErrorMessage, createValidator } from '#pages/components/forms/validations.tsx'
@@ -21,10 +20,9 @@ import { validateQuestionFormState, errorMessage } from './validators.ts'
 interface QuestionEditProps {
     readonly question?: Question
     readonly onSubmit: (questionData: QuestionRequest) => void
-    readonly onBack?: () => void
 }
 
-export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditProps) => {
+export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
     const state = useQuestionFormState(question)
 
     const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
@@ -84,14 +82,7 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 <Field label="Tag">
                     <TextInput id="question-tag" value={state.tagText} onChange={state.setTagText} />
                 </Field>
-                <Row>
-                    {onBack && (
-                        <Button id="back" className="primary button" onClick={onBack}>
-                            Back
-                        </Button>
-                    )}
-                    <SubmitButton />
-                </Row>
+                <SubmitButton />
             </Form>
         </>
     )

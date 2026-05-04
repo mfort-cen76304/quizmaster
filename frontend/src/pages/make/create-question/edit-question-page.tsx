@@ -25,18 +25,14 @@ export function EditQuestionPage() {
         })
     }
 
-    const handleBack = () => {
-        navigate(urls.workspace(workspaceId))
-    }
-
     return (
         <Page
             title="Edit Question"
-            eyebrow="Workspace authoring"
+            back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}
             subtitle="Tune the prompt, answers, and explanations until the question reads clearly and scores fairly."
             id="edit-question-page"
         >
-            {question && <QuestionEditForm question={question} onSubmit={handleSubmit} onBack={handleBack} />}
+            {question && <QuestionEditForm question={question} onSubmit={handleSubmit} />}
         </Page>
     )
 }

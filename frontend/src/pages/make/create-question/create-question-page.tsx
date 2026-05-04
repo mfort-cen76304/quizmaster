@@ -17,18 +17,14 @@ export function CreateQuestionPage() {
         })
     }
 
-    const handleBack = () => {
-        navigate(urls.workspace(workspaceId))
-    }
-
     return (
         <Page
             title="Create Question"
-            eyebrow="Workspace authoring"
+            back={{ to: urls.workspace(workspaceId), label: 'Back to workspace' }}
             subtitle="Draft a clean quiz question, refine the answers, and use AI as a starting point when it helps."
             id="create-question-page"
         >
-            <QuestionEditForm onSubmit={handleSubmit} onBack={handleBack} />
+            <QuestionEditForm onSubmit={handleSubmit} />
         </Page>
     )
 }
