@@ -31,7 +31,6 @@ export class QuestionEditPage {
 
     private aiAssistButtonLocator = () => this.page.locator('#robin-generate-button')
     clickAiAssist = () => this.aiAssistButtonLocator().click()
-    clickGenerateExplanations = () => this.generateExplanationsButtonLocator().click()
 
     private previousVersionButtonLocator = () => this.page.locator('#previous-version-button')
     clickPreviousVersion = () => this.previousVersionButtonLocator().click()
@@ -39,7 +38,6 @@ export class QuestionEditPage {
     expectPreviousVersionButtonNotVisible = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
 
     private showExplanationLocator = () => this.page.locator('#show-explanation')
-    private generateExplanationsButtonLocator = () => this.page.locator('#generate-explanations')
     explanationsEnabled = () => this.showExplanationLocator().isChecked()
     enableExplanations = () => this.showExplanationLocator().check()
     disableExplanations = () => this.showExplanationLocator().uncheck()
@@ -150,9 +148,6 @@ export class QuestionEditPage {
     expectAiBlockVisible = () => expect(this.aiPromptLocator().first()).toBeVisible()
     expectAiBlockNotVisible = () => expect(this.aiPromptLocator().first()).not.toBeVisible()
     expectNoExplanationFields = () => expect(this.explanationFieldsLocator()).toHaveCount(0)
-    expectGenerateExplanationsButtonNotVisible = () =>
-        expect(this.generateExplanationsButtonLocator()).not.toBeVisible()
-    expectGenerateExplanationsButtonVisible = () => expect(this.generateExplanationsButtonLocator()).toBeVisible()
     expectAnswerRowCount = (count: number) => expect(this.answerRowsLocator()).toHaveCount(count)
     expectAnswerRowCountGreaterThanOrEqual = async (count: number) =>
         expect(await this.answerRowsLocator().count()).toBeGreaterThanOrEqual(count)

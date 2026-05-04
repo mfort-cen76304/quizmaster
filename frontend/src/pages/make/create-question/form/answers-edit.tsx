@@ -38,10 +38,7 @@ interface AnswersProps {
     readonly answerStates: readonly AnswerState[]
     readonly isMultipleChoice: boolean
     readonly addAnswer: () => void
-    readonly generateExplanations: () => void | Promise<void>
-    readonly generateExplanationsLoading: boolean
     readonly showExplanations: boolean
-    readonly showGenerateExplanationsButton: boolean
     readonly setShowExplanations: (show: boolean | ((show: boolean) => boolean)) => void
     readonly removeAnswer: (idx: number) => void
 }
@@ -50,10 +47,7 @@ export const AnswersEdit = ({
     answerStates,
     isMultipleChoice,
     addAnswer,
-    generateExplanations,
-    generateExplanationsLoading,
     showExplanations,
-    showGenerateExplanationsButton,
     setShowExplanations,
     removeAnswer,
 }: AnswersProps) => {
@@ -68,16 +62,6 @@ export const AnswersEdit = ({
                     onToggle={handleToggleExplanations}
                     checked={showExplanations}
                 />
-                {showGenerateExplanationsButton && (
-                    <Button
-                        id="generate-explanations"
-                        className="secondary button"
-                        onClick={generateExplanations}
-                        disabled={generateExplanationsLoading}
-                    >
-                        {generateExplanationsLoading ? 'Generating...' : 'Generate Explanations'}
-                    </Button>
-                )}
             </div>
             {answerStates.map((state, idx) => (
                 <AnswerRow

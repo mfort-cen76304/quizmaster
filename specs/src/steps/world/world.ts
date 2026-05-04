@@ -86,7 +86,6 @@ export class QuizmasterWorld {
     correctAnswersCounts: Record<string, string> = {}
     clockInstalled = false
     lastAnsweredTitle?: string
-    rememberedAnswerExplanations: Record<number, string> = {}
     rememberedAiQuestion = ''
 
     parseAnswers(answersString: string) {

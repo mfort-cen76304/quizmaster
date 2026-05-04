@@ -153,14 +153,6 @@ Then('I do not see explanation fields', async function () {
     await this.questionEditPage.expectNoExplanationFields()
 })
 
-Then('I do not see Generate Explanations button', async function () {
-    await this.questionEditPage.expectGenerateExplanationsButtonNotVisible()
-})
-
-Then('I see Generate Explanations button', async function () {
-    await this.questionEditPage.expectGenerateExplanationsButtonVisible()
-})
-
 Then('button to see previous version is shown', async function () {
     await this.questionEditPage.expectPreviousVersionButtonVisible()
 })
@@ -300,31 +292,6 @@ When('I click on previous version button', async function () {
 
 Then('I see the previous generated version', async function () {
     await this.questionEditPage.expectQuestionValue(this.rememberedAiQuestion)
-})
-
-When('I click Generate Explanations', async function () {
-    await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
-            timeout: 60_000,
-        }),
-        this.questionEditPage.clickGenerateExplanations(),
-    ])
-})
-
-When('I remember explanation for answer {int}', async function (index: number) {
-    this.rememberedAnswerExplanations[index - 1] = await this.questionEditPage.answerExplanation(index - 1)
-})
-
-Then('explanation for answer {int} has changed', async function (index: number) {
-    const answerIndex = index - 1
-    const previousExplanation = this.rememberedAnswerExplanations[answerIndex]
-    if (previousExplanation === undefined) {
-        throw new Error(`Missing remembered explanation for answer ${index}`)
-    }
-
-    const currentExplanation = await this.questionEditPage.answerExplanation(answerIndex)
-    expect(currentExplanation.trim().length).toBeGreaterThan(0)
-    expect(currentExplanation).not.toEqual(previousExplanation)
 })
 
 When(/I mark the question as (single|multiple|numerical) choice/, async function (choice: string) {
