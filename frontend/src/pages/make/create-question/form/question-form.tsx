@@ -1,25 +1,11 @@
-import { useState } from 'react'
-
-import { postAiAssistant } from '#api/ai-assistant.ts'
 import type { QuestionRequest } from '#api/question.ts'
-import type { Question, QuestionType } from '#model/question.ts'
-import {
-    SubmitButton,
-    Form,
-    Field,
-    TextArea,
-    TextInput,
-    CheckField,
-    Row,
-    Button,
-    Alert,
-    RadioSet,
-} from '#pages/components'
+import type { Question } from '#model/question.ts'
+import { SubmitButton, Form, Field, TextArea, TextInput, CheckField, Row, Button, RadioSet } from '#pages/components'
 import { ErrorMessage, createValidator } from '#pages/components/forms/validations.tsx'
 import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#pages/make/create-question/form'
+import { RobinAiHelper, useRobinAi } from '#pages/make/create-question/robin-ai'
 
 import { useQuestionFormState } from './question-form-state.ts'
-import { RobinAiHelper } from './robin-ai-helper.tsx'
 import { validateQuestionFormState, errorMessage } from './validators.ts'
 
 interface QuestionEditProps {
@@ -28,57 +14,25 @@ interface QuestionEditProps {
     readonly onBack?: () => void
 }
 
-const buildAiPrompt = (prompt: string, questionType: QuestionType) => {
-    const trimmedPrompt = prompt.trim()
-    const typeInstructionByQuestionType: Record<QuestionType, string> = {
-        single: 'This must be a single choice question with exactly 1 correct answer. Return a non-empty explanation for every answer.',
-        multiple:
-            'This must be a multiple choice question with at least 2 correct answers. Never return exactly 1 correct answer. Return a non-empty explanation for every answer.',
-        numerical:
-            'This should be suitable for a numerical quiz question asking for just one numeric value. Include exactly 1 correct numeric answer and at least 1 incorrect answer. Return a non-empty explanation for every answer and return non-empty questionExplanation when requested.',
-    }
-
-    const typeInstruction = typeInstructionByQuestionType[questionType]
-    return typeInstruction ? `${trimmedPrompt}\n\n${typeInstruction}` : trimmedPrompt
-}
-
 export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditProps) => {
     const state = useQuestionFormState(question)
-    const [aiLoading, setAiLoading] = useState(false)
-    const [aiError, setAiError] = useState('')
-    const [robinSheetOpen, setRobinSheetOpen] = useState(false)
+    const robin = useRobinAi(state)
 
     const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
 
     const handleSubmit = () => onSubmit(stateToQuestionApiData(state))
 
-    const handleAiAssistantClick = async () => {
-        setAiError('')
-        setAiLoading(true)
-
-        try {
-            const response = await postAiAssistant(buildAiPrompt(state.aiPromptText, state.questionType))
-            state.applyAiResponse(response)
-            setRobinSheetOpen(false)
-        } catch (error) {
-            const message = error instanceof Error ? error.message : 'AI assistant request failed.'
-            setAiError(message || 'AI assistant request failed.')
-        } finally {
-            setAiLoading(false)
-        }
-    }
-
     return (
         <>
             <RobinAiHelper
-                open={robinSheetOpen}
-                onOpen={() => setRobinSheetOpen(true)}
-                onClose={() => setRobinSheetOpen(false)}
-                promptText={state.aiPromptText}
-                onPromptTextChange={state.setAiPromptText}
-                onGenerate={() => void handleAiAssistantClick()}
-                loading={aiLoading}
-                error={aiError}
+                open={robin.sheetOpen}
+                onOpen={robin.open}
+                onClose={robin.close}
+                promptText={robin.promptText}
+                onPromptTextChange={robin.setPromptText}
+                onGenerate={() => void robin.generate()}
+                loading={robin.loading}
+                error={robin.error}
             />
             <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
                 <Row>
@@ -97,19 +51,14 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 <Field label="Question" required>
                     <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
                     <ErrorMessage errorCode="empty-question" />
-                    {state.hasPreviousVersion && (
+                    {robin.hasPreviousVersion && (
                         <Button
                             id="previous-version-button"
                             className="secondary button"
-                            onClick={state.restorePreviousVersion}
+                            onClick={robin.restorePreviousVersion}
                         >
                             Previous version
                         </Button>
-                    )}
-                    {aiError && !robinSheetOpen && (
-                        <Alert type="error" dataTestId="ai-assistant-error">
-                            {aiError}
-                        </Alert>
                     )}
                 </Field>
                 <Field label="Image URL">

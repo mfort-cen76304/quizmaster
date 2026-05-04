@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react'
 
-import type { AiAssistantResponse } from '#api/ai-assistant.ts'
 import type { QuestionRequest } from '#api/question.ts'
 import { updated } from '#fe/helpers.ts'
 import type { Question, QuestionType } from '#model/question.ts'
@@ -33,7 +32,20 @@ export interface QuestionFormState {
     readonly questionExplanation: string
     readonly showExplanations: boolean
     readonly imageUrl: string
-    readonly hasPreviousVersion: boolean
+}
+
+export interface QuestionFormStatePatch {
+    readonly questionText?: string
+    readonly questionType?: QuestionType
+    readonly answers?: readonly string[]
+    readonly explanations?: readonly string[]
+    readonly correctAnswers?: readonly number[]
+    readonly questionExplanation?: string
+    readonly isEasy?: boolean
+    readonly showExplanations?: boolean
+    readonly numericalAnswer?: string
+    readonly tolerance?: number
+    readonly imageUrl?: string
 }
 
 export type { QuestionType }
@@ -44,7 +56,6 @@ export const useQuestionFormState = (question?: Question) => {
     const initialTag = question?.tags[0] || ''
     const initialTitle = question?.question || ''
 
-    const [aiPromptText, setAiPromptText] = useState('')
     const [questionText, setQuestionText] = useState<string>(initialTitle)
     const [tagText, setTagText] = useState<string>(initialTag)
     const [questionType, setQuestionType] = useState<QuestionType>(question?.questionType ?? 'single')
@@ -54,19 +65,6 @@ export const useQuestionFormState = (question?: Question) => {
     const [showExplanations, setShowExplanations] = useState(
         question?.explanations?.some(explanation => !!explanation) ?? false,
     )
-    const [hasPreviousVersion, setHasPreviousVersion] = useState(false)
-    const [previousSnapshot, setPreviousSnapshot] = useState<null | {
-        questionText: string
-        questionType: QuestionType
-        answers: readonly string[]
-        explanations: readonly string[]
-        correctAnswers: readonly number[]
-        questionExplanation: string
-        isEasy: boolean
-        showExplanations: boolean
-        numericalAnswer: string
-        tolerance: number
-    }>(null)
     const nextId = useRef(0)
     const genId = () => nextId.current++
     const [answerIds, setAnswerIds] = useState<readonly number[]>(() =>
@@ -113,77 +111,6 @@ export const useQuestionFormState = (question?: Question) => {
         setAnswerIds([...answerIds, genId()])
     }
 
-    const applyAiResponse = (response: AiAssistantResponse) => {
-        setPreviousSnapshot({
-            questionText,
-            questionType,
-            answers,
-            explanations,
-            correctAnswers,
-            questionExplanation,
-            isEasy,
-            showExplanations,
-            numericalAnswer,
-            tolerance,
-        })
-        setHasPreviousVersion(true)
-
-        if (questionType === 'numerical') {
-            const firstCorrectIndex = response.correctAnswers[0]
-            const selectedAnswer =
-                firstCorrectIndex != null && firstCorrectIndex >= 0 && firstCorrectIndex < response.answers.length
-                    ? response.answers[firstCorrectIndex]
-                    : ''
-
-            setQuestionText(response.question)
-            setQuestionExplanation(response.questionExplanation ?? '')
-            setQuestionType('numerical')
-            setNumericalAnswer(selectedAnswer)
-            setTolerance(response.tolerance ?? 0)
-            setIsEasy(false)
-            setAnswers(emptyAnswerSlots(''))
-            setExplanations(emptyAnswerSlots(''))
-            setCorrectAnswers([])
-            setShowExplanations(false)
-            setAnswerIds(emptyAnswerSlots(0).map(() => genId()))
-            return
-        }
-
-        const responseExplanations =
-            response.explanations?.length === response.answers.length
-                ? response.explanations.map(explanation => explanation ?? '')
-                : response.answers.map(() => '')
-
-        setQuestionText(response.question)
-        setQuestionExplanation(response.questionExplanation ?? '')
-        setQuestionType(response.correctAnswers.length > 1 ? 'multiple' : 'single')
-        setAnswers(response.answers)
-        setExplanations(responseExplanations)
-        setCorrectAnswers(Array.from(response.correctAnswers))
-        setShowExplanations(responseExplanations.some(explanation => explanation !== ''))
-        setNumericalAnswer('')
-        setTolerance(0)
-        setIsEasy(false)
-        setAnswerIds(response.answers.map(() => genId()))
-    }
-
-    const restorePreviousVersion = () => {
-        if (!previousSnapshot) return
-        setQuestionText(previousSnapshot.questionText)
-        setQuestionType(previousSnapshot.questionType)
-        setAnswers(previousSnapshot.answers)
-        setExplanations(previousSnapshot.explanations)
-        setCorrectAnswers(previousSnapshot.correctAnswers)
-        setQuestionExplanation(previousSnapshot.questionExplanation)
-        setIsEasy(previousSnapshot.isEasy)
-        setShowExplanations(previousSnapshot.showExplanations)
-        setNumericalAnswer(previousSnapshot.numericalAnswer)
-        setTolerance(previousSnapshot.tolerance)
-        setHasPreviousVersion(false)
-        setPreviousSnapshot(null)
-        setAnswerIds(previousSnapshot.answers.map(() => genId()))
-    }
-
     const removeAnswer = (idx: number) => {
         setAnswers(answers.filter((_, i) => i !== idx))
         setExplanations(explanations.filter((_, i) => i !== idx))
@@ -194,6 +121,37 @@ export const useQuestionFormState = (question?: Question) => {
             .filter(item => item !== idx)
             .map(item => (item >= idx ? item - 1 : item))
         setCorrectAnswers(sortedCorrectAnswers)
+    }
+
+    const snapshot = (): QuestionFormStatePatch => ({
+        questionText,
+        questionType,
+        answers,
+        explanations,
+        correctAnswers,
+        questionExplanation,
+        isEasy,
+        showExplanations,
+        numericalAnswer,
+        tolerance,
+        imageUrl,
+    })
+
+    const applyPatch = (patch: QuestionFormStatePatch) => {
+        if (patch.questionText !== undefined) setQuestionText(patch.questionText)
+        if (patch.questionType !== undefined) setQuestionType(patch.questionType)
+        if (patch.answers !== undefined) {
+            setAnswers(patch.answers)
+            setAnswerIds(patch.answers.map(() => genId()))
+        }
+        if (patch.explanations !== undefined) setExplanations(patch.explanations)
+        if (patch.correctAnswers !== undefined) setCorrectAnswers(patch.correctAnswers)
+        if (patch.questionExplanation !== undefined) setQuestionExplanation(patch.questionExplanation)
+        if (patch.isEasy !== undefined) setIsEasy(patch.isEasy)
+        if (patch.showExplanations !== undefined) setShowExplanations(patch.showExplanations)
+        if (patch.numericalAnswer !== undefined) setNumericalAnswer(patch.numericalAnswer)
+        if (patch.tolerance !== undefined) setTolerance(patch.tolerance)
+        if (patch.imageUrl !== undefined) setImageUrl(patch.imageUrl)
     }
 
     const answerStates: readonly AnswerState[] = answers.map((answer, index) => ({
@@ -209,7 +167,6 @@ export const useQuestionFormState = (question?: Question) => {
     return {
         questionText,
         tagText,
-        aiPromptText,
         answerStates,
         answers,
         explanations,
@@ -223,10 +180,8 @@ export const useQuestionFormState = (question?: Question) => {
         isEasy,
         showExplanations,
         imageUrl,
-        hasPreviousVersion,
         setQuestionText,
         setTagText,
-        setAiPromptText,
         addAnswer,
         removeAnswer,
         setQuestionExplanation,
@@ -236,10 +191,12 @@ export const useQuestionFormState = (question?: Question) => {
         setIsEasy,
         setShowExplanations,
         setImageUrl,
-        applyAiResponse,
-        restorePreviousVersion,
+        snapshot,
+        applyPatch,
     }
 }
+
+export type QuestionFormStateApi = ReturnType<typeof useQuestionFormState>
 
 const buildTags = (tagText: string): string[] => {
     const tag = tagText.trim()
