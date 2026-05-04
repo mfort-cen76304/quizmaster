@@ -9,8 +9,6 @@ import {
     Field,
     TextArea,
     TextInput,
-    DecimalInput,
-    NumberInput,
     CheckField,
     Row,
     Button,
@@ -18,7 +16,7 @@ import {
     RadioSet,
 } from '#pages/components'
 import { ErrorMessage, createValidator } from '#pages/components/forms/validations.tsx'
-import { AnswersEdit, stateToQuestionApiData } from '#pages/make/create-question/form'
+import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#pages/make/create-question/form'
 
 import { useQuestionFormState } from './question-form-state.ts'
 import { RobinAiHelper } from './robin-ai-helper.tsx'
@@ -177,33 +175,12 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                     {hasImagePreview && <img src={state.imageUrl} alt="preview" className="image-preview" />}
                 </Field>
                 {state.isNumerical ? (
-                    <>
-                        <Field label="Correct numerical answer" required>
-                            <DecimalInput
-                                id="numerical-correct-answer"
-                                value={state.numericalAnswer}
-                                onChange={state.setNumericalAnswer}
-                            />
-                            <ErrorMessage errorCode="empty-numerical-answer" />
-                            <ErrorMessage errorCode="invalid-numerical-answer" />
-                            {(() => {
-                                const dotIndex = state.numericalAnswer.indexOf('.')
-                                if (dotIndex === -1) return null
-                                const decimalDigits = state.numericalAnswer.length - dotIndex - 1
-                                if (decimalDigits <= 0) return null
-                                return <p>{decimalDigits} decimal digits will be required in the answer.</p>
-                            })()}
-                        </Field>
-                        <Field label="Tolerance">
-                            <NumberInput
-                                id="numerical-tolerance"
-                                min={0}
-                                step="any"
-                                value={state.tolerance}
-                                onChange={state.setTolerance}
-                            />
-                        </Field>
-                    </>
+                    <NumericalAnswerEdit
+                        answer={state.numericalAnswer}
+                        onAnswerChange={state.setNumericalAnswer}
+                        tolerance={state.tolerance}
+                        onToleranceChange={state.setTolerance}
+                    />
                 ) : (
                     <AnswersEdit
                         setShowExplanations={state.setShowExplanations}
