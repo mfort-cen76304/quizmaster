@@ -392,29 +392,6 @@ When('I enter image URL {string}', async function (imageUrl: string) {
     await enterImageUrl(this, imageUrl)
 })
 
-When('I enter an invalid image URL {string}', async function (invalidUrl: string) {
-    await this.questionEditPage.enterImageUrl(invalidUrl)
-})
-
-When('I enter an invalid image URL containing a 2049 character URL', async function () {
-    const tooLongUrl = `https://example.com/${'a'.repeat(2050)}`
-    await this.questionEditPage.enterImageUrl(tooLongUrl)
-})
-
-When('I type image URL {string}', async function (imageUrl: string) {
-    await this.questionEditPage.typeImageUrl(imageUrl)
-})
-
-When('I clear image URL and enter {string}', async function (imageUrl: string) {
-    await this.questionEditPage.clearImageUrl()
-    await this.questionEditPage.enterImageUrl(imageUrl)
-})
-
-When('I clear image URL and type {string}', async function (imageUrl: string) {
-    await this.questionEditPage.clearImageUrl()
-    await this.questionEditPage.typeImageUrl(imageUrl)
-})
-
 Then('I see image preview', async function () {
     await expect(this.questionEditPage.imagePreviewLocator()).toBeAttached()
 })

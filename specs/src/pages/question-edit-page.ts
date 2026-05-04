@@ -108,8 +108,6 @@ export class QuestionEditPage {
 
     private imageUrlLocator = () => this.page.locator('#image-url')
     enterImageUrl = (url: string) => this.imageUrlLocator().fill(url)
-    typeImageUrl = (url: string) => this.imageUrlLocator().pressSequentially(url)
-    clearImageUrl = () => this.imageUrlLocator().clear()
 
     imagePreviewLocator = () => this.page.locator('img.image-preview')
 

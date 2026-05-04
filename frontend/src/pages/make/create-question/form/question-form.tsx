@@ -20,7 +20,7 @@ import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#pages
 
 import { useQuestionFormState } from './question-form-state.ts'
 import { RobinAiHelper } from './robin-ai-helper.tsx'
-import { validateQuestionFormState, errorMessage, isValidImageUrl } from './validators.ts'
+import { validateQuestionFormState, errorMessage } from './validators.ts'
 
 interface QuestionEditProps {
     readonly question?: Question
@@ -72,9 +72,6 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
     const [robinSheetOpen, setRobinSheetOpen] = useState(false)
 
     const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
-    const hasImagePreview = state.imageUrl.trim() !== '' && isValidImageUrl(state.imageUrl)
-    const hasInvalidImageUrl = state.imageUrl.trim() !== '' && !isValidImageUrl(state.imageUrl)
-    const hasImageUrlTooLong = state.imageUrl.trim().length > 2048
 
     const handleSubmit = () => onSubmit(stateToQuestionApiData(state))
 
@@ -162,17 +159,9 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 </Field>
                 <Field label="Image URL">
                     <TextInput id="image-url" value={state.imageUrl} onChange={state.setImageUrl} />
-                    {hasImageUrlTooLong && (
-                        <Alert type="error" dataTestId="image-url-too-long">
-                            {errorMessage['image-url-too-long']}
-                        </Alert>
+                    {state.imageUrl.trim() !== '' && (
+                        <img src={state.imageUrl} alt="preview" className="image-preview" />
                     )}
-                    {hasInvalidImageUrl && !hasImageUrlTooLong && (
-                        <Alert type="error" dataTestId="invalid-image-url">
-                            {errorMessage['invalid-image-url']}
-                        </Alert>
-                    )}
-                    {hasImagePreview && <img src={state.imageUrl} alt="preview" className="image-preview" />}
                 </Field>
                 {state.isNumerical ? (
                     <NumericalAnswerEdit
