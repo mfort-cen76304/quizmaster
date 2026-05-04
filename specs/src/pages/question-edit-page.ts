@@ -22,7 +22,7 @@ export class QuestionEditPage {
     enterAIPrompt = (prompt: string) => this.aiPromptLocator().fill(prompt)
     questionValue = () => this.questionLocator().inputValue()
 
-    private robinButtonLocator = () => this.page.locator('.robin-button')
+    private robinButtonLocator = () => this.page.locator('.robin-fab .trigger')
     clickRobinButton = async () => {
         await this.robinButtonLocator().click()
         // Wait for the Robin sheet to open
