@@ -153,8 +153,8 @@ Then('I do not see explanation fields', async function () {
     await this.questionEditPage.expectNoExplanationFields()
 })
 
-Then('button to see previous version is shown', async function () {
-    await this.questionEditPage.expectPreviousVersionButtonVisible()
+Then('I can restore the previous version', async function () {
+    await this.questionEditPage.expectPreviousVersionAvailable()
 })
 
 Then('I see 2 default empty answers', async function () {
@@ -286,8 +286,8 @@ When('I generated a new question by AI', async function () {
     ])
 })
 
-When('I click on previous version button', async function () {
-    await this.questionEditPage.clickPreviousVersion()
+When('I restore the previous version', async function () {
+    await this.questionEditPage.restorePreviousVersion()
 })
 
 Then('I see the previous generated version', async function () {

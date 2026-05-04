@@ -13,6 +13,8 @@ interface RobinAiHelperProps {
     readonly onGenerate: () => void
     readonly loading: boolean
     readonly error: string
+    readonly hasPreviousVersion: boolean
+    readonly onRestorePreviousVersion: () => void
 }
 
 export const RobinAiHelper = ({
@@ -24,6 +26,8 @@ export const RobinAiHelper = ({
     onGenerate,
     loading,
     error,
+    hasPreviousVersion,
+    onRestorePreviousVersion,
 }: RobinAiHelperProps) =>
     createPortal(
         <>
@@ -52,6 +56,15 @@ export const RobinAiHelper = ({
                         <Alert type="error" dataTestId="ai-assistant-error">
                             {error}
                         </Alert>
+                    )}
+                    {hasPreviousVersion && (
+                        <Button
+                            id="previous-version-button"
+                            className="secondary button"
+                            onClick={onRestorePreviousVersion}
+                        >
+                            Previous version
+                        </Button>
                     )}
                     <Button
                         id="robin-generate-button"

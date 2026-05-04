@@ -88,16 +88,18 @@ Feature: Generate question using AI
     When I start editing question "Czechia"
     Then I do not see AI section
  @ai @slow
- Scenario: After question is generated button previous version is shown
+ Scenario: After question is generated previous version is available
    Given I start creating a new question
    When I open Robin AI
    And I generated a question by AI
-   Then button to see previous version is shown
+   And I open Robin AI
+   Then I can restore the previous version
  @ai @slow
- Scenario: After I clicked on button "previous version" I see the previous generated version
+ Scenario: After I restore the previous version I see the previous generated content
    Given I start creating a new question when I already have generated content
    When I open Robin AI
    And I ask AI:
      | Generate a new question about a different topic |
-   And I click on previous version button
+   And I open Robin AI
+   And I restore the previous version
    Then I see the previous generated version

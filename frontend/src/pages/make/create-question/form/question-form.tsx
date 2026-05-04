@@ -33,6 +33,8 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 onGenerate={() => void robin.generate()}
                 loading={robin.loading}
                 error={robin.error}
+                hasPreviousVersion={robin.hasPreviousVersion}
+                onRestorePreviousVersion={robin.restorePreviousVersion}
             />
             <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
                 <Row>
@@ -51,15 +53,6 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 <Field label="Question" required>
                     <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
                     <ErrorMessage errorCode="empty-question" />
-                    {robin.hasPreviousVersion && (
-                        <Button
-                            id="previous-version-button"
-                            className="secondary button"
-                            onClick={robin.restorePreviousVersion}
-                        >
-                            Previous version
-                        </Button>
-                    )}
                 </Field>
                 <Field label="Image URL">
                     <TextInput id="image-url" value={state.imageUrl} onChange={state.setImageUrl} />
