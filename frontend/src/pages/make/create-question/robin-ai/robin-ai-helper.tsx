@@ -1,79 +1,57 @@
 import { createPortal } from 'react-dom'
 
 import robinIcon from '#fe/assets/icons/Robin.svg'
-import type { QuestionType } from '#model/question.ts'
 import { Alert, Button, Field, QuestionTypeRadioSet, TextArea } from '#pages/components'
 import './robin-ai.scss'
+import { type RobinFormBinding, useRobinAi } from './use-robin-ai.ts'
 
 interface RobinAiHelperProps {
-    readonly open: boolean
-    readonly onOpen: () => void
-    readonly onClose: () => void
-    readonly promptText: string
-    readonly onPromptTextChange: (value: string) => void
-    readonly questionType: QuestionType
-    readonly onQuestionTypeChange: (value: QuestionType) => void
-    readonly onGenerate: () => void
-    readonly loading: boolean
-    readonly error: string
-    readonly hasPreviousVersion: boolean
-    readonly onRestorePreviousVersion: () => void
+    readonly form: RobinFormBinding
 }
 
-export const RobinAiHelper = ({
-    open,
-    onOpen,
-    onClose,
-    promptText,
-    onPromptTextChange,
-    questionType,
-    onQuestionTypeChange,
-    onGenerate,
-    loading,
-    error,
-    hasPreviousVersion,
-    onRestorePreviousVersion,
-}: RobinAiHelperProps) =>
-    createPortal(
+export const RobinAiHelper = ({ form }: RobinAiHelperProps) => {
+    const state = useRobinAi(form)
+
+    return createPortal(
         <>
             <div className="robin-fab">
                 <div className="tooltip">AI Helper</div>
-                <button type="button" className="trigger" onClick={onOpen}>
+                <button type="button" className="trigger" onClick={state.open}>
                     <img src={robinIcon} alt="Robin" className="icon" />
                 </button>
             </div>
-            {open && (
+            {state.sheetOpen && (
                 <div className="robin-sheet">
                     <div className="header">
                         <span className="title">Ask Robin AI</span>
-                        <button type="button" className="close-button" onClick={onClose}>
+                        <button type="button" className="close-button" onClick={state.close}>
                             ✕
                         </button>
                     </div>
                     <Field label="Question type" required>
                         <QuestionTypeRadioSet
                             name="robin-question-type"
-                            value={questionType}
-                            onChange={onQuestionTypeChange}
+                            value={state.questionType}
+                            onChange={state.setQuestionType}
                         />
                     </Field>
                     <TextArea
                         id="robin-prompt-text"
                         placeholder="What do you want to ask?"
-                        value={promptText}
-                        onChange={onPromptTextChange}
+                        value={state.promptText}
+                        onChange={state.setPromptText}
                     />
                     <span className="example">Example: "What is the capital of France? Generate 6 answers."</span>
-                    {error && (
+                    {state.error && (
                         <Alert type="error" dataTestId="ai-assistant-error">
-                            {error}
+                            {state.error}
                         </Alert>
                     )}
-                    {hasPreviousVersion && (
+                    {state.hasPreviousVersion && (
                         <Button
                             id="previous-version-button"
                             className="secondary button"
-                            onClick={onRestorePreviousVersion}
+                            onClick={state.restorePreviousVersion}
                         >
                             Previous version
                         </Button>
@@ -81,13 +59,14 @@ export const RobinAiHelper = ({
                     <Button
                         id="robin-generate-button"
                         className="secondary button"
-                        onClick={onGenerate}
-                        disabled={loading}
+                        onClick={() => void state.generate()}
+                        disabled={state.loading}
                     >
-                        {loading ? 'Loading...' : 'Generate'}
+                        {state.loading ? 'Loading...' : 'Generate'}
                     </Button>
                 </div>
             )}
         </>,
         document.body,
     )
+}

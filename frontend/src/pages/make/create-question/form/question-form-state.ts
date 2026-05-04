@@ -196,8 +196,6 @@ export const useQuestionFormState = (question?: Question) => {
     }
 }
 
-export type QuestionFormStateApi = ReturnType<typeof useQuestionFormState>
-
 const buildTags = (tagText: string): string[] => {
     const tag = tagText.trim()
     return tag ? [tag] : []

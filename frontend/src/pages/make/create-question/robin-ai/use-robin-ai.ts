@@ -4,7 +4,12 @@ import { type AiAssistantResponse, postAiAssistant } from '#api/ai-assistant.ts'
 import type { QuestionType } from '#model/question.ts'
 import { NUM_DEFAULT_ANSWERS } from '#shared/defaults/question.ts'
 
-import type { QuestionFormStateApi, QuestionFormStatePatch } from '../form/question-form-state.ts'
+import type { QuestionFormStatePatch } from '../form/question-form-state.ts'
+
+export interface RobinFormBinding {
+    readonly snapshot: () => QuestionFormStatePatch
+    readonly applyPatch: (patch: QuestionFormStatePatch) => void
+}
 
 const TYPE_INSTRUCTIONS: Record<QuestionType, string> = {
     single: 'This must be a single choice question with exactly 1 correct answer. Return a non-empty explanation for every answer.',
@@ -63,26 +68,23 @@ const responseToPatch = (response: AiAssistantResponse, requestedType: QuestionT
     }
 }
 
-export const useRobinAi = (formState: QuestionFormStateApi) => {
+export const useRobinAi = (form: RobinFormBinding) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [sheetOpen, setSheetOpen] = useState(false)
-    const [questionType, setQuestionType] = useState<QuestionType>(formState.questionType)
+    const [questionType, setQuestionType] = useState<QuestionType>('single')
     const [previousSnapshot, setPreviousSnapshot] = useState<QuestionFormStatePatch | null>(null)
 
-    const open = () => {
-        setQuestionType(formState.questionType)
-        setSheetOpen(true)
-    }
+    const open = () => setSheetOpen(true)
 
     const generate = async () => {
         setError('')
         setLoading(true)
         try {
             const response = await postAiAssistant(buildAiPrompt(promptText, questionType))
-            const snap = formState.snapshot()
-            formState.applyPatch(responseToPatch(response, questionType))
+            const snap = form.snapshot()
+            form.applyPatch(responseToPatch(response, questionType))
             setPreviousSnapshot(snap)
             setSheetOpen(false)
         } catch (e) {
@@ -95,7 +97,7 @@ export const useRobinAi = (formState: QuestionFormStateApi) => {
 
     const restorePreviousVersion = () => {
         if (!previousSnapshot) return
-        formState.applyPatch(previousSnapshot)
+        form.applyPatch(previousSnapshot)
         setPreviousSnapshot(null)
     }
 

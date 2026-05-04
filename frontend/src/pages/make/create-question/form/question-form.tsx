@@ -13,7 +13,7 @@ import {
 } from '#pages/components'
 import { ErrorMessage, createValidator } from '#pages/components/forms/validations.tsx'
 import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#pages/make/create-question/form'
-import { RobinAiHelper, useRobinAi } from '#pages/make/create-question/robin-ai'
+import { RobinAiHelper } from '#pages/make/create-question/robin-ai'
 
 import { useQuestionFormState } from './question-form-state.ts'
 import { validateQuestionFormState, errorMessage } from './validators.ts'
@@ -26,7 +26,6 @@ interface QuestionEditProps {
 
 export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditProps) => {
     const state = useQuestionFormState(question)
-    const robin = useRobinAi(state)
 
     const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
 
@@ -34,20 +33,7 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
 
     return (
         <>
-            <RobinAiHelper
-                open={robin.sheetOpen}
-                onOpen={robin.open}
-                onClose={robin.close}
-                promptText={robin.promptText}
-                onPromptTextChange={robin.setPromptText}
-                questionType={robin.questionType}
-                onQuestionTypeChange={robin.setQuestionType}
-                onGenerate={() => void robin.generate()}
-                loading={robin.loading}
-                error={robin.error}
-                hasPreviousVersion={robin.hasPreviousVersion}
-                onRestorePreviousVersion={robin.restorePreviousVersion}
-            />
+            <RobinAiHelper form={{ snapshot: state.snapshot, applyPatch: state.applyPatch }} />
             <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
                 <Field label="Question" required>
                     <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />
