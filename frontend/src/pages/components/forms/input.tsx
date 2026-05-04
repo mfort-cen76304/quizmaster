@@ -32,3 +32,15 @@ export const NumberInput = Input<number>(
     v => v.toString(),
     s => Number(s),
 )
+
+export const DecimalInput = ({ id, className, placeholder, value, onChange }: InputProps<string>) => (
+    <input
+        type="text"
+        inputMode="decimal"
+        id={id}
+        className={className}
+        placeholder={placeholder}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+    />
+)

@@ -9,6 +9,7 @@ import {
     Field,
     TextArea,
     TextInput,
+    DecimalInput,
     CheckField,
     Row,
     Button,
@@ -177,12 +178,10 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                 {state.isNumerical ? (
                     <>
                         <Field label="Correct numerical answer" required>
-                            <input
-                                type="text"
-                                inputMode="decimal"
+                            <DecimalInput
                                 id="numerical-correct-answer"
                                 value={state.numericalAnswer}
-                                onChange={e => state.setNumericalAnswer(e.target.value)}
+                                onChange={state.setNumericalAnswer}
                             />
                             <ErrorMessage errorCode="empty-numerical-answer" />
                             <ErrorMessage errorCode="invalid-numerical-answer" />
