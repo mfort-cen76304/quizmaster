@@ -26,7 +26,7 @@ export interface QuestionFormState {
     readonly correctAnswers: readonly number[]
     readonly questionType: QuestionType
     readonly numericalAnswer: string
-    readonly tolerance: string
+    readonly tolerance: number
     readonly isNumerical: boolean
     readonly isMultipleChoice: boolean
     readonly isEasy: boolean
@@ -53,7 +53,7 @@ export const useQuestionFormState = (question?: Question) => {
     const [tagText, setTagText] = useState<string>(initialTag)
     const [questionType, setQuestionType] = useState<QuestionType>(question?.questionType ?? 'single')
     const [numericalAnswer, setNumericalAnswer] = useState(isQuestionNumerical ? (question?.answers?.[0] ?? '') : '')
-    const [tolerance, setTolerance] = useState(question?.tolerance != null ? String(question.tolerance) : '')
+    const [tolerance, setTolerance] = useState<number>(question?.tolerance ?? 0)
     const [isEasy, setIsEasy] = useState(question?.isEasy || false)
     const [showExplanations, setShowExplanations] = useState(
         question?.explanations?.some(explanation => !!explanation) ?? false,
@@ -70,7 +70,7 @@ export const useQuestionFormState = (question?: Question) => {
         isEasy: boolean
         showExplanations: boolean
         numericalAnswer: string
-        tolerance: string
+        tolerance: number
     }>(null)
     const [generatedExplanations, setGeneratedExplanations] = useState<readonly string[]>([])
     const nextId = useRef(0)
@@ -146,7 +146,7 @@ export const useQuestionFormState = (question?: Question) => {
             setQuestionExplanation(response.questionExplanation ?? '')
             setQuestionType('numerical')
             setNumericalAnswer(selectedAnswer)
-            setTolerance(response.tolerance != null ? String(response.tolerance) : '')
+            setTolerance(response.tolerance ?? 0)
             setIsEasy(false)
             setIsAiGenerated(false)
             setAnswers(emptyAnswerSlots(''))
@@ -172,7 +172,7 @@ export const useQuestionFormState = (question?: Question) => {
         setCorrectAnswers(Array.from(response.correctAnswers))
         setShowExplanations(false)
         setNumericalAnswer('')
-        setTolerance('')
+        setTolerance(0)
         setIsEasy(false)
         setIsAiGenerated(true)
         setAnswerIds(response.answers.map(() => genId()))
@@ -270,8 +270,6 @@ const buildTags = (tagText: string): string[] => {
 
 export const stateToQuestionApiData = (state: QuestionFormState): QuestionRequest => {
     if (state.isNumerical) {
-        const normalizedTolerance = state.tolerance.trim()
-        const parsedTolerance = normalizedTolerance === '' ? undefined : Number.parseFloat(normalizedTolerance)
         return {
             question: state.questionText,
             answers: [state.numericalAnswer.trim()],
@@ -280,7 +278,7 @@ export const stateToQuestionApiData = (state: QuestionFormState): QuestionReques
             questionExplanation: state.questionExplanation,
             questionType: state.questionType,
             isEasy: false,
-            tolerance: Number.isNaN(parsedTolerance) ? undefined : parsedTolerance,
+            tolerance: state.tolerance,
             tags: buildTags(state.tagText),
         }
     }

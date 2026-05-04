@@ -10,6 +10,7 @@ import {
     TextArea,
     TextInput,
     DecimalInput,
+    NumberInput,
     CheckField,
     Row,
     Button,
@@ -194,13 +195,12 @@ export const QuestionEditForm = ({ question, onSubmit, onBack }: QuestionEditPro
                             })()}
                         </Field>
                         <Field label="Tolerance">
-                            <input
-                                type="number"
+                            <NumberInput
                                 id="numerical-tolerance"
-                                min="0"
+                                min={0}
                                 step="any"
                                 value={state.tolerance}
-                                onChange={e => state.setTolerance(e.target.value)}
+                                onChange={state.setTolerance}
                             />
                         </Field>
                     </>

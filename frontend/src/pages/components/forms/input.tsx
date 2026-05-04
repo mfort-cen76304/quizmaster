@@ -6,15 +6,19 @@ export interface InputProps<V> {
     readonly id?: string
     readonly value: V
     readonly onChange: (value: V) => void
+    readonly min?: number
+    readonly step?: number | 'any'
 }
 
 export function Input<V>(type: string, toText: (value: V) => string, toValue: (value: string) => V) {
-    return ({ placeholder, className, id, value, onChange }: InputProps<V>) => (
+    return ({ placeholder, className, id, value, onChange, min, step }: InputProps<V>) => (
         <input
             type={type}
             id={id}
             className={className}
             placeholder={placeholder}
+            min={min}
+            step={step}
             value={toText(value)}
             onChange={e => onChange(toValue(e.target.value))}
         />

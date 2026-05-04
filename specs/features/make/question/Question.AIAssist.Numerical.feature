@@ -55,7 +55,7 @@ Feature: Generate numerical question using AI
     Then the question is saved in the workspace
 
   @ai @slow
-  Scenario: AI-generated numerical question leaves tolerance empty when not requested
+  Scenario: AI-generated numerical question defaults tolerance to 0 when not requested
     Given I start creating a new question
     And I mark the question as numerical choice
     When I open Robin AI
@@ -66,7 +66,7 @@ Feature: Generate numerical question using AI
     Then Question field is not empty
     And the question is numerical choice
     And I see numerical correct answer "12"
-    And I see tolerance ""
+    And I see tolerance "0"
 
   @ai @slow
   Scenario: AI-generated numerical question fills question explanation by default
@@ -83,7 +83,7 @@ Feature: Generate numerical question using AI
     And I see empty question explanation
 
   @ai @slow
-  Scenario: AI-generated numerical question clears existing tolerance when the next prompt does not ask for it
+  Scenario: AI-generated numerical question resets tolerance to 0 when the next prompt does not ask for it
     Given I start creating a new question
     And I mark the question as numerical choice
     When I open Robin AI
@@ -101,7 +101,7 @@ Feature: Generate numerical question using AI
     Then Question field is not empty
     And the question is numerical choice
     And I see numerical correct answer "12"
-    And I see tolerance ""
+    And I see tolerance "0"
 
   @ai @slow
   Scenario: AI-generated numerical question clears existing question explanation when the next prompt does not ask for it
