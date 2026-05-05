@@ -17,7 +17,7 @@ const TYPE_INSTRUCTIONS: Record<QuestionType, string> = {
     multiple:
         'This must be a multiple choice question with at least 2 correct answers. Never return exactly 1 correct answer. Return a non-empty explanation for every answer.',
     numerical:
-        'This should be suitable for a numerical quiz question asking for just one numeric value. Include exactly 1 correct numeric answer and at least 1 incorrect answer. Return a non-empty explanation for every answer and return non-empty questionExplanation when requested.',
+        'This should be suitable for a numerical quiz question asking for just one numeric value. Include exactly 1 correct numeric answer and at least 1 incorrect answer. Return a non-empty explanation for every answer. Set questionExplanation to "" (empty string) unless this prompt explicitly asks for an explanation, hint, or description for the question itself.',
 }
 
 const buildAiPrompt = (prompt: string, questionType: QuestionType): string => {

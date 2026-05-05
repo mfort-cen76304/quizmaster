@@ -39,9 +39,10 @@ For numerical questions (when the user asks for a numerical answer):
     "answers": ["correct_numeric_answer", "incorrect_answer_1", "incorrect_answer_2"],
     "correctAnswers": [0],
     "explanations": ["explanation for correct answer", "explanation for incorrect answer 1", "explanation for incorrect answer 2"],
-    "tolerance": 0.5,
-    "questionExplanation": "A general explanation that helps understand the question without revealing the correct answer."
+    "questionExplanation": ""
 }
+
+Always include "questionExplanation" as an empty string "". Fill it with a non-empty value ONLY when the user prompt explicitly asks for an explanation, hint, description, or context for the question itself. A topic alone (e.g. "about basic arithmetic") is NOT a request to fill it. Add "tolerance" only when the user requested it.
 
 CRITICAL REQUIREMENTS FOR JSON RESPONSE:
 1. The "answers" array contains all answer options in order.
@@ -59,6 +60,7 @@ CRITICAL REQUIREMENTS FOR JSON RESPONSE:
     - "tolerance" must be a JSON number, never a string and never null.
     - If the user does not mention tolerance, omit the "tolerance" field.
     - If the user asks for tolerance but does not provide a value, infer it from the correct answer using the rules above.
+    - For numerical questions, "questionExplanation" MUST be present as a JSON string. Set it to "" (empty string) by default. Use a non-empty string ONLY when the user prompt explicitly requests an explanation, hint, description, or context for the question. A topic alone (e.g. "about basic arithmetic", "about geometry") is NOT a request to fill it.
 8. Do NOT include "tolerance" for non-numerical questions.
 9. This applies to BOTH single-choice and multiple-choice questions.
 10. If the user provides an explanation in the prompt, use it as the "questionExplanation" field.
@@ -89,7 +91,8 @@ Example with numerical question without tolerance or question explanation:
     "question": "What is 6 + 6?",
     "answers": ["12", "11", "13"],
     "correctAnswers": [0],
-    "explanations": ["12 is correct because 6 + 6 equals 12.", "11 is too low because adding 6 and 6 gives 12.", "13 is too high because adding 6 and 6 gives 12."]
+    "explanations": ["12 is correct because 6 + 6 equals 12.", "11 is too low because adding 6 and 6 gives 12.", "13 is too high because adding 6 and 6 gives 12."],
+    "questionExplanation": ""
 }
 
 Example with numerical question where tolerance is requested but not specified:
@@ -98,7 +101,8 @@ Example with numerical question where tolerance is requested but not specified:
     "answers": ["2.5", "2", "3"],
     "correctAnswers": [0],
     "explanations": ["2.5 is correct because 5 divided by 2 equals 2.5.", "2 is too low because 5 divided by 2 is 2.5, not 2.", "3 is too high because 5 divided by 2 is 2.5, not 3."],
-    "tolerance": 0.25
+    "tolerance": 0.25,
+    "questionExplanation": ""
 }
 
 Rules:
