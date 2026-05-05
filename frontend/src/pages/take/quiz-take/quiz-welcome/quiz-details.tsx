@@ -1,6 +1,7 @@
 import type { Quiz, QuizTake } from '#model/quiz.ts'
+import { Page } from '#pages/components'
 import { StartButton } from '#pages/take/quiz-take/components/buttons.tsx'
-import './quiz-details.scss'
+import { TakeCard } from '#pages/take/shared/take-card.tsx'
 
 export interface QuizDetailsProps {
     readonly quiz: Quiz | QuizTake
@@ -8,39 +9,45 @@ export interface QuizDetailsProps {
     readonly onStart: () => void
 }
 
-const getFeedbackText = (mode: string): string => {
-    return mode === 'learn' ? 'Continuous feedback' : 'Feedback at the end'
-}
+const getFeedbackText = (mode: string): string => (mode === 'learn' ? 'Continuous feedback' : 'Feedback at the end')
 
 export const QuizDetails = ({ quiz, canStart, onStart }: QuizDetailsProps) => (
-    <div className="quiz-details-container">
-        <h1 className="quiz-details-page-title">Welcome to the quiz</h1>
-        <div className="quiz-details-card">
-            <div className="quiz-details-header">
+    <Page id="quiz-welcome" title="Welcome to the quiz">
+        <TakeCard id="quiz-details">
+            <header>
+                <span className="eyebrow">Quiz</span>
                 <h2 id="quiz-name">{quiz.title}</h2>
                 <p id="quiz-description">{quiz.description}</p>
+            </header>
+            <div className="details">
+                <div className="detail">
+                    <span className="label">Time limit</span>
+                    <span id="time-limit" className="value">
+                        {quiz.timeLimit} seconds
+                    </span>
+                </div>
+                <div className="detail">
+                    <span className="label">Question count</span>
+                    <span id="question-count" className="value">
+                        {quiz.randomQuestionCount || quiz.questions.length}
+                    </span>
+                </div>
+                <div className="detail">
+                    <span className="label">Pass score</span>
+                    <span id="pass-score" className="value">
+                        {quiz.passScore}%
+                    </span>
+                </div>
+                <div className="detail">
+                    <span className="label">Feedback</span>
+                    <span id="question-feedback" className="value">
+                        {getFeedbackText(quiz.mode)}
+                    </span>
+                </div>
             </div>
-            <div className="quiz-details-body">
-                <div className="detail-item">
-                    <label>Time limit</label>
-                    <span id="time-limit">{quiz.timeLimit} seconds</span>
-                </div>
-                <div className="detail-item">
-                    <label>Question count</label>
-                    <span id="question-count">{quiz.randomQuestionCount || quiz.questions.length}</span>
-                </div>
-                <div className="detail-item">
-                    <label>Pass score</label>
-                    <span id="pass-score">{quiz.passScore}%</span>
-                </div>
-                <div className="detail-item">
-                    <label>Feedback</label>
-                    <span id="question-feedback">{getFeedbackText(quiz.mode)}</span>
-                </div>
-            </div>
-            <div className="quiz-details-footer">
+            <footer>
                 <StartButton onClick={onStart} disabled={!canStart} />
-            </div>
-        </div>
-    </div>
+            </footer>
+        </TakeCard>
+    </Page>
 )

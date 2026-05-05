@@ -1,0 +1,105 @@
+.take-card {
+    position: relative;
+    overflow: hidden;
+    margin: 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    background:
+        radial-gradient(circle at 100% 0%, rgba(15, 159, 140, 0.1), transparent 38%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 251, 255, 0.96) 100%);
+    box-shadow: var(--shadow-md);
+    backdrop-filter: blur(10px);
+
+    > header {
+        padding: 1.6rem 1.8rem 1.25rem;
+        border-bottom: 1px solid var(--border-subtle);
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 0.55rem;
+            padding: 0.32rem 0.72rem;
+            border-radius: 999px;
+            background: rgba(15, 159, 140, 0.12);
+            color: var(--accent-mint);
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 1.55rem;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            color: var(--text-strong);
+        }
+
+        p {
+            margin: 0.55rem 0 0;
+            color: var(--text-soft);
+            font-size: 0.98rem;
+            line-height: 1.55;
+        }
+    }
+
+    .details {
+        display: grid;
+        gap: 0.4rem;
+        padding: 1.1rem 1.8rem;
+
+        .detail {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.55rem 0;
+            border-bottom: 1px dashed var(--border-subtle);
+
+            &:last-child {
+                border-bottom: none;
+            }
+
+            .label {
+                font-size: 0.86rem;
+                font-weight: 600;
+                letter-spacing: 0.04em;
+                text-transform: uppercase;
+                color: var(--text-muted);
+            }
+
+            .value {
+                font-size: 1rem;
+                font-weight: 600;
+                color: var(--text-strong);
+            }
+        }
+    }
+
+    > footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.6rem;
+        padding: 1.15rem 1.8rem 1.4rem;
+        background: rgba(248, 251, 255, 0.6);
+        border-top: 1px solid var(--border-subtle);
+    }
+
+    @media (max-width: 720px) {
+        > header,
+        .details,
+        > footer {
+            padding-left: 1.15rem;
+            padding-right: 1.15rem;
+        }
+
+        > footer {
+            justify-content: stretch;
+
+            > * {
+                flex: 1;
+            }
+        }
+    }
+}

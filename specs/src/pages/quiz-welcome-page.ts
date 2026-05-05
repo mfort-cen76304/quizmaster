@@ -4,12 +4,12 @@ export class QuizWelcomePage {
     constructor(private page: Page) {}
 
     private headerLocator = () => this.page.locator('h1')
-    private nameLocator = () => this.page.locator('h2#quiz-name')
-    private descriptionLocator = () => this.page.locator('p#quiz-description')
-    private questionCountLocator = () => this.page.locator('span#question-count')
-    private feedbackLocator = () => this.page.locator('span#question-feedback')
-    private passScoreLocator = () => this.page.locator('span#pass-score')
-    private timeLimitLocator = () => this.page.locator('span#time-limit')
+    private nameLocator = () => this.page.locator('#quiz-name')
+    private descriptionLocator = () => this.page.locator('#quiz-description')
+    private questionCountLocator = () => this.page.locator('#question-count')
+    private feedbackLocator = () => this.page.locator('#question-feedback')
+    private passScoreLocator = () => this.page.locator('#pass-score')
+    private timeLimitLocator = () => this.page.locator('#time-limit')
 
     expectHeader = (text: string) => expect(this.headerLocator()).toHaveText(text)
     expectName = (name: string) => expect(this.nameLocator()).toHaveText(name)

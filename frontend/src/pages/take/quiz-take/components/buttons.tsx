@@ -22,7 +22,7 @@ interface StartButtonProps extends WithOnClick {
 }
 
 export const StartButton = ({ onClick, disabled = false }: StartButtonProps) => (
-    <Button id="start" type="button" onClick={onClick} disabled={disabled}>
+    <Button id="start" type="button" className="button primary" onClick={onClick} disabled={disabled}>
         Start
     </Button>
 )

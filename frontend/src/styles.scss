@@ -22,6 +22,18 @@
     --radius-xl: 28px;
     --radius-lg: 18px;
     --radius-md: 14px;
+
+    --feedback-correct-bg: #d8efd8;
+    --feedback-correct-border: rgba(46, 125, 50, 0.32);
+    --feedback-correct-fg: #1f6b1f;
+    --feedback-partial-bg: #fff3b0;
+    --feedback-partial-border: rgba(170, 130, 0, 0.3);
+    --feedback-partial-fg: #8a6300;
+    --feedback-incorrect-bg: #fbdbdc;
+    --feedback-incorrect-border: rgba(176, 39, 49, 0.28);
+    --feedback-incorrect-fg: #8e1f25;
+    --feedback-tolerance-bg: #fff3b0;
+    --feedback-tolerance-fg: #8a6300;
 }
 
 * {
