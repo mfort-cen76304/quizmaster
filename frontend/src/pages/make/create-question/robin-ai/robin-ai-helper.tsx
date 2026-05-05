@@ -17,7 +17,9 @@ export const RobinAiHelper = ({ form }: RobinAiHelperProps) => {
     const [sheetOpen, setSheetOpen] = useState(false)
     const [questionType, setQuestionType] = useState<QuestionType>('single')
     const undo = useRobinUndoBuffer(form)
-    const handleGenerated = (draft: QuestionDraft) => {
+    const handleGenerated = (drafts: readonly QuestionDraft[]) => {
+        const [draft] = drafts
+        if (!draft) return
         form.applyPatch(questionToPatch(draft))
     }
 

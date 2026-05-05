@@ -78,4 +78,14 @@ public class AiAssistantControllerTest {
 """))
             .andExpect(status().isBadRequest());
     }
+
+    @Test
+    public void emptyBatchInputReturnsBadRequest() throws Exception {
+        mockMvc.perform(post("/api/ai-assistant/batch")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"question": "   ", "questionType": "single"}
+"""))
+            .andExpect(status().isBadRequest());
+    }
 }

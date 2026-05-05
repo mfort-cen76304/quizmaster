@@ -12,13 +12,28 @@ export interface RobinFormBinding {
 }
 
 interface UseRobinPromptFormArgs {
-    readonly onGenerated: (draft: QuestionDraft) => void | Promise<void>
+    readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
+    readonly generateRequest?: (request: {
+        question: string
+        questionType: QuestionType
+    }) => Promise<readonly QuestionDraft[]>
     readonly undo: RobinUndoBuffer
     readonly questionType: QuestionType
     readonly onClose: () => void
 }
 
-export const useRobinPromptForm = ({ onGenerated, undo, questionType, onClose }: UseRobinPromptFormArgs) => {
+const generateSingleDraft = async (request: {
+    question: string
+    questionType: QuestionType
+}): Promise<readonly QuestionDraft[]> => [await postAiAssistant(request)]
+
+export const useRobinPromptForm = ({
+    onGenerated,
+    generateRequest = generateSingleDraft,
+    undo,
+    questionType,
+    onClose,
+}: UseRobinPromptFormArgs) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -27,7 +42,7 @@ export const useRobinPromptForm = ({ onGenerated, undo, questionType, onClose }:
         setError('')
         setLoading(true)
         try {
-            const response = await postAiAssistant({ question: promptText.trim(), questionType })
+            const response = await generateRequest({ question: promptText.trim(), questionType })
             undo.capture()
             await onGenerated(response)
             onClose()

@@ -37,6 +37,17 @@ public class AiAssistantServiceTest {
         assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("Topic", "wat"));
     }
 
+    @Test
+    void generateQuestionsFailsOnEmptyPrompt() {
+        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("   ", "single"));
+    }
+
+    @Test
+    void generateQuestionsFailsOnMissingQuestionType() {
+        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("Topic", null));
+        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("Topic", "  "));
+    }
+
     @Tag("ai")
     @Test
     void generateSingleChoiceWithType() {
@@ -161,6 +172,27 @@ public class AiAssistantServiceTest {
     void validateResponse_negativeIndex() {
         assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateResponse(
             new AiAssistantService.AssistantResponse("Question?", new String[]{"a", "b"}, new int[]{-1}, new String[]{"", ""}, null, null)
+        ));
+    }
+
+    @Test
+    void validateBatchResponses_valid() {
+        assertDoesNotThrow(() -> AiAssistantService.validateBatchResponses(
+            new AiAssistantService.AssistantResponse[]{
+                new AiAssistantService.AssistantResponse("Q1?", new String[]{"a", "b"}, new int[]{0}, new String[]{"", ""}, null, null),
+                new AiAssistantService.AssistantResponse("Q2?", new String[]{"c", "d"}, new int[]{1}, new String[]{"", ""}, null, null),
+            },
+            "single"
+        ));
+    }
+
+    @Test
+    void validateBatchResponses_requiresAtLeastTwoQuestions() {
+        assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateBatchResponses(
+            new AiAssistantService.AssistantResponse[]{
+                new AiAssistantService.AssistantResponse("Q1?", new String[]{"a", "b"}, new int[]{0}, new String[]{"", ""}, null, null),
+            },
+            "single"
         ));
     }
 

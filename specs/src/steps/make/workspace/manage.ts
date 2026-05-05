@@ -63,6 +63,10 @@ When('I edit the AI-generated question from the workspace', async function () {
     await this.workspacePage.editFirstQuestion()
 })
 
+When('I edit one of the AI-generated questions from the workspace', async function () {
+    await this.workspacePage.editFirstQuestion()
+})
+
 When('I delete question {string} from the list', async function (question: string) {
     this.activeQuestionBookmark = question
     await this.workspacePage.deleteQuestion(question)

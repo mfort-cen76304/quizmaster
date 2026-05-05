@@ -6,16 +6,28 @@ import { useRobinPromptForm } from './use-robin-prompt-form.ts'
 import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'
 
 interface RobinSheetProps {
-    readonly onGenerated: (draft: QuestionDraft) => void | Promise<void>
+    readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
+    readonly generateRequest?: (request: {
+        question: string
+        questionType: QuestionType
+    }) => Promise<readonly QuestionDraft[]>
     readonly undo: RobinUndoBuffer
     readonly questionType: QuestionType
     readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
 }
 
-export const RobinSheet = ({ onGenerated, undo, questionType, onQuestionTypeChange, onClose }: RobinSheetProps) => {
+export const RobinSheet = ({
+    onGenerated,
+    generateRequest,
+    undo,
+    questionType,
+    onQuestionTypeChange,
+    onClose,
+}: RobinSheetProps) => {
     const { promptText, setPromptText, loading, error, generate } = useRobinPromptForm({
         onGenerated,
+        generateRequest,
         undo,
         questionType,
         onClose,

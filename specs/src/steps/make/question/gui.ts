@@ -258,6 +258,16 @@ When('I ask AI:', async function (dataTable: DataTable) {
     ])
 })
 
+When('I ask AI to generate multiple questions:', async function (dataTable: DataTable) {
+    await enterAIPrompt(this, toText(dataTable))
+    await Promise.all([
+        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant/batch') && response.ok(), {
+            timeout: 60_000,
+        }),
+        this.robinSheetPage.generate(),
+    ])
+})
+
 When(
     /I ask AI for (single choice|multiple choice|numerical) question:/,
     async function (choice: string, dataTable: DataTable) {
@@ -265,6 +275,20 @@ When(
         await enterAIPrompt(this, toText(dataTable))
         await Promise.all([
             this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+                timeout: 60_000,
+            }),
+            this.robinSheetPage.generate(),
+        ])
+    },
+)
+
+When(
+    /I ask AI for (single choice|multiple choice|numerical) questions:/,
+    async function (choice: string, dataTable: DataTable) {
+        await selectAIQuestionType(this, choice as AIQuestionTypeChoice)
+        await enterAIPrompt(this, toText(dataTable))
+        await Promise.all([
+            this.page.waitForResponse(response => response.url().includes('/api/ai-assistant/batch') && response.ok(), {
                 timeout: 60_000,
             }),
             this.robinSheetPage.generate(),

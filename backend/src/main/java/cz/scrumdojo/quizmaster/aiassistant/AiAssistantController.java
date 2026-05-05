@@ -22,4 +22,9 @@ public class AiAssistantController {
     public ResponseEntity<QuestionResponse> generate(@RequestBody AiAssistantRequest request) {
         return ResponseEntity.ok(aiAssistantService.generateQuestion(request.question(), request.questionType()));
     }
+
+    @PostMapping("/batch")
+    public ResponseEntity<QuestionResponse[]> generateBatch(@RequestBody AiAssistantRequest request) {
+        return ResponseEntity.ok(aiAssistantService.generateQuestions(request.question(), request.questionType()));
+    }
 }

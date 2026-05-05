@@ -9,3 +9,6 @@ interface AiAssistantRequest {
 
 export const postAiAssistant = async (request: AiAssistantRequest) =>
     await postJson<AiAssistantRequest, QuestionDraft>('/api/ai-assistant', request)
+
+export const postAiAssistantBatch = async (request: AiAssistantRequest) =>
+    await postJson<AiAssistantRequest, readonly QuestionDraft[]>('/api/ai-assistant/batch', request)

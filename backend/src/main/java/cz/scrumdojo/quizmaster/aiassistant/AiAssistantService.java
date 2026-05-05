@@ -38,6 +38,9 @@ public class AiAssistantService {
     private final String singleChoicePrompt;
     private final String multipleChoicePrompt;
     private final String numericalPrompt;
+    private final String singleChoiceBatchPrompt;
+    private final String multipleChoiceBatchPrompt;
+    private final String numericalBatchPrompt;
 
     public AiAssistantService(
         ObjectMapper objectMapper,
@@ -53,6 +56,9 @@ public class AiAssistantService {
         this.singleChoicePrompt = loadPrompt("prompts/single-choice.md");
         this.multipleChoicePrompt = loadPrompt("prompts/multiple-choice.md");
         this.numericalPrompt = loadPrompt("prompts/numerical.md");
+        this.singleChoiceBatchPrompt = loadPrompt("prompts/single-choice-batch.md");
+        this.multipleChoiceBatchPrompt = loadPrompt("prompts/multiple-choice-batch.md");
+        this.numericalBatchPrompt = loadPrompt("prompts/numerical-batch.md");
     }
 
     private static String loadPrompt(String path) throws IOException {
@@ -60,16 +66,40 @@ public class AiAssistantService {
     }
 
     public QuestionResponse generateQuestion(String prompt, String questionType) {
+        validatePromptAndToken(prompt);
+        String resolvedType = resolveType(questionType);
+        AssistantResponse assistantResponse = requestAssistant(prompt, chooseSystemPrompt(resolvedType), AssistantResponse.class);
+        validateForType(assistantResponse, resolvedType);
+        String[] explanations = normalizeExplanations(assistantResponse);
+
+        return toDraftResponse(assistantResponse, explanations, resolvedType);
+    }
+
+    public QuestionResponse[] generateQuestions(String prompt, String questionType) {
+        validatePromptAndToken(prompt);
+        String resolvedType = resolveType(questionType);
+        AssistantBatchResponse assistantResponse = requestAssistant(
+            prompt,
+            chooseBatchSystemPrompt(resolvedType),
+            AssistantBatchResponse.class
+        );
+        validateBatchResponses(assistantResponse.questions(), resolvedType);
+
+        return Arrays.stream(assistantResponse.questions())
+            .map(response -> toDraftResponse(response, normalizeExplanations(response), resolvedType))
+            .toArray(QuestionResponse[]::new);
+    }
+
+    private void validatePromptAndToken(String prompt) {
         if (prompt == null || prompt.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question must not be empty.");
         }
         if (apiToken == null || apiToken.isBlank()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI token is not configured.");
         }
+    }
 
-        String resolvedType = resolveType(questionType);
-        String systemPrompt = chooseSystemPrompt(resolvedType);
-
+    private <T> T requestAssistant(String prompt, String systemPrompt, Class<T> responseType) {
         try {
             String body = objectMapper.writeValueAsString(new ChatRequest(
                 model,
@@ -94,19 +124,7 @@ public class AiAssistantService {
 
             JsonNode root = objectMapper.readTree(response.body());
             String content = root.path("choices").path(0).path("message").path("content").asText("").trim();
-            AssistantResponse assistantResponse = objectMapper.readValue(content, AssistantResponse.class);
-            validateForType(assistantResponse, resolvedType);
-            String[] explanations = normalizeExplanations(assistantResponse);
-
-            return QuestionResponse.draft(
-                assistantResponse.question(),
-                assistantResponse.answers(),
-                assistantResponse.correctAnswers(),
-                explanations,
-                assistantResponse.questionExplanation(),
-                assistantResponse.tolerance(),
-                resolvedType
-            );
+            return objectMapper.readValue(content, responseType);
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
@@ -134,12 +152,30 @@ public class AiAssistantService {
         };
     }
 
+    private String chooseBatchSystemPrompt(String resolvedType) {
+        return switch (resolvedType) {
+            case "single" -> singleChoiceBatchPrompt;
+            case "multiple" -> multipleChoiceBatchPrompt;
+            case "numerical" -> numericalBatchPrompt;
+            default -> throw new IllegalStateException("Unhandled questionType: " + resolvedType);
+        };
+    }
+
     private static void validateForType(AssistantResponse response, String resolvedType) {
         switch (resolvedType) {
             case "single" -> validateSingleChoiceResponse(response);
             case "multiple" -> validateMultipleChoiceResponse(response);
             case "numerical" -> validateNumericalResponse(response);
             default -> throw new IllegalStateException("Unhandled questionType: " + resolvedType);
+        }
+    }
+
+    static void validateBatchResponses(AssistantResponse[] responses, String resolvedType) {
+        if (responses == null || responses.length < 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid batch response: need at least 2 questions.");
+        }
+        for (AssistantResponse response : responses) {
+            validateForType(response, resolvedType);
         }
     }
 
@@ -215,6 +251,18 @@ public class AiAssistantService {
             .toArray(String[]::new);
     }
 
+    private static QuestionResponse toDraftResponse(AssistantResponse assistantResponse, String[] explanations, String resolvedType) {
+        return QuestionResponse.draft(
+            assistantResponse.question(),
+            assistantResponse.answers(),
+            assistantResponse.correctAnswers(),
+            explanations,
+            assistantResponse.questionExplanation(),
+            assistantResponse.tolerance(),
+            resolvedType
+        );
+    }
+
     private record ChatRequest(String model, Message[] messages, @JsonProperty("response_format") ResponseFormat responseFormat, @JsonProperty("max_tokens") int maxTokens) {}
 
     private record ResponseFormat(String type) {}
@@ -231,4 +279,6 @@ public class AiAssistantService {
         @JsonProperty("questionExplanation")
         String questionExplanation
     ) {}
+
+    record AssistantBatchResponse(AssistantResponse[] questions) {}
 }
