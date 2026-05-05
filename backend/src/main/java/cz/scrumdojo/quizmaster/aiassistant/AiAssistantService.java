@@ -35,7 +35,6 @@ public class AiAssistantService {
     private final String apiToken;
     private final String model;
     private final int maxTokens;
-    private final String legacyPrompt;
     private final String singleChoicePrompt;
     private final String multipleChoicePrompt;
     private final String numericalPrompt;
@@ -51,7 +50,6 @@ public class AiAssistantService {
         this.model = model;
         this.maxTokens = maxTokens;
         this.httpClient = HttpClient.newBuilder().connectTimeout(TIMEOUT).build();
-        this.legacyPrompt = loadPrompt("prompts/question-generation.md");
         this.singleChoicePrompt = loadPrompt("prompts/single-choice.md");
         this.multipleChoicePrompt = loadPrompt("prompts/multiple-choice.md");
         this.numericalPrompt = loadPrompt("prompts/numerical.md");
@@ -59,10 +57,6 @@ public class AiAssistantService {
 
     private static String loadPrompt(String path) throws IOException {
         return new ClassPathResource(path).getContentAsString(StandardCharsets.UTF_8);
-    }
-
-    public QuestionResponse generateQuestion(String prompt) {
-        return generateQuestion(prompt, null);
     }
 
     public QuestionResponse generateQuestion(String prompt, String questionType) {
@@ -121,7 +115,9 @@ public class AiAssistantService {
     }
 
     private static String resolveType(String questionType) {
-        if (questionType == null || questionType.isBlank()) return null;
+        if (questionType == null || questionType.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "questionType is required.");
+        }
         String normalized = questionType.trim().toLowerCase();
         if (!KNOWN_TYPES.contains(normalized)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown questionType: " + questionType);
@@ -130,25 +126,20 @@ public class AiAssistantService {
     }
 
     private String chooseSystemPrompt(String resolvedType) {
-        if (resolvedType == null) return legacyPrompt;
         return switch (resolvedType) {
             case "single" -> singleChoicePrompt;
             case "multiple" -> multipleChoicePrompt;
             case "numerical" -> numericalPrompt;
-            default -> legacyPrompt;
+            default -> throw new IllegalStateException("Unhandled questionType: " + resolvedType);
         };
     }
 
     private static void validateForType(AssistantResponse response, String resolvedType) {
-        if (resolvedType == null) {
-            validateResponse(response);
-            return;
-        }
         switch (resolvedType) {
             case "single" -> validateSingleChoiceResponse(response);
             case "multiple" -> validateMultipleChoiceResponse(response);
             case "numerical" -> validateNumericalResponse(response);
-            default -> validateResponse(response);
+            default -> throw new IllegalStateException("Unhandled questionType: " + resolvedType);
         }
     }
 

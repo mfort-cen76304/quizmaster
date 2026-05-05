@@ -32,9 +32,10 @@ public class AiAssistantControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                        "question": "Generate a question about capital cities of Europe with 1 correct answer and 2 incorrect answers"
+                        "question": "Generate a question about capital cities of Europe with 1 correct answer and 2 incorrect answers",
+                        "questionType": "single"
                     }
-                    """))
+"""))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.question").isNotEmpty())
             .andExpect(jsonPath("$.answers").isArray())
@@ -54,9 +55,10 @@ public class AiAssistantControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                        "question": "Generate a question about European geography with 1 correct answer and 3 incorrect answers"
+                        "question": "Generate a question about European geography with 1 correct answer and 3 incorrect answers",
+                        "questionType": "single"
                     }
-                    """))
+"""))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.question").isNotEmpty())
             .andExpect(jsonPath("$.answers").isArray())
@@ -72,8 +74,8 @@ public class AiAssistantControllerTest {
         mockMvc.perform(post("/api/ai-assistant")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
-                    {"question": "   "}
-                    """))
+                    {"question": "   ", "questionType": "single"}
+"""))
             .andExpect(status().isBadRequest());
     }
 }

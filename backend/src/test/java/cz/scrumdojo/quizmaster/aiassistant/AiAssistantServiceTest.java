@@ -21,39 +21,15 @@ public class AiAssistantServiceTest {
     @Value("${ai.token:}")
     private String apiToken;
 
-    @Tag("ai")
-    @Test
-    void generateSingleChoiceQuestion() {
-        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
-
-        var response = aiAssistantService.generateQuestion(
-            "Generate a question about capital cities of Europe with 1 correct answer and 3 incorrect answers"
-        );
-
-        assertNotNull(response.question());
-        assertFalse(response.question().isBlank());
-        assertEquals(4, response.answers().length);
-        assertEquals(1, response.correctAnswers().length);
-    }
-
-    @Tag("ai")
-    @Test
-    void generateMultipleChoiceQuestion() {
-        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
-
-        var response = aiAssistantService.generateQuestion(
-            "Generate a question about European capitals with 2 correct answers and 2 incorrect answers"
-        );
-
-        assertNotNull(response.question());
-        assertFalse(response.question().isBlank());
-        assertEquals(4, response.answers().length);
-        assertEquals(2, response.correctAnswers().length);
-    }
-
     @Test
     void generateQuestionFailsOnEmptyPrompt() {
-        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("   "));
+        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("   ", "single"));
+    }
+
+    @Test
+    void generateQuestionFailsOnMissingQuestionType() {
+        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("Topic", null));
+        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("Topic", "  "));
     }
 
     @Test
@@ -115,7 +91,8 @@ public class AiAssistantServiceTest {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
         var response = aiAssistantService.generateQuestion(
-            "Create a question on exoplanets. There must be exactly 2 correct answers and exactly 2 incorrect answers. Total: 4 answers."
+            "Create a question on exoplanets with exactly 2 correct answers and exactly 2 incorrect answers.",
+            "multiple"
         );
 
         assertFalse(response.question().isBlank());
@@ -129,40 +106,13 @@ public class AiAssistantServiceTest {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
         var response = aiAssistantService.generateQuestion(
-            "Create a question about European capitals. There must be exactly 1 correct answer and exactly 2 incorrect answers. Total: 3 answers."
+            "Create a question about European capitals with exactly 2 incorrect answers (3 answers total).",
+            "single"
         );
 
         assertFalse(response.question().isBlank());
         assertEquals(3, response.answers().length, "Expected exactly 3 answers");
         assertEquals(1, response.correctAnswers().length, "Expected exactly 1 correct answer");
-    }
-
-    @Tag("ai")
-    @Test
-    void generateSingleChoiceQuestionWithGeneralExpectedShape() {
-        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
-
-        var response = aiAssistantService.generateQuestion(
-            "Create a single choice question about world geography. Return 4 answers total. Exactly 1 answer must be correct."
-        );
-
-        assertGeneralChoiceResponse(response);
-        assertEquals(4, response.answers().length);
-        assertEquals(1, response.correctAnswers().length);
-    }
-
-    @Tag("ai")
-    @Test
-    void generateMultipleChoiceQuestionWithGeneralExpectedShape() {
-        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
-
-        var response = aiAssistantService.generateQuestion(
-            "Create a multiple choice question about world geography. Return 4 answers total. At least 2 answers must be correct."
-        );
-
-        assertGeneralChoiceResponse(response);
-        assertEquals(4, response.answers().length);
-        assertTrue(response.correctAnswers().length >= 2, "Expected at least 2 correct answers");
     }
 
     @Test
