@@ -109,6 +109,10 @@ Then('I see numerical correct answer {string}', async function (value: string) {
     await this.questionEditPage.expectNumericalCorrectAnswer(value)
 })
 
+Then('I see non-empty numerical correct answer', async function () {
+    await this.questionEditPage.expectNumericalCorrectAnswerNotEmpty()
+})
+
 Then('I see tolerance {string}', async function (value: string) {
     await this.questionEditPage.expectNumericalTolerance(value)
 })

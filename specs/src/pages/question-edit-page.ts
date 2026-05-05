@@ -118,6 +118,7 @@ export class QuestionEditPage {
     expectNumericalAnswerVisible = () => expect(this.numericalCorrectAnswerLocator()).toBeVisible()
     expectNumericalAnswerNotVisible = () => expect(this.numericalCorrectAnswerLocator()).not.toBeVisible()
     expectNumericalCorrectAnswer = (value: string) => expect(this.numericalCorrectAnswerLocator()).toHaveValue(value)
+    expectNumericalCorrectAnswerNotEmpty = () => expect(this.numericalCorrectAnswerLocator()).not.toHaveValue('')
     expectNumericalAnswerNote = (value: string) => expect(this.numericalAnswerFieldLocator()).toContainText(value)
     expectNumericalTolerance = (value: string) => expect(this.numericalToleranceLocator()).toHaveValue(value)
     expectNumericalToleranceNotEmpty = () => expect(this.numericalToleranceLocator()).not.toHaveValue('')
