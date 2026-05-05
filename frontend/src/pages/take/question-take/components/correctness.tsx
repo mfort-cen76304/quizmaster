@@ -1,4 +1,4 @@
-import './correctness.css'
+import './correctness.scss'
 
 interface CorrectnessProps {
     readonly score: number

@@ -1,3 +1,5 @@
+import './submit-button.scss'
+
 interface SubmitButtonProps {
     readonly disabled: boolean
 }

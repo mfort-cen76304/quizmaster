@@ -1,4 +1,5 @@
 import { Button, type WithOnClick } from '#pages/components/button.tsx'
+import './buttons.scss'
 
 export const NextButton = ({ onClick }: WithOnClick) => (
     <Button id="next" onClick={onClick}>

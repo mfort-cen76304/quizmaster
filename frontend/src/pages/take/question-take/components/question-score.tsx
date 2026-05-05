@@ -1,5 +1,3 @@
-import './question-score.scss'
-
 interface QuestionScoreProps {
     readonly score: number
 }

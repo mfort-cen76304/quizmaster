@@ -63,20 +63,6 @@ body {
     min-height: 100vh;
 }
 
-.evaluation-button {
-    border: 1px solid #359b74;
-    background-color: #bdf1ea;
-    color: #666;
-    padding: 10px;
-    text-decoration: none;
-    transition: 0.3s;
-    border-radius: 5px;
-
-    &:hover {
-        background-color: #8bdbd1;
-    }
-}
-
 .button {
     display: inline-flex;
     align-items: center;
@@ -130,9 +116,4 @@ body {
             transform: none;
         }
     }
-}
-
-.flex-container {
-    display: flex;
-    gap: 10px;
 }

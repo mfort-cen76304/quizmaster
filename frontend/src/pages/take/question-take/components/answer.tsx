@@ -1,6 +1,7 @@
 import type React from 'react'
 
 import { Explanation } from './explanation.tsx'
+import './answer.scss'
 
 export interface AnswerProps {
     readonly isMultipleChoice: boolean

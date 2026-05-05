@@ -1,0 +1,63 @@
+ul.answers {
+    li input[type='checkbox']:hover,
+    li input[type='radio']:hover {
+        background-color: #bbb;
+    }
+
+    li input[type='checkbox']:checked,
+    li input[type='radio']:checked {
+        border-color: rgb(0, 0, 0);
+    }
+
+    li input[type='checkbox']:checked::after {
+        content: '■';
+        font-size: 16px;
+        color: black;
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    li input[type='radio']:checked::after {
+        content: '●';
+        font-size: 16px;
+        color: black;
+        position: absolute;
+        top: 45%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    li input[type='checkbox'],
+    li input[type='radio'] {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid black;
+        background-color: white;
+        cursor: pointer;
+        display: inline-block;
+        position: relative;
+        transition:
+            background-color 0.4s ease,
+            border-color 0.4s ease;
+
+        &:disabled {
+            cursor: not-allowed;
+
+            &:hover {
+                background-color: white;
+                border-color: black;
+            }
+            &:checked:hover {
+                background-color: black;
+                border-color: black;
+            }
+        }
+    }
+
+    li input[type='radio'] {
+        border-radius: 10px;
+    }
+}

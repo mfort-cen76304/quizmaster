@@ -1,0 +1,13 @@
+.feedback {
+    &.correct {
+        color: green;
+    }
+
+    &.incorrect {
+        color: red;
+    }
+
+    &.partial-correct {
+        color: orange;
+    }
+}

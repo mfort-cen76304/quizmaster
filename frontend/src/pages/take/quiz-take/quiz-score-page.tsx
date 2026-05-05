@@ -1,4 +1,5 @@
 import './quiz.scss'
+import './quiz-score-page.scss'
 import type { Quiz, QuizSubmitResponse, QuizTake } from '#model/quiz.ts'
 
 import { QuestionFeedback } from './components/question.tsx'
