@@ -10,8 +10,9 @@ export class RobinSheetPage {
     private questionTypeRadio = (value: string) => this.page.locator(`#robin-question-type-${value}`)
 
     open = async () => {
+        await expect(this.fabLocator()).toBeVisible({ timeout: 3_000 })
         await this.fabLocator().click()
-        await this.promptLocator().waitFor({ state: 'visible' })
+        await expect(this.promptLocator()).toBeVisible({ timeout: 3_000 })
     }
 
     enterPrompt = (prompt: string) => this.promptLocator().fill(prompt)
