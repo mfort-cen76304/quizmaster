@@ -47,16 +47,26 @@ type SplatParticle = {
     size: number
     opacity: number
     color: string
+    gravity?: number
+    fade?: number
+    shrink?: number
 }
 
-type FireParticle = {
+type GoalStar = {
     x: number
     y: number
-    vx: number
-    vy: number
     size: number
     opacity: number
-    color: string
+    rotation: number
+    spin: number
+    scale: number
+    fill: string
+    stroke: string
+    glow: string
+}
+
+function clamp(value: number, min: number, max: number) {
+    return Math.max(min, Math.min(max, value))
 }
 
 function makeAngel(_w: number, h: number): Angel {
@@ -98,24 +108,62 @@ function makeAngelSplat(x: number, y: number): SplatParticle[] {
     })
 }
 
-function makeHellfire(x: number, y: number): FireParticle[] {
-    const colors = ['#fff7ad', '#facc15', '#fb923c', '#f97316', '#dc2626', '#7f1d1d', '#111827']
+function makeSatanBloodSplat(x: number, y: number): SplatParticle[] {
+    const blotColors = ['#2a0206', '#3f030b', '#5f0713', '#7f1d1d', '#991b1b']
+    const sprayColors = ['#4c0519', '#7f1d1d', '#991b1b', '#b91c1c', '#dc2626', '#fecaca']
 
-    return Array.from({ length: 70 }, () => {
-        const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.25
-        const speed = 1.5 + Math.random() * 6.5
-        const smoke = Math.random() < 0.18
+    const blotches = Array.from({ length: 36 }, () => {
+        const angle = Math.random() * Math.PI * 2
+        const speed = 0.2 + Math.random() * 1.35
 
         return {
-            x: x + (Math.random() - 0.5) * 18,
-            y: y + (Math.random() - 0.5) * 18,
-            vx: Math.cos(angle) * speed * (smoke ? 0.45 : 1),
-            vy: Math.sin(angle) * speed - (smoke ? 0.6 : 0),
-            size: smoke ? 8 + Math.random() * 12 : 3 + Math.random() * 8,
-            opacity: smoke ? 0.62 : 1,
-            color: colors[Math.floor(Math.random() * colors.length)],
+            x: x + (Math.random() - 0.5) * 14,
+            y: y + (Math.random() - 0.5) * 14,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: 6 + Math.random() * 15,
+            opacity: 0.96,
+            color: blotColors[Math.floor(Math.random() * blotColors.length)],
+            gravity: 0.028 + Math.random() * 0.018,
+            fade: 0.01 + Math.random() * 0.006,
+            shrink: 0.992 + Math.random() * 0.005,
         }
     })
+
+    const spray = Array.from({ length: 62 }, () => {
+        const angle = Math.random() * Math.PI * 2
+        const speed = 1.8 + Math.random() * 7.2
+
+        return {
+            x: x + (Math.random() - 0.5) * 12,
+            y: y + (Math.random() - 0.5) * 12,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: 2.2 + Math.random() * 7.4,
+            opacity: 1,
+            color: sprayColors[Math.floor(Math.random() * sprayColors.length)],
+            gravity: 0.05 + Math.random() * 0.03,
+            fade: 0.017 + Math.random() * 0.01,
+            shrink: 0.982 + Math.random() * 0.01,
+        }
+    })
+
+    return [...blotches, ...spray]
+}
+
+function makeGoalStar(x: number, y: number, fill: string, stroke: string, glow: string): GoalStar {
+    return {
+        x,
+        y,
+        size: 38 + Math.random() * 8,
+        opacity: 1,
+        rotation: Math.random() * Math.PI * 2,
+        spin: (Math.random() - 0.5) * 0.08,
+        scale: 0.88,
+        fill,
+        stroke,
+        glow,
+    }
 }
 
 function makeSatan(w: number, h: number): Satan {
@@ -176,6 +224,112 @@ function drawColoredHeart(
     ctx.bezierCurveTo(x + size, y, x, y, x, y + size * 0.3)
     ctx.fill()
     ctx.stroke()
+    ctx.restore()
+}
+
+function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+    const r = Math.min(radius, width / 2, height / 2)
+    ctx.beginPath()
+    ctx.moveTo(x + r, y)
+    ctx.lineTo(x + width - r, y)
+    ctx.quadraticCurveTo(x + width, y, x + width, y + r)
+    ctx.lineTo(x + width, y + height - r)
+    ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height)
+    ctx.lineTo(x + r, y + height)
+    ctx.quadraticCurveTo(x, y + height, x, y + height - r)
+    ctx.lineTo(x, y + r)
+    ctx.quadraticCurveTo(x, y, x + r, y)
+    ctx.closePath()
+}
+
+function traceStarPath(ctx: CanvasRenderingContext2D, outerRadius: number, innerRatio = 0.42) {
+    ctx.beginPath()
+    for (let i = 0; i < 10; i++) {
+        const angle = -Math.PI / 2 + (i * Math.PI) / 5
+        const radius = i % 2 === 0 ? outerRadius : outerRadius * innerRatio
+        const px = Math.cos(angle) * radius
+        const py = Math.sin(angle) * radius
+
+        if (i === 0) ctx.moveTo(px, py)
+        else ctx.lineTo(px, py)
+    }
+    ctx.closePath()
+}
+
+function drawGoalStar(ctx: CanvasRenderingContext2D, star: GoalStar) {
+    ctx.save()
+    ctx.translate(star.x, star.y)
+    ctx.rotate(star.rotation)
+    ctx.scale(star.scale, star.scale)
+    ctx.globalAlpha = star.opacity * 0.22
+    ctx.fillStyle = star.glow
+    traceStarPath(ctx, star.size * 1.7, 0.36)
+    ctx.fill()
+
+    ctx.globalAlpha = star.opacity
+    ctx.fillStyle = star.fill
+    ctx.strokeStyle = star.stroke
+    ctx.lineWidth = 4.6
+    ctx.shadowColor = star.glow
+    ctx.shadowBlur = 38
+    traceStarPath(ctx, star.size, 0.4)
+    ctx.fill()
+    ctx.stroke()
+
+    ctx.shadowBlur = 0
+    ctx.globalAlpha = star.opacity * 0.82
+    ctx.fillStyle = star.stroke
+    traceStarPath(ctx, star.size * 0.46, 0.5)
+    ctx.fill()
+
+    ctx.restore()
+}
+
+type ScorePanelOptions = {
+    x: number
+    y: number
+    width: number
+    label: string
+    score: number
+    align: 'left' | 'right'
+    background: string
+    border: string
+    labelColor: string
+    scoreColor: string
+    glow: string
+}
+
+function drawScorePanel(ctx: CanvasRenderingContext2D, options: ScorePanelOptions) {
+    const { x, y, width, label, score, align, background, border, labelColor, scoreColor, glow } = options
+    const height = 66
+    const padding = 18
+    const labelX = align === 'left' ? x + padding : x + width - padding
+    const scoreX = labelX
+
+    ctx.save()
+    ctx.shadowColor = glow
+    ctx.shadowBlur = 20
+    ctx.fillStyle = background
+    drawRoundedRect(ctx, x, y, width, height, 18)
+    ctx.fill()
+
+    ctx.shadowBlur = 0
+    ctx.lineWidth = 1.8
+    ctx.strokeStyle = border
+    drawRoundedRect(ctx, x, y, width, height, 18)
+    ctx.stroke()
+
+    ctx.textAlign = align
+    ctx.textBaseline = 'middle'
+
+    ctx.fillStyle = labelColor
+    ctx.font = '700 15px Georgia, serif'
+    ctx.fillText(label, labelX, y + 18)
+
+    ctx.fillStyle = scoreColor
+    ctx.font = '900 31px Georgia, serif'
+    ctx.fillText(String(score), scoreX, y + 45)
+
     ctx.restore()
 }
 
@@ -389,7 +543,9 @@ export function CrazyBackground() {
         const angels: Angel[] = []
         const satans: Satan[] = []
         const splats: SplatParticle[] = []
-        const hellfires: FireParticle[] = []
+        const goalStars: GoalStar[] = []
+        let angelScore = 0
+        let satanScore = 0
 
         function resize() {
             w = canvas!.width = window.innerWidth
@@ -440,7 +596,8 @@ export function CrazyBackground() {
 
                     const hitSatanIdx = satans.findIndex(s => hitTest(hrt, s.x, s.y, 30 + hrt.size))
                     if (hitSatanIdx !== -1) {
-                        hellfires.push(...makeHellfire(satans[hitSatanIdx].x, satans[hitSatanIdx].y))
+                        angelScore += 1
+                        splats.push(...makeSatanBloodSplat(satans[hitSatanIdx].x, satans[hitSatanIdx].y))
                         satans[hitSatanIdx] = makeSatan(w, h)
                         a.hearts.splice(j, 1)
                         continue
@@ -454,6 +611,21 @@ export function CrazyBackground() {
                 }
 
                 drawAngel(ctx!, a)
+
+                if (a.x >= w - 36) {
+                    angelScore += 20
+                    goalStars.push(
+                        makeGoalStar(
+                            Math.max(36, w - 36),
+                            clamp(a.y, 44, h - 44),
+                            '#facc15',
+                            '#fff7b3',
+                            'rgba(250, 204, 21, 0.98)',
+                        ),
+                    )
+                    angels[i] = makeAngel(w, h)
+                    continue
+                }
 
                 // recycle when off-screen
                 if (a.x < -100 || a.x > w + 100) {
@@ -495,6 +667,7 @@ export function CrazyBackground() {
 
                     const hitAngelIdx = angels.findIndex(a => hitTest(hrt, a.x, a.y, 26 + hrt.size))
                     if (hitAngelIdx !== -1) {
+                        satanScore += 1
                         splats.push(...makeAngelSplat(angels[hitAngelIdx].x, angels[hitAngelIdx].y))
                         angels[hitAngelIdx] = makeAngel(w, h)
                         s.hearts.splice(j, 1)
@@ -510,6 +683,21 @@ export function CrazyBackground() {
 
                 drawSatan(ctx!, s)
 
+                if (s.x <= 36) {
+                    satanScore += 20
+                    goalStars.push(
+                        makeGoalStar(
+                            36,
+                            clamp(s.y, 44, h - 44),
+                            '#050505',
+                            '#991b1b',
+                            'rgba(248, 113, 113, 0.68)',
+                        ),
+                    )
+                    satans[i] = makeSatan(w, h)
+                    continue
+                }
+
                 if (s.x < -120 || s.x > w + 120) {
                     satans[i] = makeSatan(w, h)
                 }
@@ -519,9 +707,9 @@ export function CrazyBackground() {
                 const p = splats[i]
                 p.x += p.vx
                 p.y += p.vy
-                p.vy += 0.05
-                p.opacity -= 0.018
-                p.size *= 0.985
+                p.vy += p.gravity ?? 0.05
+                p.opacity -= p.fade ?? 0.018
+                p.size *= p.shrink ?? 0.985
                 if (p.opacity <= 0) {
                     splats.splice(i, 1)
                     continue
@@ -536,30 +724,46 @@ export function CrazyBackground() {
                 ctx!.restore()
             }
 
-            for (let i = hellfires.length - 1; i >= 0; i--) {
-                const fire = hellfires[i]
-                fire.x += fire.vx
-                fire.y += fire.vy
-                fire.vx *= 0.97
-                fire.vy -= 0.04
-                fire.size *= 1.015
-                fire.opacity -= 0.016
-
-                if (fire.opacity <= 0) {
-                    hellfires.splice(i, 1)
+            for (let i = goalStars.length - 1; i >= 0; i--) {
+                const star = goalStars[i]
+                star.rotation += star.spin
+                star.scale += 0.026
+                star.opacity -= 0.012
+                if (star.opacity <= 0) {
+                    goalStars.splice(i, 1)
                     continue
                 }
-
-                ctx!.save()
-                ctx!.globalAlpha = fire.opacity
-                ctx!.fillStyle = fire.color
-                ctx!.shadowColor = fire.color === '#111827' ? '#111827' : '#fb923c'
-                ctx!.shadowBlur = fire.color === '#111827' ? 2 : 14
-                ctx!.beginPath()
-                ctx!.ellipse(fire.x, fire.y, fire.size * 0.75, fire.size * 1.2, 0, 0, Math.PI * 2)
-                ctx!.fill()
-                ctx!.restore()
+                drawGoalStar(ctx!, star)
             }
+
+            const stackedPanels = w < 330
+            const panelWidth = Math.min(168, Math.max(118, stackedPanels ? w - 36 : w * 0.18))
+            drawScorePanel(ctx!, {
+                x: 18,
+                y: 18,
+                width: panelWidth,
+                label: 'Certici',
+                score: satanScore,
+                align: 'left',
+                background: 'rgba(17, 24, 39, 0.78)',
+                border: 'rgba(248, 113, 113, 0.62)',
+                labelColor: '#fca5a5',
+                scoreColor: '#fff7ed',
+                glow: 'rgba(127, 29, 29, 0.45)',
+            })
+            drawScorePanel(ctx!, {
+                x: stackedPanels ? 18 : Math.max(18, w - panelWidth - 18),
+                y: stackedPanels ? 92 : 18,
+                width: panelWidth,
+                label: 'Andilci',
+                score: angelScore,
+                align: 'right',
+                background: 'rgba(255, 255, 255, 0.74)',
+                border: 'rgba(255, 228, 168, 0.96)',
+                labelColor: '#7c3aed',
+                scoreColor: '#1f2937',
+                glow: 'rgba(255, 255, 255, 0.36)',
+            })
 
             raf = requestAnimationFrame(tick)
         }
