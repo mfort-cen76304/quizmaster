@@ -9,6 +9,7 @@ import { answerQuestion } from '#steps/take/question/ops.ts'
 When('I take question {string}', async function (bookmark: string) {
     await this.workspacePage.goto(this.workspaceGuid)
     await this.workspacePage.takeQuestion(this.questionBookmarks[bookmark].text)
+    await this.takeQuestionPage.waitForLoaded()
     this.activeQuestionBookmark = bookmark
 })
 

@@ -3,7 +3,7 @@ import { expect, type Page } from '@playwright/test'
 export class TakeQuestionPage {
     constructor(private page: Page) {}
 
-    private questionLocator = () => this.page.locator('h1')
+    private questionLocator = () => this.page.locator('h1#question')
     questionText = () => this.questionLocator().textContent()
     questionImageLocator = (filename: string) => this.page.locator(`img[src*="${filename}"]`)
     private questionImageLocator_ = () => this.page.locator('img.question-image')
