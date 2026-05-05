@@ -227,7 +227,14 @@ function drawColoredHeart(
     ctx.restore()
 }
 
-function drawRoundedRect(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, radius: number) {
+function drawRoundedRect(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+    radius: number,
+) {
     const r = Math.min(radius, width / 2, height / 2)
     ctx.beginPath()
     ctx.moveTo(x + r, y)
@@ -686,13 +693,7 @@ export function CrazyBackground() {
                 if (s.x <= 36) {
                     satanScore += 20
                     goalStars.push(
-                        makeGoalStar(
-                            36,
-                            clamp(s.y, 44, h - 44),
-                            '#050505',
-                            '#991b1b',
-                            'rgba(248, 113, 113, 0.68)',
-                        ),
+                        makeGoalStar(36, clamp(s.y, 44, h - 44), '#050505', '#991b1b', 'rgba(248, 113, 113, 0.68)'),
                     )
                     satans[i] = makeSatan(w, h)
                     continue
