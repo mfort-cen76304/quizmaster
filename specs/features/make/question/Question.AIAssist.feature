@@ -1,4 +1,6 @@
 Feature: Generate question using AI
+  Robin AI can generate question drafts from a topic and prefill the
+  question form before the question is saved.
 
   @ai @slow
   Scenario: AI-generated question shows explanations
@@ -34,6 +36,15 @@ Feature: Generate question using AI
     And the question is multiple choice
     And I see at least 4 answers
     And at least 2 answers are marked correct
+
+  @skip
+  @ai @slow
+  Scenario: Do not generate a question that duplicates an existing workspace question
+    Given I start creating a new question
+    And the workspace already contains the question "Which country is the largest producer of coffee?"
+    When I ask the application to create a exact question "Which country is the largest producer of coffee?"
+    Then I should see a newly generated question about "coffee"
+    And the generated question should not ask "Which country is the largest producer of coffee?"
 
   @ai @slow
   Scenario: Save an AI-generated question

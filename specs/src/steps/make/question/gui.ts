@@ -17,6 +17,7 @@ import {
     selectAIQuestionType,
     submitQuestion,
     enterTag,
+    createQuestion,
     type AIQuestionTypeChoice,
 } from '#steps/make/question/ops.ts'
 import { ensureWorkspace } from '#steps/make/workspace/ops.ts'
@@ -56,6 +57,16 @@ Given('I start editing question {string}', async function (bookmark: string) {
     await this.workspacePage.goto(this.workspaceGuid)
     await this.workspacePage.editQuestion(this.questionWip.text)
     this.activeQuestionBookmark = bookmark
+})
+
+Given('the workspace already contains the question {string}', async function (question: string) {
+    await createQuestion(this, {
+        text: question,
+        answers: [
+            { text: 'Correct answer', correct: true },
+            { text: 'Incorrect answer', correct: false },
+        ],
+    })
 })
 
 When('I enable explanations', async function () {
@@ -272,6 +283,25 @@ Then('Question field is not empty', async function () {
     await this.questionEditPage.expectQuestionValueNotEmpty()
 })
 
+const normalizeQuestionText = (question: string) =>
+    question
+        .trim()
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+
+Then('I should see a newly generated question about {string}', async function (topic: string) {
+    await this.questionEditPage.expectQuestionValueNotEmpty()
+    const generatedQuestion = await this.questionEditPage.questionValue()
+    expect(normalizeQuestionText(generatedQuestion)).toContain(normalizeQuestionText(topic))
+})
+
+Then('the generated question should not ask {string}', async function (question: string) {
+    const generatedQuestion = await this.questionEditPage.questionValue()
+    expect(normalizeQuestionText(generatedQuestion)).not.toBe(normalizeQuestionText(question))
+})
+
 // Field edits
 
 When('I enter question {string}', async function (question: string) {
@@ -280,6 +310,17 @@ When('I enter question {string}', async function (question: string) {
 
 When('I open Robin AI', async function () {
     await this.robinSheetPage.open()
+})
+
+When('I ask the application to create a exact question {string}', async function (topic: string) {
+    await this.robinSheetPage.open()
+    await enterAIPrompt(this, `Generate a exact question: ${topic}`)
+    await Promise.all([
+        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+            timeout: 60_000,
+        }),
+        this.robinSheetPage.generate(),
+    ])
 })
 
 When('I ask AI:', async function (dataTable: DataTable) {
