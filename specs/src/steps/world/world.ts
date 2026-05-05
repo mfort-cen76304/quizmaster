@@ -94,6 +94,7 @@ export class QuizmasterWorld {
         question: string
         questionType: string
     }
+    rememberedWorkspaceQuestionCount?: number
 
     parseAnswers(answersString: string) {
         return answersString.split(',').map(answer => answer.trim())

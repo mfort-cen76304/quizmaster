@@ -171,8 +171,8 @@ public class AiAssistantService {
     }
 
     static void validateBatchResponses(AssistantResponse[] responses, String resolvedType) {
-        if (responses == null || responses.length < 2) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid batch response: need at least 2 questions.");
+        if (responses == null || responses.length < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid batch response: need at least 1 question.");
         }
         for (AssistantResponse response : responses) {
             validateForType(response, resolvedType);

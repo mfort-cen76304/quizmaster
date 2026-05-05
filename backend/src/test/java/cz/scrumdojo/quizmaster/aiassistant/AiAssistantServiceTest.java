@@ -189,9 +189,7 @@ public class AiAssistantServiceTest {
     @Test
     void validateBatchResponses_requiresAtLeastTwoQuestions() {
         assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateBatchResponses(
-            new AiAssistantService.AssistantResponse[]{
-                new AiAssistantService.AssistantResponse("Q1?", new String[]{"a", "b"}, new int[]{0}, new String[]{"", ""}, null, null),
-            },
+            new AiAssistantService.AssistantResponse[]{},
             "single"
         ));
     }

@@ -14,6 +14,18 @@ Then('I see workspace question count {int}', async function (count: number) {
     await this.workspacePage.expectWorkspaceQuestionSummaryCount(count)
 })
 
+When('I remember workspace question count', async function () {
+    this.rememberedWorkspaceQuestionCount = await this.workspacePage.workspaceQuestionSummaryCount()
+})
+
+Then('workspace question count increased by {int}', async function (addedCount: number) {
+    const previousCount = this.rememberedWorkspaceQuestionCount
+    if (previousCount === undefined) {
+        throw new Error('Cannot compare workspace question count: no previous count was remembered.')
+    }
+    await this.workspacePage.expectWorkspaceQuestionSummaryCount(previousCount + addedCount)
+})
+
 Then('I see workspace quiz count {int}', async function (count: number) {
     await this.workspacePage.expectWorkspaceQuizSummaryCount(count)
 })

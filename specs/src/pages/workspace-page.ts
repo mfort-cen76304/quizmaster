@@ -24,6 +24,11 @@ export class WorkspacePage {
         await expect(stat.locator('span')).toHaveText(count === 1 ? 'question' : 'questions')
     }
 
+    workspaceQuestionSummaryCount = async (): Promise<number> => {
+        const value = (await this.workspaceSummaryStatLocator(0).locator('strong').textContent())?.trim() ?? '0'
+        return Number.parseInt(value, 10)
+    }
+
     expectWorkspaceQuizSummaryCount = async (count: number) => {
         const stat = this.workspaceSummaryStatLocator(1)
         await expect(stat.locator('strong')).toHaveText(String(count))
