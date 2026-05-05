@@ -4,7 +4,9 @@ import { useParams } from 'react-router'
 import { useApi } from '#api/hooks.ts'
 import { fetchQuestion, submitQuestionAnswer } from '#api/question.ts'
 import type { QuestionTake } from '#model/question.ts'
-import { QuestionForm, QuizQuestionProvider } from '#pages/take/question-take'
+
+import { QuestionForm } from './question-form.tsx'
+import { QuizQuestionProvider } from './quiz-question-context.tsx'
 
 export const QuestionTakePage = () => {
     const params = useParams()

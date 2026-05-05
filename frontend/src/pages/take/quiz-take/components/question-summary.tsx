@@ -1,15 +1,14 @@
-import './question.scss'
+import './question-summary.scss'
 import type { Question, QuestionAnswer } from '#model/question.ts'
-import { Answer } from '#pages/take/question-take'
-import { QuestionExplanation } from '#pages/take/question-take'
+import { Answer, QuestionExplanation } from '#pages/take/question-take'
 import { NumericalResult } from '#pages/take/question-take/components/numerical-result.tsx'
 
-interface QuestionFeedbackProps {
+interface QuestionSummaryProps {
     readonly question: Question
     readonly answer?: QuestionAnswer
 }
 
-export const QuestionFeedback = ({ question, answer }: QuestionFeedbackProps) => {
+export const QuestionSummary = ({ question, answer }: QuestionSummaryProps) => {
     const isMultipleChoice = question.correctAnswers.length > 1
     const selectedIdxs = answer?.type === 'choice' ? answer.selectedIdxs : undefined
     const isNumerical = question.questionType === 'numerical'

@@ -6,9 +6,9 @@ import { urls, useWorkspaceId } from '#fe/urls.ts'
 import { DryRunIndicator } from './dry-run-indicator.tsx'
 import { useWorkspaceQuizApi } from './hooks.ts'
 import type { QuizAnswers } from './quiz-answers-state.ts'
+import { QuizPlayForm } from './quiz-play.tsx'
 import { QuizScorePage } from './quiz-score-page.tsx'
 import { storeQuizAnswers } from './quiz-session.ts'
-import { QuestionForm } from './quiz.tsx'
 
 export const QuizDryRunTakePage = () => {
     const workspaceId = useWorkspaceId()
@@ -33,7 +33,7 @@ export const QuizDryRunTakePage = () => {
             {quizAnswers ? (
                 <QuizScorePage quiz={quiz} quizAnswers={quizAnswers} />
             ) : (
-                <QuestionForm
+                <QuizPlayForm
                     quiz={quiz}
                     quizRunId={null}
                     questionsBaseUrl={questionsBaseUrl}

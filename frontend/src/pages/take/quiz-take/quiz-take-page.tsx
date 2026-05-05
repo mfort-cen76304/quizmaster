@@ -8,9 +8,9 @@ import type { QuizSubmitResponse } from '#model/quiz.ts'
 import { useQuizApi, useQuizAttemptApi } from './hooks.ts'
 import type { QuizAnswers } from './quiz-answers-state.ts'
 import { isQuizAvailable } from './quiz-availability.ts'
+import { QuizPlayForm } from './quiz-play.tsx'
 import { QuizScorePage } from './quiz-score-page.tsx'
 import { clearQuizTakeSession, getStoredQuizRunId, loadQuizAnswers, storeQuizAnswers } from './quiz-session.ts'
-import { QuestionForm } from './quiz.tsx'
 
 export const QuizTakePage = () => {
     const baseQuiz = useQuizApi()
@@ -56,7 +56,7 @@ export const QuizTakePage = () => {
         return quizAnswers && scoredQuiz ? (
             <QuizScorePage quiz={quiz} quizAnswers={quizAnswers} result={scoredQuiz} />
         ) : (
-            <QuestionForm
+            <QuizPlayForm
                 quiz={quiz}
                 quizRunId={quizRunId}
                 questionsBaseUrl={urls.quizTake(quiz.id)}

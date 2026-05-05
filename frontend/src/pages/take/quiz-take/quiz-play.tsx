@@ -1,10 +1,10 @@
-import './quiz.scss'
+import './quiz-play.scss'
 import { useRef, useState } from 'react'
 
 import { patchAttempt, recordQuizQuestionAnswer, submitQuizQuestionAnswer } from '#api/stats.ts'
 import { type AnswerIdxs, type QuestionAnswer, type QuestionEvaluation, evaluateAnswer } from '#model/question.ts'
 import type { Quiz, QuizTake } from '#model/quiz.ts'
-import { QuestionForm as StandaloneQuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
+import { QuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
 
 import { BookmarkList } from './components/bookmark-list.tsx'
 import { EvaluateButton, NextButton, BackButton, BookmarkButton } from './components/buttons.tsx'
@@ -14,14 +14,14 @@ import { useQuizBookmarkState } from './quiz-bookmark-state.ts'
 import { useQuizNavigationState } from './quiz-navigation-state.ts'
 import { TimeLimit } from './time-limit/with-time-limit.tsx'
 
-interface QuestionProps {
+interface QuizPlayFormProps {
     readonly quiz: Quiz | QuizTake
     readonly quizRunId: number | null
     readonly questionsBaseUrl: string
     readonly onEvaluate: (quizAnswers: QuizAnswers, timedOut?: boolean) => void
 }
 
-export const QuestionForm = (props: QuestionProps) => {
+export const QuizPlayForm = (props: QuizPlayFormProps) => {
     const { quizAnswers, answerQuestion } = useQuizAnswersState()
     const nav = useQuizNavigationState(props.quiz, props.questionsBaseUrl)
     const bookmarks = useQuizBookmarkState()
@@ -153,7 +153,7 @@ export const QuestionForm = (props: QuestionProps) => {
                     difficulty: props.quiz.difficulty,
                 }}
             >
-                <StandaloneQuestionForm key={currentQuestion.id} question={currentQuestion} />
+                <QuestionForm key={currentQuestion.id} question={currentQuestion} />
             </QuizQuestionProvider>
             <div className="quiz-button-bar">
                 {nav.canBack && <BackButton onClick={nav.back} />}

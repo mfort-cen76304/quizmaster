@@ -1,8 +1,8 @@
-import './quiz.scss'
+import './quiz-play.scss'
 import './quiz-score-page.scss'
 import type { Quiz, QuizSubmitResponse, QuizTake } from '#model/quiz.ts'
 
-import { QuestionFeedback } from './components/question.tsx'
+import { QuestionSummary } from './components/question-summary.tsx'
 import type { QuizAnswers } from './quiz-answers-state.ts'
 import { evaluate } from './quiz-score.ts'
 
@@ -26,7 +26,7 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
                 <h2>Answer overview</h2>
                 {reviewQuiz.questions.map((question, idx) => {
                     const answer = quizAnswers.finalAnswers[idx]
-                    return <QuestionFeedback key={question.id} question={question} answer={answer} />
+                    return <QuestionSummary key={question.id} question={question} answer={answer} />
                 })}
             </>
         ) : null
