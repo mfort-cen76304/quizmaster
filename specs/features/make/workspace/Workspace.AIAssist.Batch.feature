@@ -3,6 +3,19 @@ Feature: Generate multiple questions from workspace using AI
   The generated questions are saved directly into the workspace without opening the question form.
   Batch generation must work regardless of the language used in the prompt.
 
+  @skip @ai @slow
+  Scenario: Batch generation keeps Robin AI open after generation
+    Given workspace "Workspace"
+    When I remember workspace question count
+    And I open Robin AI
+    And I ask AI to generate multiple questions:
+      | Generate 2 questions about capital cities |
+      | each with 1 correct answer                |
+      | and 2 incorrect answers                   |
+    Then I see the workspace "Workspace"
+    And workspace question count increased by 2
+    And I see AI section
+
   @ai @slow
   Scenario: Generate two single-choice questions from one prompt directly in workspace
     Given workspace "Workspace"
