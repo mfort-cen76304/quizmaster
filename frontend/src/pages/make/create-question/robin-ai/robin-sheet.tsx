@@ -30,7 +30,7 @@ export const RobinSheet = ({
     onClose,
     closeOnGenerated,
 }: RobinSheetProps) => {
-    const { promptText, setPromptText, loading, error, generate } = useRobinPromptForm({
+    const { promptText, setPromptText, loading, error, generate, generatedDrafts } = useRobinPromptForm({
         onGenerated,
         generateRequest,
         undo,
@@ -67,6 +67,74 @@ export const RobinSheet = ({
                 <Button id="previous-version-button" className="secondary button" onClick={undo.restore}>
                     Previous version
                 </Button>
+            )}
+            {generatedDrafts.length > 0 && (
+                <div className="generated-questions" data-testid="robin-generated-questions">
+                    {generatedDrafts.map((draft, index) => {
+                        const questionNumber = index + 1
+                        const numericalAnswer = draft.questionType === 'numerical' ? draft.answers[0] : undefined
+                        return (
+                            <article
+                                key={`${questionNumber}-${draft.question}`}
+                                className="generated-question"
+                                data-testid="robin-generated-question"
+                            >
+                                <div className="generated-question__header">
+                                    <span
+                                        className="generated-question__number"
+                                        data-testid="robin-generated-question-number"
+                                    >
+                                        {questionNumber}.
+                                    </span>
+                                    <h3
+                                        className="generated-question__title"
+                                        data-testid="robin-generated-question-title"
+                                    >
+                                        {draft.question}
+                                    </h3>
+                                </div>
+
+                                {draft.questionType === 'numerical' ? (
+                                    <div className="generated-question__numerical">
+                                        <div data-testid="robin-generated-numerical-answer">{numericalAnswer}</div>
+                                        {draft.tolerance !== undefined && (
+                                            <div data-testid="robin-generated-tolerance">{draft.tolerance}</div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <ol className="generated-question__answers">
+                                        {draft.answers.map((answer, answerIndex) => {
+                                            const correct = draft.correctAnswers.includes(answerIndex)
+                                            return (
+                                                <li
+                                                    key={`${questionNumber}-${answer}`}
+                                                    className={correct ? 'is-correct' : undefined}
+                                                    data-testid="robin-generated-answer"
+                                                >
+                                                    <span>{answer}</span>
+                                                    {correct && (
+                                                        <strong data-testid="robin-generated-answer-correct">
+                                                            Correct
+                                                        </strong>
+                                                    )}
+                                                </li>
+                                            )
+                                        })}
+                                    </ol>
+                                )}
+
+                                {draft.questionExplanation && (
+                                    <p
+                                        className="generated-question__explanation"
+                                        data-testid="robin-generated-question-explanation"
+                                    >
+                                        {draft.questionExplanation}
+                                    </p>
+                                )}
+                            </article>
+                        )
+                    })}
+                </div>
             )}
             <Button
                 id="robin-generate-button"

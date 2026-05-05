@@ -43,12 +43,14 @@ export const useRobinPromptForm = ({
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
+    const [generatedDrafts, setGeneratedDrafts] = useState<readonly QuestionDraft[]>([])
 
     const generate = async () => {
         setError('')
         setLoading(true)
         try {
             const response = await generateRequest({ question: promptText.trim(), questionType, workspaceGuid })
+            setGeneratedDrafts(response)
             undo.capture()
             await onGenerated(response)
             if (closeOnGenerated) onClose()
@@ -60,5 +62,5 @@ export const useRobinPromptForm = ({
         }
     }
 
-    return { promptText, setPromptText, loading, error, generate }
+    return { promptText, setPromptText, loading, error, generate, generatedDrafts }
 }

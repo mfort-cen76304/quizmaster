@@ -47,12 +47,18 @@ const aiPrompt = (world: { lastAiAssistantRequest?: { question: string } }) => {
     return prompt ?? ''
 }
 
+const SIMPLE_NUMERICAL_PATTERN = /^-?\d+(?:\.\d+)?$/
+
 const questionSpecToDraft = (row: Record<string, string | undefined>): QuestionDraft => {
     const spec = parseQuestionRow(row)
-    if (spec.numericalAnswer !== undefined) {
+    const rawAnswers = row.answers?.trim() ?? ''
+    const plainNumericalAnswer = SIMPLE_NUMERICAL_PATTERN.test(rawAnswers) ? rawAnswers : undefined
+    const numericalAnswer = spec.numericalAnswer ?? plainNumericalAnswer
+
+    if (numericalAnswer !== undefined) {
         return {
             question: spec.text,
-            answers: [spec.numericalAnswer],
+            answers: [numericalAnswer],
             correctAnswers: [0],
             explanations: [''],
             questionExplanation: spec.explanation ?? '',
@@ -309,6 +315,10 @@ Then('generated question {int} in Robin chat shows a numerical answer', async fu
 
 Then('generated question {int} in Robin chat has numerical answer {string}', async function (index: number, value: string) {
     await this.robinSheetPage.expectGeneratedQuestionNumericalAnswer(index, value)
+})
+
+Then('generated question {int} in Robin chat has numerical answer {float}', async function (index: number, value: number) {
+    await this.robinSheetPage.expectGeneratedQuestionNumericalAnswer(index, String(value))
 })
 
 Then('generated question {int} in Robin chat shows tolerance', async function (index: number) {

@@ -75,5 +75,5 @@ Feature: Generate numerical question preview from workspace using AI
 
     Examples:
       | prompt             | answer | tolerance | answer-magnitude |
-      | "What is 5 / 2?"   | "2.5"  | "0.25"    | "2.5"            |
-      | "What is -5 / 2?"  | "-2.5" | "0.25"    | "2.5"            |
+      | "What is 5 / 2?"   | 2.5    | 0.25      | "2.5"            |
+      | "What is -5 / 2?"  | -2.5   | 0.25      | "2.5"            |
