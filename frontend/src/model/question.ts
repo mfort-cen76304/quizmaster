@@ -1,7 +1,7 @@
 import type { Question } from '#shared/types/question.ts'
 
 export type { AnswerIdxs, QuestionType } from '#shared/types/enums.ts'
-export type { Question } from '#shared/types/question.ts'
+export type { Question, QuestionDraft } from '#shared/types/question.ts'
 
 export type QuestionAnswer =
     | { readonly type: 'choice'; readonly selectedIdxs: readonly number[] }

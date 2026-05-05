@@ -27,3 +27,5 @@ export interface Question {
     isEasy: boolean
     readonly tags: string[]
 }
+
+export type QuestionDraft = Omit<Question, 'id' | 'workspaceGuid'>
