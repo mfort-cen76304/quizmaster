@@ -3,7 +3,7 @@ Feature: Generate multiple questions from workspace using AI
   The generated questions are saved directly into the workspace without opening the question form.
   Batch generation must work regardless of the language used in the prompt.
 
-  @skip @ai @slow
+  @ai @slow
   Scenario: Batch generation keeps Robin AI open after generation
     Given workspace "Workspace"
     When I remember workspace question count

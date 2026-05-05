@@ -22,6 +22,7 @@ interface UseRobinPromptFormArgs {
     readonly questionType: QuestionType
     readonly workspaceGuid?: string
     readonly onClose: () => void
+    readonly closeOnGenerated?: boolean
 }
 
 const generateSingleDraft = async (request: {
@@ -37,6 +38,7 @@ export const useRobinPromptForm = ({
     questionType,
     workspaceGuid,
     onClose,
+    closeOnGenerated = true,
 }: UseRobinPromptFormArgs) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
@@ -49,7 +51,7 @@ export const useRobinPromptForm = ({
             const response = await generateRequest({ question: promptText.trim(), questionType, workspaceGuid })
             undo.capture()
             await onGenerated(response)
-            onClose()
+            if (closeOnGenerated) onClose()
         } catch (e) {
             const message = e instanceof Error ? e.message : 'AI assistant request failed.'
             setError(message || 'AI assistant request failed.')

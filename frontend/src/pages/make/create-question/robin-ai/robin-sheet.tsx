@@ -17,6 +17,7 @@ interface RobinSheetProps {
     readonly workspaceGuid?: string
     readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
+    readonly closeOnGenerated?: boolean
 }
 
 export const RobinSheet = ({
@@ -27,6 +28,7 @@ export const RobinSheet = ({
     workspaceGuid,
     onQuestionTypeChange,
     onClose,
+    closeOnGenerated,
 }: RobinSheetProps) => {
     const { promptText, setPromptText, loading, error, generate } = useRobinPromptForm({
         onGenerated,
@@ -35,6 +37,7 @@ export const RobinSheet = ({
         questionType,
         workspaceGuid,
         onClose,
+        closeOnGenerated,
     })
 
     return (

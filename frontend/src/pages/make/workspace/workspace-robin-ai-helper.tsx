@@ -60,6 +60,7 @@ export const WorkspaceRobinAiHelper = ({ workspaceId, onQuestionCreated }: Works
                     workspaceGuid={workspaceId}
                     onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
+                    closeOnGenerated={false}
                 />
             )}
         </>,
