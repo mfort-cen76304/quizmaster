@@ -56,6 +56,59 @@ public class AiAssistantServiceTest {
         assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("   "));
     }
 
+    @Test
+    void generateQuestionFailsOnUnknownQuestionType() {
+        assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestion("Topic", "wat"));
+    }
+
+    @Tag("ai")
+    @Test
+    void generateSingleChoiceWithType() {
+        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
+
+        var response = aiAssistantService.generateQuestion(
+            "Generate a question about capital cities and 2 incorrect answers",
+            "single"
+        );
+
+        assertGeneralChoiceResponse(response);
+        assertEquals(1, response.correctAnswers().length);
+        assertEquals("single", response.questionType());
+    }
+
+    @Tag("ai")
+    @Test
+    void generateMultipleChoiceWithType() {
+        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
+
+        var response = aiAssistantService.generateQuestion(
+            "Generate a question about European capitals with 2 correct answers and 2 incorrect answers",
+            "multiple"
+        );
+
+        assertGeneralChoiceResponse(response);
+        assertTrue(response.correctAnswers().length >= 2, "Expected at least 2 correct answers");
+        assertEquals("multiple", response.questionType());
+    }
+
+    @Tag("ai")
+    @Test
+    void generateNumericalWithType() {
+        assumeTrue(!apiToken.isBlank(), "ai.token not configured");
+
+        var response = aiAssistantService.generateQuestion(
+            "Generate a numerical question about basic arithmetic",
+            "numerical"
+        );
+
+        assertNotNull(response.question());
+        assertFalse(response.question().isBlank());
+        assertEquals(1, response.answers().length, "Numerical must have exactly 1 answer");
+        assertDoesNotThrow(() -> Double.parseDouble(response.answers()[0].trim()));
+        assertArrayEquals(new int[]{0}, response.correctAnswers());
+        assertEquals("numerical", response.questionType());
+    }
+
     @Tag("ai")
     @Test
     void generateMultipleCorrectAnswersWithSpecificCount() {

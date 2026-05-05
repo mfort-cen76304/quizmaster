@@ -20,6 +20,6 @@ public class AiAssistantController {
 
     @PostMapping
     public ResponseEntity<QuestionResponse> generate(@RequestBody AiAssistantRequest request) {
-        return ResponseEntity.ok(aiAssistantService.generateQuestion(request.question()));
+        return ResponseEntity.ok(aiAssistantService.generateQuestion(request.question(), request.questionType()));
     }
 }

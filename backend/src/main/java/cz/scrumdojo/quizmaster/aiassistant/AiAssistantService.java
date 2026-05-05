@@ -20,6 +20,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.Set;
 
 @Service
 public class AiAssistantService {
@@ -27,12 +28,17 @@ public class AiAssistantService {
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
     private static final Duration TIMEOUT = Duration.ofSeconds(60);
 
+    static final Set<String> KNOWN_TYPES = Set.of("single", "multiple", "numerical");
+
     private final ObjectMapper objectMapper;
     private final HttpClient httpClient;
     private final String apiToken;
     private final String model;
     private final int maxTokens;
-    private final String systemPrompt;
+    private final String legacyPrompt;
+    private final String singleChoicePrompt;
+    private final String multipleChoicePrompt;
+    private final String numericalPrompt;
 
     public AiAssistantService(
         ObjectMapper objectMapper,
@@ -45,17 +51,30 @@ public class AiAssistantService {
         this.model = model;
         this.maxTokens = maxTokens;
         this.httpClient = HttpClient.newBuilder().connectTimeout(TIMEOUT).build();
-        this.systemPrompt = new ClassPathResource("prompts/question-generation.md")
-            .getContentAsString(StandardCharsets.UTF_8);
+        this.legacyPrompt = loadPrompt("prompts/question-generation.md");
+        this.singleChoicePrompt = loadPrompt("prompts/single-choice.md");
+        this.multipleChoicePrompt = loadPrompt("prompts/multiple-choice.md");
+        this.numericalPrompt = loadPrompt("prompts/numerical.md");
+    }
+
+    private static String loadPrompt(String path) throws IOException {
+        return new ClassPathResource(path).getContentAsString(StandardCharsets.UTF_8);
     }
 
     public QuestionResponse generateQuestion(String prompt) {
+        return generateQuestion(prompt, null);
+    }
+
+    public QuestionResponse generateQuestion(String prompt, String questionType) {
         if (prompt == null || prompt.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question must not be empty.");
         }
         if (apiToken == null || apiToken.isBlank()) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI token is not configured.");
         }
+
+        String resolvedType = resolveType(questionType);
+        String systemPrompt = chooseSystemPrompt(resolvedType);
 
         try {
             String body = objectMapper.writeValueAsString(new ChatRequest(
@@ -82,7 +101,7 @@ public class AiAssistantService {
             JsonNode root = objectMapper.readTree(response.body());
             String content = root.path("choices").path(0).path("message").path("content").asText("").trim();
             AssistantResponse assistantResponse = objectMapper.readValue(content, AssistantResponse.class);
-            validateResponse(assistantResponse);
+            validateForType(assistantResponse, resolvedType);
             String[] explanations = normalizeExplanations(assistantResponse);
 
             return QuestionResponse.draft(
@@ -92,12 +111,44 @@ public class AiAssistantService {
                 explanations,
                 assistantResponse.questionExplanation(),
                 assistantResponse.tolerance(),
-                null
+                resolvedType
             );
         } catch (ResponseStatusException e) {
             throw e;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant request failed.");
+        }
+    }
+
+    private static String resolveType(String questionType) {
+        if (questionType == null || questionType.isBlank()) return null;
+        String normalized = questionType.trim().toLowerCase();
+        if (!KNOWN_TYPES.contains(normalized)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unknown questionType: " + questionType);
+        }
+        return normalized;
+    }
+
+    private String chooseSystemPrompt(String resolvedType) {
+        if (resolvedType == null) return legacyPrompt;
+        return switch (resolvedType) {
+            case "single" -> singleChoicePrompt;
+            case "multiple" -> multipleChoicePrompt;
+            case "numerical" -> numericalPrompt;
+            default -> legacyPrompt;
+        };
+    }
+
+    private static void validateForType(AssistantResponse response, String resolvedType) {
+        if (resolvedType == null) {
+            validateResponse(response);
+            return;
+        }
+        switch (resolvedType) {
+            case "single" -> validateSingleChoiceResponse(response);
+            case "multiple" -> validateMultipleChoiceResponse(response);
+            case "numerical" -> validateNumericalResponse(response);
+            default -> validateResponse(response);
         }
     }
 
@@ -118,6 +169,46 @@ public class AiAssistantService {
             .allMatch(i -> i >= 0 && i < response.answers().length);
         if (!allInBounds) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: correctAnswers index out of bounds.");
+        }
+    }
+
+    static void validateSingleChoiceResponse(AssistantResponse response) {
+        validateResponse(response);
+        if (response.correctAnswers().length != 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: single-choice must have exactly 1 correct answer.");
+        }
+    }
+
+    static void validateMultipleChoiceResponse(AssistantResponse response) {
+        validateResponse(response);
+        if (response.correctAnswers().length < 2) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: multiple-choice must have at least 2 correct answers.");
+        }
+    }
+
+    static void validateNumericalResponse(AssistantResponse response) {
+        if (response.question() == null || response.question().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: missing question.");
+        }
+        if (response.answers() == null || response.answers().length != 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical must have exactly 1 answer.");
+        }
+        if (response.answers()[0] == null || response.answers()[0].isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical answer must not be empty.");
+        }
+        try {
+            Double.parseDouble(response.answers()[0].trim());
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical answer must parse as a number.");
+        }
+        if (response.correctAnswers() == null || response.correctAnswers().length != 1 || response.correctAnswers()[0] != 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical correctAnswers must be [0].");
+        }
+        if (response.explanations() != null && response.explanations().length != 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical explanations length must be 1.");
+        }
+        if (response.tolerance() != null && response.tolerance() < 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: tolerance must be non-negative.");
         }
     }
 
