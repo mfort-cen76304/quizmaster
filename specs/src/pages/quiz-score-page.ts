@@ -23,14 +23,13 @@ export class QuizScorePage {
 
     private firstTextResultLocator = () => this.page.locator('#first-text-result')
 
-    private questionsLocator = () => this.page.locator('[id^=question-name-]')
+    private questionsLocator = () => this.page.locator('fieldset[id^="question-"]')
     questions = async () => {
         await expect(this.questionsLocator().first()).toBeVisible()
-        return this.questionsLocator().allTextContents()
+        return this.page.locator('[id^="question-name-"]').allTextContents()
     }
 
-    private questionLocator = (question: string) =>
-        this.page.locator('[id^=question-name-]').filter({ hasText: question }).locator('..').locator('..')
+    private questionLocator = (question: string) => this.questionsLocator().filter({ hasText: question })
 
     private waitForQuestion = async (question: string) => {
         await expect(this.questionLocator(question)).toBeVisible()

@@ -1,13 +1,16 @@
 .feedback {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+
     &.correct {
-        color: green;
+        color: var(--feedback-correct-fg);
     }
 
     &.incorrect {
-        color: red;
+        color: var(--feedback-incorrect-fg);
     }
 
     &.partial-correct {
-        color: orange;
+        color: var(--feedback-partial-fg);
     }
 }

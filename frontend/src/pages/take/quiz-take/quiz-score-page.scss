@@ -1,24 +1,145 @@
-.resultTable {
-    border: 1px solid #000;
-    border-radius: 10px;
-    width: 600px;
-    margin-top: 20px;
-    margin-bottom: 40px;
+.quiz-score {
+    h2 {
+        margin: 1.6rem 0 0.85rem;
+        font-size: 1.1rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+    }
 
-    .row {
-        display: flex;
+    .score-summary {
+        margin: 1.1rem 0 0;
+        padding: 0;
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-xl);
+        background:
+            radial-gradient(circle at 100% 0%, rgba(15, 159, 140, 0.1), transparent 38%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 251, 255, 0.97) 100%);
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
+        overflow: hidden;
 
-        div {
-            border: none;
-            padding: 8px;
-            flex: 1;
-            white-space: nowrap;
-            text-align: center;
-            display: block;
+        > header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.4rem 1.6rem 0.6rem;
+
+            .outcome {
+                display: inline-flex;
+                align-items: center;
+                padding: 0.45rem 0.95rem;
+                border-radius: 999px;
+                font-size: 0.78rem;
+                font-weight: 700;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+
+                &.passed {
+                    background: var(--feedback-correct-bg);
+                    color: var(--feedback-correct-fg);
+                    border: 1px solid var(--feedback-correct-border);
+                }
+
+                &.failed {
+                    background: var(--feedback-incorrect-bg);
+                    color: var(--feedback-incorrect-fg);
+                    border: 1px solid var(--feedback-incorrect-border);
+                }
+            }
+
+            .percent-display {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-end;
+                margin-left: auto;
+                line-height: 1;
+
+                .percent-value {
+                    font-size: clamp(2.4rem, 5vw, 3.4rem);
+                    font-weight: 800;
+                    color: var(--text-strong);
+                    letter-spacing: -0.04em;
+                    font-variant-numeric: tabular-nums;
+                }
+
+                .percent-label {
+                    margin-top: 0.3rem;
+                    font-size: 0.74rem;
+                    font-weight: 700;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    color: var(--text-muted);
+                }
+            }
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0;
+            margin: 0;
+            padding: 0;
+            border-top: 1px solid var(--border-subtle);
+
+            .metric {
+                padding: 0.95rem 1.6rem;
+
+                & + .metric {
+                    border-left: 1px solid var(--border-subtle);
+                }
+
+                dt {
+                    font-size: 0.74rem;
+                    font-weight: 700;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    color: var(--text-muted);
+                }
+
+                dd {
+                    margin: 0.35rem 0 0;
+                    font-size: 1.15rem;
+                    font-weight: 700;
+                    color: var(--text-strong);
+                    font-variant-numeric: tabular-nums;
+
+                    .separator {
+                        color: var(--text-muted);
+                        font-weight: 500;
+                    }
+                }
+            }
         }
     }
 
-    .header {
-        font-weight: bold;
+    @media (max-width: 720px) {
+        .score-summary {
+            > header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.55rem;
+                padding: 1.1rem 1.15rem 0.4rem;
+
+                .percent-display {
+                    margin-left: 0;
+                    align-items: flex-start;
+                }
+            }
+
+            .metrics {
+                grid-template-columns: 1fr;
+
+                .metric {
+                    padding: 0.75rem 1.15rem;
+
+                    & + .metric {
+                        border-left: none;
+                        border-top: 1px solid var(--border-subtle);
+                    }
+                }
+            }
+        }
     }
 }

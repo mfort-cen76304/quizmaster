@@ -1,4 +1,3 @@
-import './quiz-play.scss'
 import './quiz-score-page.scss'
 import type { Quiz, QuizSubmitResponse, QuizTake } from '#model/quiz.ts'
 
@@ -36,30 +35,38 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
     const outcome = passed ? 'passed' : 'failed'
 
     return (
-        <div className="quiz-take">
-            <h1>Test result</h1>
-            <div className="resultTable" id="results">
-                <div className="row header">
-                    <div>Points</div>
-                    <div>Score</div>
-                    <div>Min pass score</div>
-                    <div>State</div>
-                </div>
-                <div className="row">
-                    <div>
-                        <span id="correct-answers">{score}</span> / <span id="total-questions">{total}</span>
-                    </div>
-                    <div>
-                        <span id="percentage-result">{percentage.toFixed(0)}</span> %
-                    </div>
-                    <div>
-                        <span id="pass-score">{quiz.passScore}</span> %
-                    </div>
-                    <div>
+        <div className="page quiz-score" id="quiz-score">
+            <h1>Quiz result</h1>
+
+            <section className="score-summary" id="results" data-result={outcome}>
+                <header>
+                    <span className={`outcome ${outcome}`}>
                         <span id="text-result">{outcome}</span>
+                    </span>
+                    <div className="percent-display">
+                        <span className="percent-value">
+                            <span id="percentage-result">{percentage.toFixed(0)}</span>%
+                        </span>
+                        <span className="percent-label">your score</span>
                     </div>
-                </div>
-            </div>
+                </header>
+                <dl className="metrics">
+                    <div className="metric">
+                        <dt>Points</dt>
+                        <dd>
+                            <span id="correct-answers">{score}</span>
+                            <span className="separator"> / </span>
+                            <span id="total-questions">{total}</span>
+                        </dd>
+                    </div>
+                    <div className="metric">
+                        <dt>Required to pass</dt>
+                        <dd>
+                            <span id="pass-score">{quiz.passScore}</span>%
+                        </dd>
+                    </div>
+                </dl>
+            </section>
 
             {answerOverview}
         </div>

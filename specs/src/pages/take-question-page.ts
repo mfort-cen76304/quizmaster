@@ -15,7 +15,8 @@ export class TakeQuestionPage {
     }
 
     private answersLocator = () => this.page.locator('ul.answers > li')
-    answerLocator = (answer: string) => this.answersLocator().filter({ has: this.page.locator(`input[value="${answer}"]`) })
+    answerLocator = (answer: string) =>
+        this.answersLocator().filter({ has: this.page.locator(`input[value="${answer}"]`) })
 
     answerRowLocator = (answer: string) => this.answerLocator(answer).locator('.answer-input-row')
     answerFeedbackLocator = (answer: string) => this.answerRowLocator(answer).locator('.answer-feedback')

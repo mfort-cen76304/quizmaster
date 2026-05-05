@@ -1,63 +1,131 @@
 ul.answers {
-    li input[type='checkbox']:hover,
-    li input[type='radio']:hover {
-        background-color: #bbb;
-    }
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    list-style-type: none;
+    padding: 0;
+    margin: 1em 0;
 
-    li input[type='checkbox']:checked,
-    li input[type='radio']:checked {
-        border-color: rgb(0, 0, 0);
-    }
+    li {
+        .answer-input-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            padding: 0.4em 0.8em;
+            border-radius: 0.5em;
 
-    li input[type='checkbox']:checked::after {
-        content: '■';
-        font-size: 16px;
-        color: black;
-        position: absolute;
-        top: 40%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    li input[type='radio']:checked::after {
-        content: '●';
-        font-size: 16px;
-        color: black;
-        position: absolute;
-        top: 45%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-
-    li input[type='checkbox'],
-    li input[type='radio'] {
-        appearance: none;
-        width: 20px;
-        height: 20px;
-        border: 2px solid black;
-        background-color: white;
-        cursor: pointer;
-        display: inline-block;
-        position: relative;
-        transition:
-            background-color 0.4s ease,
-            border-color 0.4s ease;
-
-        &:disabled {
-            cursor: not-allowed;
-
-            &:hover {
-                background-color: white;
-                border-color: black;
+            input {
+                flex: 0 0 auto;
             }
-            &:checked:hover {
-                background-color: black;
-                border-color: black;
+
+            label {
+                flex: 1;
+            }
+
+            .bar-label {
+                flex: 0 0 auto;
+                font-size: 0.85em;
+                opacity: 0.7;
+
+                &.correct-label {
+                    opacity: 1;
+                    color: var(--feedback-correct-fg);
+                }
+            }
+
+            .bar-note {
+                flex: 0 0 auto;
+                font-size: 0.85em;
+                font-style: italic;
+                opacity: 0.6;
+            }
+
+            .answer-feedback {
+                flex: 0;
+                font-size: 0.8em;
+            }
+
+            &.correctly-selected {
+                background-color: var(--feedback-correct-bg);
+                color: var(--feedback-correct-fg);
+            }
+
+            &.correctly-not-selected:has(.bar-label.correct-label) {
+                color: var(--feedback-correct-fg);
+
+                .bar-label,
+                .bar-note {
+                    color: var(--feedback-correct-fg);
+                    opacity: 1;
+                }
+            }
+
+            &.incorrect {
+                background-color: var(--feedback-incorrect-bg);
+                color: var(--feedback-incorrect-fg);
             }
         }
-    }
 
-    li input[type='radio'] {
-        border-radius: 10px;
+        input[type='checkbox']:hover,
+        input[type='radio']:hover {
+            background-color: #bbb;
+        }
+
+        input[type='checkbox']:checked,
+        input[type='radio']:checked {
+            border-color: rgb(0, 0, 0);
+        }
+
+        input[type='checkbox']:checked::after {
+            content: '■';
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: black;
+        }
+
+        input[type='radio']:checked::after {
+            content: '●';
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: black;
+        }
+
+        input[type='checkbox'],
+        input[type='radio'] {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid black;
+            background-color: white;
+            cursor: pointer;
+            display: inline-block;
+            position: relative;
+            transition:
+                background-color 0.4s ease,
+                border-color 0.4s ease;
+
+            &:disabled {
+                cursor: not-allowed;
+
+                &:hover {
+                    background-color: white;
+                    border-color: black;
+                }
+                &:checked:hover {
+                    background-color: black;
+                    border-color: black;
+                }
+            }
+        }
+
+        input[type='radio'] {
+            border-radius: 10px;
+        }
     }
 }

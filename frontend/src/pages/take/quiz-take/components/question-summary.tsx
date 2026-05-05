@@ -48,12 +48,11 @@ export const QuestionSummary = ({ question, answer }: QuestionSummaryProps) => {
                 </ul>
             )}
             {question.questionExplanation && (
-                <div className="row">
-                    Question explanation:{'\u00A0'}
+                <div className="question-explanation-row">
+                    <span className="explanation-label">Question explanation:</span>
                     <QuestionExplanation text={question.questionExplanation} />
                 </div>
             )}
-            <br />
         </fieldset>
     )
 }

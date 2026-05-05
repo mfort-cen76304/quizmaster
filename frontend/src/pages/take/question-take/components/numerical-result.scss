@@ -8,40 +8,42 @@
         display: flex;
         align-items: center;
         gap: 0.5em;
-        border-radius: 0.5em;
         padding: 0.4em 0.8em;
-        color: black;
+        border-radius: 0.5em;
+        color: var(--text-strong);
 
         .bar-label {
-            opacity: 0.7;
-            font-size: 0.85em;
             flex: 0 0 auto;
+            font-size: 0.85em;
+            opacity: 0.7;
 
             &.correct-label {
-                color: #2e7d32;
                 opacity: 1;
+                color: var(--feedback-correct-fg);
             }
         }
 
         .bar-note {
-            opacity: 0.6;
-            font-size: 0.85em;
-            font-style: italic;
             flex: 0 0 auto;
             margin-left: auto;
+            font-size: 0.85em;
+            font-style: italic;
+            opacity: 0.6;
         }
 
         &.correct {
-            background-color: #b2dfb2;
+            background-color: var(--feedback-correct-bg);
+            color: var(--feedback-correct-fg);
         }
 
         &.within-tolerance {
-            background-color: #fff3b0;
+            background-color: var(--feedback-tolerance-bg);
+            color: var(--feedback-tolerance-fg);
         }
 
         &.incorrect {
-            background-color: #f4b6b8;
-            color: black;
+            background-color: var(--feedback-incorrect-bg);
+            color: var(--feedback-incorrect-fg);
         }
     }
 }
