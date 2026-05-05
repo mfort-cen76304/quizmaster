@@ -1,5 +1,6 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
+import type { QuestionDraft } from '#shared/types/question.ts'
 
 import { toText } from '#steps/common.ts'
 import { Given, Then, When } from '#steps/fixture.ts'
@@ -28,7 +29,7 @@ import {
     expectErrorCount,
     expectErrorMessages,
 } from '#steps/question/expects.ts'
-import { parseAnswerTable } from '#steps/shared/parsers.ts'
+import { parseAnswerTable, parseQuestionRow } from '#steps/shared/parsers.ts'
 
 const stubbedAiResponse = {
     question: 'What is the capital of Czech Republic?',
@@ -44,6 +45,35 @@ const aiPrompt = (world: { lastAiAssistantRequest?: { question: string } }) => {
     const prompt = world.lastAiAssistantRequest?.question
     expect(prompt, 'Expected AI assistant request to be captured').toBeDefined()
     return prompt ?? ''
+}
+
+const questionSpecToDraft = (row: Record<string, string | undefined>): QuestionDraft => {
+    const spec = parseQuestionRow(row)
+    if (spec.numericalAnswer !== undefined) {
+        return {
+            question: spec.text,
+            answers: [spec.numericalAnswer],
+            correctAnswers: [0],
+            explanations: [''],
+            questionExplanation: spec.explanation ?? '',
+            questionType: 'numerical',
+            isEasy: false,
+            tolerance: spec.tolerance ? Number.parseFloat(spec.tolerance) : undefined,
+            tags: [],
+        }
+    }
+
+    const correctAnswers = spec.answers.flatMap((answer, index) => (answer.correct ? [index] : []))
+    return {
+        question: spec.text,
+        answers: spec.answers.map(answer => answer.text),
+        correctAnswers,
+        explanations: spec.answers.map(answer => answer.explanation ?? ''),
+        questionExplanation: spec.explanation ?? '',
+        questionType: correctAnswers.length > 1 ? 'multiple' : 'single',
+        isEasy: false,
+        tags: [],
+    }
 }
 
 Given('I start creating a new question', async function () {
@@ -66,6 +96,29 @@ Given('the workspace already contains the question {string}', async function (qu
             { text: 'Correct answer', correct: true },
             { text: 'Incorrect answer', correct: false },
         ],
+    })
+})
+
+Given('Robin AI will return these generated questions:', async function (dataTable: DataTable) {
+    const drafts = dataTable.hashes().map(questionSpecToDraft)
+    if (drafts.length === 0) throw new Error('Robin AI stub requires at least one generated question.')
+
+    await this.page.route('**/api/ai-assistant', async route => {
+        this.lastAiAssistantRequest = route.request().postDataJSON() as { question: string; questionType: string }
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(drafts[0]),
+        })
+    })
+
+    await this.page.route('**/api/ai-assistant/batch', async route => {
+        this.lastAiAssistantRequest = route.request().postDataJSON() as { question: string; questionType: string }
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(drafts),
+        })
     })
 })
 
@@ -217,6 +270,67 @@ Then('I do not see explanation fields', async function () {
 
 Then('I can restore the previous version', async function () {
     await this.robinSheetPage.expectPreviousVersionAvailable()
+})
+
+Then('I see {int} generated questions in Robin chat', async function (count: number) {
+    await this.robinSheetPage.expectGeneratedQuestionCount(count)
+})
+
+Then('I see generated question {int} in Robin chat', async function (index: number) {
+    await this.robinSheetPage.expectGeneratedQuestionVisible(index)
+    await this.robinSheetPage.expectGeneratedQuestionNumber(index)
+})
+
+Then('generated question {int} in Robin chat is {string}', async function (index: number, title: string) {
+    await this.robinSheetPage.expectGeneratedQuestionTitle(index, title)
+})
+
+Then('I see these answers for generated question {int} in Robin chat:', async function (index: number, dataTable: DataTable) {
+    const answers = parseAnswerTable(dataTable.raw())
+    for (const answer of answers) {
+        await this.robinSheetPage.expectGeneratedAnswer(index, answer.text, answer.correct)
+    }
+})
+
+Then('generated question {int} in Robin chat has {int} answers', async function (index: number, count: number) {
+    await this.robinSheetPage.expectGeneratedQuestionAnswerCount(index, count)
+})
+
+Then(
+    'generated question {int} in Robin chat has {int} highlighted correct answers',
+    async function (index: number, count: number) {
+        await this.robinSheetPage.expectGeneratedQuestionCorrectAnswerCount(index, count)
+    },
+)
+
+Then('generated question {int} in Robin chat shows a numerical answer', async function (index: number) {
+    await this.robinSheetPage.expectGeneratedQuestionNumericalAnswerVisible(index)
+})
+
+Then('generated question {int} in Robin chat has numerical answer {string}', async function (index: number, value: string) {
+    await this.robinSheetPage.expectGeneratedQuestionNumericalAnswer(index, value)
+})
+
+Then('generated question {int} in Robin chat shows tolerance', async function (index: number) {
+    await this.robinSheetPage.expectGeneratedQuestionToleranceVisible(index)
+})
+
+Then(
+    'generated question {int} in Robin chat has tolerance greater than {string}',
+    async function (index: number, threshold: string) {
+        await this.robinSheetPage.expectGeneratedQuestionToleranceGreaterThan(index, Number.parseFloat(threshold))
+    },
+)
+
+Then(
+    'generated question {int} in Robin chat has tolerance less than {string}',
+    async function (index: number, threshold: string) {
+        await this.robinSheetPage.expectGeneratedQuestionToleranceLessThan(index, Number.parseFloat(threshold))
+    },
+)
+
+Then('generated question {int} in Robin chat shows question explanation', async function (index: number) {
+    await this.robinSheetPage.expectGeneratedQuestionExplanationVisible(index)
 })
 
 Then('I see 2 default empty answers', async function () {

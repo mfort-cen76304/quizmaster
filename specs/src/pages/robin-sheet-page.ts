@@ -8,6 +8,24 @@ export class RobinSheetPage {
     private generateButtonLocator = () => this.page.locator('#robin-generate-button')
     private previousVersionButtonLocator = () => this.page.locator('#previous-version-button')
     private questionTypeRadio = (value: string) => this.page.locator(`#robin-question-type-${value}`)
+    private generatedQuestionsLocator = () => this.page.getByTestId('robin-generated-question')
+    private generatedQuestionLocator = (index: number) => this.generatedQuestionsLocator().nth(index - 1)
+    private generatedQuestionNumberLocator = (index: number) =>
+        this.generatedQuestionLocator(index).getByTestId('robin-generated-question-number')
+    private generatedQuestionTitleLocator = (index: number) =>
+        this.generatedQuestionLocator(index).getByTestId('robin-generated-question-title')
+    private generatedQuestionAnswersLocator = (index: number) =>
+        this.generatedQuestionLocator(index).getByTestId('robin-generated-answer')
+    private generatedQuestionAnswerLocator = (index: number, answer: string) =>
+        this.generatedQuestionAnswersLocator(index).filter({ hasText: answer })
+    private generatedQuestionAnswerCorrectBadgeLocator = (index: number, answer: string) =>
+        this.generatedQuestionAnswerLocator(index, answer).getByTestId('robin-generated-answer-correct')
+    private generatedQuestionNumericalAnswerLocator = (index: number) =>
+        this.generatedQuestionLocator(index).getByTestId('robin-generated-numerical-answer')
+    private generatedQuestionToleranceLocator = (index: number) =>
+        this.generatedQuestionLocator(index).getByTestId('robin-generated-tolerance')
+    private generatedQuestionExplanationLocator = (index: number) =>
+        this.generatedQuestionLocator(index).getByTestId('robin-generated-question-explanation')
 
     open = async () => {
         await expect(this.fabLocator()).toBeVisible({ timeout: 3_000 })
@@ -29,4 +47,40 @@ export class RobinSheetPage {
     expectPromptNotVisible = () => expect(this.promptLocator().first()).not.toBeVisible()
     expectPreviousVersionAvailable = () => expect(this.previousVersionButtonLocator()).toBeVisible()
     expectPreviousVersionNotAvailable = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
+
+    expectGeneratedQuestionCount = (count: number) => expect(this.generatedQuestionsLocator()).toHaveCount(count)
+    expectGeneratedQuestionVisible = (index: number) => expect(this.generatedQuestionLocator(index)).toBeVisible()
+    expectGeneratedQuestionNumber = (index: number) => expect(this.generatedQuestionNumberLocator(index)).toHaveText(`${index}.`)
+    expectGeneratedQuestionTitle = (index: number, title: string) =>
+        expect(this.generatedQuestionTitleLocator(index)).toHaveText(title)
+    expectGeneratedQuestionAnswerCount = (index: number, count: number) =>
+        expect(this.generatedQuestionAnswersLocator(index)).toHaveCount(count)
+    expectGeneratedQuestionCorrectAnswerCount = (index: number, count: number) =>
+        expect(this.generatedQuestionLocator(index).getByTestId('robin-generated-answer-correct')).toHaveCount(count)
+    expectGeneratedAnswer = async (index: number, answer: string, correct: boolean) => {
+        await expect(this.generatedQuestionAnswerLocator(index, answer)).toBeVisible()
+        if (correct) {
+            await expect(this.generatedQuestionAnswerCorrectBadgeLocator(index, answer)).toBeVisible()
+        } else {
+            await expect(this.generatedQuestionAnswerCorrectBadgeLocator(index, answer)).not.toBeVisible()
+        }
+    }
+    expectGeneratedQuestionNumericalAnswerVisible = (index: number) =>
+        expect(this.generatedQuestionNumericalAnswerLocator(index)).toBeVisible()
+    expectGeneratedQuestionNumericalAnswer = (index: number, value: string) =>
+        expect(this.generatedQuestionNumericalAnswerLocator(index)).toHaveText(value)
+    generatedQuestionTolerance = async (index: number): Promise<number> => {
+        const text = (await this.generatedQuestionToleranceLocator(index).textContent())?.trim() ?? ''
+        return Number.parseFloat(text)
+    }
+    expectGeneratedQuestionToleranceVisible = (index: number) =>
+        expect(this.generatedQuestionToleranceLocator(index)).toBeVisible()
+    expectGeneratedQuestionToleranceGreaterThan = async (index: number, threshold: number) => {
+        expect(await this.generatedQuestionTolerance(index)).toBeGreaterThan(threshold)
+    }
+    expectGeneratedQuestionToleranceLessThan = async (index: number, threshold: number) => {
+        expect(await this.generatedQuestionTolerance(index)).toBeLessThan(threshold)
+    }
+    expectGeneratedQuestionExplanationVisible = (index: number) =>
+        expect(this.generatedQuestionExplanationLocator(index)).toBeVisible()
 }
