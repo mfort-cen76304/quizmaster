@@ -25,7 +25,9 @@ BeforeScenario(async function ({ $tags, $test, $testInfo }) {
     const hasNotFeatureFlag = $tags.includes('@not-feature-flag')
     const isAi = $tags.includes('@ai')
     const isSlow = $tags.includes('@slow')
+    const isSkipped = $tags.includes('@skip')
 
+    if (isSkipped) $test.skip()
     if (hasFeatureFlag && !FEATURE_FLAG_ENABLED) $test.skip()
     if (hasNotFeatureFlag && FEATURE_FLAG_ENABLED) $test.skip()
     if (isAi && !AI_ENABLED) $test.skip()

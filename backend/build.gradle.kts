@@ -44,6 +44,7 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.security:spring-security-test")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -98,13 +99,22 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 }
 
+fun Test.useTestSourceSet() {
+    testClassesDirs = sourceSets["test"].output.classesDirs
+    classpath = sourceSets["test"].runtimeClasspath
+}
+
 tasks.register<Test>("testLocal") {
+    useTestSourceSet()
+
     useJUnitPlatform {
         excludeTags("ai")
     }
 }
 
 tasks.register<Test>("testAi") {
+    useTestSourceSet()
+
     useJUnitPlatform {
         includeTags("ai")
     }
