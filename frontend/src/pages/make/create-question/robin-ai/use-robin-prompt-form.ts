@@ -11,27 +11,14 @@ export interface RobinFormBinding {
     readonly applyPatch: (patch: QuestionFormStatePatch) => void
 }
 
-const questionToPatch = (q: QuestionDraft): QuestionFormStatePatch => ({
-    questionText: q.question,
-    questionType: q.questionType,
-    answers: q.answers,
-    explanations: q.explanations,
-    correctAnswers: Array.from(q.correctAnswers),
-    questionExplanation: q.questionExplanation,
-    isEasy: q.isEasy,
-    showExplanations: q.explanations.some(explanation => !!explanation),
-    numericalAnswer: q.questionType === 'numerical' ? (q.answers[0] ?? '') : '',
-    tolerance: q.tolerance ?? 0,
-})
-
 interface UseRobinPromptFormArgs {
-    readonly form: RobinFormBinding
+    readonly onGenerated: (draft: QuestionDraft) => void | Promise<void>
     readonly undo: RobinUndoBuffer
     readonly questionType: QuestionType
     readonly onClose: () => void
 }
 
-export const useRobinPromptForm = ({ form, undo, questionType, onClose }: UseRobinPromptFormArgs) => {
+export const useRobinPromptForm = ({ onGenerated, undo, questionType, onClose }: UseRobinPromptFormArgs) => {
     const [promptText, setPromptText] = useState('')
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
@@ -42,7 +29,7 @@ export const useRobinPromptForm = ({ form, undo, questionType, onClose }: UseRob
         try {
             const response = await postAiAssistant({ question: promptText.trim(), questionType })
             undo.capture()
-            form.applyPatch(questionToPatch(response))
+            await onGenerated(response)
             onClose()
         } catch (e) {
             const message = e instanceof Error ? e.message : 'AI assistant request failed.'

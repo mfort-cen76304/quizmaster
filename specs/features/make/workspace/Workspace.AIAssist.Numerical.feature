@@ -1,4 +1,3 @@
-@skip
 Feature: Generate numerical question from workspace using AI
   Robin AI can generate and save a numerical question directly from the
   workspace page without navigating to the question form first.
@@ -13,7 +12,7 @@ Feature: Generate numerical question from workspace using AI
     And the question is saved in the workspace
     And I see workspace question count 1
 
-  @skip @ai @slow
+  @ai @slow
   Scenario: Generate a numerical question with tolerance directly in workspace
     Given workspace "Workspace"
     When I open Robin AI

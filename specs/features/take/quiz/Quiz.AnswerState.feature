@@ -108,7 +108,6 @@ Feature: Quiz answer state
     When I go back to previous question
     Then I see answer "Elephant" checked
 
-  @skip
   Scenario: When going back answer is submitted
     Given workspace "Flow 3Q" with questions
       | question                       | answers                                            |

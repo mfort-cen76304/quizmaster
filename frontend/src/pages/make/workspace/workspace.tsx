@@ -13,6 +13,7 @@ import { ItemList, LinkButton } from '#pages/components'
 
 import { QuestionItem } from './question-item.tsx'
 import { QuizItem } from './quiz-item.tsx'
+import { WorkspaceRobinAiHelper } from './workspace-robin-ai-helper.tsx'
 
 export function WorkspacePage() {
     const workspaceId = useWorkspaceId()
@@ -23,7 +24,7 @@ export function WorkspacePage() {
     const [quizToDelete, setQuizToDelete] = useState<{ id: number; title: string } | null>(null)
 
     useApi(workspaceId, fetchWorkspace, setWorkspace)
-    useApi(workspaceId, fetchWorkspaceQuestions, setQuestions)
+    const refreshQuestions = useApi(workspaceId, fetchWorkspaceQuestions, setQuestions)
     useApi(workspaceId, fetchWorkspaceQuizzes, setQuizzes)
 
     const onDeleteQuestion = async (id: number) => {
@@ -45,6 +46,7 @@ export function WorkspacePage() {
 
     return (
         <div className="workspace-page">
+            <WorkspaceRobinAiHelper workspaceId={workspaceId} onQuestionCreated={refreshQuestions} />
             <section className="workspace-header">
                 <div className="workspace-header__content">
                     <div className="workspace-header__eyebrow">Welcome to your workspace!</div>

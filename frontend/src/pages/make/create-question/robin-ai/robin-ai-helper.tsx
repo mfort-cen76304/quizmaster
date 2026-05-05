@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import type { QuestionType } from '#model/question.ts'
+import type { QuestionDraft, QuestionType } from '#model/question.ts'
 import './robin-ai.scss'
+import { questionToPatch } from './question-draft-mappers.ts'
 import { RobinFab } from './robin-fab.tsx'
 import { RobinSheet } from './robin-sheet.tsx'
 import type { RobinFormBinding } from './use-robin-prompt-form.ts'
@@ -16,13 +17,16 @@ export const RobinAiHelper = ({ form }: RobinAiHelperProps) => {
     const [sheetOpen, setSheetOpen] = useState(false)
     const [questionType, setQuestionType] = useState<QuestionType>('single')
     const undo = useRobinUndoBuffer(form)
+    const handleGenerated = (draft: QuestionDraft) => {
+        form.applyPatch(questionToPatch(draft))
+    }
 
     return createPortal(
         <>
             <RobinFab onOpen={() => setSheetOpen(true)} />
             {sheetOpen && (
                 <RobinSheet
-                    form={form}
+                    onGenerated={handleGenerated}
                     undo={undo}
                     questionType={questionType}
                     onQuestionTypeChange={setQuestionType}

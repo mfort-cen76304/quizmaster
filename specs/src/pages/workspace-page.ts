@@ -44,6 +44,7 @@ export class WorkspacePage {
 
     takeQuestion = (question: string) => this.questionLocator(question).getByRole('link', { name: 'Take' }).click()
     editQuestion = (question: string) => this.questionLocator(question).getByRole('link', { name: 'Edit' }).click()
+    editFirstQuestion = () => this.questionsLocator().first().getByRole('link', { name: 'Edit' }).click()
 
     private deleteButtonLocator = (question: string) =>
         this.questionLocator(question).getByRole('button', { name: 'Delete' })

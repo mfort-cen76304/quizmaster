@@ -1,20 +1,21 @@
 import type { QuestionType } from '#model/question.ts'
+import type { QuestionDraft } from '#model/question.ts'
 import { Alert, Button, Field, QuestionTypeRadioSet, TextArea } from '#pages/components'
 
-import { type RobinFormBinding, useRobinPromptForm } from './use-robin-prompt-form.ts'
+import { useRobinPromptForm } from './use-robin-prompt-form.ts'
 import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'
 
 interface RobinSheetProps {
-    readonly form: RobinFormBinding
+    readonly onGenerated: (draft: QuestionDraft) => void | Promise<void>
     readonly undo: RobinUndoBuffer
     readonly questionType: QuestionType
     readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
 }
 
-export const RobinSheet = ({ form, undo, questionType, onQuestionTypeChange, onClose }: RobinSheetProps) => {
+export const RobinSheet = ({ onGenerated, undo, questionType, onQuestionTypeChange, onClose }: RobinSheetProps) => {
     const { promptText, setPromptText, loading, error, generate } = useRobinPromptForm({
-        form,
+        onGenerated,
         undo,
         questionType,
         onClose,

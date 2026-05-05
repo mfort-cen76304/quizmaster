@@ -1,9 +1,8 @@
-@skip
 Feature: Generate question from workspace using AI
   Robin AI is available directly on the workspace page, so a quiz maker
   can generate and save a new question without opening the question form first.
 
-  @only @ai @slow
+  @ai @slow
   Scenario: Open Robin AI from workspace
     Given workspace "Workspace"
     When I open Robin AI
@@ -33,7 +32,7 @@ Feature: Generate question from workspace using AI
     And the question is saved in the workspace
     And I see workspace question count 1
 
-  @skip @ai @slow
+  @ai @slow
   Scenario: Generated question can be edited from workspace after direct creation
     Given workspace "Workspace"
     When I open Robin AI
