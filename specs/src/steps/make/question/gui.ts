@@ -14,8 +14,10 @@ import {
     enterQuestion,
     enterQuestionExplanation,
     markAnswerCorrectness,
+    selectAIQuestionType,
     submitQuestion,
     enterTag,
+    type AIQuestionTypeChoice,
 } from '#steps/make/question/ops.ts'
 import { ensureWorkspace } from '#steps/make/workspace/ops.ts'
 import {
@@ -235,12 +237,6 @@ When('I open Robin AI', async function () {
     await this.robinSheetPage.open()
 })
 
-When(/I ask AI for (single choice|multiple choice|numerical) question/, async function (choice: string) {
-    if (choice === 'single choice') await this.robinSheetPage.askForSingleChoice()
-    else if (choice === 'multiple choice') await this.robinSheetPage.askForMultipleChoice()
-    else await this.robinSheetPage.askForNumericalChoice()
-})
-
 When('I ask AI:', async function (dataTable: DataTable) {
     await enterAIPrompt(this, toText(dataTable))
     // Wait on the actual API response, not the textarea content. The latter
@@ -253,6 +249,20 @@ When('I ask AI:', async function (dataTable: DataTable) {
         this.robinSheetPage.generate(),
     ])
 })
+
+When(
+    /I ask AI for (single choice|multiple choice|numerical) question:/,
+    async function (choice: string, dataTable: DataTable) {
+        await selectAIQuestionType(this, choice as AIQuestionTypeChoice)
+        await enterAIPrompt(this, toText(dataTable))
+        await Promise.all([
+            this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+                timeout: 60_000,
+            }),
+            this.robinSheetPage.generate(),
+        ])
+    },
+)
 
 Given('I start creating a new question when I already have generated content', async function () {
     await ensureWorkspace(this)

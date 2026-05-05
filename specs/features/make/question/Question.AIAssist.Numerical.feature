@@ -7,8 +7,7 @@ Feature: Generate numerical question using AI
   Scenario: Generate a numerical question
     Given I start creating a new question
     When I open Robin AI
-    And I ask AI for numerical question
-    And I ask AI:
+    And I ask AI for numerical question:
       | Generate a numerical question about basic arithmetic |
     Then Question field is not empty
     And the question is numerical choice
@@ -23,8 +22,7 @@ Feature: Generate numerical question using AI
   Scenario: Numerical question with tolerance
     Given I start creating a new question
     When I open Robin AI
-    And I ask AI for numerical question
-    And I ask AI:
+    And I ask AI for numerical question:
       | Generate a numerical question about a physics calculation |
       | and include tolerance                                     |
     Then Question field is not empty
@@ -36,8 +34,7 @@ Feature: Generate numerical question using AI
   Scenario: Numerical question with question explanation
     Given I start creating a new question
     When I open Robin AI
-    And I ask AI for numerical question
-    And I ask AI:
+    And I ask AI for numerical question:
       | Generate a numerical question about geometry |
       | and include question explanation             |
     Then Question field is not empty
@@ -49,8 +46,7 @@ Feature: Generate numerical question using AI
   Scenario Outline: AI-generated numerical question proposes unrounded tolerance for fractional or negative answers
     Given I start creating a new question
     When I open Robin AI
-    And I ask AI for numerical question
-    And I ask AI:
+    And I ask AI for numerical question:
       | Generate a numerical question |
       | asking <prompt>               |
       | with correct answer <answer>  |

@@ -27,8 +27,7 @@ Feature: Generate question using AI
   Scenario: Generate a multiple-choice question
     Given I start creating a new question
     When I open Robin AI
-    And I ask AI for multiple choice question
-    And I ask AI:
+    And I ask AI for multiple choice question:
       | Generate a question about European capitals |
       | and 2 incorrect answers                     |
     Then Question field is not empty
@@ -69,8 +68,7 @@ Feature: Generate question using AI
       | and 2 incorrect answers                 |
     Then the question is single choice
     When I open Robin AI
-    And I ask AI for multiple choice question
-    And I ask AI:
+    And I ask AI for multiple choice question:
       | Generate a question about European capitals |
       | with 2 correct answers                      |
       | and 2 incorrect answers                     |
