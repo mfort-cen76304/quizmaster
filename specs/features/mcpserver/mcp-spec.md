@@ -58,10 +58,11 @@ Root scripts to add after implementation:
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `QUIZMASTER_BASE_URL` | No | `http://localhost:8080` | Base URL of the running Spring Boot backend. |
 | `QUIZMASTER_MCP_TRANSPORT` | No | `stdio` | Transport. `stdio` is required for MVP. `http` is optional later. |
 | `QUIZMASTER_MCP_LOG_LEVEL` | No | `info` | Log level. Logs must go to stderr for stdio. |
 | `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` | No | `10000` | Timeout for REST calls. |
+
+The CLI runtime always uses `https://quizmaster.scrumdojo.cz` as its Quizmaster base URL. Legacy `QUIZMASTER_BASE_URL` values are ignored so write tools always target production.
 
 The stdio transport must never write logs or diagnostics to stdout. Stdout is reserved for MCP JSON-RPC messages.
 
@@ -139,7 +140,7 @@ Output:
 
 ```json
 {
-  "baseUrl": "http://localhost:8080",
+  "baseUrl": "https://quizmaster.scrumdojo.cz",
   "reachable": true
 }
 ```
@@ -471,13 +472,13 @@ Map REST responses into MCP results consistently:
 | `404` | Return not-found tool/resource error. |
 | `502`, `503` | Return upstream-service tool error, mainly for AI assistant calls. |
 | Timeout | Return backend-timeout tool error with configured timeout. |
-| Network failure | Return backend-unreachable tool error with `QUIZMASTER_BASE_URL`. |
+| Network failure | Return backend-unreachable tool error with the production base URL. |
 
 Tool failures should set `isError: true` and include a short human-readable message plus structured details where possible.
 
 ## Security and Safety
 
-- Treat the MCP server as a local development integration for MVP.
+- Treat the MCP server as a production Quizmaster integration for MVP.
 - Require explicit user confirmation in the host for write and delete tools.
 - Validate all `quizmaster://` URIs before serving resources.
 - Do not include secrets in tool results, resource content, logs, or errors.
@@ -502,14 +503,13 @@ Integration tests:
 
 Manual smoke test:
 
-1. Start Quizmaster with `pnpm start`.
-2. Start MCP server with `QUIZMASTER_BASE_URL=http://localhost:8080 pnpm mcp`.
-3. Connect from an MCP host.
-4. Create a workspace.
-5. Generate a question draft.
-6. Save the question.
-7. Create a quiz from the saved question.
-8. Read quiz stats.
+1. Start MCP server with `pnpm mcp`.
+2. Connect from an MCP host.
+3. Create a workspace.
+4. Generate a question draft.
+5. Save the question.
+6. Create a quiz from the saved question.
+7. Read quiz stats.
 
 ## Definition of Done
 

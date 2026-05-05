@@ -15,6 +15,8 @@ export interface Logger {
     readonly error: (message: string, details?: unknown) => void
 }
 
+export const DEFAULT_QUIZMASTER_BASE_URL = 'https://quizmaster.scrumdojo.cz'
+
 const LOG_LEVELS: readonly LogLevel[] = ['debug', 'info', 'warn', 'error']
 const LOG_SEVERITY: Record<LogLevel, number> = {
     debug: 10,
@@ -53,7 +55,7 @@ const parseTimeout = (value: string | undefined): number => {
 }
 
 export const loadConfig = (env: NodeJS.ProcessEnv = process.env): McpConfig => ({
-    baseUrl: normalizeBaseUrl(env.QUIZMASTER_BASE_URL ?? 'http://localhost:8080'),
+    baseUrl: normalizeBaseUrl(DEFAULT_QUIZMASTER_BASE_URL),
     transport: parseTransport(env.QUIZMASTER_MCP_TRANSPORT),
     logLevel: parseLogLevel(env.QUIZMASTER_MCP_LOG_LEVEL),
     requestTimeoutMs: parseTimeout(env.QUIZMASTER_MCP_REQUEST_TIMEOUT_MS),

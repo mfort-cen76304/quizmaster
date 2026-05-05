@@ -1,6 +1,6 @@
 # Quizmaster MCP Server Configuration
 
-This document explains how to configure the Quizmaster MCP server for a local Quizmaster development environment and for MCP hosts that connect over stdio.
+This document explains how to configure the Quizmaster MCP server for production Quizmaster and for MCP hosts that connect over stdio.
 
 ## Prerequisites
 
@@ -10,33 +10,28 @@ This document explains how to configure the Quizmaster MCP server for a local Qu
 pnpm install:all
 ```
 
-- Start the Quizmaster backend. The default MCP configuration expects the REST API at `http://localhost:8080`.
-
-```bash
-pnpm start
-```
-
-For backend-only work, `pnpm start:be` is enough because the MCP server calls the Spring Boot REST API directly.
+- Ensure `https://quizmaster.scrumdojo.cz` is reachable. The MCP CLI runtime always targets the production Quizmaster REST API.
 
 ## Runtime Configuration
 
-The MCP server reads its configuration from environment variables.
+The MCP server reads operational settings from environment variables. The Quizmaster base URL is fixed to production for the CLI runtime so write tools create production workspaces, questions, and quizzes.
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
-| `QUIZMASTER_BASE_URL` | No | `http://localhost:8080` | Base URL of the running Quizmaster Spring Boot REST API. A trailing slash is accepted and normalized away. |
 | `QUIZMASTER_MCP_TRANSPORT` | No | `stdio` | MCP transport. The current implementation supports only `stdio`. |
 | `QUIZMASTER_MCP_LOG_LEVEL` | No | `info` | Log level. Allowed values are `debug`, `info`, `warn`, and `error`. |
 | `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` | No | `10000` | Positive integer timeout for Quizmaster REST calls, in milliseconds. |
 
+`QUIZMASTER_BASE_URL` is intentionally ignored by the CLI runtime. This prevents stale local MCP host configuration from accidentally creating quizzes on `localhost`.
+
 The stdio transport reserves stdout for MCP JSON-RPC messages. Logs and diagnostics must go to stderr.
 
-## Local Smoke Run
+## Production Smoke Run
 
 From the repository root, run:
 
 ```bash
-QUIZMASTER_BASE_URL=http://localhost:8080 pnpm --silent --dir mcp start
+pnpm --silent --dir mcp start
 ```
 
 This starts the MCP server and waits for an MCP host to speak JSON-RPC over stdin/stdout. For normal use, start it from an MCP host configuration instead of typing JSON-RPC manually in a terminal.
@@ -52,7 +47,6 @@ Use this shape for MCP hosts that support an `mcpServers` JSON configuration:
       "command": "pnpm",
       "args": ["--silent", "--dir", "/workspaces/quizmaster/mcp", "start"],
       "env": {
-        "QUIZMASTER_BASE_URL": "http://localhost:8080",
         "QUIZMASTER_MCP_TRANSPORT": "stdio",
         "QUIZMASTER_MCP_LOG_LEVEL": "info",
         "QUIZMASTER_MCP_REQUEST_TIMEOUT_MS": "10000"
@@ -102,7 +96,6 @@ Example future authenticated host configuration:
       "command": "pnpm",
       "args": ["--silent", "--dir", "/workspaces/quizmaster/mcp", "start"],
       "env": {
-        "QUIZMASTER_BASE_URL": "http://localhost:8080",
         "QUIZMASTER_AUTH_MODE": "bearer",
         "QUIZMASTER_AUTH_TOKEN": "replace-with-local-token",
         "QUIZMASTER_MCP_LOG_LEVEL": "info"
@@ -117,7 +110,7 @@ Example future authenticated host configuration:
 | Symptom | Check |
 | --- | --- |
 | MCP host reports invalid JSON or protocol startup failure | Confirm the command uses `pnpm --silent` and that nothing writes to stdout except the MCP server. |
-| `quizmaster_health` returns unreachable | Confirm the backend is running and `QUIZMASTER_BASE_URL` points to the backend port, normally `http://localhost:8080`. |
+| `quizmaster_health` returns unreachable | Confirm `https://quizmaster.scrumdojo.cz` is reachable from the MCP host environment. |
 | Startup fails with unsupported transport | Set `QUIZMASTER_MCP_TRANSPORT=stdio` or remove the variable. |
 | REST calls time out | Increase `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` or check backend/database startup. |
 | Tools cannot find a workspace | Provide an existing workspace GUID or create one with `quizmaster_create_workspace`. The current REST API has no workspace index endpoint. |
@@ -129,7 +122,7 @@ Run these commands before sharing a configured MCP setup:
 ```bash
 pnpm code:mcp:tsc
 pnpm test:mcp
-QUIZMASTER_BASE_URL=http://localhost:8080 pnpm --silent --dir mcp start
+pnpm --silent --dir mcp start
 ```
 
 The final command is expected to keep running until the MCP host disconnects or the process is stopped.
