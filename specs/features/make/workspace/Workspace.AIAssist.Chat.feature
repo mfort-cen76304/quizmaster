@@ -3,6 +3,57 @@ Feature: Show generated questions in workspace Robin AI chat
   they are created in the workspace. The quiz maker can review the generated
   questions, their answers, and which answers are correct.
 
+  Scenario: Robin AI chat composer is docked at the bottom of the chat
+    Given workspace "Workspace"
+    When I open Robin AI
+    Then Robin AI message composer is docked to the bottom of the chat
+
+  Scenario: Robin AI chat does not show a Generate button
+    Given workspace "Workspace"
+    When I open Robin AI
+    Then I do not see Robin AI send button
+
+  Scenario: Pressing Enter sends a Robin AI message from the workspace chat
+    Given workspace "Workspace"
+    And Robin AI will return these generated questions:
+      | question                               | answers                   |
+      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
+      | What is the capital of France?         | Paris (*), Lyon, Nice    |
+    When I open Robin AI
+    And I enter Robin AI message "Vytvor 2 otazky na tema hlavni mesta v Evrope"
+    And I press Enter to send the Robin AI message
+    Then I see AI section
+    And I see 2 generated questions in Robin chat
+    And I do not see Robin AI send button
+
+  Scenario: Robin AI clears the chat composer after sending a message
+    Given workspace "Workspace"
+    And Robin AI will return these generated questions:
+      | question                               | answers                   |
+      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
+      | What is the capital of France?         | Paris (*), Lyon, Nice    |
+    When I open Robin AI
+    And I enter Robin AI message "Vytvor 2 otazky na tema hlavni mesta v Evrope"
+    And I press Enter to send the Robin AI message
+    Then Robin AI message composer is empty
+    And I see 2 generated questions in Robin chat
+
+  Scenario: Robin AI confirms saving generated questions and clears the previews
+    Given workspace "Workspace"
+    And Robin AI will return these generated questions:
+      | question                               | answers                   |
+      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
+      | What is the capital of France?         | Paris (*), Lyon, Nice    |
+    When I remember workspace question count
+    And I open Robin AI
+    And I enter Robin AI message "Vytvor 2 otazky na tema hlavni mesta v Evrope"
+    And I press Enter to send the Robin AI message
+    And I tell Robin AI "Uloz to"
+    Then Robin AI message composer is empty
+    And I see Robin AI chat message "Saved 2 questions to workspace."
+    And I do not see generated questions in Robin chat
+    And workspace question count increased by 2
+
   @ai @slow
   Scenario: Robin shows generated questions in the workspace chat
     Given workspace "Workspace"

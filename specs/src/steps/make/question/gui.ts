@@ -245,6 +245,26 @@ Then('I see AI section', async function () {
     await this.robinSheetPage.expectPromptVisible()
 })
 
+Then('Robin AI message composer is docked to the bottom of the chat', async function () {
+    await this.robinSheetPage.expectComposerDockedToBottom()
+})
+
+Then('I do not see Robin AI send button', async function () {
+    await this.robinSheetPage.expectGenerateButtonNotVisible()
+})
+
+Then('Robin AI message composer is empty', async function () {
+    await this.robinSheetPage.expectPromptValue('')
+})
+
+Then('I see Robin AI chat message {string}', async function (message: string) {
+    await this.robinSheetPage.expectChatMessageVisible(message)
+})
+
+Then('I do not see generated questions in Robin chat', async function () {
+    await this.robinSheetPage.expectNoGeneratedQuestions()
+})
+
 Then('AI received current question context', async function () {
     const prompt = aiPrompt(this)
     expect(prompt).toContain('add two more incorrect answers')
@@ -467,6 +487,14 @@ When('I ask AI to generate multiple questions:', async function (dataTable: Data
 When('I tell Robin AI {string}', async function (message: string) {
     await this.robinSheetPage.enterPrompt(message)
     await this.robinSheetPage.generate()
+})
+
+When('I enter Robin AI message {string}', async function (message: string) {
+    await this.robinSheetPage.enterPrompt(message)
+})
+
+When('I press Enter to send the Robin AI message', async function () {
+    await this.robinSheetPage.sendPromptByEnter()
 })
 
 When('I ask stubbed AI to {string}', async function (instruction: string) {

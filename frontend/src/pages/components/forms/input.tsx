@@ -1,3 +1,5 @@
+import type { KeyboardEvent } from 'react'
+
 import './input.scss'
 
 export interface InputProps<V> {
@@ -6,6 +8,7 @@ export interface InputProps<V> {
     readonly id?: string
     readonly value: V
     readonly onChange: (value: V) => void
+    readonly onKeyDown?: (event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) => void
     readonly min?: number
     readonly step?: number | 'any'
 }

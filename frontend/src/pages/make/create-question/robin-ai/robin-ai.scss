@@ -61,8 +61,7 @@
     bottom: 0;
     left: 0;
     right: 0;
-    max-height: 80vh;
-    overflow-y: auto;
+    height: min(80vh, 760px);
     background: white;
     z-index: 10000;
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
@@ -97,6 +96,58 @@
     .example {
         font-size: 12px;
         color: var(--text-soft);
+    }
+
+    .robin-sheet__content {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-right: 4px;
+    }
+
+    .robin-sheet__composer {
+        margin-top: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        padding-top: 12px;
+        border-top: 1px solid var(--line, #d7dbe7);
+        background: white;
+    }
+
+    .robin-sheet__composer textarea {
+        min-height: 5.5rem;
+    }
+
+    .robin-chat-messages {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .robin-chat-message {
+        max-width: min(80%, 680px);
+        padding: 10px 14px;
+        border-radius: 14px;
+        line-height: 1.4;
+        white-space: pre-wrap;
+    }
+
+    .robin-chat-message--user {
+        align-self: flex-end;
+        background: #1d4ed8;
+        color: white;
+        border-bottom-right-radius: 6px;
+    }
+
+    .robin-chat-message--assistant {
+        align-self: flex-start;
+        background: #eef2ff;
+        color: #312e81;
+        border-bottom-left-radius: 6px;
     }
 
     .generated-questions {

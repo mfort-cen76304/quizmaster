@@ -4,7 +4,10 @@ export class RobinSheetPage {
     constructor(private page: Page) {}
 
     private fabLocator = () => this.page.locator('.robin-fab .trigger')
+    private sheetLocator = () => this.page.getByTestId('robin-sheet')
+    private composerLocator = () => this.page.getByTestId('robin-composer')
     private promptLocator = () => this.page.locator('#robin-prompt-text')
+    private chatMessageLocator = () => this.page.getByTestId('robin-chat-message')
     private generateButtonLocator = () => this.page.locator('#robin-generate-button')
     private previousVersionButtonLocator = () => this.page.locator('#previous-version-button')
     private questionTypeRadio = (value: string) => this.page.locator(`#robin-question-type-${value}`)
@@ -34,8 +37,8 @@ export class RobinSheetPage {
     }
 
     enterPrompt = (prompt: string) => this.promptLocator().fill(prompt)
-
-    generate = () => this.generateButtonLocator().click()
+    sendPromptByEnter = () => this.promptLocator().press('Enter')
+    generate = () => this.sendPromptByEnter()
 
     askForSingleChoice = () => this.questionTypeRadio('single').check()
     askForMultipleChoice = () => this.questionTypeRadio('multiple').check()
@@ -45,8 +48,20 @@ export class RobinSheetPage {
 
     expectPromptVisible = () => expect(this.promptLocator().first()).toBeVisible()
     expectPromptNotVisible = () => expect(this.promptLocator().first()).not.toBeVisible()
+    expectPromptValue = (value: string) => expect(this.promptLocator()).toHaveValue(value)
+    expectGenerateButtonNotVisible = () => expect(this.generateButtonLocator()).not.toBeVisible()
+    expectChatMessageVisible = (message: string) => expect(this.chatMessageLocator().filter({ hasText: message })).toBeVisible()
+    expectComposerDockedToBottom = async () => {
+        const sheet = await this.sheetLocator().boundingBox()
+        const composer = await this.composerLocator().boundingBox()
+        expect(sheet).not.toBeNull()
+        expect(composer).not.toBeNull()
+        if (!sheet || !composer) return
+        expect(Math.abs(sheet.y + sheet.height - (composer.y + composer.height))).toBeLessThanOrEqual(40)
+    }
     expectPreviousVersionAvailable = () => expect(this.previousVersionButtonLocator()).toBeVisible()
     expectPreviousVersionNotAvailable = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
+    expectNoGeneratedQuestions = () => expect(this.generatedQuestionsLocator()).toHaveCount(0)
 
     expectGeneratedQuestionCount = (count: number) => expect(this.generatedQuestionsLocator()).toHaveCount(count)
     expectGeneratedQuestionVisible = (index: number) => expect(this.generatedQuestionLocator(index)).toBeVisible()

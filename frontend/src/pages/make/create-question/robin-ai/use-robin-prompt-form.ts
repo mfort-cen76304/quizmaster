@@ -11,13 +11,24 @@ export interface RobinFormBinding {
     readonly applyPatch: (patch: QuestionFormStatePatch) => void
 }
 
+export interface RobinChatMessage {
+    readonly role: 'user' | 'assistant'
+    readonly text: string
+}
+
+export interface RobinGenerationResult {
+    readonly drafts: readonly QuestionDraft[]
+    readonly assistantMessage?: string
+}
+
 interface UseRobinPromptFormArgs {
     readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
     readonly generateRequest?: (request: {
         question: string
         questionType: QuestionType
         workspaceGuid?: string
-    }) => Promise<readonly QuestionDraft[]>
+        currentDrafts: readonly QuestionDraft[]
+    }) => Promise<RobinGenerationResult>
     readonly undo: RobinUndoBuffer
     readonly questionType: QuestionType
     readonly workspaceGuid?: string
@@ -29,7 +40,8 @@ const generateSingleDraft = async (request: {
     question: string
     questionType: QuestionType
     workspaceGuid?: string
-}): Promise<readonly QuestionDraft[]> => [await postAiAssistant(request)]
+    currentDrafts: readonly QuestionDraft[]
+}): Promise<RobinGenerationResult> => ({ drafts: [await postAiAssistant(request)] })
 
 export const useRobinPromptForm = ({
     onGenerated,
@@ -44,15 +56,30 @@ export const useRobinPromptForm = ({
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
     const [generatedDrafts, setGeneratedDrafts] = useState<readonly QuestionDraft[]>([])
+    const [chatMessages, setChatMessages] = useState<readonly RobinChatMessage[]>([])
 
     const generate = async () => {
+        const submittedPrompt = promptText.trim()
+        if (!submittedPrompt) return
         setError('')
         setLoading(true)
         try {
-            const response = await generateRequest({ question: promptText.trim(), questionType, workspaceGuid })
-            setGeneratedDrafts(response)
+            const response = await generateRequest({
+                question: submittedPrompt,
+                questionType,
+                workspaceGuid,
+                currentDrafts: generatedDrafts,
+            })
+            const nextMessages: RobinChatMessage[] = [{ role: 'user', text: submittedPrompt }]
+            if (response.assistantMessage) {
+                nextMessages.push({ role: 'assistant', text: response.assistantMessage })
+            }
+
+            setGeneratedDrafts(response.drafts)
+            setChatMessages(messages => [...messages, ...nextMessages])
+            setPromptText('')
             undo.capture()
-            await onGenerated(response)
+            await onGenerated(response.drafts)
             if (closeOnGenerated) onClose()
         } catch (e) {
             const message = e instanceof Error ? e.message : 'AI assistant request failed.'
@@ -62,5 +89,5 @@ export const useRobinPromptForm = ({
         }
     }
 
-    return { promptText, setPromptText, loading, error, generate, generatedDrafts }
+    return { promptText, setPromptText, loading, error, generate, generatedDrafts, chatMessages }
 }
