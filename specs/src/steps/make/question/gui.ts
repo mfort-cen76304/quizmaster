@@ -464,6 +464,11 @@ When('I ask AI to generate multiple questions:', async function (dataTable: Data
     ])
 })
 
+When('I tell Robin AI {string}', async function (message: string) {
+    await this.robinSheetPage.enterPrompt(message)
+    await this.robinSheetPage.generate()
+})
+
 When('I ask stubbed AI to {string}', async function (instruction: string) {
     await this.page.route('**/api/ai-assistant', async route => {
         this.lastAiAssistantRequest = route.request().postDataJSON() as { question: string; questionType: string }

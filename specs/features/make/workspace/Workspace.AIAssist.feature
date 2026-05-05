@@ -65,3 +65,19 @@ Feature: Generate question preview from workspace using AI
     And I see workspace question count 0
     And I do not see question "What is the capital of Czech Republic?" in the list
     And I do not see question "Which of these are European capitals?" in the list
+
+  @ai @slow
+  Scenario: Asking Robin in chat to save a generated question saves it to the workspace
+    Given workspace "Workspace"
+    And Robin AI will return these generated questions:
+      | question                               | answers                   |
+      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
+    When I remember workspace question count
+    And I open Robin AI
+    And I ask AI:
+      | Generate a question about capital cities |
+      | with 1 correct answer                   |
+      | and 2 incorrect answers                 |
+    And I tell Robin AI "Uloz otazky"
+    Then workspace question count increased by 1
+    And I see question in list "What is the capital of Czech Republic?"

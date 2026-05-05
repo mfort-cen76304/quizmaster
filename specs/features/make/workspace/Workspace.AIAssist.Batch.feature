@@ -79,6 +79,29 @@ Feature: Generate multiple question previews from workspace using AI
     And I do not see question "What is the capital of France?" in the list
 
   @ai @slow
+  Scenario Outline: Asking Robin in chat to save generated questions saves all of them for a non-English prompt
+    Given workspace "Workspace"
+    And Robin AI will return these generated questions:
+      | question                               | answers                   |
+      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
+      | What is the capital of France?         | Paris (*), Lyon, Nice    |
+    When I remember workspace question count
+    And I open Robin AI
+    And I ask AI to generate multiple questions:
+      | <line-1> |
+      | <line-2> |
+      | <line-3> |
+    And I tell Robin AI "<save-command>"
+    Then workspace question count increased by 2
+    And I see question in list "What is the capital of Czech Republic?"
+    And I see question in list "What is the capital of France?"
+
+    Examples:
+      | line-1                                 | line-2                       | line-3                      | save-command  |
+      | Vygeneruj 2 otazky o hlavnych mestach | kazda ma 1 spravnu odpoved  | a 2 nespravne odpovede      | Uloz otazky   |
+      | Vygeneruj 2 otázky o hlavních městech | každá má 1 správnou odpověď | a 2 nesprávné odpovědi      | Ulož otázky   |
+
+  @ai @slow
   Scenario Outline: Generate two single-choice questions from one non-English prompt into Robin chat directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
