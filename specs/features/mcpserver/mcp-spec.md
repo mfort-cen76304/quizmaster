@@ -20,7 +20,7 @@ The server must be a thin integration layer. It should not read or write Postgre
 - Do not replace the existing REST API.
 - Do not implement quiz taking through MCP in the first version.
 - Do not introduce direct database access from the MCP server.
-- Do not add user authentication until the main Quizmaster application has an authentication model to reuse.
+- Do not implement a separate MCP-only authentication model. Once REST authentication exists, reuse the Quizmaster model described in `rest-auth-spec.md`.
 - Do not expose raw environment variables, database connection details, or internal service configuration as resources.
 
 ## Recommended Implementation Shape
