@@ -2,6 +2,7 @@
 .idea/
 .pnpm-store/
 node_modules/
+*.tsbuildinfo
 
 backend/bin/
 backend/.gradle/

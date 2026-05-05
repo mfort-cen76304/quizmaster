@@ -12,9 +12,10 @@
         "env:init": "./scripts/init-env.sh",
         "install:fe": "cd frontend && pnpm install",
         "install:specs": "cd specs && pnpm install && pnpm install:playwright",
+        "install:mcp": "cd mcp && pnpm install",
         "install:psql": "./scripts/install-psql.sh",
 
-        "install:all": "pnpm env:init && pnpm install && pnpm install:fe && pnpm install:specs && pnpm install:psql",
+        "install:all": "pnpm env:init && pnpm install && pnpm install:fe && pnpm install:specs && pnpm install:mcp && pnpm install:psql",
 
         // Build scripts
         "build:fe:dev": "cd frontend && pnpm build:dev",
@@ -25,6 +26,7 @@
         // Start Quizmaster in dev mode
         "start:be": "pnpm build:fe:dev && cd backend && ./gradlew bootRun",
         "start:fe": "cd frontend && pnpm dev",
+        "mcp": "cd mcp && pnpm start",
         "start": "concurrently 'pnpm start:be' 'pnpm start:fe'",
 
         // Code quality
@@ -38,9 +40,15 @@
         "code:specs:format": "oxfmt specs/src/",
         "code:specs": "pnpm code:specs:tsc && pnpm code:specs:lint && pnpm code:specs:format",
 
-        "code": "pnpm code:fe && pnpm code:specs",
+        "code:mcp:tsc": "cd mcp && pnpm tsc -b && rm -f tsconfig.tsbuildinfo",
+        "code:mcp:lint": "oxlint --fix mcp/src/ mcp/test/",
+        "code:mcp:format": "oxfmt mcp/src/ mcp/test/",
+        "code:mcp": "pnpm code:mcp:tsc && pnpm code:mcp:lint && pnpm code:mcp:format",
+
+        "code": "pnpm code:fe && pnpm code:specs && pnpm code:mcp",
 
         // Unit tests
+        "test:mcp": "cd mcp && pnpm test",
         "test:be:local": "cd backend && ./gradlew testLocal",
         "test:be:ai": "cd backend && ./gradlew testAi",
         "test:be": "cd backend && ./gradlew test",
@@ -65,9 +73,9 @@
         "build:ci:be": "FEATURE_FLAG=true pnpm build:be",
         "build:ci": "pnpm build:ci:fe && pnpm build:ci:be",
 
-        "code:ci:tsc": "pnpm code:fe:tsc && pnpm code:specs:tsc",
-        "code:ci:lint": "oxlint --deny-warnings frontend/src/ specs/src/",
-        "code:ci:format": "oxfmt --check frontend/src/ specs/src/",
+        "code:ci:tsc": "pnpm code:fe:tsc && pnpm code:specs:tsc && pnpm code:mcp:tsc",
+        "code:ci:lint": "oxlint --deny-warnings frontend/src/ specs/src/ mcp/src/ mcp/test/",
+        "code:ci:format": "oxfmt --check frontend/src/ specs/src/ mcp/src/ mcp/test/",
         "code:ci": "pnpm code:ci:tsc && pnpm code:ci:lint && pnpm code:ci:format",
 
         "test:e2e:ci": "FEATURE_FLAG=true ./scripts/test-e2e.sh",

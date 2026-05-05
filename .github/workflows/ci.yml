@@ -47,8 +47,11 @@ jobs:
       - name: Install frontend dependencies and Playwright
         run: pnpm install:all
 
-      - name: Type check & lint & format frontend + specs
+      - name: Type check & lint & format frontend + specs + MCP
         run: pnpm code:ci
+
+      - name: Run MCP tests
+        run: pnpm test:mcp
 
       - name: Build frontend
         run: pnpm build:ci:fe
