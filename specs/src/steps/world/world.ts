@@ -90,6 +90,10 @@ export class QuizmasterWorld {
     clockInstalled = false
     lastAnsweredTitle?: string
     rememberedAiQuestion = ''
+    lastAiAssistantRequest?: {
+        question: string
+        questionType: string
+    }
 
     parseAnswers(answersString: string) {
         return answersString.split(',').map(answer => answer.trim())

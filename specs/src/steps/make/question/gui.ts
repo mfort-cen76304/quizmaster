@@ -29,6 +29,22 @@ import {
 } from '#steps/question/expects.ts'
 import { parseAnswerTable } from '#steps/shared/parsers.ts'
 
+const stubbedAiResponse = {
+    question: 'What is the capital of Czech Republic?',
+    answers: ['Brno', 'Prague', 'Berlin', 'Ostrava', 'Bratislava'],
+    correctAnswers: [1],
+    explanations: ['No Brno', 'Yes', 'Germany', 'No', 'No'],
+    questionExplanation: '',
+    questionType: 'single',
+    isEasy: false,
+}
+
+const aiPrompt = (world: { lastAiAssistantRequest?: { question: string } }) => {
+    const prompt = world.lastAiAssistantRequest?.question
+    expect(prompt, 'Expected AI assistant request to be captured').toBeDefined()
+    return prompt ?? ''
+}
+
 Given('I start creating a new question', async function () {
     await ensureWorkspace(this)
     await this.workspacePage.createNewQuestion()
@@ -159,6 +175,27 @@ Then('I see AI section', async function () {
     await this.robinSheetPage.expectPromptVisible()
 })
 
+Then('AI received current question context', async function () {
+    const prompt = aiPrompt(this)
+    expect(prompt).toContain('add two more incorrect answers')
+    expect(prompt).toContain('What is the capital of Czech Republic?')
+    expect(prompt).toContain('Brno')
+    expect(prompt).toContain('Prague')
+    expect(prompt).toContain('Berlin')
+    expect(prompt).toContain('No Brno')
+    expect(prompt).toContain('Yes')
+    expect(prompt).toContain('Germany')
+    expect(prompt).toContain('1')
+})
+
+Then('AI received current question context with question {string}', async function (question: string) {
+    expect(aiPrompt(this)).toContain(question)
+})
+
+Then('AI received current question context with answer {string}', async function (answer: string) {
+    expect(aiPrompt(this)).toContain(answer)
+})
+
 Then('I see explanation fields', async function () {
     await this.questionEditPage.expectExplanationFieldsExist()
 })
@@ -266,6 +303,25 @@ When('I ask AI to generate multiple questions:', async function (dataTable: Data
         }),
         this.robinSheetPage.generate(),
     ])
+})
+
+When('I ask stubbed AI to {string}', async function (instruction: string) {
+    await this.page.route('**/api/ai-assistant', async route => {
+        this.lastAiAssistantRequest = route.request().postDataJSON() as { question: string; questionType: string }
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify(stubbedAiResponse),
+        })
+    })
+    await enterAIPrompt(this, instruction)
+    await Promise.all([
+        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+            timeout: 60_000,
+        }),
+        this.robinSheetPage.generate(),
+    ])
+    await this.page.unroute('**/api/ai-assistant')
 })
 
 When(

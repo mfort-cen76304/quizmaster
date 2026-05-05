@@ -75,16 +75,66 @@ Feature: Generate question using AI
     Then the question is multiple choice
     And at least 2 answers are marked correct
 
-  Scenario: AI section is not available when editing
+@skip
+  Scenario: AI section is available when editing
     Given question "What is the capital of Czech Republic?"
       * with answers:
         | Brno   |   | No Brno |
         | Prague | * | Yes     |
         | Berlin |   | Germany |
-      * with explanation "Czechia is a country in Europe. Czechs love beer."
       * saved and bookmarked as "Czechia"
     When I start editing question "Czechia"
-    Then I do not see AI section
+    Then I see AI section
+@skip
+  Scenario: AI updates an edited question from current form context
+    Given question "What is the capital of Czech Republic?"
+      * with answers:
+        | Brno   |   | No Brno |
+        | Prague | * | Yes     |
+        | Berlin |   | Germany |
+      * saved and bookmarked as "Czechia"
+    When I start editing question "Czechia"
+      * I open Robin AI
+      * I ask stubbed AI to "add two more incorrect answers"
+    Then AI received current question context
+      * I see the answers fields
+        | Brno       |   | No Brno |
+        | Prague     | * | Yes     |
+        | Berlin     |   | Germany |
+        | Ostrava    |   | No      |
+        | Bratislava |   | No      |
+@skip
+  Scenario: AI edit is discarded when not submitted
+    Given question "What is the capital of Czech Republic?"
+      * with answers:
+        | Brno   |   | No Brno |
+        | Prague | * | Yes     |
+        | Berlin |   | Germany |
+      * saved and bookmarked as "Czechia"
+    When I start editing question "Czechia"
+      * I open Robin AI
+      * I ask stubbed AI to "add two more incorrect answers"
+      * I refresh the page
+      * I start editing question "Czechia"
+    Then I see the answers fields
+      | Brno   |   | No Brno |
+      | Prague | * | Yes     |
+      | Berlin |   | Germany |
+@skip
+  Scenario: AI context includes unsaved manual edits
+    Given question "What is the capital of Czech Republic?"
+      * with answers:
+        | Brno   |   | No Brno |
+        | Prague | * | Yes     |
+        | Berlin |   | Germany |
+      * saved and bookmarked as "Czechia"
+    When I start editing question "Czechia"
+      * I enter question "What is the capital of Slovakia?"
+      * I enter answer 2 text "Bratislava"
+      * I open Robin AI
+      * I ask stubbed AI to "add one more incorrect answer"
+    Then AI received current question context with question "What is the capital of Slovakia?"
+      * AI received current question context with answer "Bratislava"
  @ai @slow
  Scenario: After question is generated previous version is available
    Given I start creating a new question
