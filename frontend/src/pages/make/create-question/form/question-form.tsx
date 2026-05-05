@@ -19,10 +19,11 @@ import { validateQuestionFormState, errorMessage } from './validators.ts'
 
 interface QuestionEditProps {
     readonly question?: Question
+    readonly workspaceGuid?: string
     readonly onSubmit: (questionData: QuestionRequest) => void
 }
 
-export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
+export const QuestionEditForm = ({ question, workspaceGuid, onSubmit }: QuestionEditProps) => {
     const state = useQuestionFormState(question)
 
     const validator = createValidator(() => validateQuestionFormState(state), errorMessage)
@@ -31,7 +32,10 @@ export const QuestionEditForm = ({ question, onSubmit }: QuestionEditProps) => {
 
     return (
         <>
-            <RobinAiHelper form={{ snapshot: state.snapshot, applyPatch: state.applyPatch }} />
+            <RobinAiHelper
+                form={{ snapshot: state.snapshot, applyPatch: state.applyPatch }}
+                workspaceGuid={workspaceGuid}
+            />
             <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
                 <Field label="Question" required>
                     <TextArea id="question-text" value={state.questionText} onChange={state.setQuestionText} />

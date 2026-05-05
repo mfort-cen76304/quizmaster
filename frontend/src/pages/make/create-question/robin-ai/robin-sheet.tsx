@@ -10,9 +10,11 @@ interface RobinSheetProps {
     readonly generateRequest?: (request: {
         question: string
         questionType: QuestionType
+        workspaceGuid?: string
     }) => Promise<readonly QuestionDraft[]>
     readonly undo: RobinUndoBuffer
     readonly questionType: QuestionType
+    readonly workspaceGuid?: string
     readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
 }
@@ -22,6 +24,7 @@ export const RobinSheet = ({
     generateRequest,
     undo,
     questionType,
+    workspaceGuid,
     onQuestionTypeChange,
     onClose,
 }: RobinSheetProps) => {
@@ -30,6 +33,7 @@ export const RobinSheet = ({
         generateRequest,
         undo,
         questionType,
+        workspaceGuid,
         onClose,
     })
 

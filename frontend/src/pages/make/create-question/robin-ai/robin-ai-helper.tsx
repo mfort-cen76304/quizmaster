@@ -11,9 +11,10 @@ import { useRobinUndoBuffer } from './use-robin-undo-buffer.ts'
 
 interface RobinAiHelperProps {
     readonly form: RobinFormBinding
+    readonly workspaceGuid?: string
 }
 
-export const RobinAiHelper = ({ form }: RobinAiHelperProps) => {
+export const RobinAiHelper = ({ form, workspaceGuid }: RobinAiHelperProps) => {
     const [sheetOpen, setSheetOpen] = useState(false)
     const [questionType, setQuestionType] = useState<QuestionType>('single')
     const undo = useRobinUndoBuffer(form)
@@ -31,6 +32,7 @@ export const RobinAiHelper = ({ form }: RobinAiHelperProps) => {
                     onGenerated={handleGenerated}
                     undo={undo}
                     questionType={questionType}
+                    workspaceGuid={workspaceGuid}
                     onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
                 />

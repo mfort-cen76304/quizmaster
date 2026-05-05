@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +22,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -27,10 +30,12 @@ public class AiAssistantService {
 
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
     private static final Duration TIMEOUT = Duration.ofSeconds(60);
+    private static final int MAX_EXISTING_QUESTIONS = 50;
 
     static final Set<String> KNOWN_TYPES = Set.of("single", "multiple", "numerical");
 
     private final ObjectMapper objectMapper;
+    private final QuestionRepository questionRepository;
     private final HttpClient httpClient;
     private final String apiToken;
     private final String model;
@@ -44,11 +49,13 @@ public class AiAssistantService {
 
     public AiAssistantService(
         ObjectMapper objectMapper,
+        QuestionRepository questionRepository,
         @Value("${ai.token:}") String apiToken,
         @Value("${ai.model}") String model,
         @Value("${ai.max-tokens}") int maxTokens
     ) throws IOException {
         this.objectMapper = objectMapper;
+        this.questionRepository = questionRepository;
         this.apiToken = apiToken.strip();
         this.model = model;
         this.maxTokens = maxTokens;
@@ -66,13 +73,41 @@ public class AiAssistantService {
     }
 
     public QuestionResponse generateQuestion(String prompt, String questionType) {
+        return generateQuestion(prompt, questionType, null);
+    }
+
+    public QuestionResponse generateQuestion(String prompt, String questionType, String workspaceGuid) {
         validatePromptAndToken(prompt);
         String resolvedType = resolveType(questionType);
-        AssistantResponse assistantResponse = requestAssistant(prompt, chooseSystemPrompt(resolvedType), AssistantResponse.class);
-        validateForType(assistantResponse, resolvedType);
-        String[] explanations = normalizeExplanations(assistantResponse);
+        List<String> existingQuestions = existingWorkspaceQuestions(workspaceGuid);
+        if (existingQuestions.isEmpty()) {
+            AssistantResponse assistantResponse = requestAssistant(
+                prompt,
+                chooseSystemPrompt(resolvedType),
+                AssistantResponse.class
+            );
+            validateForType(assistantResponse, resolvedType);
+            return toDraftResponse(assistantResponse, normalizeExplanations(assistantResponse), resolvedType);
+        }
 
-        return toDraftResponse(assistantResponse, explanations, resolvedType);
+        AssistantResponse assistantResponse = generateUniqueCandidate(prompt, resolvedType, existingQuestions, null);
+        validateForType(assistantResponse, resolvedType);
+        SimilarityCheck similarityCheck = checkSimilarity(assistantResponse.question(), existingQuestions);
+        if (!similarityCheck.similar()) {
+            return toDraftResponse(assistantResponse, normalizeExplanations(assistantResponse), resolvedType);
+        }
+
+        AssistantResponse retryResponse = generateUniqueCandidate(prompt, resolvedType, existingQuestions, similarityCheck);
+        validateForType(retryResponse, resolvedType);
+        SimilarityCheck retrySimilarityCheck = checkSimilarity(retryResponse.question(), existingQuestions);
+        if (!retrySimilarityCheck.similar()) {
+            return toDraftResponse(retryResponse, normalizeExplanations(retryResponse), resolvedType);
+        }
+
+        throw new ResponseStatusException(
+            HttpStatus.BAD_GATEWAY,
+            "AI assistant could not generate a question that is different from existing workspace questions."
+        );
     }
 
     public QuestionResponse[] generateQuestions(String prompt, String questionType) {
@@ -129,6 +164,97 @@ public class AiAssistantService {
             throw e;
         } catch (Exception e) {
             throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant request failed.");
+        }
+    }
+
+    private List<String> existingWorkspaceQuestions(String workspaceGuid) {
+        if (workspaceGuid == null || workspaceGuid.isBlank()) {
+            return List.of();
+        }
+
+        return questionRepository.findByWorkspaceGuid(workspaceGuid.strip()).stream()
+            .map(Question::getQuestion)
+            .filter(question -> question != null && !question.isBlank())
+            .map(String::strip)
+            .limit(MAX_EXISTING_QUESTIONS)
+            .toList();
+    }
+
+    private AssistantResponse generateUniqueCandidate(
+        String prompt,
+        String resolvedType,
+        List<String> existingQuestions,
+        SimilarityCheck retryFeedback
+    ) {
+        String systemPrompt = chooseSystemPrompt(resolvedType)
+            + "\n\n"
+            + uniquenessRule(existingQuestions, retryFeedback);
+        return requestAssistant(prompt, systemPrompt, AssistantResponse.class);
+    }
+
+    private SimilarityCheck checkSimilarity(String generatedQuestion, List<String> existingQuestions) {
+        SimilarityCheck response = requestAssistant(
+            similarityPrompt(generatedQuestion, existingQuestions),
+            """
+                You are checking whether an AI-generated quiz question is too similar to existing workspace questions.
+                Similar means the generated question tests the same knowledge, fact, or calculation as an existing question.
+                The same broad topic is allowed when the concrete question is different.
+                Respond only with JSON shaped as {"similar": false, "matchedQuestion": "", "reason": ""}.
+                """,
+            SimilarityCheck.class
+        );
+
+        if (response == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid similarity check.");
+        }
+        return new SimilarityCheck(
+            response.similar(),
+            response.matchedQuestion() == null ? "" : response.matchedQuestion(),
+            response.reason() == null ? "" : response.reason()
+        );
+    }
+
+    private static String uniquenessRule(List<String> existingQuestions, SimilarityCheck retryFeedback) {
+        StringBuilder rule = new StringBuilder();
+        rule.append("""
+            Workspace uniqueness rule, which overrides any user request for an exact duplicate:
+            Do not create a question that is similar to any existing workspace question.
+            Similar means the generated question tests the same knowledge, fact, or calculation as an existing question.
+            The same broad topic is allowed when the concrete question is different.
+            Existing workspace questions:
+            """);
+        appendQuestionList(rule, existingQuestions);
+        if (retryFeedback != null) {
+            rule.append("\nYour previous draft was too similar to an existing question.\n");
+            rule.append("Matched question: ").append(retryFeedback.matchedQuestion()).append("\n");
+            rule.append("Reason: ").append(retryFeedback.reason()).append("\n");
+            rule.append("Generate a clearly different question while still following the user's topic and answer-count request.\n");
+        }
+        return rule.toString();
+    }
+
+    private static String similarityPrompt(String generatedQuestion, List<String> existingQuestions) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generated question:\n");
+        prompt.append(generatedQuestion == null ? "" : generatedQuestion.strip()).append("\n\n");
+        prompt.append("Existing workspace questions:\n");
+        appendQuestionList(prompt, existingQuestions);
+        prompt.append("""
+
+            Decide whether the generated question is similar to any existing question.
+            Return JSON only with:
+            {
+              "similar": false,
+              "matchedQuestion": "",
+              "reason": ""
+            }
+            """);
+        return prompt.toString();
+    }
+
+    private static void appendQuestionList(StringBuilder target, List<String> questions) {
+        for (int i = 0; i < questions.size(); i++) {
+            target.append(i + 1).append(". ").append(questions.get(i)).append("\n");
         }
     }
 
@@ -281,4 +407,6 @@ public class AiAssistantService {
     ) {}
 
     record AssistantBatchResponse(AssistantResponse[] questions) {}
+
+    private record SimilarityCheck(boolean similar, String matchedQuestion, String reason) {}
 }

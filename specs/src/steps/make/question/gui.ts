@@ -291,12 +291,6 @@ const normalizeQuestionText = (question: string) =>
         .replace(/\s+/g, ' ')
         .trim()
 
-Then('I should see a newly generated question about {string}', async function (topic: string) {
-    await this.questionEditPage.expectQuestionValueNotEmpty()
-    const generatedQuestion = await this.questionEditPage.questionValue()
-    expect(normalizeQuestionText(generatedQuestion)).toContain(normalizeQuestionText(topic))
-})
-
 Then('the generated question should not ask {string}', async function (question: string) {
     const generatedQuestion = await this.questionEditPage.questionValue()
     expect(normalizeQuestionText(generatedQuestion)).not.toBe(normalizeQuestionText(question))

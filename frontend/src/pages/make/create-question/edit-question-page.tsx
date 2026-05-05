@@ -32,7 +32,7 @@ export function EditQuestionPage() {
             subtitle="Tune the prompt, answers, and explanations until the question reads clearly and scores fairly."
             id="edit-question-page"
         >
-            {question && <QuestionEditForm question={question} onSubmit={handleSubmit} />}
+            {question && <QuestionEditForm question={question} workspaceGuid={workspaceId} onSubmit={handleSubmit} />}
         </Page>
     )
 }

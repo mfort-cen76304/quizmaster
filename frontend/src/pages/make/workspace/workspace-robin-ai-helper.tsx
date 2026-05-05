@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { postAiAssistantBatch } from '#api/ai-assistant.ts'
+import { postAiAssistant, postAiAssistantBatch } from '#api/ai-assistant.ts'
 import { saveQuestion } from '#api/question.ts'
 import type { QuestionDraft, QuestionType } from '#model/question.ts'
 import { questionDraftToRequest } from '#pages/make/create-question/robin-ai/question-draft-mappers.ts'
@@ -13,6 +13,23 @@ const noUndo: RobinUndoBuffer = {
     hasPrevious: false,
     capture: () => {},
     restore: () => {},
+}
+
+const wantsMultipleQuestions = (prompt: string): boolean => {
+    const match = prompt.match(/\b(\d+)\s+(questions?|ot[aá]zk\w*)\b/iu)
+    if (!match) return false
+    return Number.parseInt(match[1] ?? '0', 10) > 1
+}
+
+const generateWorkspaceRobinDrafts = async (request: {
+    question: string
+    questionType: QuestionType
+    workspaceGuid?: string
+}): Promise<readonly QuestionDraft[]> => {
+    if (wantsMultipleQuestions(request.question)) {
+        return await postAiAssistantBatch(request)
+    }
+    return [await postAiAssistant(request)]
 }
 
 interface WorkspaceRobinAiHelperProps {
@@ -37,9 +54,10 @@ export const WorkspaceRobinAiHelper = ({ workspaceId, onQuestionCreated }: Works
             {sheetOpen && (
                 <RobinSheet
                     onGenerated={handleGenerated}
-                    generateRequest={postAiAssistantBatch}
+                    generateRequest={generateWorkspaceRobinDrafts}
                     undo={noUndo}
                     questionType={questionType}
+                    workspaceGuid={workspaceId}
                     onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
                 />

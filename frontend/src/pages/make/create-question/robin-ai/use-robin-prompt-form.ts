@@ -16,15 +16,18 @@ interface UseRobinPromptFormArgs {
     readonly generateRequest?: (request: {
         question: string
         questionType: QuestionType
+        workspaceGuid?: string
     }) => Promise<readonly QuestionDraft[]>
     readonly undo: RobinUndoBuffer
     readonly questionType: QuestionType
+    readonly workspaceGuid?: string
     readonly onClose: () => void
 }
 
 const generateSingleDraft = async (request: {
     question: string
     questionType: QuestionType
+    workspaceGuid?: string
 }): Promise<readonly QuestionDraft[]> => [await postAiAssistant(request)]
 
 export const useRobinPromptForm = ({
@@ -32,6 +35,7 @@ export const useRobinPromptForm = ({
     generateRequest = generateSingleDraft,
     undo,
     questionType,
+    workspaceGuid,
     onClose,
 }: UseRobinPromptFormArgs) => {
     const [promptText, setPromptText] = useState('')
@@ -42,7 +46,7 @@ export const useRobinPromptForm = ({
         setError('')
         setLoading(true)
         try {
-            const response = await generateRequest({ question: promptText.trim(), questionType })
+            const response = await generateRequest({ question: promptText.trim(), questionType, workspaceGuid })
             undo.capture()
             await onGenerated(response)
             onClose()
