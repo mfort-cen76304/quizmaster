@@ -123,6 +123,14 @@ Then('I see non-empty tolerance', async function () {
     await this.questionEditPage.expectNumericalToleranceNotEmpty()
 })
 
+Then('tolerance is greater than {string}', async function (threshold: string) {
+    await this.questionEditPage.expectNumericalToleranceGreaterThan(Number.parseFloat(threshold))
+})
+
+Then('tolerance is less than {string}', async function (threshold: string) {
+    await this.questionEditPage.expectNumericalToleranceLessThan(Number.parseFloat(threshold))
+})
+
 Then('I see note {string}', async function (value: string) {
     await this.questionEditPage.expectNumericalAnswerNote(value)
 })

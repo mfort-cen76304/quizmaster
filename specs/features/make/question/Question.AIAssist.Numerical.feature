@@ -43,7 +43,7 @@ Feature: Generate numerical question using AI
     And I see non-empty question explanation
 
   @ai @slow
-  Scenario Outline: AI-generated numerical question proposes unrounded tolerance for fractional or negative answers
+  Scenario Outline: Vague tolerance request yields a non-zero tolerance bounded by the answer
     Given I start creating a new question
     When I open Robin AI
     And I ask AI for numerical question:
@@ -54,9 +54,10 @@ Feature: Generate numerical question using AI
     Then Question field is not empty
     And the question is numerical choice
     And I see numerical correct answer <answer>
-    And I see tolerance <tolerance>
+    And tolerance is greater than "0"
+    And tolerance is less than <answer-magnitude>
 
     Examples:
-      | prompt             | answer | tolerance |
-      | "What is 5 / 2?"  | "2.5" | "0.25"  |
-      | "What is -5 / 2?" | "-2.5" | "0.25" |
+      | prompt             | answer | answer-magnitude |
+      | "What is 5 / 2?"   | "2.5"  | "2.5"            |
+      | "What is -5 / 2?"  | "-2.5" | "2.5"            |

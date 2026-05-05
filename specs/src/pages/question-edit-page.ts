@@ -122,6 +122,18 @@ export class QuestionEditPage {
     expectNumericalAnswerNote = (value: string) => expect(this.numericalAnswerFieldLocator()).toContainText(value)
     expectNumericalTolerance = (value: string) => expect(this.numericalToleranceLocator()).toHaveValue(value)
     expectNumericalToleranceNotEmpty = () => expect(this.numericalToleranceLocator()).not.toHaveValue('')
+    expectNumericalToleranceGreaterThan = async (threshold: number) => {
+        const raw = await this.numericalToleranceLocator().inputValue()
+        const value = Number.parseFloat(raw)
+        expect(Number.isFinite(value), `tolerance "${raw}" is not a finite number`).toBe(true)
+        expect(value, `tolerance ${value} is not greater than ${threshold}`).toBeGreaterThan(threshold)
+    }
+    expectNumericalToleranceLessThan = async (threshold: number) => {
+        const raw = await this.numericalToleranceLocator().inputValue()
+        const value = Number.parseFloat(raw)
+        expect(Number.isFinite(value), `tolerance "${raw}" is not a finite number`).toBe(true)
+        expect(value, `tolerance ${value} is not less than ${threshold}`).toBeLessThan(threshold)
+    }
     expectEasyChecked = () => expect(this.isEasyLocator()).toBeChecked()
     expectEasyUnchecked = () => expect(this.isEasyLocator()).not.toBeChecked()
     expectEasyVisible = () => expect(this.isEasyLocator()).toBeVisible()
