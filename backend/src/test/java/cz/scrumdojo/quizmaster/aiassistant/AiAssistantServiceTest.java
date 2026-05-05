@@ -1,5 +1,7 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import cz.scrumdojo.quizmaster.question.QuestionResponse;
+
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,7 +161,7 @@ public class AiAssistantServiceTest {
         ));
     }
 
-    private static void assertGeneralChoiceResponse(AiAssistantResponse response) {
+    private static void assertGeneralChoiceResponse(QuestionResponse response) {
         assertNotNull(response.question());
         assertFalse(response.question().isBlank(), "Expected a non-empty question");
         assertNotNull(response.answers());

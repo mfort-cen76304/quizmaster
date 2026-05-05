@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import cz.scrumdojo.quizmaster.question.QuestionResponse;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -47,7 +49,7 @@ public class AiAssistantService {
             .getContentAsString(StandardCharsets.UTF_8);
     }
 
-    public AiAssistantResponse generateQuestion(String prompt) {
+    public QuestionResponse generateQuestion(String prompt) {
         if (prompt == null || prompt.isBlank()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Question must not be empty.");
         }
@@ -83,13 +85,14 @@ public class AiAssistantService {
             validateResponse(assistantResponse);
             String[] explanations = normalizeExplanations(assistantResponse);
 
-            return new AiAssistantResponse(
+            return QuestionResponse.draft(
                 assistantResponse.question(),
                 assistantResponse.answers(),
                 assistantResponse.correctAnswers(),
                 explanations,
+                assistantResponse.questionExplanation(),
                 assistantResponse.tolerance(),
-                assistantResponse.questionExplanation()
+                null
             );
         } catch (ResponseStatusException e) {
             throw e;

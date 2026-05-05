@@ -21,4 +21,20 @@ public record QuestionResponse(
             q.isEasy(), q.getImageUrl(), q.getTolerance(), q.getQuestionType(), q.getTags()
         );
     }
+
+    public static QuestionResponse draft(
+        String question,
+        String[] answers,
+        int[] correctAnswers,
+        String[] explanations,
+        String questionExplanation,
+        Double tolerance,
+        String questionType
+    ) {
+        return new QuestionResponse(
+            null, question, answers, explanations,
+            questionExplanation, correctAnswers, null,
+            false, null, tolerance, questionType, new String[0]
+        );
+    }
 }

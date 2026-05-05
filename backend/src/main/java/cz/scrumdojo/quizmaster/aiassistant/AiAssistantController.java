@@ -1,5 +1,7 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import cz.scrumdojo.quizmaster.question.QuestionResponse;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,7 +19,7 @@ public class AiAssistantController {
     }
 
     @PostMapping
-    public ResponseEntity<AiAssistantResponse> generate(@RequestBody AiAssistantRequest request) {
+    public ResponseEntity<QuestionResponse> generate(@RequestBody AiAssistantRequest request) {
         return ResponseEntity.ok(aiAssistantService.generateQuestion(request.question()));
     }
 }
