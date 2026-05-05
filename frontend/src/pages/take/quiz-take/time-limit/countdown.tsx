@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import './countdown.scss'
 
 interface CountdownProps {
     readonly timeLimit: number
     readonly onTimeLimit: () => void
 }
+
+const LOW_TIME_THRESHOLD_MS = 60_000
 
 export const Countdown = ({ onTimeLimit, timeLimit }: CountdownProps) => {
     const durationMs = (timeLimit || 120) * 1000
@@ -41,8 +44,15 @@ export const Countdown = ({ onTimeLimit, timeLimit }: CountdownProps) => {
 
     const minutes = Math.floor(timeLeft / 60000)
     const seconds = Math.floor((timeLeft % 60000) / 1000)
+    const formatted = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
+    const isLow = timeLeft > 0 && timeLeft < LOW_TIME_THRESHOLD_MS
 
     return (
-        <div data-testid="timerID">{`${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`}</div>
+        <div className={`countdown${isLow ? ' is-low' : ''}`}>
+            <span className="label">Time left</span>
+            <span className="value" data-testid="timerID">
+                {formatted}
+            </span>
+        </div>
     )
 }

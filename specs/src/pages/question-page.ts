@@ -3,15 +3,15 @@ import { expect, type Page } from '@playwright/test'
 export class QuestionPage {
     constructor(private page: Page) {}
 
-    backButtonLocator = () => this.page.locator('button#back')
-    nextButtonLocator = () => this.page.locator('button#next')
-    evaluateButtonLocator = () => this.page.locator('button#evaluate')
+    backButtonLocator = () => this.page.locator('#back')
+    nextButtonLocator = () => this.page.locator('#next')
+    evaluateButtonLocator = () => this.page.locator('#evaluate')
     evaluateModalButtonLocator = () => this.page.locator('dialog #evaluate')
 
     dialogTextLocator = () => this.page.locator('dialog p')
     timerLocator = () => this.page.getByTestId('timerID')
 
-    navigationButtonsLocator = () => this.page.locator('button#back, button#next, button#evaluate')
+    navigationButtonsLocator = () => this.page.locator('#back, #next, #evaluate')
     submitButtonLocator = () => this.page.locator('input.submit-btn')
 
     private bookmarkQuestionButtonLocator = () => this.page.locator('[data-testid="bookmark-toggle"]')

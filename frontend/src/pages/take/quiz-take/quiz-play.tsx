@@ -3,11 +3,11 @@ import { useRef, useState } from 'react'
 
 import { patchAttempt, recordQuizQuestionAnswer, submitQuizQuestionAnswer } from '#api/stats.ts'
 import { type AnswerIdxs, type QuestionAnswer, type QuestionEvaluation, evaluateAnswer } from '#model/question.ts'
-import type { Quiz, QuizTake } from '#model/quiz.ts'
+import type { Quiz, QuizMode, QuizTake } from '#model/quiz.ts'
 import { QuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
 
 import { BookmarkList } from './components/bookmark-list.tsx'
-import { EvaluateButton, NextButton, BackButton, BookmarkButton } from './components/buttons.tsx'
+import { BackButton, BookmarkButton, EvaluateButton, NextButton } from './components/buttons.tsx'
 import { ProgressBar } from './components/progress-bar.tsx'
 import { useQuizAnswersState, type QuizAnswers } from './quiz-answers-state.ts'
 import { useQuizBookmarkState } from './quiz-bookmark-state.ts'
@@ -20,6 +20,8 @@ interface QuizPlayFormProps {
     readonly questionsBaseUrl: string
     readonly onEvaluate: (quizAnswers: QuizAnswers, timedOut?: boolean) => void
 }
+
+const feedbackModeLabel = (mode: QuizMode): string => (mode === 'learn' ? 'Continuous feedback' : 'Feedback at the end')
 
 export const QuizPlayForm = (props: QuizPlayFormProps) => {
     const { quizAnswers, answerQuestion } = useQuizAnswersState()
@@ -35,7 +37,6 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
 
     const bookmark = () => bookmarks.toggle(nav.currentQuestionIdx)
 
-    // Prepare bookmarks for BookmarkList
     const bookmarkList = Array.from(bookmarks.questionIdxs).map(questionIdx => ({
         title: props.quiz.questions[questionIdx].question,
         onClick: () => nav.goto(questionIdx),
@@ -132,12 +133,12 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     }
 
     return (
-        <div className="quiz-take">
-            <TimeLimit timeLimit={props.quiz.timeLimit} onTimeOut={handleTimeOut} onConfirm={evaluateTimedOut} />
-            <h2>Quiz</h2>
-            <div className="feedback-mode-row">
-                <div id="feedback-mode">Feedback mode:</div>
-                <label className="feedback-mode-label">{props.quiz.mode}</label>
+        <div className="page quiz-play" id="quiz-play">
+            <div className="quiz-play-status">
+                <span className="feedback-mode-chip" id="feedback-mode" data-mode={props.quiz.mode}>
+                    {feedbackModeLabel(props.quiz.mode)}
+                </span>
+                <TimeLimit timeLimit={props.quiz.timeLimit} onTimeOut={handleTimeOut} onConfirm={evaluateTimedOut} />
             </div>
 
             <ProgressBar current={nav.currentQuestionIdx + 1} total={props.quiz.questions.length} />
@@ -155,14 +156,14 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
             >
                 <QuestionForm key={currentQuestion.id} question={currentQuestion} />
             </QuizQuestionProvider>
-            <div className="quiz-button-bar">
+
+            <div className="quiz-play-actions">
                 {nav.canBack && <BackButton onClick={nav.back} />}
+                <BookmarkButton isBookmarked={bookmarks.has(nav.currentQuestionIdx)} onClick={bookmark} />
                 {nav.canNext && <NextButton onClick={handleNextButton} />}
                 {isAnswered && !nav.canNext && <EvaluateButton onClick={evaluate} />}
-                <BookmarkButton isBookmarked={bookmarks.has(nav.currentQuestionIdx)} onClick={bookmark} />
             </div>
 
-            {/* Bookmark list visible for tests */}
             <BookmarkList bookmarks={bookmarkList} />
         </div>
     )

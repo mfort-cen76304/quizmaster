@@ -14,8 +14,8 @@ export class TakeQuestionPage {
         await expect(submit.or(feedback)).toBeVisible()
     }
 
-    private answersLocator = () => this.page.locator('li')
-    answerLocator = (answer: string) => this.page.locator(`li:has(input[value="${answer}"])`)
+    private answersLocator = () => this.page.locator('ul.answers > li')
+    answerLocator = (answer: string) => this.answersLocator().filter({ has: this.page.locator(`input[value="${answer}"]`) })
 
     answerRowLocator = (answer: string) => this.answerLocator(answer).locator('.answer-input-row')
     answerFeedbackLocator = (answer: string) => this.answerRowLocator(answer).locator('.answer-feedback')

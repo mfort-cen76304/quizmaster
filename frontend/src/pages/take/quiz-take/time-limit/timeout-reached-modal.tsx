@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-
+import './timeout-reached-modal.scss'
 import { EvaluateButton } from '#pages/take/quiz-take/components/buttons.tsx'
 
 interface TimeOutReachedModalProps {
@@ -15,8 +15,8 @@ export const TimeOutReachedModal = ({ onConfirm }: TimeOutReachedModalProps) => 
     }, [])
 
     return (
-        <dialog ref={dialogRef}>
-            <p>Game over time</p>
+        <dialog ref={dialogRef} className="timeout-modal">
+            <p>Time's up</p>
             <EvaluateButton onClick={onConfirm} />
         </dialog>
     )

@@ -1,5 +1,16 @@
-.submit-btn-evaluate {
-    background-color: rgb(14, 180, 111);
-    display: inline-block;
-    text-decoration: none;
+.bookmark-button {
+    background: rgba(255, 255, 255, 0.85);
+    border-color: var(--border-subtle);
+    color: var(--text-soft);
+    box-shadow: var(--shadow-sm);
+
+    &:hover {
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+    }
+
+    &[data-bookmarked='true'] {
+        background: var(--accent-warm-soft);
+        border-color: rgba(249, 115, 22, 0.32);
+        color: #b45309;
+    }
 }

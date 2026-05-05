@@ -2,18 +2,19 @@ import { Button, type WithOnClick } from '#pages/components/button.tsx'
 import './buttons.scss'
 
 export const NextButton = ({ onClick }: WithOnClick) => (
-    <Button id="next" onClick={onClick}>
-        Next Question
+    <Button id="next" className="button primary" onClick={onClick}>
+        Next question
     </Button>
 )
 
 export const EvaluateButton = ({ onClick }: WithOnClick) => (
-    <Button id="evaluate" className="submit-btn-evaluate" onClick={onClick}>
+    <Button id="evaluate" className="button primary" onClick={onClick}>
         Evaluate
     </Button>
 )
+
 export const BackButton = ({ onClick }: WithOnClick) => (
-    <Button id="back" onClick={onClick}>
+    <Button id="back" className="button secondary" onClick={onClick}>
         Back
     </Button>
 )
@@ -34,7 +35,14 @@ interface BookmarkButtonProps {
 }
 
 export const BookmarkButton = ({ isBookmarked, onClick }: BookmarkButtonProps) => (
-    <Button type="button" onClick={onClick} data-testid="bookmark-toggle" data-bookmarked={isBookmarked}>
-        {isBookmarked ? 'Unbookmark ⭐' : 'Bookmark ☆'}
+    <Button
+        type="button"
+        className="button bookmark-button"
+        onClick={onClick}
+        data-testid="bookmark-toggle"
+        data-bookmarked={isBookmarked}
+        title={isBookmarked ? 'Remove bookmark' : 'Bookmark this question'}
+    >
+        {isBookmarked ? '★ Bookmarked' : '☆ Bookmark'}
     </Button>
 )

@@ -1,20 +1,86 @@
-.feedback-mode-row {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
+.quiz-play {
+    .quiz-play-status {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin: 0 0 0.9rem;
 
-.feedback-mode-label {
-    font-weight: 800;
-}
+        .feedback-mode-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.78rem;
+            border-radius: 999px;
+            background: rgba(15, 159, 140, 0.12);
+            color: var(--accent-mint);
+            font-size: 0.78rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
 
-.quiz-button-bar {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    margin-top: 10px;
-    margin-bottom: 20px;
+            &[data-mode='exam'] {
+                background: rgba(37, 99, 235, 0.1);
+                color: var(--accent-strong);
+            }
+        }
+    }
+
+    .question-fieldset {
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        margin: 0;
+        padding: 1.6rem 1.8rem;
+        border: 1px solid var(--border-subtle);
+        border-radius: var(--radius-xl);
+        background:
+            radial-gradient(circle at 100% 0%, rgba(15, 159, 140, 0.08), transparent 38%),
+            linear-gradient(180deg, rgba(255, 255, 255, 0.97) 0%, rgba(248, 251, 255, 0.97) 100%);
+        box-shadow: var(--shadow-md);
+        backdrop-filter: blur(10px);
+
+        h1#question {
+            margin: 0 0 1rem;
+            font-size: clamp(1.35rem, 2vw, 1.7rem);
+            line-height: 1.25;
+            letter-spacing: -0.015em;
+            color: var(--text-strong);
+        }
+
+        .answers {
+            width: 100%;
+        }
+    }
+
+    .quiz-play-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin: 1.1rem 0 1.4rem;
+
+        .bookmark-button {
+            margin-left: auto;
+        }
+    }
+
+    @media (max-width: 720px) {
+        .quiz-play-status {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 0.55rem;
+        }
+
+        .question-fieldset {
+            padding: 1.15rem 1.05rem;
+            border-radius: var(--radius-lg);
+        }
+
+        .quiz-play-actions .bookmark-button {
+            margin-left: 0;
+            order: 1;
+        }
+    }
 }
 
 .quiz-take {

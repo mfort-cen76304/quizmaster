@@ -48,7 +48,7 @@ When('I evaluate the quiz', async function () {
 })
 
 Then('I see the timeout message', async function () {
-    await expectTextToBe(this.questionPage.dialogTextLocator(), 'Game over time')
+    await expectTextToBe(this.questionPage.dialogTextLocator(), "Time's up")
 })
 
 Then('I see buttons {string}', async function (buttonList: string) {

@@ -1,31 +1,36 @@
-import type React from 'react'
+import './bookmark-list.scss'
 
 interface BookmarkListProps {
-    bookmarks: { title: string; onClick: () => void; onDelete: () => void }[]
+    readonly bookmarks: { title: string; onClick: () => void; onDelete: () => void }[]
 }
 
-export const BookmarkList: React.FC<BookmarkListProps> = ({ bookmarks }) => (
-    <table data-testid="bookmark-list">
-        <tbody>
-            {bookmarks.map(bookmark => (
-                <tr key={bookmark.title}>
-                    <td>
-                        <button type="button" onClick={bookmark.onClick}>
-                            {bookmark.title}
+export const BookmarkList = ({ bookmarks }: BookmarkListProps) => {
+    const isEmpty = bookmarks.length === 0
+    return (
+        <aside className={`bookmark-list${isEmpty ? ' is-empty' : ''}`} data-testid="bookmark-list">
+            {!isEmpty && <h2 className="title">Bookmarked questions</h2>}
+            <ul>
+                {bookmarks.map(bookmark => (
+                    <li key={bookmark.title}>
+                        <button type="button" className="entry" onClick={bookmark.onClick}>
+                            <span className="icon" aria-hidden="true">
+                                ★
+                            </span>
+                            <span className="entry-title">{bookmark.title}</span>
                         </button>
-                    </td>
-                    <td>
                         <button
                             type="button"
+                            className="remove"
                             aria-label={`delete-bookmark-${bookmark.title}`}
                             data-testid={`delete-bookmark-${bookmark.title}`}
                             onClick={bookmark.onDelete}
+                            title="Remove bookmark"
                         >
-                            🗑️
+                            ×
                         </button>
-                    </td>
-                </tr>
-            ))}
-        </tbody>
-    </table>
-)
+                    </li>
+                ))}
+            </ul>
+        </aside>
+    )
+}
