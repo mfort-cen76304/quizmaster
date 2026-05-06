@@ -120,6 +120,19 @@ public class AiAssistantControllerTest {
     }
 
     @Test
+    public void unknownWorkspaceScopedPathReturnsNotFound() throws Exception {
+        mockMvc.perform(post("/api/workspaces/{guid}/ai-assistant", "non-existent-guid")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "question": "Generate a question about Europe",
+                        "questionType": "single"
+                    }
+"""))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void missingWorkspaceHeaderReturnsNotFound() throws Exception {
         mockMvc.perform(post("/api/ai-assistant")
                 .contentType(MediaType.APPLICATION_JSON)

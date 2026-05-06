@@ -68,6 +68,34 @@ public class QuestionMakeControllerTest {
     }
 
     @Test
+    public void createQuestionInWorkspaceScopedPath() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        var result = mockMvc.perform(post("/api/workspaces/{guid}/questions", workspace.getGuid())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "question": "What is the capital of Italy?",
+                        "answers": ["Naples", "Rome", "Florence"],
+                        "correctAnswers": [1],
+                        "explanations": ["No", "Correct!", "No"],
+                        "isEasy": false,
+                        "questionType": "single"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").isNumber())
+            .andReturn();
+
+        Integer questionId = com.jayway.jsonpath.JsonPath
+            .read(result.getResponse().getContentAsString(), "$.id");
+
+        mockMvc.perform(get("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), questionId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(questionId));
+    }
+
+    @Test
     public void updateWorkspaceQuestion() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));

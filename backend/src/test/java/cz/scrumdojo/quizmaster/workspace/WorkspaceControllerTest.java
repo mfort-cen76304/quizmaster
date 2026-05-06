@@ -128,14 +128,19 @@ public class WorkspaceControllerTest {
     }
 
     @Test
-    public void oldWorkspaceScopedPathsAreNotAvailable() throws Exception {
+    public void workspaceScopedPathsAreAvailable() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quizIn(workspace));
 
         mockMvc.perform(get("/api/workspaces/{guid}", workspace.getGuid()))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.guid").value(workspace.getGuid()));
         mockMvc.perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(question.getId()));
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes", workspace.getGuid()))
-            .andExpect(status().isNotFound());
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(quiz.getId()));
     }
 }

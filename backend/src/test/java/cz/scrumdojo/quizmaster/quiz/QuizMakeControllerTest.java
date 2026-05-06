@@ -65,6 +65,36 @@ public class QuizMakeControllerTest {
     }
 
     @Test
+    public void createQuizInWorkspaceScopedPath() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+
+        var result = mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "title": "New Quiz",
+                        "description": "A quiz",
+                        "questionIds": [%d],
+                        "mode": "learn",
+                        "passScore": 80,
+                        "randomQuestionCount": 1
+                    }
+                    """.formatted(question.getId())))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").isNumber())
+            .andReturn();
+
+        Integer quizId = com.jayway.jsonpath.JsonPath
+            .read(result.getResponse().getContentAsString(), "$.id");
+
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quizId))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.id").value(quizId))
+            .andExpect(jsonPath("$.questions.length()").value(1));
+    }
+
+    @Test
     public void getWorkspaceQuizReturnsAllQuestionsForRandomQuiz() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));

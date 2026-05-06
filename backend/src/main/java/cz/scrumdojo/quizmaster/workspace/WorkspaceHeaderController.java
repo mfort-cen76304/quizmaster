@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/workspace")
+@RequestMapping({"/api/workspace", "/api/workspaces/{workspaceGuid}"})
 public class WorkspaceHeaderController {
     private final WorkspaceRepository workspaceRepository;
     private final QuestionRepository questionRepository;
@@ -39,16 +39,18 @@ public class WorkspaceHeaderController {
 
     @GetMapping
     public ResponseEntity<WorkspaceResponse> getWorkspace(
+            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
             @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey) {
-        String guid = WorkspaceKey.require(workspaceKey);
+        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
         return ResponseHelper.okOrNotFound(workspaceRepository.findById(guid).map(WorkspaceResponse::from));
     }
 
     @Transactional(readOnly = true)
     @GetMapping("/questions")
     public ResponseEntity<List<QuestionListItem>> getWorkspaceQuestions(
+            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
             @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey) {
-        String guid = WorkspaceKey.require(workspaceKey);
+        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
         if (!workspaceRepository.existsById(guid))
             return ResponseEntity.notFound().build();
 
@@ -65,8 +67,9 @@ public class WorkspaceHeaderController {
     @Transactional(readOnly = true)
     @GetMapping("/quizzes")
     public ResponseEntity<List<QuizListItem>> getWorkspaceQuizzes(
+            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
             @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey) {
-        String guid = WorkspaceKey.require(workspaceKey);
+        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
         if (!workspaceRepository.existsById(guid))
             return ResponseEntity.notFound().build();
 
@@ -81,12 +84,19 @@ public class WorkspaceHeaderController {
 
     @GetMapping("/quizzes/{id}/stats")
     public ResponseEntity<QuizStatsResponse> getQuizStats(
+            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
             @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
             @PathVariable Integer id) {
-        String guid = WorkspaceKey.require(workspaceKey);
+        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
         if (!workspaceRepository.existsById(guid))
             return ResponseEntity.notFound().build();
 
         return ResponseHelper.okOrNotFound(quizStatsService.getStats(guid, id));
+    }
+
+    private String workspaceGuid(String pathWorkspaceGuid, String workspaceKey) {
+        return pathWorkspaceGuid == null
+            ? WorkspaceKey.require(workspaceKey)
+            : WorkspaceKey.require(pathWorkspaceGuid);
     }
 }
