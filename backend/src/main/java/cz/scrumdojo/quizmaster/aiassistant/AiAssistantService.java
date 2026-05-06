@@ -110,6 +110,15 @@ public class AiAssistantService {
         );
     }
 
+    public QuestionResponse generateQuestion(
+        String prompt,
+        String questionType,
+        String workspaceGuid,
+        Integer excludedQuestionId
+    ) {
+        throw new UnsupportedOperationException("Embedding-aware question generation with an excluded question is not implemented yet.");
+    }
+
     public QuestionResponse[] generateQuestions(String prompt, String questionType) {
         validatePromptAndToken(prompt);
         String resolvedType = resolveType(questionType);
@@ -123,6 +132,10 @@ public class AiAssistantService {
         return Arrays.stream(assistantResponse.questions())
             .map(response -> toDraftResponse(response, normalizeExplanations(response), resolvedType))
             .toArray(QuestionResponse[]::new);
+    }
+
+    public QuestionResponse[] generateQuestions(String prompt, String questionType, String workspaceGuid) {
+        throw new UnsupportedOperationException("Embedding-aware batch generation is not implemented yet.");
     }
 
     private void validatePromptAndToken(String prompt) {
