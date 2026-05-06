@@ -28,15 +28,20 @@ public class AiAssistantController {
             @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
             @RequestBody AiAssistantRequest request) {
         String workspaceGuid = requireCanUseAiAssistant(workspaceKey);
-        return ResponseEntity.ok(aiAssistantService.generateQuestion(request.question(), request.questionType(), workspaceGuid));
+        return ResponseEntity.ok(aiAssistantService.generateQuestion(
+            request.question(),
+            request.questionType(),
+            workspaceGuid,
+            request.excludedQuestionId()
+        ));
     }
 
     @PostMapping("/batch")
     public ResponseEntity<QuestionResponse[]> generateBatch(
             @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
             @RequestBody AiAssistantRequest request) {
-        requireCanUseAiAssistant(workspaceKey);
-        return ResponseEntity.ok(aiAssistantService.generateQuestions(request.question(), request.questionType()));
+        String workspaceGuid = requireCanUseAiAssistant(workspaceKey);
+        return ResponseEntity.ok(aiAssistantService.generateQuestions(request.question(), request.questionType(), workspaceGuid));
     }
 
     private String requireCanUseAiAssistant(String workspaceKey) {

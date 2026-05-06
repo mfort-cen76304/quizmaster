@@ -2,6 +2,7 @@ package cz.scrumdojo.quizmaster.question;
 
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
+import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingService;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceKey;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceRepository;
 import jakarta.validation.Valid;
@@ -15,12 +16,16 @@ public class QuestionMakeController {
 
     private final WorkspaceRepository workspaceRepository;
     private final QuestionRepository questionRepository;
+    private final QuestionEmbeddingService questionEmbeddingService;
 
     public QuestionMakeController(
-            WorkspaceRepository workspaceRepository,
-            QuestionRepository questionRepository) {
+        WorkspaceRepository workspaceRepository,
+        QuestionRepository questionRepository,
+        QuestionEmbeddingService questionEmbeddingService
+    ) {
         this.workspaceRepository = workspaceRepository;
         this.questionRepository = questionRepository;
+        this.questionEmbeddingService = questionEmbeddingService;
     }
 
     @Transactional(readOnly = true)
@@ -44,7 +49,9 @@ public class QuestionMakeController {
         if (!workspaceRepository.existsById(guid))
             return ResponseEntity.notFound().build();
 
-        var created = questionRepository.save(request.toEntity(guid));
+        var question = request.toEntity(guid);
+        embedBestEffort(question);
+        var created = questionRepository.save(question);
         return ResponseEntity.ok(new IdResponse(created.getId()));
     }
 
@@ -62,6 +69,7 @@ public class QuestionMakeController {
             .map(existing -> {
                 var question = request.toEntity(guid);
                 question.setId(existing.getId());
+                embedBestEffort(question);
                 questionRepository.save(question);
                 return ResponseEntity.ok(new IdResponse(existing.getId()));
             })
@@ -83,5 +91,15 @@ public class QuestionMakeController {
                 return ResponseEntity.noContent().<Void>build();
             })
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    private void embedBestEffort(Question question) {
+        try {
+            questionEmbeddingService.embedForSave(question);
+        } catch (RuntimeException ignored) {
+            question.setEmbedding(null);
+            question.setEmbeddingModel(null);
+            question.setEmbeddingTextHash(null);
+        }
     }
 }

@@ -66,7 +66,9 @@ fun ProcessForkOptions.forwardSharedEnv() {
     val optionalForwardedEnvVars = listOf(
         "OPENROUTER_API_KEY",
         "OPENROUTER_MODEL",
-        "OPENROUTER_MAX_TOKENS"
+        "OPENROUTER_MAX_TOKENS",
+        "OPENROUTER_EMBEDDING_MODEL",
+        "AI_EMBEDDING_SIMILARITY_THRESHOLD"
     )
 
     environment("DB_HOST", env.fetch("DB_HOST", "postgres"))

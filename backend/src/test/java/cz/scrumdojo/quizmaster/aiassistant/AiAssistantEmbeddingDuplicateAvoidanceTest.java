@@ -6,7 +6,6 @@ import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest
 @Tag("ai")
-@Disabled("TDD spec for persisted embeddings; enable during implementation.")
 class AiAssistantEmbeddingDuplicateAvoidanceTest {
 
     private static final String EXISTING_QUESTION = "Which country is the largest producer of coffee?";

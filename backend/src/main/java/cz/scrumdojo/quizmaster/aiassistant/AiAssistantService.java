@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import cz.scrumdojo.quizmaster.question.Question;
-import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 @Service
@@ -30,16 +29,16 @@ public class AiAssistantService {
 
     private static final String OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
     private static final Duration TIMEOUT = Duration.ofSeconds(60);
-    private static final int MAX_EXISTING_QUESTIONS = 50;
 
     static final Set<String> KNOWN_TYPES = Set.of("single", "multiple", "numerical");
 
     private final ObjectMapper objectMapper;
-    private final QuestionRepository questionRepository;
+    private final QuestionEmbeddingService questionEmbeddingService;
     private final HttpClient httpClient;
     private final String apiToken;
     private final String model;
     private final int maxTokens;
+    private final double similarityThreshold;
     private final String singleChoicePrompt;
     private final String multipleChoicePrompt;
     private final String numericalPrompt;
@@ -49,16 +48,18 @@ public class AiAssistantService {
 
     public AiAssistantService(
         ObjectMapper objectMapper,
-        QuestionRepository questionRepository,
+        QuestionEmbeddingService questionEmbeddingService,
         @Value("${ai.token:}") String apiToken,
         @Value("${ai.model}") String model,
-        @Value("${ai.max-tokens}") int maxTokens
+        @Value("${ai.max-tokens}") int maxTokens,
+        @Value("${ai.embedding.similarity-threshold}") double similarityThreshold
     ) throws IOException {
         this.objectMapper = objectMapper;
-        this.questionRepository = questionRepository;
+        this.questionEmbeddingService = questionEmbeddingService;
         this.apiToken = apiToken.strip();
         this.model = model;
         this.maxTokens = maxTokens;
+        this.similarityThreshold = similarityThreshold;
         this.httpClient = HttpClient.newBuilder().connectTimeout(TIMEOUT).build();
         this.singleChoicePrompt = loadPrompt("prompts/single-choice.md");
         this.multipleChoicePrompt = loadPrompt("prompts/multiple-choice.md");
@@ -77,37 +78,7 @@ public class AiAssistantService {
     }
 
     public QuestionResponse generateQuestion(String prompt, String questionType, String workspaceGuid) {
-        validatePromptAndToken(prompt);
-        String resolvedType = resolveType(questionType);
-        List<String> existingQuestions = existingWorkspaceQuestions(workspaceGuid);
-        if (existingQuestions.isEmpty()) {
-            AssistantResponse assistantResponse = requestAssistant(
-                prompt,
-                chooseSystemPrompt(resolvedType),
-                AssistantResponse.class
-            );
-            validateForType(assistantResponse, resolvedType);
-            return toDraftResponse(assistantResponse, normalizeExplanations(assistantResponse), resolvedType);
-        }
-
-        AssistantResponse assistantResponse = generateUniqueCandidate(prompt, resolvedType, existingQuestions, null);
-        validateForType(assistantResponse, resolvedType);
-        SimilarityCheck similarityCheck = checkSimilarity(assistantResponse.question(), existingQuestions);
-        if (!similarityCheck.similar()) {
-            return toDraftResponse(assistantResponse, normalizeExplanations(assistantResponse), resolvedType);
-        }
-
-        AssistantResponse retryResponse = generateUniqueCandidate(prompt, resolvedType, existingQuestions, similarityCheck);
-        validateForType(retryResponse, resolvedType);
-        SimilarityCheck retrySimilarityCheck = checkSimilarity(retryResponse.question(), existingQuestions);
-        if (!retrySimilarityCheck.similar()) {
-            return toDraftResponse(retryResponse, normalizeExplanations(retryResponse), resolvedType);
-        }
-
-        throw new ResponseStatusException(
-            HttpStatus.BAD_GATEWAY,
-            "AI assistant could not generate a question that is different from existing workspace questions."
-        );
+        return generateQuestion(prompt, questionType, workspaceGuid, null);
     }
 
     public QuestionResponse generateQuestion(
@@ -116,26 +87,53 @@ public class AiAssistantService {
         String workspaceGuid,
         Integer excludedQuestionId
     ) {
-        throw new UnsupportedOperationException("Embedding-aware question generation with an excluded question is not implemented yet.");
+        validatePromptAndToken(prompt);
+        String resolvedType = resolveType(questionType);
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
+            questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, excludedQuestionId);
+
+        AssistantResponse assistantResponse = generateCandidate(prompt, resolvedType, existingEmbeddings, null);
+        validateForType(assistantResponse, resolvedType);
+        DuplicateMatch duplicate = findDuplicate(assistantResponse.question(), existingEmbeddings);
+        if (duplicate == null) {
+            return toDraftResponse(assistantResponse, normalizeExplanations(assistantResponse), resolvedType);
+        }
+
+        AssistantResponse retryResponse = generateCandidate(prompt, resolvedType, existingEmbeddings, duplicate);
+        validateForType(retryResponse, resolvedType);
+        DuplicateMatch retryDuplicate = findDuplicate(retryResponse.question(), existingEmbeddings);
+        if (retryDuplicate == null) {
+            return toDraftResponse(retryResponse, normalizeExplanations(retryResponse), resolvedType);
+        }
+
+        throw duplicateGenerationFailure();
     }
 
     public QuestionResponse[] generateQuestions(String prompt, String questionType) {
-        validatePromptAndToken(prompt);
-        String resolvedType = resolveType(questionType);
-        AssistantBatchResponse assistantResponse = requestAssistant(
-            prompt,
-            chooseBatchSystemPrompt(resolvedType),
-            AssistantBatchResponse.class
-        );
-        validateBatchResponses(assistantResponse.questions(), resolvedType);
-
-        return Arrays.stream(assistantResponse.questions())
-            .map(response -> toDraftResponse(response, normalizeExplanations(response), resolvedType))
-            .toArray(QuestionResponse[]::new);
+        return generateQuestions(prompt, questionType, null);
     }
 
     public QuestionResponse[] generateQuestions(String prompt, String questionType, String workspaceGuid) {
-        throw new UnsupportedOperationException("Embedding-aware batch generation is not implemented yet.");
+        validatePromptAndToken(prompt);
+        String resolvedType = resolveType(questionType);
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
+            questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, null);
+
+        AssistantBatchResponse assistantResponse = generateBatchCandidate(prompt, resolvedType, existingEmbeddings, null);
+        validateBatchResponses(assistantResponse.questions(), resolvedType);
+        DuplicateMatch duplicate = findBatchDuplicate(assistantResponse.questions(), existingEmbeddings);
+        if (duplicate == null) {
+            return toDraftResponses(assistantResponse.questions(), resolvedType);
+        }
+
+        AssistantBatchResponse retryResponse = generateBatchCandidate(prompt, resolvedType, existingEmbeddings, duplicate);
+        validateBatchResponses(retryResponse.questions(), resolvedType);
+        DuplicateMatch retryDuplicate = findBatchDuplicate(retryResponse.questions(), existingEmbeddings);
+        if (retryDuplicate == null) {
+            return toDraftResponses(retryResponse.questions(), resolvedType);
+        }
+
+        throw duplicateGenerationFailure();
     }
 
     private void validatePromptAndToken(String prompt) {
@@ -180,89 +178,152 @@ public class AiAssistantService {
         }
     }
 
-    private List<String> existingWorkspaceQuestions(String workspaceGuid) {
-        if (workspaceGuid == null || workspaceGuid.isBlank()) {
-            return List.of();
-        }
-
-        return questionRepository.findByWorkspaceGuid(workspaceGuid.strip()).stream()
-            .map(Question::getQuestion)
-            .filter(question -> question != null && !question.isBlank())
-            .map(String::strip)
-            .limit(MAX_EXISTING_QUESTIONS)
-            .toList();
-    }
-
-    private AssistantResponse generateUniqueCandidate(
+    private AssistantResponse generateCandidate(
         String prompt,
         String resolvedType,
-        List<String> existingQuestions,
-        SimilarityCheck retryFeedback
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
+        DuplicateMatch retryFeedback
     ) {
         String systemPrompt = chooseSystemPrompt(resolvedType)
-            + "\n\n"
-            + uniquenessRule(existingQuestions, retryFeedback);
+            + embeddingUniquenessRule(existingEmbeddings, retryFeedback);
         return requestAssistant(prompt, systemPrompt, AssistantResponse.class);
     }
 
-    private SimilarityCheck checkSimilarity(String generatedQuestion, List<String> existingQuestions) {
-        SimilarityCheck response = requestAssistant(
-            similarityPrompt(generatedQuestion, existingQuestions),
-            """
-                You are checking whether an AI-generated quiz question is too similar to existing workspace questions.
-                Similar means the generated question tests the same knowledge, fact, or calculation as an existing question.
-                The same broad topic is allowed when the concrete question is different.
-                Respond only with JSON shaped as {"similar": false, "matchedQuestion": "", "reason": ""}.
-                """,
-            SimilarityCheck.class
-        );
-
-        if (response == null) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid similarity check.");
-        }
-        return new SimilarityCheck(
-            response.similar(),
-            response.matchedQuestion() == null ? "" : response.matchedQuestion(),
-            response.reason() == null ? "" : response.reason()
-        );
+    private AssistantBatchResponse generateBatchCandidate(
+        String prompt,
+        String resolvedType,
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
+        DuplicateMatch retryFeedback
+    ) {
+        String systemPrompt = chooseBatchSystemPrompt(resolvedType)
+            + embeddingUniquenessRule(existingEmbeddings, retryFeedback);
+        return requestAssistant(prompt, systemPrompt, AssistantBatchResponse.class);
     }
 
-    private static String uniquenessRule(List<String> existingQuestions, SimilarityCheck retryFeedback) {
+    private DuplicateMatch findDuplicate(
+        String generatedQuestion,
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
+    ) {
+        if (existingEmbeddings.isEmpty()) {
+            return null;
+        }
+
+        try {
+            double[] generatedEmbedding = questionEmbeddingService.embedQuestionText(generatedQuestion);
+            return highestDuplicate(generatedQuestion, generatedEmbedding, existingEmbeddings);
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    private DuplicateMatch findBatchDuplicate(
+        AssistantResponse[] responses,
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
+    ) {
+        if (responses == null || (responses.length < 2 && existingEmbeddings.isEmpty())) {
+            return null;
+        }
+
+        List<String> questions = Arrays.stream(responses)
+            .map(AssistantResponse::question)
+            .toList();
+
+        try {
+            List<double[]> generatedEmbeddings = questionEmbeddingService.embedQuestionTexts(questions);
+            for (int generatedIndex = 0; generatedIndex < generatedEmbeddings.size(); generatedIndex++) {
+                DuplicateMatch existingDuplicate = highestDuplicate(
+                    questions.get(generatedIndex),
+                    generatedEmbeddings.get(generatedIndex),
+                    existingEmbeddings
+                );
+                if (existingDuplicate != null) {
+                    return existingDuplicate;
+                }
+
+                for (int previousIndex = 0; previousIndex < generatedIndex; previousIndex++) {
+                    double similarity = EmbeddingSimilarity.cosine(
+                        generatedEmbeddings.get(generatedIndex),
+                        generatedEmbeddings.get(previousIndex)
+                    );
+                    if (similarity >= similarityThreshold) {
+                        return new DuplicateMatch(
+                            questions.get(generatedIndex),
+                            questions.get(previousIndex),
+                            similarity
+                        );
+                    }
+                }
+            }
+            return null;
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
+    private DuplicateMatch highestDuplicate(
+        String generatedQuestion,
+        double[] generatedEmbedding,
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings
+    ) {
+        DuplicateMatch bestMatch = null;
+        for (QuestionEmbeddingService.UsableQuestionEmbedding existing : existingEmbeddings) {
+            double similarity = EmbeddingSimilarity.cosine(generatedEmbedding, existing.embedding());
+            if (similarity >= similarityThreshold && (bestMatch == null || similarity > bestMatch.similarity())) {
+                bestMatch = new DuplicateMatch(generatedQuestion, existing.questionText(), similarity);
+            }
+        }
+        return bestMatch;
+    }
+
+    private static String embeddingUniquenessRule(
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
+        DuplicateMatch retryFeedback
+    ) {
+        if (existingEmbeddings.isEmpty() && retryFeedback == null) {
+            return "";
+        }
+
         StringBuilder rule = new StringBuilder();
         rule.append("""
-            Workspace uniqueness rule, which overrides any user request for an exact duplicate:
-            Do not create a question that is similar to any existing workspace question.
+
+            Workspace uniqueness rule:
+            This rule overrides any user request for an exact duplicate.
+            Do not create a question that is similar to existing workspace questions.
             Similar means the generated question tests the same knowledge, fact, or calculation as an existing question.
             The same broad topic is allowed when the concrete question is different.
-            Existing workspace questions:
+            If the user asks for an exact duplicate, keep only the broad topic and create a question about a different fact, concept, or calculation.
             """);
-        appendQuestionList(rule, existingQuestions);
+        if (!existingEmbeddings.isEmpty()) {
+            rule.append("Existing workspace questions:\n");
+            appendQuestionList(
+                rule,
+                existingEmbeddings.stream()
+                    .map(QuestionEmbeddingService.UsableQuestionEmbedding::questionText)
+                    .toList()
+            );
+        }
         if (retryFeedback != null) {
-            rule.append("\nYour previous draft was too similar to an existing question.\n");
+            rule.append("\nThe previous draft was too similar to another question.\n");
+            rule.append("Previous draft: ").append(retryFeedback.generatedQuestion()).append("\n");
             rule.append("Matched question: ").append(retryFeedback.matchedQuestion()).append("\n");
-            rule.append("Reason: ").append(retryFeedback.reason()).append("\n");
-            rule.append("Generate a clearly different question while still following the user's topic and answer-count request.\n");
+            rule.append("Similarity score: ").append(String.format(Locale.ROOT, "%.4f", retryFeedback.similarity())).append("\n");
+            rule.append("The next draft must not preserve the same wording, answer, fact, or calculation.\n");
+            rule.append("Generate a clearly different question on the same broad topic while still following the answer-count request.\n");
         }
         return rule.toString();
     }
 
-    private static String similarityPrompt(String generatedQuestion, List<String> existingQuestions) {
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Generated question:\n");
-        prompt.append(generatedQuestion == null ? "" : generatedQuestion.strip()).append("\n\n");
-        prompt.append("Existing workspace questions:\n");
-        appendQuestionList(prompt, existingQuestions);
-        prompt.append("""
+    private static QuestionResponse[] toDraftResponses(AssistantResponse[] responses, String resolvedType) {
+        return Arrays.stream(responses)
+            .map(response -> toDraftResponse(response, normalizeExplanations(response), resolvedType))
+            .toArray(QuestionResponse[]::new);
+    }
 
-            Decide whether the generated question is similar to any existing question.
-            Return JSON only with:
-            {
-              "similar": false,
-              "matchedQuestion": "",
-              "reason": ""
-            }
-            """);
-        return prompt.toString();
+    private static ResponseStatusException duplicateGenerationFailure() {
+        return new ResponseStatusException(
+            HttpStatus.BAD_GATEWAY,
+            "AI assistant could not generate a question that is different from existing workspace questions."
+        );
     }
 
     private static void appendQuestionList(StringBuilder target, List<String> questions) {
@@ -421,5 +482,5 @@ public class AiAssistantService {
 
     record AssistantBatchResponse(AssistantResponse[] questions) {}
 
-    private record SimilarityCheck(boolean similar, String matchedQuestion, String reason) {}
+    private record DuplicateMatch(String generatedQuestion, String matchedQuestion, double similarity) {}
 }

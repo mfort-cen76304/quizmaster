@@ -1,6 +1,8 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
+import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 
@@ -24,6 +26,12 @@ class AiAssistantDuplicateAvoidanceTest {
 
     @Autowired
     private AiAssistantService aiAssistantService;
+
+    @Autowired
+    private QuestionEmbeddingService questionEmbeddingService;
+
+    @Autowired
+    private QuestionRepository questionRepository;
 
     @Autowired
     private TestFixtures fixtures;
@@ -77,7 +85,9 @@ class AiAssistantDuplicateAvoidanceTest {
 
     private Workspace workspaceWithQuestion(String questionText) {
         Workspace workspace = fixtures.save(fixtures.workspace());
-        fixtures.save(fixtures.questionIn(workspace).question(questionText));
+        Question question = fixtures.questionIn(workspace).question(questionText).build();
+        questionEmbeddingService.embedForSave(question);
+        questionRepository.save(question);
         return workspace;
     }
 

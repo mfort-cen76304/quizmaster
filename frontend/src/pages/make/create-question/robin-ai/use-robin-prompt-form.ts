@@ -68,6 +68,7 @@ export const useRobinPromptForm = ({
         if (!submittedPrompt) return
         setError('')
         setLoading(true)
+        setPromptText('')
         try {
             const response = await generateRequest({
                 workspaceGuid: workspaceId,
@@ -85,7 +86,6 @@ export const useRobinPromptForm = ({
 
                 setGeneratedDrafts(response.drafts)
                 setChatMessages(messages => [...messages, ...nextMessages])
-                setPromptText('')
             }
             if (closeOnGenerated) onClose()
         } catch (e) {
