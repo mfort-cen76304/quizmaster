@@ -62,6 +62,8 @@ Root scripts to add after implementation:
 | `QUIZMASTER_MCP_BASE_URL` | No | `https://quizmaster.scrumdojo.cz` | Quizmaster REST API base URL. Set explicitly for local or test backends. |
 | `QUIZMASTER_MCP_LOG_LEVEL` | No | `info` | Log level. Logs must go to stderr for stdio. |
 | `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` | No | `10000` | Timeout for REST calls. |
+| `QUIZMASTER_AUTH_MODE` | No | `bearer` | `bearer` for authenticated REST, `none` only for legacy local development. |
+| `QUIZMASTER_AUTH_TOKEN` | Yes for protected calls in bearer mode | none | Bearer token used by the MCP server. |
 
 The CLI runtime defaults to `https://quizmaster.scrumdojo.cz` as its Quizmaster base URL. Legacy `QUIZMASTER_BASE_URL` values are ignored so stale frontend or backend configuration does not redirect MCP writes. Use `QUIZMASTER_MCP_BASE_URL` only when a non-production MCP target is explicit.
 
@@ -292,11 +294,12 @@ Input:
 
 ```json
 {
+  "workspaceGuid": "workspace-guid",
   "quizId": 7
 }
 ```
 
-REST mapping: `GET /api/quiz/{id}`
+REST mapping: `GET /api/workspaces/{guid}/quizzes/{id}`
 
 ### `quizmaster_create_quiz`
 
@@ -322,7 +325,7 @@ Input schema mirrors `QuizRequest`:
 
 REST mapping: `POST /api/workspaces/{guid}/quizzes`
 
-The request body must include `workspaceGuid`, because the existing backend entity mapping expects it in the quiz payload too.
+The request body must not be trusted for workspace selection. The backend derives `workspaceGuid` from the path.
 
 ### `quizmaster_update_quiz`
 
@@ -372,12 +375,13 @@ Input:
 
 ```json
 {
+  "workspaceGuid": "workspace-guid",
   "question": "Create a question about Definition of Done.",
   "questionType": "multiple"
 }
 ```
 
-REST mapping: `POST /api/ai-assistant`
+REST mapping: `POST /api/workspaces/{guid}/ai-assistant`
 
 Output: `QuestionDraft`
 
@@ -470,7 +474,10 @@ Map REST responses into MCP results consistently:
 | --- | --- |
 | `200`, `204` | Return successful structured content. |
 | `400` | Return tool error with validation details when available. |
+| `401` | Return authentication-required tool/resource error. |
+| `403` | Return permission-denied tool/resource error. |
 | `404` | Return not-found tool/resource error. |
+| `429` | Return rate-limited tool error. |
 | `502`, `503` | Return upstream-service tool error, mainly for AI assistant calls. |
 | Timeout | Return backend-timeout tool error with configured timeout. |
 | Network failure | Return backend-unreachable tool error with the configured base URL. |
@@ -480,6 +487,8 @@ Tool failures should set `isError: true` and include a short human-readable mess
 ## Security and Safety
 
 - Treat the MCP server as a production Quizmaster integration by default.
+- In bearer mode, fail protected tools/resources before REST calls when `QUIZMASTER_AUTH_TOKEN` is missing.
+- Send `Authorization: Bearer ${QUIZMASTER_AUTH_TOKEN}` for protected REST calls in bearer mode.
 - Require explicit user confirmation in the host for write and delete tools.
 - Validate all `quizmaster://` URIs before serving resources.
 - Do not include secrets in tool results, resource content, logs, or errors.

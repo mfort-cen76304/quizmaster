@@ -8,6 +8,9 @@ import type { Workspace, WorkspaceCreateResponse, WorkspaceRequest } from '../..
 import type { McpConfig } from './config.ts'
 
 export type QuizmasterErrorCode =
+    | 'authentication-required'
+    | 'permission-denied'
+    | 'rate-limited'
     | 'backend-validation'
     | 'not-found'
     | 'upstream-service'
@@ -40,7 +43,8 @@ export interface AiAssistantRequest {
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
-const WORKSPACE_KEY_HEADER = 'X-Workspace-Key'
+type AuthRequirement = 'public' | 'protected'
+const SECRET_KEY_PATTERN = /(authorization|token)/i
 
 const parseJsonOrText = (text: string): unknown => {
     if (text.trim() === '') return undefined
@@ -62,17 +66,28 @@ const responseMessage = (status: number, response: unknown): string => {
     }
     if (typeof response === 'string' && response.trim() !== '') return response
     if (status === 400) return 'Quizmaster rejected the request.'
+    if (status === 401) return 'Quizmaster authentication is required or the token is invalid.'
+    if (status === 403) return 'Quizmaster permission denied.'
     if (status === 404) return 'Quizmaster resource was not found.'
+    if (status === 429) return 'Quizmaster rate limit exceeded.'
     if (status === 502 || status === 503) return 'Quizmaster upstream service failed.'
     return `Quizmaster request failed with HTTP ${status}.`
 }
 
 const codeForStatus = (status: number): QuizmasterErrorCode => {
     if (status === 400) return 'backend-validation'
+    if (status === 401) return 'authentication-required'
+    if (status === 403) return 'permission-denied'
     if (status === 404) return 'not-found'
+    if (status === 429) return 'rate-limited'
     if (status === 502 || status === 503) return 'upstream-service'
     return 'backend-error'
 }
+
+const pathSegment = (value: string | number): string => encodeURIComponent(value)
+
+const workspacePath = (workspaceGuid: string, suffix = ''): string =>
+    `/api/workspaces/${pathSegment(workspaceGuid)}${suffix}`
 
 const stripDraftTransportFields = (question: Question & { readonly id?: number | null }): QuestionDraft => ({
     question: question.question,
@@ -103,12 +118,12 @@ export class QuizmasterClient {
 
     async health(): Promise<{ readonly baseUrl: string; readonly reachable: boolean }> {
         try {
-            await this.request<unknown>('GET', '/api/feature-flag')
+            await this.request<unknown>('GET', '/api/feature-flag', undefined, 'public')
             return { baseUrl: this.baseUrl, reachable: true }
         } catch (error) {
             if (error instanceof QuizmasterClientError && error.code === 'not-found') {
                 try {
-                    await this.request<unknown>('GET', '/')
+                    await this.request<unknown>('GET', '/', undefined, 'public')
                     return { baseUrl: this.baseUrl, reachable: true }
                 } catch {
                     return { baseUrl: this.baseUrl, reachable: false }
@@ -123,95 +138,116 @@ export class QuizmasterClient {
     }
 
     async getWorkspace(workspaceGuid: string): Promise<Workspace> {
-        return await this.request('GET', '/api/workspace', undefined, workspaceGuid)
+        return await this.request('GET', workspacePath(workspaceGuid))
     }
 
     async listQuestions(workspaceGuid: string): Promise<readonly QuestionListItem[]> {
-        return await this.request('GET', '/api/workspace/questions', undefined, workspaceGuid)
+        return await this.request('GET', workspacePath(workspaceGuid, '/questions'))
     }
 
     async getQuestion(workspaceGuid: string, questionId: number): Promise<Question> {
-        return await this.request(
-            'GET',
-            `/api/workspace/questions/${encodeURIComponent(questionId)}`,
-            undefined,
-            workspaceGuid,
-        )
+        return await this.request('GET', workspacePath(workspaceGuid, `/questions/${pathSegment(questionId)}`))
     }
 
     async createQuestion(workspaceGuid: string, question: QuestionRequest): Promise<IdResponse> {
-        return await this.request('POST', '/api/workspace/questions', question, workspaceGuid)
+        return await this.request('POST', workspacePath(workspaceGuid, '/questions'), question)
     }
 
     async updateQuestion(workspaceGuid: string, questionId: number, question: QuestionRequest): Promise<IdResponse> {
         return await this.request(
             'PATCH',
-            `/api/workspace/questions/${encodeURIComponent(questionId)}`,
+            workspacePath(workspaceGuid, `/questions/${pathSegment(questionId)}`),
             question,
-            workspaceGuid,
         )
     }
 
     async deleteQuestion(workspaceGuid: string, questionId: number): Promise<void> {
-        await this.request('DELETE', `/api/workspace/questions/${questionId}`, undefined, workspaceGuid)
+        await this.request('DELETE', workspacePath(workspaceGuid, `/questions/${pathSegment(questionId)}`))
     }
 
     async listQuizzes(workspaceGuid: string): Promise<readonly QuizListItem[]> {
-        return await this.request('GET', '/api/workspace/quizzes', undefined, workspaceGuid)
+        return await this.request('GET', workspacePath(workspaceGuid, '/quizzes'))
     }
 
     async getQuiz(workspaceGuid: string, quizId: number): Promise<Quiz> {
-        return await this.request(
-            'GET',
-            `/api/workspace/quizzes/${encodeURIComponent(quizId)}`,
-            undefined,
-            workspaceGuid,
-        )
+        return await this.request('GET', workspacePath(workspaceGuid, `/quizzes/${pathSegment(quizId)}`))
     }
 
     async createQuiz(workspaceGuid: string, quiz: QuizRequest): Promise<IdResponse> {
-        return await this.request('POST', '/api/workspace/quizzes', quiz, workspaceGuid)
+        return await this.request('POST', workspacePath(workspaceGuid, '/quizzes'), quiz)
     }
 
     async updateQuiz(workspaceGuid: string, quizId: number, quiz: QuizRequest): Promise<IdResponse> {
-        return await this.request('PUT', `/api/workspace/quizzes/${encodeURIComponent(quizId)}`, quiz, workspaceGuid)
+        return await this.request('PUT', workspacePath(workspaceGuid, `/quizzes/${pathSegment(quizId)}`), quiz)
     }
 
     async deleteQuiz(workspaceGuid: string, quizId: number): Promise<void> {
-        await this.request('DELETE', `/api/workspace/quizzes/${quizId}`, undefined, workspaceGuid)
+        await this.request('DELETE', workspacePath(workspaceGuid, `/quizzes/${pathSegment(quizId)}`))
     }
 
     async getQuizStats(workspaceGuid: string, quizId: number): Promise<QuizStatsResponse> {
-        return await this.request(
-            'GET',
-            `/api/workspace/quizzes/${encodeURIComponent(quizId)}/stats`,
-            undefined,
-            workspaceGuid,
-        )
+        return await this.request('GET', workspacePath(workspaceGuid, `/quizzes/${pathSegment(quizId)}/stats`))
     }
 
     async generateQuestionDraft(request: AiAssistantRequest): Promise<QuestionDraft> {
         const { workspaceGuid, ...body } = request
         const response = await this.request<Question & { readonly id?: number | null }>(
             'POST',
-            '/api/ai-assistant',
+            workspacePath(workspaceGuid, '/ai-assistant'),
             body,
-            workspaceGuid,
         )
         return stripDraftTransportFields(response)
     }
 
-    private async request<T>(method: HttpMethod, path: string, body?: unknown, workspaceKey?: string): Promise<T> {
+    private authHeaders(path: string, authRequirement: AuthRequirement): Record<string, string> {
+        if (authRequirement === 'public' || this.config.authMode === 'none') return {}
+
+        if (!this.config.authToken) {
+            throw new QuizmasterClientError(
+                'authentication-required',
+                'QUIZMASTER_AUTH_TOKEN is required for protected Quizmaster REST calls.',
+                { path },
+            )
+        }
+
+        return { Authorization: `Bearer ${this.config.authToken}` }
+    }
+
+    private redactSecretText(value: string): string {
+        return this.config.authToken ? value.replaceAll(this.config.authToken, '[redacted]') : value
+    }
+
+    private redactSecrets(value: unknown): unknown {
+        if (typeof value === 'string') return this.redactSecretText(value)
+        if (Array.isArray(value)) return value.map(item => this.redactSecrets(item))
+        if (value && typeof value === 'object') {
+            return Object.fromEntries(
+                Object.entries(value).map(([key, entry]) => [
+                    key,
+                    SECRET_KEY_PATTERN.test(key) ? '[redacted]' : this.redactSecrets(entry),
+                ]),
+            )
+        }
+        return value
+    }
+
+    private async request<T>(
+        method: HttpMethod,
+        path: string,
+        body?: unknown,
+        authRequirement: AuthRequirement = 'protected',
+    ): Promise<T> {
         const url = new URL(path, this.baseUrl).toString()
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), this.config.requestTimeoutMs)
 
         try {
+            const authHeaders = this.authHeaders(path, authRequirement)
             const response = await this.fetcher(url, {
                 method,
                 headers: {
                     ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
-                    ...(workspaceKey === undefined ? {} : { [WORKSPACE_KEY_HEADER]: workspaceKey }),
+                    ...authHeaders,
                 },
                 body: body === undefined ? undefined : JSON.stringify(body),
                 signal: controller.signal,
@@ -220,13 +256,14 @@ export class QuizmasterClient {
             const parsed = parseJsonOrText(text)
 
             if (!response.ok) {
+                const redactedResponse = this.redactSecrets(parsed)
                 throw new QuizmasterClientError(
                     codeForStatus(response.status),
-                    responseMessage(response.status, parsed),
+                    this.redactSecretText(responseMessage(response.status, redactedResponse)),
                     {
                         status: response.status,
                         path,
-                        response: parsed,
+                        response: redactedResponse,
                     },
                 )
             }

@@ -11,6 +11,7 @@ pnpm install:all
 ```
 
 - Ensure `https://quizmaster.scrumdojo.cz` is reachable for production use. Local test runs can target another REST API by setting `QUIZMASTER_MCP_BASE_URL`.
+- Have a Quizmaster bearer token available for protected workspace, question, quiz, stats, and AI-assistant calls.
 
 ## Runtime Configuration
 
@@ -22,6 +23,8 @@ The MCP server reads operational settings from environment variables. The defaul
 | `QUIZMASTER_MCP_BASE_URL` | No | `https://quizmaster.scrumdojo.cz` | Quizmaster REST API base URL. Set this explicitly for local or test backends, for example `http://localhost:8080`. |
 | `QUIZMASTER_MCP_LOG_LEVEL` | No | `info` | Log level. Allowed values are `debug`, `info`, `warn`, and `error`. |
 | `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` | No | `10000` | Positive integer timeout for Quizmaster REST calls, in milliseconds. |
+| `QUIZMASTER_AUTH_MODE` | No | `bearer` | `bearer` for authenticated REST calls, `none` only for legacy local development. |
+| `QUIZMASTER_AUTH_TOKEN` | Yes for protected calls in bearer mode | none | Bearer token used by the MCP server when calling protected REST endpoints. |
 
 `QUIZMASTER_BASE_URL` is intentionally ignored by the CLI runtime. This prevents stale local MCP host configuration from accidentally redirecting MCP writes. Use the explicit `QUIZMASTER_MCP_BASE_URL` setting when a non-production backend is intended.
 
@@ -50,7 +53,9 @@ Use this shape for MCP hosts that support an `mcpServers` JSON configuration:
       "env": {
         "QUIZMASTER_MCP_TRANSPORT": "stdio",
         "QUIZMASTER_MCP_LOG_LEVEL": "info",
-        "QUIZMASTER_MCP_REQUEST_TIMEOUT_MS": "10000"
+        "QUIZMASTER_MCP_REQUEST_TIMEOUT_MS": "10000",
+        "QUIZMASTER_AUTH_MODE": "bearer",
+        "QUIZMASTER_AUTH_TOKEN": "replace-with-quizmaster-token"
       }
     }
   }
@@ -75,12 +80,15 @@ Use a separate MCP server entry for local testing so production and local target
         "QUIZMASTER_MCP_BASE_URL": "http://localhost:8080",
         "QUIZMASTER_MCP_TRANSPORT": "stdio",
         "QUIZMASTER_MCP_LOG_LEVEL": "info",
-        "QUIZMASTER_MCP_REQUEST_TIMEOUT_MS": "10000"
+        "QUIZMASTER_MCP_REQUEST_TIMEOUT_MS": "10000",
+        "QUIZMASTER_AUTH_MODE": "none"
       }
     }
   }
 }
 ```
+
+Use `QUIZMASTER_AUTH_MODE=none` only against a legacy unauthenticated local backend. Against a fortified local backend, use `QUIZMASTER_AUTH_MODE=bearer` and set `QUIZMASTER_AUTH_TOKEN`.
 
 Call `quizmaster_health` after connecting to confirm the MCP server is using the intended base URL.
 
@@ -100,18 +108,17 @@ Useful first checks from an MCP host:
 
 ## Authentication Notes
 
-The current MCP implementation does not add an authorization header to REST calls.
+In the default `bearer` mode, every protected REST call includes:
 
-When REST authentication from `rest-auth-spec.md` is implemented, configure these additional variables:
+```http
+Authorization: Bearer ${QUIZMASTER_AUTH_TOKEN}
+```
 
-| Variable | Required | Default | Description |
-| --- | --- | --- | --- |
-| `QUIZMASTER_AUTH_TOKEN` | Yes for protected calls | none | Bearer token used by the MCP server when calling protected REST endpoints. |
-| `QUIZMASTER_AUTH_MODE` | No | `bearer` | `bearer` for authenticated REST calls, `none` only for legacy local development. |
+If `QUIZMASTER_AUTH_TOKEN` is missing in bearer mode, protected tools and resources fail before making a REST request. The health tool still works without a token because it calls public health endpoints.
 
 Token values must never be written to stdout, stderr, MCP tool results, MCP resources, or error messages.
 
-Example future authenticated host configuration:
+Example authenticated host configuration:
 
 ```json
 {
@@ -136,6 +143,7 @@ Example future authenticated host configuration:
 | MCP host reports invalid JSON or protocol startup failure | Confirm the command uses `pnpm --silent` and that nothing writes to stdout except the MCP server. |
 | `quizmaster_health` returns unreachable | Confirm the configured Quizmaster REST API base URL is reachable from the MCP host environment. |
 | Startup fails with unsupported transport | Set `QUIZMASTER_MCP_TRANSPORT=stdio` or remove the variable. |
+| Protected tools fail before making REST calls | Set `QUIZMASTER_AUTH_TOKEN` or use `QUIZMASTER_AUTH_MODE=none` only for a legacy local backend. |
 | REST calls time out | Increase `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` or check backend/database startup. |
 | Tools cannot find a workspace | Provide an existing workspace GUID or create one with `quizmaster_create_workspace`. The current REST API has no workspace index endpoint. |
 

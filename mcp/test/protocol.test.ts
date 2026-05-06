@@ -31,10 +31,14 @@ const startMockBackend = async (): Promise<MockBackend> => {
             json(response, 200, true)
             return
         }
+        if (request.headers.authorization !== 'Bearer test-token') {
+            json(response, 401, { message: 'Authentication required.' })
+            return
+        }
         if (
             request.method === 'GET' &&
-            request.url === '/api/workspace' &&
-            request.headers['x-workspace-key'] === 'demo'
+            request.url === '/api/workspaces/demo' &&
+            request.headers['x-workspace-key'] === undefined
         ) {
             json(response, 200, { guid: 'demo', title: 'Demo Workspace' })
             return
@@ -73,6 +77,8 @@ describe('Quizmaster MCP protocol', () => {
                 transport: 'stdio',
                 logLevel: 'error',
                 requestTimeoutMs: 1_000,
+                authMode: 'bearer',
+                authToken: 'test-token',
             },
         })
         mcpClient = new Client({ name: 'quizmaster-mcp-test', version: '0.0.0' }, { capabilities: {} })
