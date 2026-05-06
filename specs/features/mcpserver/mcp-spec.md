@@ -59,10 +59,11 @@ Root scripts to add after implementation:
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `QUIZMASTER_MCP_TRANSPORT` | No | `stdio` | Transport. `stdio` is required for MVP. `http` is optional later. |
+| `QUIZMASTER_MCP_BASE_URL` | No | `https://quizmaster.scrumdojo.cz` | Quizmaster REST API base URL. Set explicitly for local or test backends. |
 | `QUIZMASTER_MCP_LOG_LEVEL` | No | `info` | Log level. Logs must go to stderr for stdio. |
 | `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` | No | `10000` | Timeout for REST calls. |
 
-The CLI runtime always uses `https://quizmaster.scrumdojo.cz` as its Quizmaster base URL. Legacy `QUIZMASTER_BASE_URL` values are ignored so write tools always target production.
+The CLI runtime defaults to `https://quizmaster.scrumdojo.cz` as its Quizmaster base URL. Legacy `QUIZMASTER_BASE_URL` values are ignored so stale frontend or backend configuration does not redirect MCP writes. Use `QUIZMASTER_MCP_BASE_URL` only when a non-production MCP target is explicit.
 
 The stdio transport must never write logs or diagnostics to stdout. Stdout is reserved for MCP JSON-RPC messages.
 
@@ -472,13 +473,13 @@ Map REST responses into MCP results consistently:
 | `404` | Return not-found tool/resource error. |
 | `502`, `503` | Return upstream-service tool error, mainly for AI assistant calls. |
 | Timeout | Return backend-timeout tool error with configured timeout. |
-| Network failure | Return backend-unreachable tool error with the production base URL. |
+| Network failure | Return backend-unreachable tool error with the configured base URL. |
 
 Tool failures should set `isError: true` and include a short human-readable message plus structured details where possible.
 
 ## Security and Safety
 
-- Treat the MCP server as a production Quizmaster integration for MVP.
+- Treat the MCP server as a production Quizmaster integration by default.
 - Require explicit user confirmation in the host for write and delete tools.
 - Validate all `quizmaster://` URIs before serving resources.
 - Do not include secrets in tool results, resource content, logs, or errors.

@@ -10,19 +10,20 @@ This document explains how to configure the Quizmaster MCP server for production
 pnpm install:all
 ```
 
-- Ensure `https://quizmaster.scrumdojo.cz` is reachable. The MCP CLI runtime always targets the production Quizmaster REST API.
+- Ensure `https://quizmaster.scrumdojo.cz` is reachable for production use. Local test runs can target another REST API by setting `QUIZMASTER_MCP_BASE_URL`.
 
 ## Runtime Configuration
 
-The MCP server reads operational settings from environment variables. The Quizmaster base URL is fixed to production for the CLI runtime so write tools create production workspaces, questions, and quizzes.
+The MCP server reads operational settings from environment variables. The default Quizmaster base URL targets production so normal write tools create production workspaces, questions, and quizzes. Use `QUIZMASTER_MCP_BASE_URL` only for explicit local or test runs.
 
 | Variable | Required | Default | Description |
 | --- | --- | --- | --- |
 | `QUIZMASTER_MCP_TRANSPORT` | No | `stdio` | MCP transport. The current implementation supports only `stdio`. |
+| `QUIZMASTER_MCP_BASE_URL` | No | `https://quizmaster.scrumdojo.cz` | Quizmaster REST API base URL. Set this explicitly for local or test backends, for example `http://localhost:8080`. |
 | `QUIZMASTER_MCP_LOG_LEVEL` | No | `info` | Log level. Allowed values are `debug`, `info`, `warn`, and `error`. |
 | `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` | No | `10000` | Positive integer timeout for Quizmaster REST calls, in milliseconds. |
 
-`QUIZMASTER_BASE_URL` is intentionally ignored by the CLI runtime. This prevents stale local MCP host configuration from accidentally creating quizzes on `localhost`.
+`QUIZMASTER_BASE_URL` is intentionally ignored by the CLI runtime. This prevents stale local MCP host configuration from accidentally redirecting MCP writes. Use the explicit `QUIZMASTER_MCP_BASE_URL` setting when a non-production backend is intended.
 
 The stdio transport reserves stdout for MCP JSON-RPC messages. Logs and diagnostics must go to stderr.
 
@@ -59,6 +60,29 @@ Use this shape for MCP hosts that support an `mcpServers` JSON configuration:
 Adjust `/workspaces/quizmaster/mcp` to the absolute path of the local `mcp` package when running outside this workspace.
 
 Use `--silent` so the package manager does not write lifecycle output to stdout before the MCP server starts.
+
+## Local Test Host Configuration
+
+Use a separate MCP server entry for local testing so production and local targets are visible in the MCP host:
+
+```json
+{
+  "mcpServers": {
+    "quizmaster-local": {
+      "command": "pnpm",
+      "args": ["--silent", "--dir", "/workspaces/quizmaster/mcp", "start"],
+      "env": {
+        "QUIZMASTER_MCP_BASE_URL": "http://localhost:8080",
+        "QUIZMASTER_MCP_TRANSPORT": "stdio",
+        "QUIZMASTER_MCP_LOG_LEVEL": "info",
+        "QUIZMASTER_MCP_REQUEST_TIMEOUT_MS": "10000"
+      }
+    }
+  }
+}
+```
+
+Call `quizmaster_health` after connecting to confirm the MCP server is using the intended base URL.
 
 ## Available Capabilities
 
@@ -110,7 +134,7 @@ Example future authenticated host configuration:
 | Symptom | Check |
 | --- | --- |
 | MCP host reports invalid JSON or protocol startup failure | Confirm the command uses `pnpm --silent` and that nothing writes to stdout except the MCP server. |
-| `quizmaster_health` returns unreachable | Confirm `https://quizmaster.scrumdojo.cz` is reachable from the MCP host environment. |
+| `quizmaster_health` returns unreachable | Confirm the configured Quizmaster REST API base URL is reachable from the MCP host environment. |
 | Startup fails with unsupported transport | Set `QUIZMASTER_MCP_TRANSPORT=stdio` or remove the variable. |
 | REST calls time out | Increase `QUIZMASTER_MCP_REQUEST_TIMEOUT_MS` or check backend/database startup. |
 | Tools cannot find a workspace | Provide an existing workspace GUID or create one with `quizmaster_create_workspace`. The current REST API has no workspace index endpoint. |

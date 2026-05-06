@@ -55,7 +55,7 @@ const parseTimeout = (value: string | undefined): number => {
 }
 
 export const loadConfig = (env: NodeJS.ProcessEnv = process.env): McpConfig => ({
-    baseUrl: normalizeBaseUrl(DEFAULT_QUIZMASTER_BASE_URL),
+    baseUrl: normalizeBaseUrl(env.QUIZMASTER_MCP_BASE_URL ?? DEFAULT_QUIZMASTER_BASE_URL),
     transport: parseTransport(env.QUIZMASTER_MCP_TRANSPORT),
     logLevel: parseLogLevel(env.QUIZMASTER_MCP_LOG_LEVEL),
     requestTimeoutMs: parseTimeout(env.QUIZMASTER_MCP_REQUEST_TIMEOUT_MS),

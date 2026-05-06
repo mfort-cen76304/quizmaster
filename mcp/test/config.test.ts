@@ -10,4 +10,10 @@ describe('Quizmaster MCP config', () => {
     it('keeps CLI runtime on production even when legacy base URL env is present', () => {
         expect(loadConfig({ QUIZMASTER_BASE_URL: 'http://localhost:8080/' }).baseUrl).toBe(DEFAULT_QUIZMASTER_BASE_URL)
     })
+
+    it('allows an explicit MCP base URL override for testing', () => {
+        expect(loadConfig({ QUIZMASTER_MCP_BASE_URL: 'http://localhost:8080/' }).baseUrl).toBe(
+            'http://localhost:8080',
+        )
+    })
 })
