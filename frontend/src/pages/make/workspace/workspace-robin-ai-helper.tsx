@@ -19,9 +19,9 @@ const noUndo: RobinUndoBuffer = {
 const normalizePrompt = (prompt: string) =>
     prompt
         .normalize('NFD')
-        .replaceAll(/\p{Diacritic}/gu, '')
-        .replaceAll(/[^\p{Letter}\p{Number}\s]/gu, ' ')
-        .replaceAll(/\s+/g, ' ')
+        .replace(/\p{Diacritic}/gu, '')
+        .replace(/[^\p{Letter}\p{Number}\s]/gu, ' ')
+        .replace(/\s+/g, ' ')
         .trim()
         .toLowerCase()
 
@@ -44,10 +44,13 @@ const isSaveGeneratedQuestionsPrompt = (prompt: string): boolean => {
     if (!normalized) return false
 
     const words = normalized.split(' ')
-    const hasSaveVerb = words.some(word => word === 'save' || word === 'store' || word.startsWith('uloz'))
-    const hasReferenceTarget = words.some(word => word === 'it' || word === 'them' || word === 'to' || word === 'je' || word === 'ich')
+    const hasSaveVerb = words.some((word: string) => word === 'save' || word === 'store' || word.startsWith('uloz'))
+    const hasReferenceTarget = words.some(
+        (word: string) => word === 'it' || word === 'them' || word === 'to' || word === 'je' || word === 'ich',
+    )
     const hasQuestionTarget = words.some(
-        word => word === 'question' || word === 'questions' || word === 'draft' || word === 'drafts' || word.startsWith('otazk'),
+        (word: string) =>
+            word === 'question' || word === 'questions' || word === 'draft' || word === 'drafts' || word.startsWith('otazk'),
     )
 
     return hasSaveVerb && (hasQuestionTarget || hasReferenceTarget)

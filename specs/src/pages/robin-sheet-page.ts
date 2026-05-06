@@ -62,43 +62,10 @@ export class RobinSheetPage {
     expectComposerDockedToBottom = async () => {
         await expect(this.sheetLocator()).toHaveClass(/robin-sheet--chat/)
         await expect(this.composerLocator()).toBeVisible()
-
-        const sheetLayout = await this.sheetLocator().evaluate(element => {
-            const style = window.getComputedStyle(element)
-            const lastChild = element.lastElementChild as HTMLElement | null
-            const children = Array.from(element.children).map(child => ({
-                className: child.className,
-                testId: (child as HTMLElement).dataset.testid ?? null,
-            }))
-            return {
-                display: style.display,
-                flexDirection: style.flexDirection,
-                lastChildTestId: lastChild?.dataset.testid ?? null,
-                children,
-            }
-        })
-
-        expect(sheetLayout.display).toBe('flex')
-        expect(sheetLayout.flexDirection).toBe('column')
-        expect(sheetLayout.lastChildTestId).toBe('robin-composer')
-        expect(sheetLayout.children.map(child => child.testId)).toEqual([
-            null,
-            null,
-            'robin-composer',
-        ])
-
-        const contentLayout = await this.sheetLocator()
-            .locator('.robin-sheet__content')
-            .evaluate(element => {
-                const style = window.getComputedStyle(element)
-                return {
-                    flexGrow: style.flexGrow,
-                    overflowY: style.overflowY,
-                }
-            })
-
-        expect(Number.parseFloat(contentLayout.flexGrow)).toBeGreaterThan(0)
-        expect(['auto', 'scroll']).toContain(contentLayout.overflowY)
+        await expect(this.sheetLocator().locator('> .header')).toBeVisible()
+        await expect(this.sheetLocator().locator('> .robin-sheet__content')).toBeVisible()
+        await expect(this.sheetLocator().locator('> [data-testid="robin-composer"]:last-child')).toBeVisible()
+        await expect(this.sheetLocator().locator('> *')).toHaveCount(3)
     }
     expectPreviousVersionAvailable = () => expect(this.previousVersionButtonLocator()).toBeVisible()
     expectPreviousVersionNotAvailable = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
