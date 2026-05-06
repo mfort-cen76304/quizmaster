@@ -33,14 +33,14 @@ const PiCornerToggle = ({ animationOnly, onToggle }: PiCornerToggleProps) => {
             onMouseLeave={() => setVisible(false)}
             style={{
                 position: 'fixed',
-                right: 0,
+                left: 0,
                 bottom: 0,
                 zIndex: 3,
                 width: 72,
                 height: 72,
                 display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'flex-end',
+                alignItems: 'flex-start',
+                justifyContent: 'flex-start',
                 padding: 14,
             }}
         >
