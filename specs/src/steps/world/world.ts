@@ -93,7 +93,6 @@ export class QuizmasterWorld {
     lastAiAssistantRequest?: {
         question: string
         questionType: string
-        excludedQuestionId?: number
     }
     rememberedWorkspaceQuestionCount?: number
 

@@ -36,7 +36,6 @@ export interface QuestionFormState {
 
 export interface QuestionFormStatePatch {
     readonly questionText?: string
-    readonly tagText?: string
     readonly questionType?: QuestionType
     readonly answers?: readonly string[]
     readonly explanations?: readonly string[]
@@ -126,7 +125,6 @@ export const useQuestionFormState = (question?: Question) => {
 
     const snapshot = (): QuestionFormStatePatch => ({
         questionText,
-        tagText,
         questionType,
         answers,
         explanations,
@@ -141,7 +139,6 @@ export const useQuestionFormState = (question?: Question) => {
 
     const applyPatch = (patch: QuestionFormStatePatch) => {
         if (patch.questionText !== undefined) setQuestionText(patch.questionText)
-        if (patch.tagText !== undefined) setTagText(patch.tagText)
         if (patch.questionType !== undefined) setQuestionType(patch.questionType)
         if (patch.answers !== undefined) {
             setAnswers(patch.answers)
@@ -214,7 +211,6 @@ export const stateToQuestionApiData = (state: QuestionFormState): QuestionReques
             questionExplanation: state.questionExplanation,
             questionType: state.questionType,
             isEasy: false,
-            imageUrl: state.imageUrl || undefined,
             tolerance: state.tolerance,
             tags: buildTags(state.tagText),
         }

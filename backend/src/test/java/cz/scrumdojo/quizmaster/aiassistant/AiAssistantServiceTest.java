@@ -1,9 +1,6 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
-import cz.scrumdojo.quizmaster.TestFixtures;
-import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
-import cz.scrumdojo.quizmaster.workspace.Workspace;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -11,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -22,9 +17,6 @@ public class AiAssistantServiceTest {
 
     @Autowired
     private AiAssistantService aiAssistantService;
-
-    @Autowired
-    private TestFixtures fixtures;
 
     @Value("${ai.token:}")
     private String apiToken;
@@ -54,20 +46,6 @@ public class AiAssistantServiceTest {
     void generateQuestionsFailsOnMissingQuestionType() {
         assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("Topic", null));
         assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("Topic", "  "));
-    }
-
-    @Test
-    void existingWorkspaceQuestionsCanExcludeQuestionBeingEdited() {
-        Workspace workspace = fixtures.save(fixtures.workspace());
-        Question editedQuestion = fixtures.save(fixtures.questionIn(workspace).question("What is 2 + 2?"));
-        fixtures.save(fixtures.questionIn(workspace).question("What is 3 + 3?"));
-
-        List<String> existingQuestions = aiAssistantService.existingWorkspaceQuestions(
-            workspace.getGuid(),
-            editedQuestion.getId()
-        );
-
-        assertEquals(List.of("What is 3 + 3?"), existingQuestions);
     }
 
     @Tag("ai")
