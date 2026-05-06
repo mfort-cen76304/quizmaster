@@ -2,6 +2,16 @@ Feature: Generate question using AI
   Robin AI can generate question drafts from a topic and prefill the
   question form before the question is saved.
 
+  Scenario: Create question Robin AI shows a Generate button
+    Given I start creating a new question
+    When I open Robin AI
+    Then I see Robin AI send button
+
+  Scenario: Create question Robin AI does not use the workspace chat composer
+    Given I start creating a new question
+    When I open Robin AI
+    Then I do not see Robin AI message composer
+
   @ai @slow
   Scenario: AI-generated question shows explanations
     Given I start creating a new question

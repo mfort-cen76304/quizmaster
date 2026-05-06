@@ -21,6 +21,7 @@ interface RobinSheetProps {
     readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
     readonly closeOnGenerated?: boolean
+    readonly mode?: 'classic' | 'chat'
 }
 
 export const RobinSheet = ({
@@ -32,6 +33,7 @@ export const RobinSheet = ({
     onQuestionTypeChange,
     onClose,
     closeOnGenerated,
+    mode = 'classic',
 }: RobinSheetProps) => {
     const { promptText, setPromptText, loading, error, generate, generatedDrafts, chatMessages } = useRobinPromptForm({
         onGenerated,
@@ -41,6 +43,7 @@ export const RobinSheet = ({
         workspaceGuid,
         onClose,
         closeOnGenerated,
+        mode,
     })
 
     const submitPrompt = () => {
@@ -54,8 +57,53 @@ export const RobinSheet = ({
         submitPrompt()
     }
 
+    if (mode === 'classic') {
+        return (
+            <div className="robin-sheet robin-sheet--classic" data-testid="robin-sheet">
+                <div className="header">
+                    <span className="title">Ask Robin AI</span>
+                    <button type="button" className="close-button" onClick={onClose}>
+                        ✕
+                    </button>
+                </div>
+                <Field label="Question type" required>
+                    <QuestionTypeRadioSet
+                        name="robin-question-type"
+                        value={questionType}
+                        onChange={onQuestionTypeChange}
+                    />
+                </Field>
+                <TextArea
+                    id="robin-prompt-text"
+                    placeholder="What do you want to ask?"
+                    value={promptText}
+                    onChange={setPromptText}
+                />
+                <span className="example">Example: "What is the capital of France? Generate 6 answers."</span>
+                {error && (
+                    <Alert type="error" dataTestId="ai-assistant-error">
+                        {error}
+                    </Alert>
+                )}
+                {undo.hasPrevious && (
+                    <Button id="previous-version-button" className="secondary button" onClick={undo.restore}>
+                        Previous version
+                    </Button>
+                )}
+                <Button
+                    id="robin-generate-button"
+                    className="secondary button"
+                    onClick={() => void generate()}
+                    disabled={loading}
+                >
+                    {loading ? 'Loading...' : 'Generate'}
+                </Button>
+            </div>
+        )
+    }
+
     return (
-        <div className="robin-sheet" data-testid="robin-sheet">
+        <div className="robin-sheet robin-sheet--chat" data-testid="robin-sheet">
             <div className="header">
                 <span className="title">Ask Robin AI</span>
                 <button type="button" className="close-button" onClick={onClose}>

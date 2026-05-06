@@ -35,6 +35,7 @@ export const RobinAiHelper = ({ form, workspaceGuid }: RobinAiHelperProps) => {
                     workspaceGuid={workspaceGuid}
                     onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
+                    mode="classic"
                 />
             )}
         </>,

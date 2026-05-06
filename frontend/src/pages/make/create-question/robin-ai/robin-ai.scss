@@ -61,7 +61,8 @@
     bottom: 0;
     left: 0;
     right: 0;
-    height: min(80vh, 760px);
+    max-height: 80vh;
+    overflow-y: auto;
     background: white;
     z-index: 10000;
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
@@ -97,6 +98,25 @@
         font-size: 12px;
         color: var(--text-soft);
     }
+
+}
+
+.robin-sheet--classic {
+    left: auto;
+    right: 20px;
+    bottom: 20px;
+    width: min(36rem, calc(100vw - 40px));
+    max-height: min(34rem, calc(100vh - 120px));
+    border-radius: 16px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+}
+
+.robin-sheet--classic textarea {
+    min-height: 7rem;
+}
+
+.robin-sheet--chat {
+    height: min(80vh, 760px);
 
     .robin-sheet__content {
         flex: 1;

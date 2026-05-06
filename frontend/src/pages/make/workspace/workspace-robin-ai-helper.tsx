@@ -108,6 +108,7 @@ export const WorkspaceRobinAiHelper = ({ workspaceId, onQuestionsSaved }: Worksp
                     onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
                     closeOnGenerated={false}
+                    mode="chat"
                 />
             )}
         </>,

@@ -49,7 +49,9 @@ export class RobinSheetPage {
     expectPromptVisible = () => expect(this.promptLocator().first()).toBeVisible()
     expectPromptNotVisible = () => expect(this.promptLocator().first()).not.toBeVisible()
     expectPromptValue = (value: string) => expect(this.promptLocator()).toHaveValue(value)
+    expectGenerateButtonVisible = () => expect(this.generateButtonLocator()).toBeVisible()
     expectGenerateButtonNotVisible = () => expect(this.generateButtonLocator()).not.toBeVisible()
+    expectComposerNotVisible = () => expect(this.composerLocator()).not.toBeVisible()
     expectChatMessageVisible = (message: string) => expect(this.chatMessageLocator().filter({ hasText: message })).toBeVisible()
     expectComposerDockedToBottom = async () => {
         const sheet = await this.sheetLocator().boundingBox()

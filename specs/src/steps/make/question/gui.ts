@@ -245,8 +245,16 @@ Then('I see AI section', async function () {
     await this.robinSheetPage.expectPromptVisible()
 })
 
+Then('I see Robin AI send button', async function () {
+    await this.robinSheetPage.expectGenerateButtonVisible()
+})
+
 Then('Robin AI message composer is docked to the bottom of the chat', async function () {
     await this.robinSheetPage.expectComposerDockedToBottom()
+})
+
+Then('I do not see Robin AI message composer', async function () {
+    await this.robinSheetPage.expectComposerNotVisible()
 })
 
 Then('I do not see Robin AI send button', async function () {
