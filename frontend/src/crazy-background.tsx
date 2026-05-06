@@ -39,6 +39,23 @@ type Satan = {
     shootCooldown: number
 }
 
+type GiantSatan = Satan & {
+    scale: number
+    health: number
+    spawnedAt: number
+    expiresAt: number
+    fireCooldown: number
+    burstShotsLeft: number
+    targetX: number
+    targetY: number
+}
+
+type AngelCluster = {
+    x: number
+    y: number
+    count: number
+}
+
 type SplatParticle = {
     x: number
     y: number
@@ -65,8 +82,20 @@ type GoalStar = {
     glow: string
 }
 
+const GIANT_SATAN_SCALE = 2
+const GIANT_SATAN_MIN_DELAY_MS = 4000
+const GIANT_SATAN_MAX_DELAY_MS = 80000
+const GIANT_SATAN_LIFETIME_MS = 1200000
+const GIANT_SATAN_HEALTH = 20
+const GIANT_SATAN_CLUSTER_RADIUS = 170
+const TAU = Math.PI * 2
+
 function clamp(value: number, min: number, max: number) {
     return Math.max(min, Math.min(max, value))
+}
+
+function randomGiantSatanDelayMs() {
+    return GIANT_SATAN_MIN_DELAY_MS + Math.random() * (GIANT_SATAN_MAX_DELAY_MS - GIANT_SATAN_MIN_DELAY_MS)
 }
 
 function makeAngel(_w: number, h: number): Angel {
@@ -151,6 +180,28 @@ function makeSatanBloodSplat(x: number, y: number): SplatParticle[] {
     return [...blotches, ...spray]
 }
 
+function makeSatanHitSparks(x: number, y: number): SplatParticle[] {
+    const colors = ['#2a0206', '#5f0713', '#7f1d1d', '#b91c1c', '#fecaca']
+
+    return Array.from({ length: 22 }, () => {
+        const angle = Math.random() * TAU
+        const speed = 0.8 + Math.random() * 3.4
+
+        return {
+            x,
+            y,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            size: 2.2 + Math.random() * 5.2,
+            opacity: 1,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            gravity: 0.035 + Math.random() * 0.02,
+            fade: 0.018 + Math.random() * 0.01,
+            shrink: 0.982 + Math.random() * 0.01,
+        }
+    })
+}
+
 function makeGoalStar(x: number, y: number, fill: string, stroke: string, glow: string): GoalStar {
     return {
         x,
@@ -179,6 +230,107 @@ function makeSatan(w: number, h: number): Satan {
         hearts: [],
         shootCooldown: 20 + Math.floor(Math.random() * 90),
     }
+}
+
+function makeGiantSatan(w: number, h: number, now: number): GiantSatan {
+    const verticalMargin = Math.min(86, Math.max(42, h * 0.18))
+    const maxY = Math.max(verticalMargin, h - verticalMargin)
+
+    return {
+        x: w + 150,
+        y: verticalMargin + Math.random() * Math.max(1, maxY - verticalMargin),
+        vx: -(0.58 + Math.random() * 0.38),
+        vy: (Math.random() - 0.5) * 0.34,
+        flip: true,
+        wingAngle: Math.random() * TAU,
+        tailAngle: Math.random() * TAU,
+        t: 0,
+        hearts: [],
+        shootCooldown: 0,
+        scale: GIANT_SATAN_SCALE,
+        health: GIANT_SATAN_HEALTH,
+        spawnedAt: now,
+        expiresAt: now + GIANT_SATAN_LIFETIME_MS,
+        fireCooldown: 8 + Math.floor(Math.random() * 10),
+        burstShotsLeft: 0,
+        targetX: w * 0.62,
+        targetY: h * 0.5,
+    }
+}
+
+function findLargestAngelCluster(angels: Angel[], w: number, h: number): AngelCluster | null {
+    let best: AngelCluster | null = null
+    const radiusSq = GIANT_SATAN_CLUSTER_RADIUS * GIANT_SATAN_CLUSTER_RADIUS
+
+    for (const anchor of angels) {
+        if (anchor.x < -40 || anchor.x > w + 40 || anchor.y < -40 || anchor.y > h + 40) continue
+
+        let count = 0
+        let totalX = 0
+        let totalY = 0
+
+        for (const angel of angels) {
+            const dx = angel.x - anchor.x
+            const dy = angel.y - anchor.y
+            if (dx * dx + dy * dy > radiusSq) continue
+
+            count++
+            totalX += angel.x
+            totalY += angel.y
+        }
+
+        if (count === 0) continue
+
+        const cluster = {
+            x: totalX / count,
+            y: totalY / count,
+            count,
+        }
+
+        if (!best || cluster.count > best.count || (cluster.count === best.count && cluster.x > best.x)) {
+            best = cluster
+        }
+    }
+
+    return best
+}
+
+function steerGiantSatanTowardCluster(satan: GiantSatan, cluster: AngelCluster | null, w: number, h: number) {
+    const verticalMargin = Math.min(92, Math.max(48, h * 0.2))
+
+    if (cluster) {
+        satan.targetX = clamp(cluster.x + 120, 82, w - 70)
+        satan.targetY = clamp(cluster.y, verticalMargin, Math.max(verticalMargin, h - verticalMargin))
+    }
+
+    satan.vx += clamp((satan.targetX - satan.x) * 0.0009, -0.055, 0.055)
+    satan.vy += clamp((satan.targetY - satan.y) * 0.0026, -0.12, 0.12)
+    satan.vx = clamp(satan.vx, -1.55, 0.95)
+    satan.vy = clamp(satan.vy, -1.35, 1.35)
+}
+
+function fireGiantSatanMachineGun(satan: GiantSatan, target: AngelCluster | null) {
+    if (!target) return
+
+    const muzzleX = satan.x - 36 * satan.scale
+    const muzzleY = satan.y - 2 * satan.scale
+    const lead = 32 + target.count * 9
+    const dx = target.x + lead - muzzleX
+    const dy = target.y - muzzleY
+    const spread = 0.11 + Math.random() * 0.1
+    const angle = Math.atan2(dy, dx) + (Math.random() - 0.5) * spread
+    const speed = 8.8 + Math.random() * 2.4
+
+    satan.hearts.push({
+        x: muzzleX,
+        y: muzzleY,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        size: 7 + Math.random() * 4,
+        opacity: 1,
+        hue: 0,
+        color: Math.random() < 0.76 ? '#050505' : '#7f1d1d',
+    })
 }
 
 // ─── draw helpers ────────────────────────────────────────────────────────────
@@ -337,6 +489,30 @@ function drawScorePanel(ctx: CanvasRenderingContext2D, options: ScorePanelOption
     ctx.font = '900 31px Georgia, serif'
     ctx.fillText(String(score), scoreX, y + 45)
 
+    ctx.restore()
+}
+
+function drawGiantSatanHealth(ctx: CanvasRenderingContext2D, satan: GiantSatan, opacity: number) {
+    const width = 92
+    const height = 8
+    const x = satan.x - width / 2
+    const y = satan.y - 62 * satan.scale
+    const healthRatio = clamp(satan.health / GIANT_SATAN_HEALTH, 0, 1)
+
+    ctx.save()
+    ctx.globalAlpha = opacity
+    ctx.fillStyle = 'rgba(10, 10, 10, 0.74)'
+    drawRoundedRect(ctx, x, y, width, height, 4)
+    ctx.fill()
+
+    ctx.fillStyle = healthRatio > 0.35 ? '#ef4444' : '#facc15'
+    drawRoundedRect(ctx, x + 1.5, y + 1.5, (width - 3) * healthRatio, height - 3, 3)
+    ctx.fill()
+
+    ctx.strokeStyle = 'rgba(254, 202, 202, 0.68)'
+    ctx.lineWidth = 1
+    drawRoundedRect(ctx, x, y, width, height, 4)
+    ctx.stroke()
     ctx.restore()
 }
 
@@ -553,6 +729,8 @@ export function CrazyBackground() {
         const goalStars: GoalStar[] = []
         let angelScore = 0
         let satanScore = 0
+        let nextGiantSatanAt = performance.now() + randomGiantSatanDelayMs()
+        let giantSatan: GiantSatan | null = null
 
         function resize() {
             w = canvas!.width = window.innerWidth
@@ -565,9 +743,13 @@ export function CrazyBackground() {
         for (let i = 0; i < 15; i++) angels.push(makeAngel(w, h))
         for (let i = 0; i < 7; i++) satans.push(makeSatan(w, h))
 
-        function tick() {
+        function tick(now: number) {
             ctx!.clearRect(0, 0, w, h)
             ctx!.globalAlpha = 1
+
+            if (!giantSatan && now >= nextGiantSatanAt) {
+                giantSatan = makeGiantSatan(w, h, now)
+            }
 
             // ── angels ────────────────────────────────────
             for (let i = angels.length - 1; i >= 0; i--) {
@@ -606,6 +788,23 @@ export function CrazyBackground() {
                         angelScore += 1
                         splats.push(...makeSatanBloodSplat(satans[hitSatanIdx].x, satans[hitSatanIdx].y))
                         satans[hitSatanIdx] = makeSatan(w, h)
+                        a.hearts.splice(j, 1)
+                        continue
+                    }
+
+                    if (giantSatan && hitTest(hrt, giantSatan.x, giantSatan.y, 58 * giantSatan.scale + hrt.size)) {
+                        angelScore += 1
+                        giantSatan.health--
+
+                        if (giantSatan.health <= 0) {
+                            splats.push(...makeSatanBloodSplat(giantSatan.x, giantSatan.y))
+                            angelScore += 20
+                            giantSatan = null
+                            nextGiantSatanAt = now + randomGiantSatanDelayMs()
+                        } else if (Math.random() < 0.64) {
+                            splats.push(...makeSatanHitSparks(hrt.x, hrt.y))
+                        }
+
                         a.hearts.splice(j, 1)
                         continue
                     }
@@ -701,6 +900,75 @@ export function CrazyBackground() {
 
                 if (s.x < -120 || s.x > w + 120) {
                     satans[i] = makeSatan(w, h)
+                }
+            }
+
+            // -- giant satan -------------------------------------------
+            if (giantSatan) {
+                const s = giantSatan
+                const targetCluster = findLargestAngelCluster(angels, w, h)
+                steerGiantSatanTowardCluster(s, targetCluster, w, h)
+
+                s.t++
+                s.wingAngle += 0.25
+                s.tailAngle += 0.18
+                s.x += s.vx
+                s.y += s.vy + Math.sin(s.t * 0.035) * 0.62
+
+                const verticalMargin = Math.min(92, Math.max(48, h * 0.2))
+                const maxY = Math.max(verticalMargin, h - verticalMargin)
+                if (s.y <= verticalMargin || s.y >= maxY) s.vy *= -1
+                s.y = clamp(s.y, verticalMargin, maxY)
+
+                s.fireCooldown--
+                if (s.fireCooldown <= 0 && targetCluster) {
+                    if (s.burstShotsLeft <= 0) {
+                        s.burstShotsLeft = 10 + Math.floor(Math.random() * 8)
+                    }
+
+                    fireGiantSatanMachineGun(s, targetCluster)
+                    s.burstShotsLeft--
+                    s.fireCooldown =
+                        s.burstShotsLeft > 0 ? 2 + Math.floor(Math.random() * 2) : 16 + Math.floor(Math.random() * 14)
+                }
+
+                for (let j = s.hearts.length - 1; j >= 0; j--) {
+                    const hrt = s.hearts[j]
+                    hrt.x += hrt.vx
+                    hrt.y += hrt.vy
+                    hrt.opacity -= 0.012
+
+                    const hitAngelIdx = angels.findIndex(a => hitTest(hrt, a.x, a.y, 28 + hrt.size))
+                    if (hitAngelIdx !== -1) {
+                        satanScore += 1
+                        splats.push(...makeAngelSplat(angels[hitAngelIdx].x, angels[hitAngelIdx].y))
+                        angels[hitAngelIdx] = makeAngel(w, h)
+                        s.hearts.splice(j, 1)
+                        continue
+                    }
+
+                    if (hrt.opacity <= 0 || hrt.x < -90 || hrt.x > w + 90 || hrt.y < -90 || hrt.y > h + 90) {
+                        s.hearts.splice(j, 1)
+                        continue
+                    }
+                    drawColoredHeart(ctx!, hrt.x, hrt.y, hrt.size, hrt.opacity, hrt.hue, hrt.color)
+                }
+
+                const fadeMs = 900
+                const opacity = clamp(Math.min(now - s.spawnedAt, s.expiresAt - now) / fadeMs, 0, 1)
+                drawSatan(ctx!, s, s.scale, opacity)
+                drawGiantSatanHealth(ctx!, s, opacity)
+
+                if (s.x <= 36 + 38 * s.scale) {
+                    satanScore += 45
+                    goalStars.push(
+                        makeGoalStar(36, clamp(s.y, 44, h - 44), '#050505', '#f87171', 'rgba(248, 113, 113, 0.88)'),
+                    )
+                    giantSatan = null
+                    nextGiantSatanAt = now + randomGiantSatanDelayMs()
+                } else if (now >= s.expiresAt || s.x < -220 || s.x > w + 220) {
+                    giantSatan = null
+                    nextGiantSatanAt = now + randomGiantSatanDelayMs()
                 }
             }
 
