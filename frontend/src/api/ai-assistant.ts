@@ -6,6 +6,7 @@ interface AiAssistantRequest {
     readonly question: string
     readonly questionType: QuestionType
     readonly workspaceGuid?: string
+    readonly excludedQuestionId?: number
 }
 
 export const postAiAssistant = async (request: AiAssistantRequest) =>

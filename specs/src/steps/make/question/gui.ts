@@ -112,7 +112,11 @@ Given('Robin AI will return these generated questions:', async function (dataTab
     if (drafts.length === 0) throw new Error('Robin AI stub requires at least one generated question.')
 
     await this.page.route('**/api/ai-assistant', async route => {
-        this.lastAiAssistantRequest = route.request().postDataJSON() as { question: string; questionType: string }
+        this.lastAiAssistantRequest = route.request().postDataJSON() as {
+            question: string
+            questionType: string
+            excludedQuestionId?: number
+        }
         await route.fulfill({
             status: 200,
             contentType: 'application/json',
@@ -121,7 +125,11 @@ Given('Robin AI will return these generated questions:', async function (dataTab
     })
 
     await this.page.route('**/api/ai-assistant/batch', async route => {
-        this.lastAiAssistantRequest = route.request().postDataJSON() as { question: string; questionType: string }
+        this.lastAiAssistantRequest = route.request().postDataJSON() as {
+            question: string
+            questionType: string
+            excludedQuestionId?: number
+        }
         await route.fulfill({
             status: 200,
             contentType: 'application/json',
@@ -286,6 +294,7 @@ Then('AI received current question context', async function () {
     expect(prompt).toContain('Yes')
     expect(prompt).toContain('Germany')
     expect(prompt).toContain('1')
+    expect(this.lastAiAssistantRequest?.excludedQuestionId).toBe(this.questionIds[this.activeQuestionBookmark])
 })
 
 Then('AI received current question context with question {string}', async function (question: string) {
@@ -518,7 +527,11 @@ When('I press Enter to send the Robin AI message', async function () {
 
 When('I ask stubbed AI to {string}', async function (instruction: string) {
     await this.page.route('**/api/ai-assistant', async route => {
-        this.lastAiAssistantRequest = route.request().postDataJSON() as { question: string; questionType: string }
+        this.lastAiAssistantRequest = route.request().postDataJSON() as {
+            question: string
+            questionType: string
+            excludedQuestionId?: number
+        }
         await route.fulfill({
             status: 200,
             contentType: 'application/json',

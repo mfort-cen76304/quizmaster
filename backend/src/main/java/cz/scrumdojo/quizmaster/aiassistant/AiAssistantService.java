@@ -1,5 +1,6 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -77,9 +78,13 @@ public class AiAssistantService {
     }
 
     public QuestionResponse generateQuestion(String prompt, String questionType, String workspaceGuid) {
+        return generateQuestion(prompt, questionType, workspaceGuid, null);
+    }
+
+    public QuestionResponse generateQuestion(String prompt, String questionType, String workspaceGuid, Integer excludedQuestionId) {
         validatePromptAndToken(prompt);
         String resolvedType = resolveType(questionType);
-        List<String> existingQuestions = existingWorkspaceQuestions(workspaceGuid);
+        List<String> existingQuestions = existingWorkspaceQuestions(workspaceGuid, excludedQuestionId);
         if (existingQuestions.isEmpty()) {
             AssistantResponse assistantResponse = requestAssistant(
                 prompt,
@@ -167,12 +172,13 @@ public class AiAssistantService {
         }
     }
 
-    private List<String> existingWorkspaceQuestions(String workspaceGuid) {
+    List<String> existingWorkspaceQuestions(String workspaceGuid, Integer excludedQuestionId) {
         if (workspaceGuid == null || workspaceGuid.isBlank()) {
             return List.of();
         }
 
         return questionRepository.findByWorkspaceGuid(workspaceGuid.strip()).stream()
+            .filter(question -> excludedQuestionId == null || !excludedQuestionId.equals(question.getId()))
             .map(Question::getQuestion)
             .filter(question -> question != null && !question.isBlank())
             .map(String::strip)
@@ -395,6 +401,7 @@ public class AiAssistantService {
 
     private record Message(String role, String content) {}
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     record AssistantResponse(
         String question,
         String[] answers,
