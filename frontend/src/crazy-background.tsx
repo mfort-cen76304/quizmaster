@@ -86,7 +86,7 @@ const GIANT_SATAN_SCALE = 2
 const GIANT_SATAN_MIN_DELAY_MS = 30000
 const GIANT_SATAN_MAX_DELAY_MS = 60000
 const GIANT_SATAN_LIFETIME_MS = 1200000
-const GIANT_SATAN_HEALTH = 20
+const GIANT_SATAN_HEALTH = 15
 const GIANT_SATAN_CLUSTER_RADIUS = 170
 const TAU = Math.PI * 2
 
@@ -890,7 +890,7 @@ export function CrazyBackground() {
                 drawSatan(ctx!, s)
 
                 if (s.x <= 36) {
-                    satanScore += 100
+                    satanScore += 50
                     goalStars.push(
                         makeGoalStar(36, clamp(s.y, 44, h - 44), '#050505', '#991b1b', 'rgba(248, 113, 113, 0.68)'),
                     )
