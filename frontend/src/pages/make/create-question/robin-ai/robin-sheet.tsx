@@ -1,7 +1,7 @@
-import type { QuestionType } from '#model/question.ts'
-import type { QuestionDraft } from '#model/question.ts'
 import type { KeyboardEvent } from 'react'
 
+import type { QuestionType } from '#model/question.ts'
+import type { QuestionDraft } from '#model/question.ts'
 import { Alert, Button, Field, QuestionTypeRadioSet, TextArea } from '#pages/components'
 
 import { useRobinPromptForm } from './use-robin-prompt-form.ts'
@@ -218,9 +218,7 @@ export const RobinSheet = ({
                     onChange={setPromptText}
                     onKeyDown={onPromptKeyDown}
                 />
-                <span className="example">
-                    Press Enter to send. Use Shift+Enter for a new line.
-                </span>
+                <span className="example">Press Enter to send. Use Shift+Enter for a new line.</span>
                 {loading && <span className="example">Robin is thinking...</span>}
             </div>
         </div>

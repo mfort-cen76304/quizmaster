@@ -4,8 +4,8 @@ import { createPortal } from 'react-dom'
 import { postAiAssistant, postAiAssistantBatch } from '#api/ai-assistant.ts'
 import { saveQuestion } from '#api/question.ts'
 import type { QuestionDraft, QuestionType } from '#model/question.ts'
-import { RobinFab } from '#pages/make/create-question/robin-ai/robin-fab.tsx'
 import { questionDraftToRequest } from '#pages/make/create-question/robin-ai/question-draft-mappers.ts'
+import { RobinFab } from '#pages/make/create-question/robin-ai/robin-fab.tsx'
 import { RobinSheet } from '#pages/make/create-question/robin-ai/robin-sheet.tsx'
 import type { RobinGenerationResult } from '#pages/make/create-question/robin-ai/use-robin-prompt-form.ts'
 import type { RobinUndoBuffer } from '#pages/make/create-question/robin-ai/use-robin-undo-buffer.ts'
@@ -50,7 +50,11 @@ const isSaveGeneratedQuestionsPrompt = (prompt: string): boolean => {
     )
     const hasQuestionTarget = words.some(
         (word: string) =>
-            word === 'question' || word === 'questions' || word === 'draft' || word === 'drafts' || word.startsWith('otazk'),
+            word === 'question' ||
+            word === 'questions' ||
+            word === 'draft' ||
+            word === 'drafts' ||
+            word.startsWith('otazk'),
     )
 
     return hasSaveVerb && (hasQuestionTarget || hasReferenceTarget)

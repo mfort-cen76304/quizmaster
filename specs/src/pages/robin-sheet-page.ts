@@ -58,7 +58,8 @@ export class RobinSheetPage {
     expectGenerateButtonVisible = () => expect(this.generateButtonLocator()).toBeVisible()
     expectGenerateButtonNotVisible = () => expect(this.generateButtonLocator()).not.toBeVisible()
     expectComposerNotVisible = () => expect(this.composerLocator()).not.toBeVisible()
-    expectChatMessageVisible = (message: string) => expect(this.chatMessageLocator().filter({ hasText: message })).toBeVisible()
+    expectChatMessageVisible = (message: string) =>
+        expect(this.chatMessageLocator().filter({ hasText: message })).toBeVisible()
     expectComposerDockedToBottom = async () => {
         await expect(this.sheetLocator()).toHaveClass(/robin-sheet--chat/)
         await expect(this.composerLocator()).toBeVisible()
@@ -73,7 +74,8 @@ export class RobinSheetPage {
 
     expectGeneratedQuestionCount = (count: number) => expect(this.generatedQuestionsLocator()).toHaveCount(count)
     expectGeneratedQuestionVisible = (index: number) => expect(this.generatedQuestionLocator(index)).toBeVisible()
-    expectGeneratedQuestionNumber = (index: number) => expect(this.generatedQuestionNumberLocator(index)).toHaveText(`${index}.`)
+    expectGeneratedQuestionNumber = (index: number) =>
+        expect(this.generatedQuestionNumberLocator(index)).toHaveText(`${index}.`)
     expectGeneratedQuestionTitle = (index: number, title: string) =>
         expect(this.generatedQuestionTitleLocator(index)).toHaveText(title)
     expectGeneratedQuestionAnswerCount = (index: number, count: number) =>

@@ -1,7 +1,7 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
-import type { QuestionDraft } from '#shared/types/question.ts'
 
+import type { QuestionDraft } from '#shared/types/question.ts'
 import { toText } from '#steps/common.ts'
 import { Given, Then, When } from '#steps/fixture.ts'
 import {
@@ -321,12 +321,15 @@ Then('generated question {int} in Robin chat is {string}', async function (index
     await this.robinSheetPage.expectGeneratedQuestionTitle(index, title)
 })
 
-Then('I see these answers for generated question {int} in Robin chat:', async function (index: number, dataTable: DataTable) {
-    const answers = parseAnswerTable(dataTable.raw())
-    for (const answer of answers) {
-        await this.robinSheetPage.expectGeneratedAnswer(index, answer.text, answer.correct)
-    }
-})
+Then(
+    'I see these answers for generated question {int} in Robin chat:',
+    async function (index: number, dataTable: DataTable) {
+        const answers = parseAnswerTable(dataTable.raw())
+        for (const answer of answers) {
+            await this.robinSheetPage.expectGeneratedAnswer(index, answer.text, answer.correct)
+        }
+    },
+)
 
 Then('generated question {int} in Robin chat has {int} answers', async function (index: number, count: number) {
     await this.robinSheetPage.expectGeneratedQuestionAnswerCount(index, count)
@@ -343,13 +346,19 @@ Then('generated question {int} in Robin chat shows a numerical answer', async fu
     await this.robinSheetPage.expectGeneratedQuestionNumericalAnswerVisible(index)
 })
 
-Then('generated question {int} in Robin chat has numerical answer {string}', async function (index: number, value: string) {
-    await this.robinSheetPage.expectGeneratedQuestionNumericalAnswer(index, value)
-})
+Then(
+    'generated question {int} in Robin chat has numerical answer {string}',
+    async function (index: number, value: string) {
+        await this.robinSheetPage.expectGeneratedQuestionNumericalAnswer(index, value)
+    },
+)
 
-Then('generated question {int} in Robin chat has numerical answer {float}', async function (index: number, value: number) {
-    await this.robinSheetPage.expectGeneratedQuestionNumericalAnswer(index, String(value))
-})
+Then(
+    'generated question {int} in Robin chat has numerical answer {float}',
+    async function (index: number, value: number) {
+        await this.robinSheetPage.expectGeneratedQuestionNumericalAnswer(index, String(value))
+    },
+)
 
 Then('generated question {int} in Robin chat shows tolerance', async function (index: number) {
     await this.robinSheetPage.expectGeneratedQuestionToleranceVisible(index)
