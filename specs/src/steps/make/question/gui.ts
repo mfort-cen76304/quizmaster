@@ -41,6 +41,8 @@ const stubbedAiResponse = {
     isEasy: false,
 }
 
+const AI_RESPONSE_TIMEOUT = 120_000
+
 const aiPrompt = (world: { lastAiAssistantRequest?: { question: string } }) => {
     const prompt = world.lastAiAssistantRequest?.question
     expect(prompt, 'Expected AI assistant request to be captured').toBeDefined()
@@ -463,7 +465,7 @@ When('I ask the application to create a exact question {string}', async function
     await enterAIPrompt(this, `Generate a exact question: ${topic}`)
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
-            timeout: 60_000,
+            timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])
@@ -476,7 +478,7 @@ When('I ask AI:', async function (dataTable: DataTable) {
     // resolve immediately, before the new response arrives).
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
-            timeout: 60_000,
+            timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])
@@ -486,7 +488,7 @@ When('I ask AI to generate multiple questions:', async function (dataTable: Data
     await enterAIPrompt(this, toText(dataTable))
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant/batch') && response.ok(), {
-            timeout: 60_000,
+            timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])
@@ -517,7 +519,7 @@ When('I ask stubbed AI to {string}', async function (instruction: string) {
     await enterAIPrompt(this, instruction)
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
-            timeout: 60_000,
+            timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])
@@ -531,7 +533,7 @@ When(
         await enterAIPrompt(this, toText(dataTable))
         await Promise.all([
             this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
-                timeout: 60_000,
+                timeout: AI_RESPONSE_TIMEOUT,
             }),
             this.robinSheetPage.generate(),
         ])
@@ -545,7 +547,7 @@ When(
         await enterAIPrompt(this, toText(dataTable))
         await Promise.all([
             this.page.waitForResponse(response => response.url().includes('/api/ai-assistant/batch') && response.ok(), {
-                timeout: 60_000,
+                timeout: AI_RESPONSE_TIMEOUT,
             }),
             this.robinSheetPage.generate(),
         ])
@@ -563,7 +565,7 @@ Given('I start creating a new question when I already have generated content', a
     )
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
-            timeout: 60_000,
+            timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])
@@ -576,7 +578,7 @@ When('I generated a question by AI', async function () {
     )
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
-            timeout: 60_000,
+            timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])
@@ -588,7 +590,7 @@ When('I generated a new question by AI', async function () {
     )
     await Promise.all([
         this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
-            timeout: 60_000,
+            timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])

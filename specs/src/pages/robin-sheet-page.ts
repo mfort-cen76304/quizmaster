@@ -38,7 +38,13 @@ export class RobinSheetPage {
 
     enterPrompt = (prompt: string) => this.promptLocator().fill(prompt)
     sendPromptByEnter = () => this.promptLocator().press('Enter')
-    generate = () => this.sendPromptByEnter()
+    generate = async () => {
+        if (await this.generateButtonLocator().isVisible()) {
+            await this.generateButtonLocator().click()
+            return
+        }
+        await this.sendPromptByEnter()
+    }
 
     askForSingleChoice = () => this.questionTypeRadio('single').check()
     askForMultipleChoice = () => this.questionTypeRadio('multiple').check()
@@ -54,12 +60,45 @@ export class RobinSheetPage {
     expectComposerNotVisible = () => expect(this.composerLocator()).not.toBeVisible()
     expectChatMessageVisible = (message: string) => expect(this.chatMessageLocator().filter({ hasText: message })).toBeVisible()
     expectComposerDockedToBottom = async () => {
-        const sheet = await this.sheetLocator().boundingBox()
-        const composer = await this.composerLocator().boundingBox()
-        expect(sheet).not.toBeNull()
-        expect(composer).not.toBeNull()
-        if (!sheet || !composer) return
-        expect(Math.abs(sheet.y + sheet.height - (composer.y + composer.height))).toBeLessThanOrEqual(56)
+        await expect(this.sheetLocator()).toHaveClass(/robin-sheet--chat/)
+        await expect(this.composerLocator()).toBeVisible()
+
+        const sheetLayout = await this.sheetLocator().evaluate(element => {
+            const style = window.getComputedStyle(element)
+            const lastChild = element.lastElementChild as HTMLElement | null
+            const children = Array.from(element.children).map(child => ({
+                className: child.className,
+                testId: (child as HTMLElement).dataset.testid ?? null,
+            }))
+            return {
+                display: style.display,
+                flexDirection: style.flexDirection,
+                lastChildTestId: lastChild?.dataset.testid ?? null,
+                children,
+            }
+        })
+
+        expect(sheetLayout.display).toBe('flex')
+        expect(sheetLayout.flexDirection).toBe('column')
+        expect(sheetLayout.lastChildTestId).toBe('robin-composer')
+        expect(sheetLayout.children.map(child => child.testId)).toEqual([
+            null,
+            null,
+            'robin-composer',
+        ])
+
+        const contentLayout = await this.sheetLocator()
+            .locator('.robin-sheet__content')
+            .evaluate(element => {
+                const style = window.getComputedStyle(element)
+                return {
+                    flexGrow: style.flexGrow,
+                    overflowY: style.overflowY,
+                }
+            })
+
+        expect(Number.parseFloat(contentLayout.flexGrow)).toBeGreaterThan(0)
+        expect(['auto', 'scroll']).toContain(contentLayout.overflowY)
     }
     expectPreviousVersionAvailable = () => expect(this.previousVersionButtonLocator()).toBeVisible()
     expectPreviousVersionNotAvailable = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
