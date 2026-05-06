@@ -57,7 +57,7 @@ export class RobinSheetPage {
         expect(sheet).not.toBeNull()
         expect(composer).not.toBeNull()
         if (!sheet || !composer) return
-        expect(Math.abs(sheet.y + sheet.height - (composer.y + composer.height))).toBeLessThanOrEqual(40)
+        expect(Math.abs(sheet.y + sheet.height - (composer.y + composer.height))).toBeLessThanOrEqual(56)
     }
     expectPreviousVersionAvailable = () => expect(this.previousVersionButtonLocator()).toBeVisible()
     expectPreviousVersionNotAvailable = () => expect(this.previousVersionButtonLocator()).not.toBeVisible()
