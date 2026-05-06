@@ -3,6 +3,8 @@ package cz.scrumdojo.quizmaster.attempt;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -22,6 +24,10 @@ public class Attempt {
 
     @Column(name = "quiz_id", nullable = false)
     private Integer quizId;
+
+    @Column(name = "question_ids", columnDefinition = "int[]")
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    private int[] questionIds;
 
     @Column(name = "started_at", nullable = false)
     private LocalDateTime startedAt;

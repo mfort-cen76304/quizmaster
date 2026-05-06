@@ -3,6 +3,7 @@ package cz.scrumdojo.quizmaster.quiz;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
+import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -21,18 +22,24 @@ public class QuizService {
     }
 
     public Optional<QuizResponse> getQuiz(Integer id) {
-        return quizRepository.findById(id).map(this::toQuizResponse);
+        return quizRepository.findById(id).map(quiz -> toQuizResponse(quiz, loadQuestions(quiz)));
     }
 
-    private QuizResponse toQuizResponse(Quiz quiz) {
-        List<Question> questions = new ArrayList<>(loadQuestions(quiz));
+    public Optional<QuizResponse> getWorkspaceQuiz(String workspaceGuid, Integer id) {
+        return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
+            .map(quiz -> toQuizResponse(quiz, loadQuestions(quiz)));
+    }
 
-        Integer randomCount = quiz.getRandomQuestionCount();
-        if (randomCount != null && randomCount > 0 && !questions.isEmpty()) {
-            Collections.shuffle(questions);
-            questions = questions.subList(0, Math.min(randomCount, questions.size()));
-        }
+    public Optional<QuizTakeResponse> getTakeQuiz(Integer id) {
+        return quizRepository.findById(id).map(quiz -> toQuizTakeResponse(quiz, selectQuestions(quiz)));
+    }
 
+    public Optional<QuizTakeResponse> getTakeQuizForAttempt(Integer quizId, int[] questionIds) {
+        return quizRepository.findById(quizId)
+            .map(quiz -> toQuizTakeResponse(quiz, loadQuestions(questionIds)));
+    }
+
+    private QuizResponse toQuizResponse(Quiz quiz, List<Question> questions) {
         QuestionResponse[] questionResponses = questions.stream()
             .map(QuestionResponse::from)
             .toArray(QuestionResponse[]::new);
@@ -52,13 +59,53 @@ public class QuizService {
         );
     }
 
-    private List<Question> loadQuestions(Quiz quiz) {
-        List<Integer> ids = Arrays.stream(quiz.getQuestionIds()).boxed().toList();
+    public List<Question> selectQuestions(Quiz quiz) {
+        List<Question> questions = new ArrayList<>(loadQuestions(quiz));
+
+        Integer randomCount = quiz.getRandomQuestionCount();
+        if (randomCount != null && randomCount > 0 && !questions.isEmpty()) {
+            Collections.shuffle(questions);
+            questions = questions.subList(0, Math.min(randomCount, questions.size()));
+        }
+
+        return questions;
+    }
+
+    public List<Question> loadQuestions(Quiz quiz) {
+        return loadQuestions(quiz.getQuestionIds());
+    }
+
+    public List<Question> loadQuestions(int[] questionIds) {
+        if (questionIds == null) {
+            return List.of();
+        }
+
+        List<Integer> ids = Arrays.stream(questionIds).boxed().toList();
         Map<Integer, Question> questionsById = questionRepository.findAllById(ids).stream()
             .collect(Collectors.toMap(Question::getId, Function.identity()));
         return ids.stream()
             .map(questionsById::get)
             .filter(Objects::nonNull)
             .toList();
+    }
+
+    private QuizTakeResponse toQuizTakeResponse(Quiz quiz, List<Question> questions) {
+        QuestionTakeResponse[] questionResponses = questions.stream()
+            .map(QuestionTakeResponse::from)
+            .toArray(QuestionTakeResponse[]::new);
+
+        return new QuizTakeResponse(
+            quiz.getId(),
+            quiz.getTitle(),
+            quiz.getDescription(),
+            quiz.getStartAt(),
+            quiz.getEndAt(),
+            questionResponses,
+            quiz.getMode(),
+            quiz.getDifficulty(),
+            quiz.getPassScore(),
+            quiz.getTimeLimit(),
+            quiz.getRandomQuestionCount()
+        );
     }
 }

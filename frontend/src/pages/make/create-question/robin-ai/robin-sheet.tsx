@@ -5,19 +5,15 @@ import type { QuestionDraft } from '#model/question.ts'
 import { Alert, Button, Field, QuestionTypeRadioSet, TextArea } from '#pages/components'
 
 import { useRobinPromptForm } from './use-robin-prompt-form.ts'
+import type { RobinGenerateRequest, RobinGenerationResult } from './use-robin-prompt-form.ts'
 import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'
 
 interface RobinSheetProps {
     readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
-    readonly generateRequest?: (request: {
-        question: string
-        questionType: QuestionType
-        workspaceGuid?: string
-        currentDrafts: readonly QuestionDraft[]
-    }) => Promise<import('./use-robin-prompt-form.ts').RobinGenerationResult>
+    readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
     readonly undo: RobinUndoBuffer
+    readonly workspaceId: string
     readonly questionType: QuestionType
-    readonly workspaceGuid?: string
     readonly onQuestionTypeChange: (type: QuestionType) => void
     readonly onClose: () => void
     readonly closeOnGenerated?: boolean
@@ -28,8 +24,8 @@ export const RobinSheet = ({
     onGenerated,
     generateRequest,
     undo,
+    workspaceId,
     questionType,
-    workspaceGuid,
     onQuestionTypeChange,
     onClose,
     closeOnGenerated,
@@ -39,8 +35,8 @@ export const RobinSheet = ({
         onGenerated,
         generateRequest,
         undo,
+        workspaceId,
         questionType,
-        workspaceGuid,
         onClose,
         closeOnGenerated,
         mode,

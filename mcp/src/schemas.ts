@@ -185,6 +185,7 @@ export const updateQuizInputSchema = z
     .superRefine(addQuizIssues)
 
 export const generateQuestionDraftInputSchema = z.object({
+    ...workspaceGuidShape,
     question: nonEmptyString('question'),
     questionType: questionTypeSchema,
 })
@@ -217,7 +218,6 @@ export const toQuizRequest = (input: CreateQuizInput | UpdateQuizInput): QuizReq
     difficulty: input.difficulty,
     passScore: input.passScore,
     timeLimit: input.timeLimit,
-    workspaceGuid: input.workspaceGuid,
     randomQuestionCount: input.randomQuestionCount,
 })
 
@@ -227,7 +227,7 @@ export type QuizmasterResource =
     | { readonly kind: 'workspace-questions'; readonly workspaceGuid: string }
     | { readonly kind: 'workspace-quizzes'; readonly workspaceGuid: string }
     | { readonly kind: 'workspace-question'; readonly workspaceGuid: string; readonly questionId: number }
-    | { readonly kind: 'quiz'; readonly quizId: number }
+    | { readonly kind: 'workspace-quiz'; readonly workspaceGuid: string; readonly quizId: number }
     | { readonly kind: 'workspace-quiz-stats'; readonly workspaceGuid: string; readonly quizId: number }
 
 const parsePath = (url: URL): readonly string[] =>
@@ -261,13 +261,12 @@ export const parseQuizmasterUri = (uri: string): QuizmasterResource => {
         if (path.length === 3 && collection === 'question' && id) {
             return { kind: 'workspace-question', workspaceGuid, questionId: parseResourceId(id, 'questionId') }
         }
+        if (path.length === 3 && collection === 'quiz' && id) {
+            return { kind: 'workspace-quiz', workspaceGuid, quizId: parseResourceId(id, 'quizId') }
+        }
         if (path.length === 4 && collection === 'quiz' && id && child === 'stats') {
             return { kind: 'workspace-quiz-stats', workspaceGuid, quizId: parseResourceId(id, 'quizId') }
         }
-    }
-
-    if (host === 'quiz' && path.length === 1) {
-        return { kind: 'quiz', quizId: parseResourceId(path[0], 'quizId') }
     }
 
     throw new Error(`Unsupported Quizmaster resource URI: ${uri}`)

@@ -7,7 +7,10 @@ import type { QuestionDraft, QuestionType } from '#model/question.ts'
 import { questionDraftToRequest } from '#pages/make/create-question/robin-ai/question-draft-mappers.ts'
 import { RobinFab } from '#pages/make/create-question/robin-ai/robin-fab.tsx'
 import { RobinSheet } from '#pages/make/create-question/robin-ai/robin-sheet.tsx'
-import type { RobinGenerationResult } from '#pages/make/create-question/robin-ai/use-robin-prompt-form.ts'
+import type {
+    RobinGenerateRequest,
+    RobinGenerationResult,
+} from '#pages/make/create-question/robin-ai/use-robin-prompt-form.ts'
 import type { RobinUndoBuffer } from '#pages/make/create-question/robin-ai/use-robin-undo-buffer.ts'
 
 const noUndo: RobinUndoBuffer = {
@@ -44,12 +47,12 @@ const isSaveGeneratedQuestionsPrompt = (prompt: string): boolean => {
     if (!normalized) return false
 
     const words = normalized.split(' ')
-    const hasSaveVerb = words.some((word: string) => word === 'save' || word === 'store' || word.startsWith('uloz'))
+    const hasSaveVerb = words.some(word => word === 'save' || word === 'store' || word.startsWith('uloz'))
     const hasReferenceTarget = words.some(
-        (word: string) => word === 'it' || word === 'them' || word === 'to' || word === 'je' || word === 'ich',
+        word => word === 'it' || word === 'them' || word === 'to' || word === 'je' || word === 'ich',
     )
     const hasQuestionTarget = words.some(
-        (word: string) =>
+        word =>
             word === 'question' ||
             word === 'questions' ||
             word === 'draft' ||
@@ -60,17 +63,15 @@ const isSaveGeneratedQuestionsPrompt = (prompt: string): boolean => {
     return hasSaveVerb && (hasQuestionTarget || hasReferenceTarget)
 }
 
-const generateWorkspaceRobinDrafts = async (request: {
-    question: string
-    questionType: QuestionType
-    workspaceGuid?: string
-    currentDrafts: readonly QuestionDraft[]
-    onQuestionsSaved: () => Promise<void>
-}): Promise<RobinGenerationResult> => {
+const generateWorkspaceRobinDrafts = async (
+    request: RobinGenerateRequest & {
+        onQuestionsSaved: () => Promise<void>
+    },
+): Promise<RobinGenerationResult> => {
     if (request.currentDrafts.length > 0 && isSaveGeneratedQuestionsPrompt(request.question)) {
         await Promise.all(
             request.currentDrafts.map(async draft => {
-                await saveQuestion(request.workspaceGuid ?? '', questionDraftToRequest(draft))
+                await saveQuestion(request.workspaceGuid, questionDraftToRequest(draft))
             }),
         )
         await request.onQuestionsSaved()
@@ -80,10 +81,14 @@ const generateWorkspaceRobinDrafts = async (request: {
         }
     }
 
-    if (wantsMultipleQuestions(request.question)) {
-        return { drafts: await postAiAssistantBatch(request) }
+    const aiRequest = {
+        question: request.question,
+        questionType: request.questionType,
     }
-    return { drafts: [await postAiAssistant(request)] }
+    if (wantsMultipleQuestions(request.question)) {
+        return { drafts: await postAiAssistantBatch(request.workspaceGuid, aiRequest) }
+    }
+    return { drafts: [await postAiAssistant(request.workspaceGuid, aiRequest)] }
 }
 
 interface WorkspaceRobinAiHelperProps {
@@ -110,8 +115,8 @@ export const WorkspaceRobinAiHelper = ({ workspaceId, onQuestionsSaved }: Worksp
                         })
                     }
                     undo={noUndo}
+                    workspaceId={workspaceId}
                     questionType={questionType}
-                    workspaceGuid={workspaceId}
                     onQuestionTypeChange={setQuestionType}
                     onClose={() => setSheetOpen(false)}
                     closeOnGenerated={false}

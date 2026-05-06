@@ -102,7 +102,6 @@ Workflow:
 - Call quizmaster_list_questions for the workspace.
 - Select matching question IDs from the tag list.
 - Ask the user to confirm title, mode, difficulty, pass score, time limit, selected questions, and randomQuestionCount.
-- Call quizmaster_create_quiz only after confirmation.
-- Include workspaceGuid in the quiz payload.`),
+- Call quizmaster_create_quiz with the workspaceGuid argument only after confirmation.`),
     )
 }

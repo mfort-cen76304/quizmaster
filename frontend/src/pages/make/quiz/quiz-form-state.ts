@@ -73,10 +73,7 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
     }
 }
 
-export const stateToQuizApiData = (
-    state: ReturnType<typeof useQuizFormState>,
-    workspaceId: string | null,
-): QuizEditFormData => ({
+export const stateToQuizApiData = (state: ReturnType<typeof useQuizFormState>): QuizEditFormData => ({
     title: state.title,
     description: state.description,
     startAt: toApiDateTimeValue(state.startAt),
@@ -86,6 +83,5 @@ export const stateToQuizApiData = (
     difficulty: state.difficulty,
     passScore: state.passScore,
     timeLimit: state.timeLimit,
-    workspaceGuid: workspaceId,
     randomQuestionCount: state.randomQuestionCount,
 })

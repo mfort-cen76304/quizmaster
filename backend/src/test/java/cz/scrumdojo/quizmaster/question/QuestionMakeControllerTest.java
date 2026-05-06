@@ -2,6 +2,7 @@ package cz.scrumdojo.quizmaster.question;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
+import cz.scrumdojo.quizmaster.workspace.WorkspaceKey;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -27,7 +28,8 @@ public class QuestionMakeControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
 
-        mockMvc.perform(get("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId()))
+        mockMvc.perform(get("/api/workspace/questions/{id}", question.getId())
+                .header(WorkspaceKey.HEADER, workspace.getGuid()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(question.getId()))
             .andExpect(jsonPath("$.question").value("What is the capital of Italy?"));
@@ -39,7 +41,8 @@ public class QuestionMakeControllerTest {
         Workspace workspace2 = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace1));
 
-        mockMvc.perform(get("/api/workspaces/{guid}/questions/{id}", workspace2.getGuid(), question.getId()))
+        mockMvc.perform(get("/api/workspace/questions/{id}", question.getId())
+                .header(WorkspaceKey.HEADER, workspace2.getGuid()))
             .andExpect(status().isNotFound());
     }
 
@@ -47,7 +50,8 @@ public class QuestionMakeControllerTest {
     public void createQuestionInWorkspace() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(post("/api/workspaces/{guid}/questions", workspace.getGuid())
+        mockMvc.perform(post("/api/workspace/questions")
+                .header(WorkspaceKey.HEADER, workspace.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -68,7 +72,8 @@ public class QuestionMakeControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
 
-        mockMvc.perform(patch("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId())
+        mockMvc.perform(patch("/api/workspace/questions/{id}", question.getId())
+                .header(WorkspaceKey.HEADER, workspace.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -83,7 +88,8 @@ public class QuestionMakeControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").value(question.getId()));
 
-        mockMvc.perform(get("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId()))
+        mockMvc.perform(get("/api/workspace/questions/{id}", question.getId())
+                .header(WorkspaceKey.HEADER, workspace.getGuid()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.question").value("Updated question?"));
     }
@@ -94,7 +100,8 @@ public class QuestionMakeControllerTest {
         Workspace workspace2 = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace1));
 
-        mockMvc.perform(patch("/api/workspaces/{guid}/questions/{id}", workspace2.getGuid(), question.getId())
+        mockMvc.perform(patch("/api/workspace/questions/{id}", question.getId())
+                .header(WorkspaceKey.HEADER, workspace2.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -114,10 +121,12 @@ public class QuestionMakeControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
 
-        mockMvc.perform(delete("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId()))
+        mockMvc.perform(delete("/api/workspace/questions/{id}", question.getId())
+                .header(WorkspaceKey.HEADER, workspace.getGuid()))
             .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId()))
+        mockMvc.perform(get("/api/workspace/questions/{id}", question.getId())
+                .header(WorkspaceKey.HEADER, workspace.getGuid()))
             .andExpect(status().isNotFound());
     }
 
@@ -127,7 +136,8 @@ public class QuestionMakeControllerTest {
         Workspace workspace2 = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace1));
 
-        mockMvc.perform(delete("/api/workspaces/{guid}/questions/{id}", workspace2.getGuid(), question.getId()))
+        mockMvc.perform(delete("/api/workspace/questions/{id}", question.getId())
+                .header(WorkspaceKey.HEADER, workspace2.getGuid()))
             .andExpect(status().isNotFound());
     }
 
@@ -135,7 +145,8 @@ public class QuestionMakeControllerTest {
     public void createQuestionBlankTextReturnsBadRequest() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(post("/api/workspaces/{guid}/questions", workspace.getGuid())
+        mockMvc.perform(post("/api/workspace/questions")
+                .header(WorkspaceKey.HEADER, workspace.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -152,7 +163,8 @@ public class QuestionMakeControllerTest {
 
     @Test
     public void createQuestionInNonExistentWorkspaceReturns404() throws Exception {
-        mockMvc.perform(post("/api/workspaces/{guid}/questions", "non-existent-guid")
+        mockMvc.perform(post("/api/workspace/questions")
+                .header(WorkspaceKey.HEADER, "non-existent-guid")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {

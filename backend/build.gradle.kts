@@ -44,7 +44,6 @@ dependencies {
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.security:spring-security-test")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
@@ -70,6 +69,10 @@ fun ProcessForkOptions.forwardSharedEnv() {
         "OPENROUTER_MAX_TOKENS"
     )
 
+    environment("DB_HOST", env.fetch("DB_HOST", "postgres"))
+    environment("DB_NAME", env.fetch("DB_NAME", "quizmaster"))
+    environment("DB_USER", env.fetch("DB_USER", "quizmaster"))
+    environment("DB_PASS", env.fetch("DB_PASS", "quizmaster"))
     environment("DB_SCHEMA", env.fetch("DB_SCHEMA", "public"))
     optionalForwardedEnvVars.forEach { name ->
         val value = env.fetch(name, "")

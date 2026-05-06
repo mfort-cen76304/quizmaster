@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { useApi } from '#api/hooks.ts'
-import { postQuiz, fetchQuiz, putQuiz } from '#api/quiz.ts'
+import { postQuiz, fetchWorkspaceQuiz, putQuiz } from '#api/quiz.ts'
 import { fetchWorkspaceQuestions } from '#api/workspace.ts'
 import { tryCatch } from '#fe/helpers.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
@@ -23,7 +23,7 @@ export const QuizEditPage = () => {
     const [errorMessage, setErrorMessage] = useState<string>('')
 
     useApi(workspaceId, fetchWorkspaceQuestions, setWorkspaceQuestions)
-    useApi(quizId, fetchQuiz, setQuiz)
+    useApi(quizId, id => fetchWorkspaceQuiz(workspaceId, id), setQuiz)
 
     const onSubmit = (data: QuizEditFormData) =>
         tryCatch(setErrorMessage, async () => {

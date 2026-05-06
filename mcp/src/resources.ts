@@ -10,7 +10,7 @@ export const QUIZMASTER_RESOURCE_URIS = [
     'quizmaster://workspace/{workspaceGuid}/questions',
     'quizmaster://workspace/{workspaceGuid}/quizzes',
     'quizmaster://workspace/{workspaceGuid}/question/{questionId}',
-    'quizmaster://quiz/{quizId}',
+    'quizmaster://workspace/{workspaceGuid}/quiz/{quizId}',
     'quizmaster://workspace/{workspaceGuid}/quiz/{quizId}/stats',
 ] as const
 
@@ -37,8 +37,8 @@ const readResource = async (client: QuizmasterClient, uri: URL) => {
                 return jsonResource(uri, await client.listQuizzes(parsed.workspaceGuid))
             case 'workspace-question':
                 return jsonResource(uri, await client.getQuestion(parsed.workspaceGuid, parsed.questionId))
-            case 'quiz':
-                return jsonResource(uri, await client.getQuiz(parsed.quizId))
+            case 'workspace-quiz':
+                return jsonResource(uri, await client.getQuiz(parsed.workspaceGuid, parsed.quizId))
             case 'workspace-quiz-stats':
                 return jsonResource(uri, await client.getQuizStats(parsed.workspaceGuid, parsed.quizId))
         }
@@ -104,11 +104,11 @@ export const registerQuizmasterResources = (server: McpServer, client: Quizmaste
     )
 
     server.registerResource(
-        'quizmaster_quiz',
-        new ResourceTemplate('quizmaster://quiz/{quizId}', { list: undefined }),
+        'quizmaster_workspace_quiz',
+        new ResourceTemplate('quizmaster://workspace/{workspaceGuid}/quiz/{quizId}', { list: undefined }),
         {
-            title: 'Quizmaster Quiz',
-            description: 'Full public quiz representation.',
+            title: 'Quizmaster Workspace Quiz',
+            description: 'Full workspace-scoped quiz representation.',
             mimeType: 'application/json',
         },
         async uri => await readResource(client, uri),

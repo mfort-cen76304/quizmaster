@@ -23,11 +23,18 @@ export class QuizScorePage {
 
     private firstTextResultLocator = () => this.page.locator('#first-text-result')
 
-    private questionsLocator = () => this.page.locator('[id^=question-]')
-    questions = () => this.questionsLocator().locator('[id^=question-name-]').allTextContents()
+    private questionsLocator = () => this.page.locator('[id^=question-name-]')
+    questions = async () => {
+        await expect(this.questionsLocator().first()).toBeVisible()
+        return this.questionsLocator().allTextContents()
+    }
 
     private questionLocator = (question: string) =>
         this.page.locator('[id^=question-name-]').filter({ hasText: question }).locator('..').locator('..')
+
+    private waitForQuestion = async (question: string) => {
+        await expect(this.questionLocator(question)).toBeVisible()
+    }
 
     private answerAndExplanationLocator = (question: string) =>
         this.questionLocator(question).locator('li[id^=answer-row-]')
@@ -49,22 +56,28 @@ export class QuizScorePage {
     }
 
     answers = async (question: string) => {
+        await this.waitForQuestion(question)
         const numericalCount = await this.numericalResultLocator(question).count()
         if (numericalCount > 0) {
             const text = await this.correctAnswerBarLocator(question).textContent()
             return [this.extractNumber(text)]
         }
-        return this.answerListLocator(question).locator('[id^=answer-label-]').allTextContents()
+        const labels = this.answerListLocator(question).locator('[id^=answer-label-]')
+        await expect(labels.first()).toBeVisible()
+        return labels.allTextContents()
     }
 
     explanations = (question: string) =>
         this.answerAndExplanationLocator(question).locator('.explanationText').allTextContents()
 
-    questionExplanation = (question: string) =>
-        this.questionLocator(question).locator('.question-explanation').textContent()
+    questionExplanation = async (question: string) => {
+        await this.waitForQuestion(question)
+        return this.questionLocator(question).locator('.question-explanation').textContent()
+    }
 
     private checkedUserSelectLocator = (question: string) => this.questionLocator(question).locator('input:checked')
     checkedAnswerLabel = async (question: string) => {
+        await this.waitForQuestion(question)
         const numericalCount = await this.numericalResultLocator(question).count()
         if (numericalCount > 0) {
             const userCount = await this.userAnswerBarLocator(question).count()

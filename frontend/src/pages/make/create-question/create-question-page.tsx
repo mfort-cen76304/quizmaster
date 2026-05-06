@@ -24,7 +24,7 @@ export function CreateQuestionPage() {
             subtitle="Draft a clean quiz question, refine the answers, and use AI as a starting point when it helps."
             id="create-question-page"
         >
-            <QuestionEditForm workspaceGuid={workspaceId} onSubmit={handleSubmit} />
+            <QuestionEditForm workspaceId={workspaceId} onSubmit={handleSubmit} />
         </Page>
     )
 }

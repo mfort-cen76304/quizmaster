@@ -20,9 +20,11 @@ describe('QuizmasterClient', () => {
     it('constructs encoded REST URLs and JSON request bodies', async () => {
         let capturedUrl = ''
         let capturedBody: unknown
+        let capturedHeaders: HeadersInit | undefined
         const fetcher: typeof fetch = async (input, init) => {
             capturedUrl = String(input)
             capturedBody = JSON.parse(String(init?.body))
+            capturedHeaders = init?.headers
             return jsonResponse({ id: 42 })
         }
 
@@ -38,8 +40,9 @@ describe('QuizmasterClient', () => {
             tags: [],
         })
 
-        expect(capturedUrl).toBe('http://quizmaster.test/api/workspaces/workspace%20guid/questions')
+        expect(capturedUrl).toBe('http://quizmaster.test/api/workspace/questions')
         expect(capturedBody).toMatchObject({ question: 'Question?', questionType: 'single' })
+        expect(capturedHeaders).toMatchObject({ 'X-Workspace-Key': 'workspace guid' })
     })
 
     it('maps REST not-found responses into typed client errors', async () => {
@@ -51,7 +54,7 @@ describe('QuizmasterClient', () => {
             message: 'Missing workspace.',
             details: {
                 status: 404,
-                path: '/api/workspaces/missing',
+                path: '/api/workspace',
             },
         })
     })
@@ -86,7 +89,11 @@ describe('QuizmasterClient', () => {
         const client = new QuizmasterClient(testConfig(), fetcher)
 
         await expect(
-            client.generateQuestionDraft({ question: 'Create one.', questionType: 'single' }),
+            client.generateQuestionDraft({
+                workspaceGuid: 'workspace-guid',
+                question: 'Create one.',
+                questionType: 'single',
+            }),
         ).resolves.toEqual({
             question: 'What is Scrum?',
             answers: ['A framework', 'A database'],

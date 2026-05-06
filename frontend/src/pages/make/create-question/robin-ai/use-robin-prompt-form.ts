@@ -21,35 +21,38 @@ export interface RobinGenerationResult {
     readonly assistantMessage?: string
 }
 
+export interface RobinGenerateRequest {
+    readonly workspaceGuid: string
+    readonly question: string
+    readonly questionType: QuestionType
+    readonly currentDrafts: readonly QuestionDraft[]
+}
+
 interface UseRobinPromptFormArgs {
     readonly onGenerated: (drafts: readonly QuestionDraft[]) => void | Promise<void>
-    readonly generateRequest?: (request: {
-        question: string
-        questionType: QuestionType
-        workspaceGuid?: string
-        currentDrafts: readonly QuestionDraft[]
-    }) => Promise<RobinGenerationResult>
+    readonly generateRequest?: (request: RobinGenerateRequest) => Promise<RobinGenerationResult>
     readonly undo: RobinUndoBuffer
+    readonly workspaceId: string
     readonly questionType: QuestionType
-    readonly workspaceGuid?: string
     readonly onClose: () => void
     readonly closeOnGenerated?: boolean
     readonly mode?: 'classic' | 'chat'
 }
 
-const generateSingleDraft = async (request: {
-    question: string
-    questionType: QuestionType
-    workspaceGuid?: string
-    currentDrafts: readonly QuestionDraft[]
-}): Promise<RobinGenerationResult> => ({ drafts: [await postAiAssistant(request)] })
+const generateSingleDraft = async ({
+    workspaceGuid,
+    question,
+    questionType,
+}: RobinGenerateRequest): Promise<RobinGenerationResult> => ({
+    drafts: [await postAiAssistant(workspaceGuid, { question, questionType })],
+})
 
 export const useRobinPromptForm = ({
     onGenerated,
     generateRequest = generateSingleDraft,
     undo,
+    workspaceId,
     questionType,
-    workspaceGuid,
     onClose,
     closeOnGenerated = true,
     mode = 'classic',
@@ -67,9 +70,9 @@ export const useRobinPromptForm = ({
         setLoading(true)
         try {
             const response = await generateRequest({
+                workspaceGuid: workspaceId,
                 question: submittedPrompt,
                 questionType,
-                workspaceGuid,
                 currentDrafts: generatedDrafts,
             })
             undo.capture()

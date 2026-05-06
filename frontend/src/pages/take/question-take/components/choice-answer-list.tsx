@@ -1,9 +1,9 @@
-import type { Question } from '#model/question.ts'
+import type { Question, QuestionTake } from '#model/question.ts'
 
 import { Answer } from './answer.tsx'
 
 interface ChoiceAnswerListProps {
-    readonly question: Question
+    readonly question: Question | QuestionTake
     readonly showFeedback: (idx: number) => boolean
     readonly onSelectedAnswerChange: (idx: number, selected: boolean) => void
     readonly isAnswerChecked: (idx: number) => boolean
@@ -15,7 +15,12 @@ export const ChoiceAnswerList = ({
     onSelectedAnswerChange,
     isAnswerChecked,
 }: ChoiceAnswerListProps) => {
-    const isMultipleChoice = question.correctAnswers.length > 1
+    const correctAnswers = 'correctAnswers' in question ? question.correctAnswers : []
+    const explanations = 'explanations' in question ? question.explanations : []
+    const correctAnswerCount =
+        'correctAnswers' in question ? question.correctAnswers.length : question.correctAnswerCount
+    const hasFeedbackDetails = 'correctAnswers' in question
+    const isMultipleChoice = correctAnswerCount > 1
 
     return (
         <ul className="answers">
@@ -26,9 +31,9 @@ export const ChoiceAnswerList = ({
                     idx={idx}
                     questionId={question.id}
                     answer={answer}
-                    isCorrect={question.correctAnswers.includes(idx)}
-                    explanation={question.explanations ? question.explanations[idx] : 'not defined'}
-                    showFeedback={showFeedback(idx)}
+                    isCorrect={correctAnswers.includes(idx)}
+                    explanation={explanations[idx] ?? ''}
+                    showFeedback={hasFeedbackDetails && showFeedback(idx)}
                     onAnswerChange={onSelectedAnswerChange}
                     isAnswerChecked={isAnswerChecked}
                 />

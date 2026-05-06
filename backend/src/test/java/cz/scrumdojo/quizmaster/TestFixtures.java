@@ -14,22 +14,13 @@ import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
-import org.springframework.test.web.servlet.request.RequestPostProcessor;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-
 @Component
 public class TestFixtures {
-    private static final String OWNER_SUBJECT = "owner@example.test";
-    private static final String EDITOR_SUBJECT = "editor@example.test";
-    private static final String VIEWER_SUBJECT = "viewer@example.test";
-    private static final String OUTSIDER_SUBJECT = "outsider@example.test";
-
     @Autowired
     private QuestionRepository questionRepository;
 
@@ -117,7 +108,6 @@ public class TestFixtures {
             Difficulty.KEEP_QUESTION,
             85,
             null,
-            null,
             1
         );
     }
@@ -181,40 +171,6 @@ public class TestFixtures {
 
     public Workspace save(Workspace workspace) {
         return workspaceRepository.save(workspace);
-    }
-
-    public RequestPostProcessor workspaceCreator() {
-        return authenticated(OWNER_SUBJECT, "workspace:create");
-    }
-
-    public RequestPostProcessor ownerOf(Workspace workspace) {
-        return workspaceMember(OWNER_SUBJECT, workspace, "OWNER");
-    }
-
-    public RequestPostProcessor editorOf(Workspace workspace) {
-        return workspaceMember(EDITOR_SUBJECT, workspace, "EDITOR");
-    }
-
-    public RequestPostProcessor viewerOf(Workspace workspace) {
-        return workspaceMember(VIEWER_SUBJECT, workspace, "VIEWER");
-    }
-
-    public RequestPostProcessor outsider() {
-        return authenticated(OUTSIDER_SUBJECT, "workspace:create");
-    }
-
-    private RequestPostProcessor workspaceMember(String subject, Workspace workspace, String role) {
-        return authenticated(
-            subject,
-            "workspace:create",
-            "workspace:%s:%s".formatted(workspace.getGuid(), role)
-        );
-    }
-
-    private RequestPostProcessor authenticated(String subject, String... authorities) {
-        return user(subject).authorities(Arrays.stream(authorities)
-            .map(SimpleGrantedAuthority::new)
-            .toList());
     }
 
     public Attempt.AttemptBuilder attempt(Quiz quiz) {

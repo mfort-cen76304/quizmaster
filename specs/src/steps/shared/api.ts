@@ -14,6 +14,8 @@ import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/wo
 import type { QuestionSpec, QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
 
+const workspaceHeaders = (workspaceGuid: string) => ({ 'X-Workspace-Key': workspaceGuid })
+
 export const createWorkspaceViaRest = async (world: QuizmasterWorld, name: string): Promise<string> => {
     const body: WorkspaceRequest = { title: name }
     const response = await world.page.request.post('/api/workspaces', { data: body })
@@ -66,9 +68,10 @@ export const createQuestionViaRest = async (
     workspaceGuid: string,
     spec: QuestionSpec,
 ): Promise<number> => {
-    const url = `/api/workspaces/${workspaceGuid}/questions`
+    const url = '/api/workspace/questions'
     const response = await world.page.request.post(url, {
         data: toQuestionPayload(spec),
+        headers: workspaceHeaders(workspaceGuid),
     })
     if (!response.ok()) {
         throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)
@@ -110,7 +113,6 @@ const toQuizPayload = (world: QuizmasterWorld, spec: QuizSpec): QuizRequest => (
     difficulty: spec.difficulty ? toDifficultyValue(spec.difficulty) : DEFAULT_DIFFICULTY,
     passScore: spec.passScore ? Number.parseInt(spec.passScore, 10) : DEFAULT_PASS_SCORE,
     timeLimit: spec.timeLimit ? parseTimeLimitToSeconds(spec.timeLimit) : DEFAULT_TIME_LIMIT,
-    workspaceGuid: world.workspaceGuid,
     randomQuestionCount: spec.size ? Number.parseInt(spec.size, 10) : DEFAULT_RANDOM_COUNT,
 })
 
@@ -119,9 +121,10 @@ export const createQuizViaRest = async (
     workspaceGuid: string,
     spec: QuizSpec,
 ): Promise<number> => {
-    const url = `/api/workspaces/${workspaceGuid}/quizzes`
+    const url = '/api/workspace/quizzes'
     const response = await world.page.request.post(url, {
         data: toQuizPayload(world, spec),
+        headers: workspaceHeaders(workspaceGuid),
     })
     if (!response.ok()) {
         throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)

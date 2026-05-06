@@ -27,10 +27,9 @@ public class QuizStatsService {
     @Transactional(readOnly = true)
     public Optional<QuizStatsResponse> getStats(String workspaceGuid, Integer quizId) {
         return quizRepository.findByIdAndWorkspaceGuid(quizId, workspaceGuid).map(quiz -> {
-            int totalQuestions = getTotalQuestions(quiz);
             List<Attempt> attempts = attemptRepository.findByQuizIdOrderByStartedAtDesc(quizId);
             List<AttemptStatsRecord> records = attempts.stream()
-                    .map(attempt -> toRecord(totalQuestions, attempt))
+                    .map(attempt -> toRecord(quiz, getTotalQuestions(quiz, attempt), attempt))
                     .toList();
             SummaryStats summary = computeSummary(records);
             return new QuizStatsResponse(summary, records);
@@ -44,13 +43,23 @@ public class QuizStatsService {
         return quiz.getQuestionIds() != null ? quiz.getQuestionIds().length : 0;
     }
 
-    private AttemptStatsRecord toRecord(int totalQuestions, Attempt attempt) {
+    private int getTotalQuestions(Quiz quiz, Attempt attempt) {
+        if (attempt.getQuestionIds() != null && attempt.getQuestionIds().length > 0) {
+            return attempt.getQuestionIds().length;
+        }
+        return getTotalQuestions(quiz);
+    }
+
+    private AttemptStatsRecord toRecord(Quiz quiz, int totalQuestions, Attempt attempt) {
         LocalDateTime endTime = attempt.getTimedOutAt() != null
                 ? attempt.getTimedOutAt()
                 : attempt.getFinishedAt();
         Integer durationSeconds = endTime != null
                 ? (int) Duration.between(attempt.getStartedAt(), endTime).getSeconds()
                 : null;
+        if (durationSeconds != null && attempt.getTimedOutAt() != null && quiz.getTimeLimit() != null) {
+            durationSeconds = Math.min(durationSeconds, quiz.getTimeLimit());
+        }
 
         int correctAnswers = attempt.getCorrectAnswers();
         int partiallyCorrectAnswers = attempt.getPartiallyCorrectAnswers() != null

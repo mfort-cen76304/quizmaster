@@ -1,7 +1,6 @@
 import './quiz-edit-form.scss'
 import { useState } from 'react'
 
-import { useWorkspaceId } from '#fe/urls.ts'
 import type { QuestionListItem } from '#model/question-list-item.ts'
 import type { Quiz } from '#model/quiz.ts'
 import { Field, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from '#pages/components'
@@ -23,7 +22,6 @@ interface QuizEditFormProps {
     readonly quiz?: Quiz
 }
 export const QuizEditForm = ({ questions, onSubmit, quiz }: QuizEditFormProps) => {
-    const workspaceId = useWorkspaceId()
     const state = useQuizFormState(questions, quiz)
     const [timeLimitText, setTimeLimitText] = useState(`${state.timeLimit}s`)
 
@@ -44,7 +42,7 @@ export const QuizEditForm = ({ questions, onSubmit, quiz }: QuizEditFormProps) =
     }
 
     return (
-        <Form id="create-quiz" validator={validator} onSubmit={() => onSubmit(stateToQuizApiData(state, workspaceId))}>
+        <Form id="create-quiz" validator={validator} onSubmit={() => onSubmit(stateToQuizApiData(state))}>
             <Field label="Quiz title" required>
                 <TextInput id="quiz-title" value={state.title} onChange={state.setTitle} />
                 <ErrorMessage errorCode="empty-title" />

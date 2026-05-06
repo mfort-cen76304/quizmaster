@@ -1,9 +1,9 @@
-import type { Quiz } from '#model/quiz.ts'
+import type { Quiz, QuizTake } from '#model/quiz.ts'
 import { StartButton } from '#pages/take/quiz-take/components/buttons.tsx'
 import './quiz-details.scss'
 
 export interface QuizDetailsProps {
-    readonly quiz: Quiz
+    readonly quiz: Quiz | QuizTake
     readonly canStart: boolean
     readonly onStart: () => void
 }

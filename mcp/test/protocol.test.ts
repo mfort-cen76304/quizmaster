@@ -31,7 +31,11 @@ const startMockBackend = async (): Promise<MockBackend> => {
             json(response, 200, true)
             return
         }
-        if (request.method === 'GET' && request.url === '/api/workspaces/demo') {
+        if (
+            request.method === 'GET' &&
+            request.url === '/api/workspace' &&
+            request.headers['x-workspace-key'] === 'demo'
+        ) {
             json(response, 200, { guid: 'demo', title: 'Demo Workspace' })
             return
         }

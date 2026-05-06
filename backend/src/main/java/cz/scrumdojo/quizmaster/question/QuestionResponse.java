@@ -1,5 +1,8 @@
 package cz.scrumdojo.quizmaster.question;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public record QuestionResponse(
     Integer id,
     String question,
@@ -18,6 +21,14 @@ public record QuestionResponse(
         return new QuestionResponse(
             q.getId(), q.getQuestion(), q.getAnswers(), q.getExplanations(),
             q.getQuestionExplanation(), q.getCorrectAnswers(), q.getWorkspaceGuid(),
+            q.isEasy(), q.getImageUrl(), q.getTolerance(), q.getQuestionType(), q.getTags()
+        );
+    }
+
+    public static QuestionResponse feedbackFrom(Question q) {
+        return new QuestionResponse(
+            q.getId(), q.getQuestion(), q.getAnswers(), q.getExplanations(),
+            q.getQuestionExplanation(), q.getCorrectAnswers(), null,
             q.isEasy(), q.getImageUrl(), q.getTolerance(), q.getQuestionType(), q.getTags()
         );
     }

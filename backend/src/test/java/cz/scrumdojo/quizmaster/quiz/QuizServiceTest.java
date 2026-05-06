@@ -2,7 +2,7 @@ package cz.scrumdojo.quizmaster.quiz;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
-import cz.scrumdojo.quizmaster.question.QuestionResponse;
+import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,13 +35,25 @@ public class QuizServiceTest {
     }
 
     @Test
-    public void quizWithRandomQuestionCountReturnsExactCount() {
+    public void adminQuizReturnsAllQuestionsWhenRandomQuestionCountIsSet() {
         Question q1 = fixtures.save(fixtures.question());
         Question q2 = fixtures.save(fixtures.question());
         Question q3 = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3).randomQuestionCount(2).build());
 
         QuizResponse response = quizService.getQuiz(quiz.getId()).orElseThrow();
+
+        assertEquals(3, response.questions().length);
+    }
+
+    @Test
+    public void quizWithRandomQuestionCountReturnsExactCount() {
+        Question q1 = fixtures.save(fixtures.question());
+        Question q2 = fixtures.save(fixtures.question());
+        Question q3 = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3).randomQuestionCount(2).build());
+
+        QuizTakeResponse response = quizService.getTakeQuiz(quiz.getId()).orElseThrow();
 
         assertEquals(2, response.questions().length);
     }
@@ -55,10 +67,10 @@ public class QuizServiceTest {
 
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3).randomQuestionCount(2).build());
 
-        QuizResponse response = quizService.getQuiz(quiz.getId()).orElseThrow();
+        QuizTakeResponse response = quizService.getTakeQuiz(quiz.getId()).orElseThrow();
 
         Set<Integer> returnedIds = Arrays.stream(response.questions())
-            .map(QuestionResponse::id)
+            .map(QuestionTakeResponse::id)
             .collect(Collectors.toSet());
         assertTrue(poolIds.containsAll(returnedIds));
     }

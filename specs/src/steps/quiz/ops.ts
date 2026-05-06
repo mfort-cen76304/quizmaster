@@ -1,3 +1,5 @@
+import type { Response as PlaywrightResponse } from '@playwright/test'
+
 import type { QuizmasterWorld } from '#steps/world'
 
 export const openQuiz = async (world: QuizmasterWorld, quizBookmark: string) => {
@@ -15,14 +17,46 @@ export const ensureFakeClockInstalled = async (world: QuizmasterWorld) => {
 export const startQuiz = async (world: QuizmasterWorld, quizBookmark: string) => {
     await ensureFakeClockInstalled(world)
     await openQuiz(world, quizBookmark)
+    const browserNow = await world.page.evaluate(() => Date.now())
+    await world.page.clock.pauseAt(browserNow + 60_000)
     await world.quizWelcomePage.start()
     world.activeQuizBookmark = quizBookmark
 }
 
+const isQuizQuestionSubmitResponse = (response: PlaywrightResponse) => {
+    const url = new URL(response.url())
+    return (
+        response.request().method() === 'POST' &&
+        /\/api\/quiz\/\d+\/attempts\/\d+\/questions\/\d+\/submit$/.test(url.pathname) &&
+        response.status() < 400
+    )
+}
+
+const waitForAnswerSettled = async (world: QuizmasterWorld, progressBefore: number, progressMax: number) => {
+    const signals = [
+        world.takeQuestionPage.questionFeedbackLocator().waitFor({ state: 'visible' }),
+        world.questionPage.evaluateButtonLocator().waitFor({ state: 'visible' }),
+    ]
+
+    if (progressBefore < progressMax) {
+        signals.push(world.questionPage.expectProgress(progressBefore + 1, progressMax))
+    }
+
+    await Promise.any(signals)
+}
+
 export const answerNth = async (world: QuizmasterWorld, n: number) => {
     await world.takeQuestionPage.waitForLoaded()
+    const progressBefore = await world.questionPage.progressCurrent()
+    const progressMax = await world.questionPage.progressMax()
+    const submitResponse = world.page.url().includes('/dry-run/')
+        ? undefined
+        : world.page.waitForResponse(isQuizQuestionSubmitResponse)
+
     await world.takeQuestionPage.selectAnswerNth(n)
     await world.takeQuestionPage.submit()
+    await submitResponse
+    await waitForAnswerSettled(world, progressBefore, progressMax)
 }
 
 export const answerCorrectly = async (world: QuizmasterWorld) => answerNth(world, 0)
@@ -63,6 +97,11 @@ export const progressThroughQuestions = async (world: QuizmasterWorld) => {
         }
 
         await world.takeQuestionPage.selectAnswerNth(0)
+        const progressBefore = await world.questionPage.progressCurrent()
+        const progressMax = await world.questionPage.progressMax()
+        const submitResponse = world.page.waitForResponse(isQuizQuestionSubmitResponse)
         await world.takeQuestionPage.submit()
+        await submitResponse
+        await waitForAnswerSettled(world, progressBefore, progressMax)
     }
 }

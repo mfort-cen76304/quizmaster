@@ -1,5 +1,5 @@
 import './question-form.scss'
-import type { Question } from '#model/question.ts'
+import type { Question, QuestionTake } from '#model/question.ts'
 import { countDecimalDigits } from '#model/question.ts'
 import { Form } from '#pages/components'
 
@@ -14,15 +14,23 @@ import { useQuestionTakeState } from './question-take-state.ts'
 import { useQuestionKeyboardShortcuts } from './use-keyboard-shortcuts.ts'
 
 interface QuestionFormProps {
-    readonly question: Question
+    readonly question: Question | QuestionTake
 }
 
 export const QuestionForm = ({ question }: QuestionFormProps) => {
-    const { correctAnswers, answers, questionExplanation } = question
-
     const state = useQuestionTakeState(question)
+    const displayQuestion = state.feedbackQuestion ?? question
+    const answers = displayQuestion.answers
+    const correctAnswerCount =
+        'correctAnswers' in displayQuestion ? displayQuestion.correctAnswers.length : displayQuestion.correctAnswerCount
+    const questionExplanation = state.feedbackQuestion?.questionExplanation ?? ''
 
-    const decimalDigits = state.isNumerical ? countDecimalDigits(answers[0]) : 0
+    const decimalDigits =
+        state.isNumerical && answers[0]
+            ? countDecimalDigits(answers[0])
+            : 'requiredDecimalDigits' in question
+              ? question.requiredDecimalDigits
+              : 0
 
     useQuestionKeyboardShortcuts({
         enabled: !state.isNumerical,
@@ -40,7 +48,7 @@ export const QuestionForm = ({ question }: QuestionFormProps) => {
             <div className="question-fieldset">
                 <QuestionHeader text={question.question} />
 
-                {state.showAnswerCount && <AnswerCountHint count={correctAnswers.length} />}
+                {state.showAnswerCount && <AnswerCountHint count={correctAnswerCount} />}
                 {question.imageUrl && <QuestionImage url={question.imageUrl} />}
 
                 {state.isNumerical ? (
@@ -50,14 +58,14 @@ export const QuestionForm = ({ question }: QuestionFormProps) => {
                     </>
                 ) : (
                     <ChoiceAnswerList
-                        question={question}
+                        question={displayQuestion}
                         showFeedback={state.showFeedback}
                         onSelectedAnswerChange={state.onSelectedAnswerChange}
                         isAnswerChecked={state.isAnswerChecked}
                     />
                 )}
 
-                {!state.submitted && <SubmitButton disabled={!state.hasAnswer} />}
+                {!state.submitted && !state.submitting && <SubmitButton disabled={!state.hasAnswer} />}
                 {state.showResultFeedback && <QuestionFeedback score={state.score} explanation={questionExplanation} />}
             </div>
         </Form>

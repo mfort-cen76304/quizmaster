@@ -10,7 +10,6 @@ import {
     emptyInputSchema,
     generateQuestionDraftInputSchema,
     questionIdInputSchema,
-    quizIdInputSchema,
     toolErrorResult,
     toolResult,
     toQuestionRequest,
@@ -219,13 +218,13 @@ export const registerQuizmasterTools = (server: McpServer, client: QuizmasterCli
     registerTool(
         server,
         'quizmaster_get_quiz',
-        quizIdInputSchema,
+        workspaceQuizIdInputSchema,
         {
             title: 'Get Quiz',
-            description: 'Reads a full public quiz representation.',
+            description: 'Reads a full workspace-scoped quiz.',
             annotations: readOnlyAnnotations,
         },
-        async input => await client.getQuiz(input.quizId),
+        async input => await client.getQuiz(input.workspaceGuid, input.quizId),
     )
 
     registerTool(

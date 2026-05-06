@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { useApi } from '#api/hooks.ts'
-import { fetchQuiz } from '#api/quiz.ts'
+import { fetchWorkspaceQuiz } from '#api/quiz.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 import type { Quiz } from '#model/quiz.ts'
 
@@ -15,7 +15,7 @@ export const QuizDryRunWelcomePage = () => {
     const workspaceId = useWorkspaceId()
     const [quiz, setQuiz] = useState<Quiz>()
 
-    useApi(params.id, fetchQuiz, setQuiz)
+    useApi(params.id, id => fetchWorkspaceQuiz(workspaceId, id), setQuiz)
 
     const onStart = () => {
         if (!quiz) return

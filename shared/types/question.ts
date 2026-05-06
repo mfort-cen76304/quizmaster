@@ -28,4 +28,22 @@ export interface Question {
     readonly tags: string[]
 }
 
+export interface QuestionTake {
+    readonly id: number
+    readonly question: string
+    readonly imageUrl?: string
+    readonly answers: string[]
+    readonly questionType: QuestionType
+    readonly isEasy: boolean
+    readonly tags: readonly string[]
+    readonly correctAnswerCount: number
+    readonly requiredDecimalDigits: number
+}
+
+export interface QuestionEvaluation {
+    readonly correct: boolean
+    readonly score: number
+    readonly question?: Question
+}
+
 export type QuestionDraft = Omit<Question, 'id' | 'workspaceGuid'>

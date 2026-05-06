@@ -34,11 +34,13 @@ export class QuizmasterClientError extends Error {
 }
 
 export interface AiAssistantRequest {
+    readonly workspaceGuid: string
     readonly question: string
     readonly questionType: QuestionRequest['questionType']
 }
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
+const WORKSPACE_KEY_HEADER = 'X-Workspace-Key'
 
 const parseJsonOrText = (text: string): unknown => {
     if (text.trim() === '') return undefined
@@ -121,77 +123,85 @@ export class QuizmasterClient {
     }
 
     async getWorkspace(workspaceGuid: string): Promise<Workspace> {
-        return await this.request('GET', `/api/workspaces/${encodeURIComponent(workspaceGuid)}`)
+        return await this.request('GET', '/api/workspace', undefined, workspaceGuid)
     }
 
     async listQuestions(workspaceGuid: string): Promise<readonly QuestionListItem[]> {
-        return await this.request('GET', `/api/workspaces/${encodeURIComponent(workspaceGuid)}/questions`)
+        return await this.request('GET', '/api/workspace/questions', undefined, workspaceGuid)
     }
 
     async getQuestion(workspaceGuid: string, questionId: number): Promise<Question> {
         return await this.request(
             'GET',
-            `/api/workspaces/${encodeURIComponent(workspaceGuid)}/questions/${encodeURIComponent(questionId)}`,
+            `/api/workspace/questions/${encodeURIComponent(questionId)}`,
+            undefined,
+            workspaceGuid,
         )
     }
 
     async createQuestion(workspaceGuid: string, question: QuestionRequest): Promise<IdResponse> {
-        return await this.request('POST', `/api/workspaces/${encodeURIComponent(workspaceGuid)}/questions`, question)
+        return await this.request('POST', '/api/workspace/questions', question, workspaceGuid)
     }
 
     async updateQuestion(workspaceGuid: string, questionId: number, question: QuestionRequest): Promise<IdResponse> {
         return await this.request(
             'PATCH',
-            `/api/workspaces/${encodeURIComponent(workspaceGuid)}/questions/${encodeURIComponent(questionId)}`,
+            `/api/workspace/questions/${encodeURIComponent(questionId)}`,
             question,
+            workspaceGuid,
         )
     }
 
     async deleteQuestion(workspaceGuid: string, questionId: number): Promise<void> {
-        await this.request('DELETE', `/api/workspaces/${encodeURIComponent(workspaceGuid)}/questions/${questionId}`)
+        await this.request('DELETE', `/api/workspace/questions/${questionId}`, undefined, workspaceGuid)
     }
 
     async listQuizzes(workspaceGuid: string): Promise<readonly QuizListItem[]> {
-        return await this.request('GET', `/api/workspaces/${encodeURIComponent(workspaceGuid)}/quizzes`)
+        return await this.request('GET', '/api/workspace/quizzes', undefined, workspaceGuid)
     }
 
-    async getQuiz(quizId: number): Promise<Quiz> {
-        return await this.request('GET', `/api/quiz/${encodeURIComponent(quizId)}`)
-    }
-
-    async createQuiz(workspaceGuid: string, quiz: QuizRequest): Promise<IdResponse> {
-        return await this.request('POST', `/api/workspaces/${encodeURIComponent(workspaceGuid)}/quizzes`, quiz)
-    }
-
-    async updateQuiz(workspaceGuid: string, quizId: number, quiz: QuizRequest): Promise<IdResponse> {
+    async getQuiz(workspaceGuid: string, quizId: number): Promise<Quiz> {
         return await this.request(
-            'PUT',
-            `/api/workspaces/${encodeURIComponent(workspaceGuid)}/quizzes/${encodeURIComponent(quizId)}`,
-            quiz,
+            'GET',
+            `/api/workspace/quizzes/${encodeURIComponent(quizId)}`,
+            undefined,
+            workspaceGuid,
         )
     }
 
+    async createQuiz(workspaceGuid: string, quiz: QuizRequest): Promise<IdResponse> {
+        return await this.request('POST', '/api/workspace/quizzes', quiz, workspaceGuid)
+    }
+
+    async updateQuiz(workspaceGuid: string, quizId: number, quiz: QuizRequest): Promise<IdResponse> {
+        return await this.request('PUT', `/api/workspace/quizzes/${encodeURIComponent(quizId)}`, quiz, workspaceGuid)
+    }
+
     async deleteQuiz(workspaceGuid: string, quizId: number): Promise<void> {
-        await this.request('DELETE', `/api/workspaces/${encodeURIComponent(workspaceGuid)}/quizzes/${quizId}`)
+        await this.request('DELETE', `/api/workspace/quizzes/${quizId}`, undefined, workspaceGuid)
     }
 
     async getQuizStats(workspaceGuid: string, quizId: number): Promise<QuizStatsResponse> {
         return await this.request(
             'GET',
-            `/api/workspaces/${encodeURIComponent(workspaceGuid)}/quizzes/${encodeURIComponent(quizId)}/stats`,
+            `/api/workspace/quizzes/${encodeURIComponent(quizId)}/stats`,
+            undefined,
+            workspaceGuid,
         )
     }
 
     async generateQuestionDraft(request: AiAssistantRequest): Promise<QuestionDraft> {
+        const { workspaceGuid, ...body } = request
         const response = await this.request<Question & { readonly id?: number | null }>(
             'POST',
             '/api/ai-assistant',
-            request,
+            body,
+            workspaceGuid,
         )
         return stripDraftTransportFields(response)
     }
 
-    private async request<T>(method: HttpMethod, path: string, body?: unknown): Promise<T> {
+    private async request<T>(method: HttpMethod, path: string, body?: unknown, workspaceKey?: string): Promise<T> {
         const url = new URL(path, this.baseUrl).toString()
         const controller = new AbortController()
         const timeout = setTimeout(() => controller.abort(), this.config.requestTimeoutMs)
@@ -199,7 +209,10 @@ export class QuizmasterClient {
         try {
             const response = await this.fetcher(url, {
                 method,
-                headers: body === undefined ? undefined : { 'Content-Type': 'application/json' },
+                headers: {
+                    ...(body === undefined ? {} : { 'Content-Type': 'application/json' }),
+                    ...(workspaceKey === undefined ? {} : { [WORKSPACE_KEY_HEADER]: workspaceKey }),
+                },
                 body: body === undefined ? undefined : JSON.stringify(body),
                 signal: controller.signal,
             })

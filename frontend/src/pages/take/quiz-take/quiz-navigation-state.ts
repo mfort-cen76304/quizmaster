@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router'
 
 import { useStateSet } from '#fe/helpers.ts'
-import type { Quiz } from '#model/quiz.ts'
+import type { Quiz, QuizTake } from '#model/quiz.ts'
 
 export interface QuizNavigationState {
     readonly currentQuestionIdx: number
@@ -18,7 +18,7 @@ export interface QuizNavigationState {
     readonly unskip: () => void
 }
 
-export const useQuizNavigationState = (quiz: Quiz, questionsBaseUrl: string): QuizNavigationState => {
+export const useQuizNavigationState = (quiz: Quiz | QuizTake, questionsBaseUrl: string): QuizNavigationState => {
     const { questionId } = useParams()
 
     const navigate = useNavigate()

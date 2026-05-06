@@ -2,6 +2,7 @@ package cz.scrumdojo.quizmaster.question;
 
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
+import cz.scrumdojo.quizmaster.workspace.WorkspaceKey;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -9,20 +10,25 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/workspaces/{guid}/questions")
+@RequestMapping("/api/workspace/questions")
 public class QuestionMakeController {
 
     private final WorkspaceRepository workspaceRepository;
     private final QuestionRepository questionRepository;
 
-    public QuestionMakeController(WorkspaceRepository workspaceRepository, QuestionRepository questionRepository) {
+    public QuestionMakeController(
+            WorkspaceRepository workspaceRepository,
+            QuestionRepository questionRepository) {
         this.workspaceRepository = workspaceRepository;
         this.questionRepository = questionRepository;
     }
 
     @Transactional(readOnly = true)
     @GetMapping("/{id}")
-    public ResponseEntity<QuestionResponse> getWorkspaceQuestion(@PathVariable String guid, @PathVariable Integer id) {
+    public ResponseEntity<QuestionResponse> getWorkspaceQuestion(
+            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable Integer id) {
+        String guid = WorkspaceKey.require(workspaceKey);
         if (!workspaceRepository.existsById(guid))
             return ResponseEntity.notFound().build();
 
@@ -32,7 +38,9 @@ public class QuestionMakeController {
     @Transactional
     @PostMapping
     public ResponseEntity<IdResponse> createWorkspaceQuestion(
-            @PathVariable String guid, @Valid @RequestBody QuestionRequest request) {
+            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @Valid @RequestBody QuestionRequest request) {
+        String guid = WorkspaceKey.require(workspaceKey);
         if (!workspaceRepository.existsById(guid))
             return ResponseEntity.notFound().build();
 
@@ -43,7 +51,10 @@ public class QuestionMakeController {
     @Transactional
     @PatchMapping("/{id}")
     public ResponseEntity<IdResponse> updateWorkspaceQuestion(
-            @PathVariable String guid, @PathVariable Integer id, @Valid @RequestBody QuestionRequest request) {
+            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable Integer id,
+            @Valid @RequestBody QuestionRequest request) {
+        String guid = WorkspaceKey.require(workspaceKey);
         if (!workspaceRepository.existsById(guid))
             return ResponseEntity.notFound().build();
 
@@ -59,7 +70,10 @@ public class QuestionMakeController {
 
     @Transactional
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWorkspaceQuestion(@PathVariable String guid, @PathVariable Integer id) {
+    public ResponseEntity<Void> deleteWorkspaceQuestion(
+            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable Integer id) {
+        String guid = WorkspaceKey.require(workspaceKey);
         if (!workspaceRepository.existsById(guid))
             return ResponseEntity.notFound().build();
 

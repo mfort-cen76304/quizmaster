@@ -1,8 +1,10 @@
 package cz.scrumdojo.quizmaster.attempt;
 
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
+import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.quiz.QuizAvailability;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
+import cz.scrumdojo.quizmaster.quiz.QuizService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,10 +18,12 @@ public class AttemptController {
 
     private final AttemptRepository attemptRepository;
     private final QuizRepository quizRepository;
+    private final QuizService quizService;
 
-    public AttemptController(AttemptRepository attemptRepository, QuizRepository quizRepository) {
+    public AttemptController(AttemptRepository attemptRepository, QuizRepository quizRepository, QuizService quizService) {
         this.attemptRepository = attemptRepository;
         this.quizRepository = quizRepository;
+        this.quizService = quizService;
     }
 
     @GetMapping("/{id}")
@@ -38,7 +42,11 @@ public class AttemptController {
                                 .body(Map.of("message", "Quiz is not currently available."));
                     }
 
-                    Attempt attempt = attemptRepository.save(request.toEntity());
+                    Attempt attempt = request.toEntity();
+                    attempt.setQuestionIds(quizService.selectQuestions(quiz).stream()
+                            .mapToInt(Question::getId)
+                            .toArray());
+                    attempt = attemptRepository.save(attempt);
                     return ResponseEntity.ok(AttemptResponse.from(attempt));
                 })
                 .orElse(ResponseEntity.notFound().build());

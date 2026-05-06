@@ -14,10 +14,9 @@ public record QuizRequest(
     Difficulty difficulty,
     int passScore,
     Integer timeLimit,
-    String workspaceGuid,
     Integer randomQuestionCount
 ) {
-    public Quiz toEntity() {
+    public Quiz toEntity(String workspaceGuid) {
         return Quiz.builder()
             .title(title)
             .description(description)

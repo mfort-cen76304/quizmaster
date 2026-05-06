@@ -37,7 +37,8 @@ public class WorkspaceControllerTest {
         String guid = com.jayway.jsonpath.JsonPath
             .read(result.getResponse().getContentAsString(), "$.guid");
 
-        mockMvc.perform(get("/api/workspaces/{guid}", guid))
+        mockMvc.perform(get("/api/workspace")
+                .header(WorkspaceKey.HEADER, guid))
             .andExpect(status().isOk())
             .andExpect(content().json("""
                 {"guid": "%s", "title": "Test Workspace"}
@@ -64,19 +65,28 @@ public class WorkspaceControllerTest {
 
     @Test
     public void getWorkspaceNotFound() throws Exception {
-        mockMvc.perform(get("/api/workspaces/{guid}", "non-existent-guid"))
+        mockMvc.perform(get("/api/workspace")
+                .header(WorkspaceKey.HEADER, "non-existent-guid"))
             .andExpect(status().isNotFound());
     }
 
     @Test
     public void getWorkspaceQuestionsNotFound() throws Exception {
-        mockMvc.perform(get("/api/workspaces/{guid}/questions", "non-existent-guid"))
+        mockMvc.perform(get("/api/workspace/questions")
+                .header(WorkspaceKey.HEADER, "non-existent-guid"))
             .andExpect(status().isNotFound());
     }
 
     @Test
     public void getWorkspaceQuizzesNotFound() throws Exception {
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", "non-existent-guid"))
+        mockMvc.perform(get("/api/workspace/quizzes")
+                .header(WorkspaceKey.HEADER, "non-existent-guid"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void workspaceHeaderIsRequired() throws Exception {
+        mockMvc.perform(get("/api/workspace"))
             .andExpect(status().isNotFound());
     }
 
@@ -88,7 +98,8 @@ public class WorkspaceControllerTest {
         Quiz quiz = fixtures.quiz(question2).workspaceGuid(workspace.getGuid()).build();
         fixtures.save(quiz);
 
-        mockMvc.perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
+        mockMvc.perform(get("/api/workspace/questions")
+                .header(WorkspaceKey.HEADER, workspace.getGuid()))
             .andExpect(status().isOk())
             .andExpect(content().json("""
                 [
@@ -105,7 +116,8 @@ public class WorkspaceControllerTest {
         Quiz quiz2 = fixtures.save(fixtures.quizIn(workspace));
         fixtures.save(fixtures.quiz()); // Quiz without workspace
 
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", workspace.getGuid()))
+        mockMvc.perform(get("/api/workspace/quizzes")
+                .header(WorkspaceKey.HEADER, workspace.getGuid()))
             .andExpect(status().isOk())
             .andExpect(content().json("""
                 [
@@ -113,5 +125,17 @@ public class WorkspaceControllerTest {
                     {"id": %d, "title": "Test Quiz"}
                 ]
                 """.formatted(quiz1.getId(), quiz2.getId())));
+    }
+
+    @Test
+    public void oldWorkspaceScopedPathsAreNotAvailable() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        mockMvc.perform(get("/api/workspaces/{guid}", workspace.getGuid()))
+            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
+            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", workspace.getGuid()))
+            .andExpect(status().isNotFound());
     }
 }

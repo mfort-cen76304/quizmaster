@@ -103,6 +103,11 @@ describe('Quizmaster MCP schemas', () => {
             workspaceGuid: 'workspace-guid',
             questionId: 42,
         })
+        expect(parseQuizmasterUri('quizmaster://workspace/workspace-guid/quiz/7')).toEqual({
+            kind: 'workspace-quiz',
+            workspaceGuid: 'workspace-guid',
+            quizId: 7,
+        })
         expect(parseQuizmasterUri('quizmaster://workspace/workspace-guid/quiz/7/stats')).toEqual({
             kind: 'workspace-quiz-stats',
             workspaceGuid: 'workspace-guid',

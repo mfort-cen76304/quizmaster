@@ -1,9 +1,9 @@
 import './quiz.scss'
 import { useRef, useState } from 'react'
 
-import { patchAttempt } from '#api/stats.ts'
-import { type AnswerIdxs, type QuestionAnswer, evaluateAnswer } from '#model/question.ts'
-import type { Quiz } from '#model/quiz.ts'
+import { patchAttempt, recordQuizQuestionAnswer, submitQuizQuestionAnswer } from '#api/stats.ts'
+import { type AnswerIdxs, type QuestionAnswer, type QuestionEvaluation, evaluateAnswer } from '#model/question.ts'
+import type { Quiz, QuizTake } from '#model/quiz.ts'
 import { QuestionForm as StandaloneQuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
 
 import { BookmarkList } from './components/bookmark-list.tsx'
@@ -15,7 +15,7 @@ import { useQuizNavigationState } from './quiz-navigation-state.ts'
 import { TimeLimit } from './time-limit/with-time-limit.tsx'
 
 interface QuestionProps {
-    readonly quiz: Quiz
+    readonly quiz: Quiz | QuizTake
     readonly quizRunId: number | null
     readonly questionsBaseUrl: string
     readonly onEvaluate: (quizAnswers: QuizAnswers, timedOut?: boolean) => void
@@ -31,13 +31,6 @@ export const QuestionForm = (props: QuestionProps) => {
     const answer = (questionAnswer: QuestionAnswer) => {
         answerQuestion(nav.currentQuestionIdx, questionAnswer)
         nav.unskip()
-    }
-
-    const answerAndNext = (questionAnswer: QuestionAnswer) => {
-        answer(questionAnswer)
-        if (!nav.isLastQuestion) {
-            nav.next()
-        }
     }
 
     const bookmark = () => bookmarks.toggle(nav.currentQuestionIdx)
@@ -64,6 +57,7 @@ export const QuestionForm = (props: QuestionProps) => {
 
     const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
     const currentAnswer = quizAnswers.finalAnswers[nav.currentQuestionIdx]
+    const authoringQuestion = 'correctAnswers' in currentQuestion ? currentQuestion : undefined
     const isAnswered = currentAnswer !== undefined
     const hasSelectedAnswer = selectedAnswerIdxs !== undefined && selectedAnswerIdxs.length > 0
 
@@ -96,17 +90,28 @@ export const QuestionForm = (props: QuestionProps) => {
     }
 
     const revertPreviousAnswerCount = () => {
-        if (currentAnswer !== undefined) {
-            const previousResult = evaluateAnswer(currentQuestion, currentAnswer)
+        if (currentAnswer !== undefined && authoringQuestion) {
+            const previousResult = evaluateAnswer(authoringQuestion, currentAnswer)
             adjustCount(previousResult.score, -1)
         }
     }
 
-    const handleAnswerSubmitted = (questionAnswer: QuestionAnswer) => {
+    const handleAnswerSubmitted = async (questionAnswer: QuestionAnswer): Promise<QuestionEvaluation | void> => {
         revertPreviousAnswerCount()
-        const result = evaluateAnswer(currentQuestion, questionAnswer)
-        adjustCount(result.score, 1)
-        if (props.quizRunId !== null) {
+        const result = authoringQuestion
+            ? evaluateAnswer(authoringQuestion, questionAnswer)
+            : props.quizRunId !== null && props.quiz.mode === 'learn'
+              ? await submitQuizQuestionAnswer(props.quiz.id, props.quizRunId, currentQuestion.id, questionAnswer)
+              : undefined
+
+        if (!authoringQuestion && props.quizRunId !== null && props.quiz.mode === 'exam') {
+            await recordQuizQuestionAnswer(props.quiz.id, props.quizRunId, currentQuestion.id, questionAnswer)
+        }
+
+        if (result) {
+            adjustCount(result.score, 1)
+        }
+        if (props.quizRunId !== null && result) {
             patchAttempt(props.quizRunId, {
                 correctAnswers: answerCounts.current.correct,
                 partiallyCorrectAnswers: answerCounts.current.partial,
@@ -117,8 +122,13 @@ export const QuestionForm = (props: QuestionProps) => {
         if (props.quiz.mode === 'learn') {
             answer(questionAnswer)
         } else {
-            answerAndNext(questionAnswer)
+            answer(questionAnswer)
+            if (!nav.isLastQuestion) {
+                nav.next()
+            }
         }
+
+        return result
     }
 
     return (
