@@ -12,8 +12,6 @@ describe('Quizmaster MCP config', () => {
     })
 
     it('allows an explicit MCP base URL override for testing', () => {
-        expect(loadConfig({ QUIZMASTER_MCP_BASE_URL: 'http://localhost:8080/' }).baseUrl).toBe(
-            'http://localhost:8080',
-        )
+        expect(loadConfig({ QUIZMASTER_MCP_BASE_URL: 'http://localhost:8080/' }).baseUrl).toBe('http://localhost:8080')
     })
 })
