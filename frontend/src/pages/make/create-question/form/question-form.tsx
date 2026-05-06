@@ -35,6 +35,8 @@ export const QuestionEditForm = ({ workspaceId, question, onSubmit }: QuestionEd
             <RobinAiHelper
                 workspaceId={workspaceId}
                 form={{ snapshot: state.snapshot, applyPatch: state.applyPatch }}
+                currentQuestion={question ? () => stateToQuestionApiData(state) : undefined}
+                currentQuestionId={question?.id}
             />
             <Form id="question-create-form" validator={validator} onSubmit={handleSubmit}>
                 <Field label="Question" required>

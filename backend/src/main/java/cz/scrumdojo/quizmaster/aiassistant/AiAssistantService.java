@@ -1,5 +1,6 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -469,6 +470,7 @@ public class AiAssistantService {
 
     private record Message(String role, String content) {}
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
     record AssistantResponse(
         String question,
         String[] answers,

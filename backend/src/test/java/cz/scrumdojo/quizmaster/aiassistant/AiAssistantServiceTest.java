@@ -1,6 +1,9 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import cz.scrumdojo.quizmaster.TestFixtures;
+import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
+import cz.scrumdojo.quizmaster.workspace.Workspace;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -8,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
@@ -18,8 +23,17 @@ public class AiAssistantServiceTest {
     @Autowired
     private AiAssistantService aiAssistantService;
 
+    @Autowired
+    private QuestionEmbeddingService questionEmbeddingService;
+
+    @Autowired
+    private TestFixtures fixtures;
+
     @Value("${ai.token:}")
     private String apiToken;
+
+    @Value("${ai.embedding.model}")
+    private String embeddingModel;
 
     @Test
     void generateQuestionFailsOnEmptyPrompt() {
@@ -46,6 +60,28 @@ public class AiAssistantServiceTest {
     void generateQuestionsFailsOnMissingQuestionType() {
         assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("Topic", null));
         assertThrows(ResponseStatusException.class, () -> aiAssistantService.generateQuestions("Topic", "  "));
+    }
+
+    @Test
+    void usableWorkspaceEmbeddingsCanExcludeQuestionBeingEdited() {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question editedQuestion = fixtures.save(withUsableEmbedding(
+            fixtures.questionIn(workspace).question("What is 2 + 2?").build(),
+            new double[]{1.0, 0.0}
+        ));
+        fixtures.save(withUsableEmbedding(
+            fixtures.questionIn(workspace).question("What is 3 + 3?").build(),
+            new double[]{0.0, 1.0}
+        ));
+
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings = questionEmbeddingService.usableWorkspaceEmbeddings(
+            workspace.getGuid(),
+            editedQuestion.getId()
+        );
+
+        assertEquals(List.of("What is 3 + 3?"), existingEmbeddings.stream()
+            .map(QuestionEmbeddingService.UsableQuestionEmbedding::questionText)
+            .toList());
     }
 
     @Tag("ai")
@@ -208,5 +244,12 @@ public class AiAssistantServiceTest {
             assertTrue(index >= 0, "Expected non-negative correct answer indexes");
             assertTrue(index < response.answers().length, "Expected correct answer indexes to stay within answers array bounds");
         }
+    }
+
+    private Question withUsableEmbedding(Question question, double[] embedding) {
+        question.setEmbedding(embedding);
+        question.setEmbeddingModel(embeddingModel);
+        question.setEmbeddingTextHash(QuestionEmbeddingText.hash(question.getQuestion()));
+        return question;
     }
 }

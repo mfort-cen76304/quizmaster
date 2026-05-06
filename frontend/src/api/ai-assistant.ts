@@ -5,6 +5,7 @@ import { postJson, workspaceKeyHeaders } from './helpers.ts'
 interface AiAssistantRequest {
     readonly question: string
     readonly questionType: QuestionType
+    readonly excludedQuestionId?: number
 }
 
 export const postAiAssistant = async (workspaceKey: string, request: AiAssistantRequest) =>
