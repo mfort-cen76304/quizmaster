@@ -148,24 +148,9 @@ BDD specs in `specs/features/`, organized into `make/` (creating) and `take/` (a
 
 ## AI Assistant
 
-Question generation uses OpenRouter via two endpoints sharing one `ai.token`:
+Quizmaster generates question drafts via **Robin AI** (frontend FAB + sheet) calling an `AiAssistantController` that proxies to OpenRouter. Drafts are deduplicated against existing questions in the workspace via cosine similarity on cached embeddings; a match above `ai.embedding.similarity-threshold` triggers one retry with feedback, then fails with `502`.
 
-- **Chat completions** (`AiAssistantService`) — generates question drafts from a per-type prompt (`prompts/{single,multiple,numerical}-choice{,-batch}.md`). Single + batch flavors.
-- **Embeddings** (`OpenRouterEmbeddingClient`) — used for **duplicate avoidance**: each saved question is embedded (`embedForSave`); on generation, the candidate is embedded and compared against workspace embeddings via cosine similarity (`EmbeddingSimilarity`). On a match above `ai.embedding.similarity-threshold`, the assistant retries once with feedback; second match → 502. Embedding columns: `embedding`, `embedding_model`, `embedding_text_hash` (migration `V00049`); a `model+hash` mismatch invalidates the cached embedding.
-
-Configuration: `application.properties` (`ai.token`, `ai.model`, `ai.embedding.model`, `ai.embedding.similarity-threshold`). See `docs/dev-environment/how-to-develop.md`.
-
-## Robin AI (frontend)
-
-Robin AI is the FAB + sheet UI on top of `/api/.../ai-assistant`. Lives at `frontend/src/pages/make/create-question/robin-ai/`:
-
-- `RobinFab` — floating button (portal).
-- `RobinSheet` — drawer with two modes: `'classic'` (single-shot, used by question form) and `'chat'` (used by workspace).
-- `useRobinPromptForm` — submit/loading/error/drafts/messages state.
-- `useRobinUndoBuffer` — captures the form state before applying a draft so "Previous version" works.
-- **`RobinFormBinding { snapshot, applyPatch }`** is the contract between Robin and the form. Robin never imports form internals — it reads via `snapshot()` and writes via `applyPatch(patch)`.
-
-The workspace flavor (`pages/make/workspace/workspace-robin-ai-helper.tsx`) reuses `RobinSheet` in `'chat'` mode with a different `generateRequest`.
+Architecture, contracts (`RobinFormBinding`), file layout, and OpenRouter configuration: see `docs/ai-assistant.md`. Setup: see `docs/devenv/how-to-develop.md`.
 
 ## MCP Server
 

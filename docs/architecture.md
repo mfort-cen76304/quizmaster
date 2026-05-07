@@ -48,16 +48,14 @@ flowchart TB
 
 ## AI Assistant
 
-Question generation calls **OpenRouter** through two endpoints, sharing one API token:
+Question generation calls **OpenRouter** through two endpoints sharing one API
+token: chat completions for drafting and embeddings for duplicate avoidance.
+The component diagram above shows OpenRouter as a single external dependency
+of the REST API.
 
-- **Chat completions** for question drafts (single or batch, per question type).
-- **Embeddings** for duplicate avoidance: each saved question is embedded; new
-  drafts are embedded and compared against the workspace via cosine similarity. On
-  a match above the configured threshold, the assistant retries once with feedback,
-  then fails. Embedding columns on `question` (`embedding`, `embedding_model`,
-  `embedding_text_hash`) cache the vector so the same text isn't re-embedded.
-
-See `CLAUDE.md` → "AI Assistant" for endpoint and configuration details.
+For the architecture, contracts between frontend and backend, the
+embedding-based duplicate-avoidance flow, and configuration, see
+[ai-assistant.md](ai-assistant.md).
 
 ## MCP Server
 
