@@ -12,7 +12,7 @@ export const test = base.extend<{ world: QuizmasterWorld }>({
     },
 })
 
-export const { Given, When, Then, BeforeScenario, After, AfterScenario, AfterAll } = createBdd(test, {
+export const { Given, When, Then, BeforeScenario, After, AfterScenario } = createBdd(test, {
     worldFixture: 'world',
 })
 
@@ -60,9 +60,4 @@ AfterScenario(async function () {
 
     const jsCoverage = await this.page.coverage.stopJSCoverage()
     await mcr.add(jsCoverage)
-})
-
-AfterAll(async () => {
-    if (!ENABLE_COVERAGE) return
-    await mcr.generate()
 })

@@ -13,6 +13,7 @@ export default defineConfig({
         timeout: 10000,
     },
     workers: Number(process.env.PW_WORKERS) || 2,
+    globalTeardown: './src/coverage/global-teardown.ts',
     use: {
         trace: 'retain-on-failure',
         screenshot: 'only-on-failure',
