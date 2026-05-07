@@ -51,7 +51,7 @@ into `docs/` and delete or trim the backlog entry.
 - **Frontend:** TypeScript, React 19, Vite, Biome (linting)
 - **E2E Testing:** Cucumber + Playwright (separate `specs/` package)
 - **Database:** PostgreSQL
-- **MCP Server:** TypeScript package at `mcp/` exposing Quizmaster as Model Context Protocol tools/resources/prompts. See `docs/mcp/overview.md` and `mcp/README.md`.
+- **MCP Server:** TypeScript package at `mcp/` exposing Quizmaster as Model Context Protocol tools/resources/prompts. See `docs/mcp/overview.md`.
 
 ## Development Commands
 
@@ -142,5 +142,5 @@ Architecture, contracts (`RobinFormBinding`), file layout, and OpenRouter config
 The `mcp/` package exposes Quizmaster as a Model Context Protocol server (stdio transport) so AI clients can read and manage workspaces, questions, quizzes, stats, and AI drafts through the existing REST API.
 
 - **Boundary:** the MCP server is a thin REST shim. It never reads the database directly and never duplicates backend validation. The backend currently has no authentication layer; MCP is wired to send a bearer token but the backend does not validate it yet. See `docs/mcp/rest-auth.md` for the current state and `backlog/rest-auth.md` for the target model.
-- **Docs:** `docs/mcp/overview.md` (what it is), `docs/mcp/configuration.md` (how to run it), `docs/mcp/rest-auth.md` (current REST auth state). Local entry point: `mcp/README.md`.
+- **Docs:** `docs/mcp/overview.md` (what it is), `docs/mcp/configuration.md` (how to run it), `docs/mcp/rest-auth.md` (current REST auth state).
 - **Workspace-scoped REST routes** (`/api/workspaces/{guid}/...`) exist alongside legacy `/api/workspace/...` (with `X-Workspace-Key` header) precisely so MCP and the FE can share controllers. Do not drop either family without coordinating with both clients.

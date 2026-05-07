@@ -30,6 +30,17 @@ The MCP server reads operational settings from environment variables. The defaul
 
 The stdio transport reserves stdout for MCP JSON-RPC messages. Logs and diagnostics must go to stderr.
 
+## Local Development Scripts
+
+Convenience scripts defined in `package.json5` at the repository root:
+
+```bash
+pnpm install:mcp     # install MCP package dependencies only
+pnpm code:mcp        # tsc + lint + format
+pnpm test:mcp        # vitest
+pnpm mcp             # start the server (waits for an MCP host on stdin/stdout)
+```
+
 ## Production Smoke Run
 
 From the repository root, run:
