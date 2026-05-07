@@ -32,5 +32,15 @@
     "js/ts.referencesCodeLens.showOnAllFunctions": true,
 
     "java.compile.nullAnalysis.mode": "disabled",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "\\.feature$",
+                "notMatch": "specs/test/gherkin-fmt/fixtures/",
+                "cmd": "cd ${workspaceFolder}/specs && pnpm fmt ${file}"
+            }
+        ]
+    }
 }
