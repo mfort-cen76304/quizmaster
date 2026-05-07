@@ -92,15 +92,15 @@ Each domain has its own package under `cz.scrumdojo.quizmaster`: `question/`,
 Endpoints live under `/api/`. Two flavors:
 
 - **Authoring** is workspace-scoped: `/api/workspaces/{guid}/...` for
-  questions, quizzes, and AI drafting (used by MCP and the newer FE paths).
-  A legacy unscoped form `/api/workspace/...` with `X-Workspace-Key` header
-  exists for the original FE; both map to the same controllers.
+  questions, quizzes, and AI drafting. Shared by FE and MCP.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
   `/api/question/{id}`, `/api/attempt/...`.
-- Plus `POST /api/ai-assistant` and `GET /api/feature-flag`.
+- Plus `GET /api/feature-flag`.
 
-Controllers are the source of truth: `*MakeController`, `*TakeController`,
-`AttemptController`, `WorkspaceController`, `AiAssistantController`. See
+Controllers are the source of truth: workspace authoring lives in
+`workspace/` (`WorkspaceController`, `WorkspaceQuestionController`,
+`WorkspaceQuizController`); taking lives in `*TakeController` +
+`AttemptController`; AI drafting in `AiAssistantController`. See
 `docs/mcp/rest-auth.md` for the (absent) auth state.
 
 ## Frontend Routes
@@ -143,4 +143,4 @@ The `mcp/` package exposes Quizmaster as a Model Context Protocol server (stdio 
 
 - **Boundary:** the MCP server is a thin REST shim. It never reads the database directly and never duplicates backend validation. The backend currently has no authentication layer; MCP is wired to send a bearer token but the backend does not validate it yet. See `docs/mcp/rest-auth.md` for the current state and `backlog/rest-auth.md` for the target model.
 - **Docs:** `docs/mcp/overview.md` (what it is), `docs/mcp/configuration.md` (how to run it), `docs/mcp/rest-auth.md` (current REST auth state).
-- **Workspace-scoped REST routes** (`/api/workspaces/{guid}/...`) exist alongside legacy `/api/workspace/...` (with `X-Workspace-Key` header) precisely so MCP and the FE can share controllers. Do not drop either family without coordinating with both clients.
+- **Workspace-scoped REST routes** (`/api/workspaces/{guid}/...`) are shared between MCP and the FE.

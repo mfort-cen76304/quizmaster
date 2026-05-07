@@ -67,10 +67,8 @@ PostgreSQL, does not duplicate backend validation, and does not implement an
 MCP-only authorization model. Whatever the REST API enforces, MCP enforces by
 construction.
 
-This means workspace-scoped REST routes (`/api/workspaces/{guid}/...`) and the
-legacy header-based routes (`/api/workspace/...` with `X-Workspace-Key`) both
-need to keep working — the FE uses the latter, MCP uses the former, and both map
-to the same controllers.
+Authoring goes through workspace-scoped REST routes (`/api/workspaces/{guid}/...`).
+FE and MCP share these controllers.
 
 Specs: [mcp/overview.md](mcp/overview.md), [mcp/configuration.md](mcp/configuration.md),
 [mcp/rest-auth.md](mcp/rest-auth.md).
