@@ -18,16 +18,16 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/workspaces/{workspaceGuid}/questions")
 public class WorkspaceQuestionController {
 
-    private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceGuard workspaceGuard;
     private final QuestionRepository questionRepository;
     private final QuestionEmbeddingService questionEmbeddingService;
 
     public WorkspaceQuestionController(
-        WorkspaceRepository workspaceRepository,
+        WorkspaceGuard workspaceGuard,
         QuestionRepository questionRepository,
         QuestionEmbeddingService questionEmbeddingService
     ) {
-        this.workspaceRepository = workspaceRepository;
+        this.workspaceGuard = workspaceGuard;
         this.questionRepository = questionRepository;
         this.questionEmbeddingService = questionEmbeddingService;
     }
@@ -37,8 +37,7 @@ public class WorkspaceQuestionController {
     public ResponseEntity<QuestionResponse> getWorkspaceQuestion(
             @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         return ResponseHelper.okOrNotFound(questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid).map(QuestionResponse::from));
     }
@@ -48,8 +47,7 @@ public class WorkspaceQuestionController {
     public ResponseEntity<IdResponse> createWorkspaceQuestion(
             @PathVariable String workspaceGuid,
             @Valid @RequestBody QuestionRequest request) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         var question = request.toEntity(workspaceGuid);
         embedBestEffort(question);
@@ -63,8 +61,7 @@ public class WorkspaceQuestionController {
             @PathVariable String workspaceGuid,
             @PathVariable Integer id,
             @Valid @RequestBody QuestionRequest request) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         return questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
@@ -82,8 +79,7 @@ public class WorkspaceQuestionController {
     public ResponseEntity<Void> deleteWorkspaceQuestion(
             @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         int deleted = questionRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
         return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();

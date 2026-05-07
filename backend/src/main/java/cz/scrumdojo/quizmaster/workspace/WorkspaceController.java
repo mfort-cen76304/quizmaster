@@ -20,16 +20,19 @@ import java.util.Set;
 public class WorkspaceController {
 
     private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceGuard workspaceGuard;
     private final QuestionRepository questionRepository;
     private final QuizRepository quizRepository;
     private final QuizStatsService quizStatsService;
 
     public WorkspaceController(
             WorkspaceRepository workspaceRepository,
+            WorkspaceGuard workspaceGuard,
             QuestionRepository questionRepository,
             QuizRepository quizRepository,
             QuizStatsService quizStatsService) {
         this.workspaceRepository = workspaceRepository;
+        this.workspaceGuard = workspaceGuard;
         this.questionRepository = questionRepository;
         this.quizRepository = quizRepository;
         this.quizStatsService = quizStatsService;
@@ -49,8 +52,7 @@ public class WorkspaceController {
     @Transactional(readOnly = true)
     @GetMapping("/{workspaceGuid}/questions")
     public ResponseEntity<List<QuestionListItem>> getWorkspaceQuestions(@PathVariable String workspaceGuid) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         List<Question> questions = questionRepository.findByWorkspaceGuid(workspaceGuid);
         Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
@@ -65,8 +67,7 @@ public class WorkspaceController {
     @Transactional(readOnly = true)
     @GetMapping("/{workspaceGuid}/quizzes")
     public ResponseEntity<List<QuizListItem>> getWorkspaceQuizzes(@PathVariable String workspaceGuid) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         List<Quiz> quizzes = quizRepository.findByWorkspaceGuid(workspaceGuid);
 
@@ -81,8 +82,7 @@ public class WorkspaceController {
     public ResponseEntity<QuizStatsResponse> getQuizStats(
             @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         return ResponseHelper.okOrNotFound(quizStatsService.getStats(workspaceGuid, id));
     }

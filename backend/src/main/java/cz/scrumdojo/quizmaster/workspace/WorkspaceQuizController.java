@@ -23,17 +23,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/workspaces/{workspaceGuid}/quizzes")
 public class WorkspaceQuizController {
 
-    private final WorkspaceRepository workspaceRepository;
+    private final WorkspaceGuard workspaceGuard;
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final QuizService quizService;
 
     public WorkspaceQuizController(
-            WorkspaceRepository workspaceRepository,
+            WorkspaceGuard workspaceGuard,
             QuizRepository quizRepository,
             QuestionRepository questionRepository,
             QuizService quizService) {
-        this.workspaceRepository = workspaceRepository;
+        this.workspaceGuard = workspaceGuard;
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.quizService = quizService;
@@ -43,8 +43,7 @@ public class WorkspaceQuizController {
     public ResponseEntity<QuizResponse> getQuiz(
             @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         return ResponseHelper.okOrNotFound(quizService.getWorkspaceQuiz(workspaceGuid, id));
     }
@@ -54,8 +53,7 @@ public class WorkspaceQuizController {
     public ResponseEntity<IdResponse> createQuiz(
             @PathVariable String workspaceGuid,
             @Valid @RequestBody QuizRequest request) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         validateQuestionsBelongToWorkspace(request.questionIds(), workspaceGuid);
 
@@ -69,8 +67,7 @@ public class WorkspaceQuizController {
             @PathVariable String workspaceGuid,
             @PathVariable Integer id,
             @Valid @RequestBody QuizRequest request) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
@@ -88,8 +85,7 @@ public class WorkspaceQuizController {
     public ResponseEntity<Void> deleteQuiz(
             @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        if (!workspaceRepository.existsById(workspaceGuid))
-            return ResponseEntity.notFound().build();
+        workspaceGuard.requireExists(workspaceGuid);
 
         int deleted = quizRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
         return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
