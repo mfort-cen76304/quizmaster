@@ -2,7 +2,6 @@ package cz.scrumdojo.quizmaster;
 
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
-import cz.scrumdojo.quizmaster.attempt.AttemptRequest;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
@@ -211,13 +210,6 @@ public class TestFixtures {
             .incorrectAnswers(0)
             .startedAt(LocalDateTime.now().minusMinutes(5))
             .timedOutAt(LocalDateTime.now().minusMinutes(5).plusSeconds(300));
-    }
-
-    public AttemptRequest attemptRequest(Quiz quiz) {
-        return new AttemptRequest(
-            quiz.getId(),
-            LocalDateTime.now().minusMinutes(2)
-        );
     }
 
     public Attempt save(Attempt.AttemptBuilder builder) {

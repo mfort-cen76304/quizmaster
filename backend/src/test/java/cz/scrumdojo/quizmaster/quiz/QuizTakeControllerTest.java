@@ -1,6 +1,7 @@
 package cz.scrumdojo.quizmaster.quiz;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
+import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
@@ -101,6 +102,54 @@ public class QuizTakeControllerTest {
             .andExpect(jsonPath("$.questions[0].id").value(attempt.getQuestionIds()[0]))
             .andExpect(jsonPath("$.questions[1].id").value(attempt.getQuestionIds()[1]))
             .andExpect(content().string(not(containsString("correctAnswers"))));
+    }
+
+    @Test
+    public void recordTimeoutStampsServerSideTimestamp() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
+        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+
+        var before = LocalDateTime.now();
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/timeout", quiz.getId(), attempt.getId()))
+            .andExpect(status().isNoContent());
+
+        var stored = attemptRepository.findById(attempt.getId()).orElseThrow();
+        assertThat(stored.getTimedOutAt()).isNotNull();
+        assertThat(stored.getTimedOutAt()).isAfterOrEqualTo(before);
+        assertThat(stored.getFinishedAt()).isNull();
+    }
+
+    @Test
+    public void recordTimeoutOnFinishedAttemptReturnsConflict() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
+        Attempt attempt = fixtures.save(fixtures.attempt(quiz).questionIds(new int[]{question.getId()}));
+
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/timeout", quiz.getId(), attempt.getId()))
+            .andExpect(status().isConflict());
+
+        assertThat(attemptRepository.findById(attempt.getId()).orElseThrow().getTimedOutAt()).isNull();
+    }
+
+    @Test
+    public void recordTimeoutOnAttemptForDifferentQuizReturnsNotFound() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
+        Quiz otherQuiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
+        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/timeout", otherQuiz.getId(), attempt.getId()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void recordTimeoutForUnknownAttemptReturnsNotFound() throws Exception {
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/timeout", -1, -1))
+            .andExpect(status().isNotFound());
     }
 
     @Test

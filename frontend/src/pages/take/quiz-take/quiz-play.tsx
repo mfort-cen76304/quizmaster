@@ -1,7 +1,7 @@
 import './quiz-play.scss'
 import { useState } from 'react'
 
-import { patchAttempt, submitQuizQuestionAnswer } from '#api/stats.ts'
+import { recordTimeout, submitQuizQuestionAnswer } from '#api/stats.ts'
 import { type AnswerIdxs, type QuestionAnswer, type QuestionEvaluation, evaluateAnswer } from '#model/question.ts'
 import type { Quiz, QuizMode, QuizTake } from '#model/quiz.ts'
 import { QuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
@@ -48,7 +48,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
 
     const handleTimeOut = async () => {
         if (props.quizRunId === null) return
-        await patchAttempt(props.quizRunId, { timedOutAt: new Date().toISOString() })
+        await recordTimeout(props.quiz.id, props.quizRunId)
     }
 
     const evaluateTimedOut = () => {

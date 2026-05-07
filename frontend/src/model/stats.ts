@@ -5,11 +5,6 @@ export interface AttemptRequest {
     readonly startedAt: string
 }
 
-export interface AttemptPatchRequest {
-    readonly timedOutAt?: string
-    readonly finishedAt?: string
-}
-
 export interface AttemptResponse {
     readonly id: number
 }

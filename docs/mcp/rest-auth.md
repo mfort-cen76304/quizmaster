@@ -9,7 +9,6 @@ The current API has these important security gaps:
 - No authentication layer is configured for the backend.
 - Workspace create, read, update, and delete operations are available to anyone who knows or guesses the URL.
 - Public quiz and question reads return full `QuestionResponse` objects, including correct answers and explanations.
-- Attempt updates trust client-provided score counters and timestamps.
 - The AI assistant endpoint can be called by any client and may trigger paid upstream requests.
 - Swagger/OpenAPI metadata is available unless blocked at deployment.
 

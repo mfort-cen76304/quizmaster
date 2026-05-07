@@ -79,6 +79,26 @@ public class QuizTakeController {
             .orElse(ResponseEntity.notFound().build());
     }
 
+    @PostMapping("/{id}/attempts/{attemptId}/timeout")
+    public ResponseEntity<Void> recordTimeout(
+            @PathVariable Integer id,
+            @PathVariable Integer attemptId) {
+        var attempt = attemptRepository.findById(attemptId)
+            .filter(existing -> Objects.equals(existing.getQuizId(), id));
+        if (attempt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var existing = attempt.get();
+        if (existing.getFinishedAt() != null) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+        }
+
+        existing.setTimedOutAt(LocalDateTime.now());
+        attemptRepository.save(existing);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/{id}/attempts/{attemptId}")
     public ResponseEntity<QuizTakeResponse> getAttemptQuiz(
             @PathVariable Integer id,
