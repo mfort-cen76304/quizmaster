@@ -108,7 +108,7 @@ public class AttemptControllerTest {
     }
 
     @Test
-    public void patchAttemptFields() throws Exception {
+    public void patchAttemptAppliesTimingFieldsAndIgnoresCounterFields() throws Exception {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
@@ -119,13 +119,17 @@ public class AttemptControllerTest {
                     {
                         "correctAnswers": 2,
                         "incorrectAnswers": 1,
-                        "finishedAt": "2026-01-01T10:03:00"
+                        "partiallyCorrectAnswers": 3,
+                        "finishedAt": "2026-01-01T10:03:00",
+                        "timedOutAt": "2026-01-01T10:02:00"
                     }
                     """))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.correctAnswers").value(2))
-            .andExpect(jsonPath("$.incorrectAnswers").value(1))
-            .andExpect(jsonPath("$.finishedAt").value("2026-01-01T10:03:00"));
+            .andExpect(jsonPath("$.correctAnswers").value(0))
+            .andExpect(jsonPath("$.incorrectAnswers").value(0))
+            .andExpect(jsonPath("$.partiallyCorrectAnswers").value(0))
+            .andExpect(jsonPath("$.finishedAt").value("2026-01-01T10:03:00"))
+            .andExpect(jsonPath("$.timedOutAt").value("2026-01-01T10:02:00"));
     }
 
     @Test

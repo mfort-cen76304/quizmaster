@@ -1,5 +1,5 @@
 import './quiz-play.scss'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 
 import { patchAttempt, submitQuizQuestionAnswer } from '#api/stats.ts'
 import { type AnswerIdxs, type QuestionAnswer, type QuestionEvaluation, evaluateAnswer } from '#model/question.ts'
@@ -28,7 +28,6 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     const nav = useQuizNavigationState(props.quiz, props.questionsBaseUrl)
     const bookmarks = useQuizBookmarkState()
     const [selectedAnswerIdxs, setSelectedAnswerIdxs] = useState<AnswerIdxs | undefined>(undefined)
-    const scoresByQuestionId = useRef<Map<number, number>>(new Map())
 
     const answer = (questionAnswer: QuestionAnswer) => {
         answerQuestion(nav.currentQuestionIdx, questionAnswer)
@@ -84,34 +83,12 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
         }
     }
 
-    const recordScore = (questionId: number, score: number) => {
-        if (props.quiz.mode === 'learn' && scoresByQuestionId.current.has(questionId)) return
-        scoresByQuestionId.current.set(questionId, score)
-    }
-
-    const computeCounts = () => {
-        let correct = 0
-        let partial = 0
-        let incorrect = 0
-        for (const score of scoresByQuestionId.current.values()) {
-            if (score === 1) correct++
-            else if (score === 0.5) partial++
-            else incorrect++
-        }
-        return { correctAnswers: correct, partiallyCorrectAnswers: partial, incorrectAnswers: incorrect }
-    }
-
     const handleAnswerSubmitted = async (questionAnswer: QuestionAnswer): Promise<QuestionEvaluation | void> => {
         const result = authoringQuestion
             ? evaluateAnswer(authoringQuestion, questionAnswer)
             : props.quizRunId !== null
               ? await submitQuizQuestionAnswer(props.quiz.id, props.quizRunId, currentQuestion.id, questionAnswer)
               : undefined
-
-        if (props.quizRunId !== null && result) {
-            recordScore(currentQuestion.id, result.score)
-            await patchAttempt(props.quizRunId, computeCounts())
-        }
 
         if (props.quiz.mode === 'learn') {
             answer(questionAnswer)
