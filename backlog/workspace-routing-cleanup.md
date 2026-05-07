@@ -61,7 +61,7 @@ Replace the four duplicates. Each controller drops ~5 lines.
 - Missing/blank header *and* missing path = `400 Bad Request` ("workspace identifier
   required").
 - Unknown workspace = `404`.
-- Anything that should later be `401/403` per `rest-auth-spec.md` is annotated with a
+- Anything that should later be `401/403` per `backlog/rest-auth.md` is annotated with a
   `// TODO(rest-auth)` so the security pass can find it.
 
 **Regression test for the dual route.** Pick `WorkspaceHeaderController` and parameterise
@@ -83,4 +83,4 @@ Ensures a future "drop the legacy form" PR breaks visibly.
 - Independent of other concerns. Pairs naturally with `quiz-take-api-hardening.md`
   (both touch controller-layer surface) but does not block it.
 - Do **not** drop either route family in this concern — that's a separate, larger
-  decision tied to the auth foundation in `rest-auth-spec.md`.
+  decision tied to the auth foundation in `backlog/rest-auth.md`.

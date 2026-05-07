@@ -7,9 +7,11 @@ quizzes, stats, AI drafts) to AI clients over stdio.
 
 | Topic | Document |
 | --- | --- |
-| What it is, what it isn't, capabilities | `../specs/features/mcpserver/mcp-spec.md` |
-| How to configure it (env vars, MCP host JSON, troubleshooting) | `../specs/features/mcpserver/mcp-server-configuration.md` |
-| Authentication / authorization design | `../specs/features/mcpserver/rest-auth-spec.md` |
+| What it is, boundary rule, what's exposed | `../docs/mcp/overview.md` |
+| How to configure it (env vars, MCP host JSON, troubleshooting) | `../docs/mcp/configuration.md` |
+| Current REST auth state (none — see also workspace-key obscurity) | `../docs/mcp/rest-auth.md` |
+| Original specification (goals, full tool/prompt schemas, design history) | `../backlog/mcp-spec.md` |
+| Target authentication / authorization design | `../backlog/rest-auth.md` |
 | Security gaps still open | `../specs/features/mcpserver/RestApi.SecurityFoundation.feature` (skipped scenarios) |
 | Architectural fit (where MCP sits relative to FE / BE / DB) | `../docs/architecture.md` |
 

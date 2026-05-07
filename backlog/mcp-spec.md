@@ -20,7 +20,7 @@ The server must be a thin integration layer. It should not read or write Postgre
 - Do not replace the existing REST API.
 - Do not implement quiz taking through MCP in the first version.
 - Do not introduce direct database access from the MCP server.
-- Do not implement a separate MCP-only authentication model. Once REST authentication exists, reuse the Quizmaster model described in `rest-auth-spec.md`.
+- Do not implement a separate MCP-only authentication model. Once REST authentication exists, reuse the Quizmaster model described in `rest-auth.md`.
 - Do not expose raw environment variables, database connection details, or internal service configuration as resources.
 
 ## Recommended Implementation Shape
@@ -115,7 +115,7 @@ All resource contents should be returned as UTF-8 JSON or Markdown text.
 
 | URI | MIME Type | Description |
 | --- | --- | --- |
-| `quizmaster://domain-language` | `text/markdown` | Domain language from `docs/domain-language.md`. |
+| `quizmaster://domain-language` | `text/markdown` | Domain language from `../docs/domain-language.md`. |
 | `quizmaster://workspace/{workspaceGuid}` | `application/json` | Workspace metadata. |
 | `quizmaster://workspace/{workspaceGuid}/questions` | `application/json` | Question list items for a workspace. |
 | `quizmaster://workspace/{workspaceGuid}/quizzes` | `application/json` | Quiz list items for a workspace. |

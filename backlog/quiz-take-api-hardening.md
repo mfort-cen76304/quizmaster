@@ -30,8 +30,8 @@ straight to the entity. The frontend (`quiz-play.tsx`) actually uses this in EXA
 keep the live counters in sync — but the server has all the data it needs to compute
 those itself when each answer is recorded.
 
-This is the "Attempt updates trust client-provided score counters" gap from
-`rest-auth-spec.md`. Fix it before the bundle split — the take bundle should not have a
+This is the "Attempt updates trust client-provided score counters" gap noted in
+`backlog/rest-auth.md`. Fix it before the bundle split — the take bundle should not have a
 write API that lets it self-score.
 
 ### 3. `feedbackFrom` is the right idea but applied inconsistently
@@ -92,7 +92,7 @@ controllers, or just a curated list — both fine.
 - `frontend/src/pages/take/quiz-take/quiz-play.tsx` — drops the `answerCounts` ref and
   the `patchAttempt` calls in `handleAnswerSubmitted`.
 - `backend/src/test/.../quiz/QuizTakeControllerTest.java` — new no-leak contract test.
-- `specs/features/mcpserver/rest-auth-spec.md` — once the score-counter gap is closed,
+- `backlog/rest-auth.md` — once the score-counter gap is closed,
   cross it off the "important security gaps" list.
 
 ## Notes

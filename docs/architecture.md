@@ -72,6 +72,5 @@ legacy header-based routes (`/api/workspace/...` with `X-Workspace-Key`) both
 need to keep working — the FE uses the latter, MCP uses the former, and both map
 to the same controllers.
 
-Specs: `specs/features/mcpserver/mcp-spec.md`,
-`specs/features/mcpserver/mcp-server-configuration.md`,
-`specs/features/mcpserver/rest-auth-spec.md`.
+Specs: [mcp/overview.md](mcp/overview.md), [mcp/configuration.md](mcp/configuration.md),
+[mcp/rest-auth.md](mcp/rest-auth.md).

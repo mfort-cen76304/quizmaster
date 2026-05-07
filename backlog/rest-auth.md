@@ -6,21 +6,6 @@ Define how Quizmaster should add authentication and authorization to the existin
 
 The goal is to fortify the API without turning the MCP server into a privileged side channel. The Spring Boot backend remains the source of truth for identity, permissions, domain validation, scoring, and audit decisions.
 
-## Background
-
-The current backend exposes REST endpoints under `/api`. Management endpoints are workspace-scoped by `workspaceGuid`, while public quiz-taking endpoints use integer IDs for quizzes, questions, and attempts.
-
-The current API has these important security gaps:
-
-- No authentication layer is configured for the backend.
-- Workspace create, read, update, and delete operations are available to anyone who knows or guesses the URL.
-- Public quiz and question reads return full `QuestionResponse` objects, including correct answers and explanations.
-- Attempt updates trust client-provided score counters and timestamps.
-- The AI assistant endpoint can be called by any client and may trigger paid upstream requests.
-- Swagger/OpenAPI metadata is available unless blocked at deployment.
-
-This specification describes the target state and the minimum staged path to get there.
-
 ## Goals
 
 - Require an authenticated principal for all authoring, workspace management, quiz management, stats, and AI assistant endpoints.
