@@ -54,8 +54,12 @@ public class WorkspaceQuestionControllerTest {
 
         mockMvc.perform(get("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(question.getId()))
-            .andExpect(jsonPath("$.question").value("What is the capital of Italy?"));
+            .andExpect(content().json("""
+                {
+                    "id": %d,
+                    "question": "What is the capital of Italy?"
+                }
+                """.formatted(question.getId())));
     }
 
     @Test
@@ -93,7 +97,9 @@ public class WorkspaceQuestionControllerTest {
 
         mockMvc.perform(get("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), questionId))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(questionId));
+            .andExpect(content().json("""
+                {"id": %d}
+                """.formatted(questionId)));
     }
 
     @Test
@@ -114,11 +120,15 @@ public class WorkspaceQuestionControllerTest {
                     }
                     """))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(question.getId()));
+            .andExpect(content().json("""
+                {"id": %d}
+                """.formatted(question.getId())));
 
         mockMvc.perform(get("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.question").value("Updated question?"));
+            .andExpect(content().json("""
+                {"question": "Updated question?"}
+                """));
     }
 
     @Test

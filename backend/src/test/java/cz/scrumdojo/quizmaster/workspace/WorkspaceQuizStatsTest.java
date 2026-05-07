@@ -49,12 +49,19 @@ public class WorkspaceQuizStatsTest {
 
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.attempts[0].totalQuestions").value(2))
-                .andExpect(jsonPath("$.attempts[0].correctAnswers").value(1))
-                .andExpect(jsonPath("$.attempts[0].incorrectAnswers").value(1))
-                .andExpect(jsonPath("$.attempts[0].score").value(50))
-                .andExpect(jsonPath("$.summary.started").value(1))
-                .andExpect(jsonPath("$.summary.finished").value(1));
+                .andExpect(content().json("""
+                    {
+                        "attempts": [
+                            {
+                                "totalQuestions": 2,
+                                "correctAnswers": 1,
+                                "incorrectAnswers": 1,
+                                "score": 50
+                            }
+                        ],
+                        "summary": { "started": 1, "finished": 1 }
+                    }
+                    """));
     }
 
     @Test
@@ -66,7 +73,9 @@ public class WorkspaceQuizStatsTest {
 
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.attempts[0].status").value("FINISHED"))
+                .andExpect(content().json("""
+                    {"attempts": [{"status": "FINISHED"}]}
+                    """))
                 .andExpect(jsonPath("$.attempts[0].durationSeconds").isNumber());
     }
 
@@ -79,8 +88,12 @@ public class WorkspaceQuizStatsTest {
 
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.attempts[0].status").value("TIMEOUT"))
-                .andExpect(jsonPath("$.summary.timeout").value(1));
+                .andExpect(content().json("""
+                    {
+                        "attempts": [{"status": "TIMEOUT"}],
+                        "summary": {"timeout": 1}
+                    }
+                    """));
     }
 
     @Test
@@ -92,9 +105,13 @@ public class WorkspaceQuizStatsTest {
 
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.attempts[0].status").value("IN_PROGRESS"))
-                .andExpect(jsonPath("$.attempts[0].durationSeconds").isEmpty())
-                .andExpect(jsonPath("$.summary.unfinished").value(1));
+                .andExpect(content().json("""
+                    {
+                        "attempts": [{"status": "IN_PROGRESS"}],
+                        "summary": {"unfinished": 1}
+                    }
+                    """))
+                .andExpect(jsonPath("$.attempts[0].durationSeconds").isEmpty());
     }
 
     @Test
@@ -106,8 +123,12 @@ public class WorkspaceQuizStatsTest {
 
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.attempts[0].status").value("ABANDONED"))
-                .andExpect(jsonPath("$.summary.unfinished").value(1));
+                .andExpect(content().json("""
+                    {
+                        "attempts": [{"status": "ABANDONED"}],
+                        "summary": {"unfinished": 1}
+                    }
+                    """));
     }
 
     @Test

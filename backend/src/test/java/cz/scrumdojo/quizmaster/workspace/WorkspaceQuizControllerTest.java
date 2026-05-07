@@ -87,7 +87,9 @@ public class WorkspaceQuizControllerTest {
 
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quizId))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(quizId))
+            .andExpect(content().json("""
+                {"id": %d}
+                """.formatted(quizId)))
             .andExpect(jsonPath("$.questions.length()").value(1));
 
         Quiz savedQuiz = latestQuiz();
@@ -196,13 +198,19 @@ public class WorkspaceQuizControllerTest {
                     }
                     """.formatted(question.getId())))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").value(quiz.getId()));
+            .andExpect(content().json("""
+                {"id": %d}
+                """.formatted(quiz.getId())));
 
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.title").value("Updated Quiz"))
-            .andExpect(jsonPath("$.startAt").value("2026-04-15T08:30:00"))
-            .andExpect(jsonPath("$.endAt").value("2026-04-15T18:00:00"));
+            .andExpect(content().json("""
+                {
+                    "title": "Updated Quiz",
+                    "startAt": "2026-04-15T08:30:00",
+                    "endAt": "2026-04-15T18:00:00"
+                }
+                """));
     }
 
     @Test
