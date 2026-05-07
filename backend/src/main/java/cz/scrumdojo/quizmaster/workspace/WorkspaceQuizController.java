@@ -45,6 +45,7 @@ public class WorkspaceQuizController {
         return ResponseHelper.okOrNotFound(quizService.getWorkspaceQuiz(workspaceGuid, id));
     }
 
+    @Transactional
     @PostMapping
     public ResponseEntity<IdResponse> createQuiz(
             @PathVariable String workspaceGuid,
