@@ -56,7 +56,7 @@ public class WorkspaceController {
         Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
 
         var items = questions.stream()
-            .map(q -> new QuestionListItem(q.getId(), q.getQuestion(), questionIdsInQuizzes.contains(q.getId()), q.getImageUrl(), q.getTags()))
+            .map(q -> QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId())))
             .toList();
 
         return ResponseEntity.ok(items);
