@@ -28,6 +28,7 @@ Built incrementally using thin slices of functionality — a key learning object
 - **Frontend:** TypeScript, React 19, Vite, Biome (linting)
 - **E2E Testing:** Cucumber + Playwright (separate `specs/` package)
 - **Database:** PostgreSQL
+- **MCP Server:** TypeScript package at `mcp/` exposing Quizmaster as Model Context Protocol tools/resources/prompts. See `specs/features/mcpserver/mcp-spec.md` and `mcp/README.md`.
 
 ## Development Commands
 
@@ -71,7 +72,7 @@ Each domain has its own package under `cz.scrumdojo.quizmaster`:
 - `attempt/` — `AttemptController`, `AttemptRepository`, `Attempt`, `AttemptStatus`, `AttemptRequest`, `AttemptResponse`
 - `common/` — `IdResponse` (shared record for POST/PUT responses), `ResponseHelper`
 - `config/` — `FeatureFlag`, `OpenApiConfig`, `WebMvcConfig`, `ResourceResolver`
-- `aiassistant/` — `AiAssistantController`, `AiAssistantService`, `AiAssistantRequest`, `AiAssistantResponse`
+- `aiassistant/` — `AiAssistantController`, `AiAssistantService`, `AiAssistantRequest`, plus the embedding stack: `OpenRouterEmbeddingClient`, `QuestionEmbeddingService`, `QuestionEmbeddingText`, `EmbeddingSimilarity`
 
 **Style guides:** See `docs/controller-style.md` and `docs/code-style.md`.
 
@@ -147,4 +148,29 @@ BDD specs in `specs/features/`, organized into `make/` (creating) and `take/` (a
 
 ## AI Assistant
 
-Question generation uses OpenRouter. See `docs/dev-environment/how-to-develop.md` for configuration.
+Question generation uses OpenRouter via two endpoints sharing one `ai.token`:
+
+- **Chat completions** (`AiAssistantService`) — generates question drafts from a per-type prompt (`prompts/{single,multiple,numerical}-choice{,-batch}.md`). Single + batch flavors.
+- **Embeddings** (`OpenRouterEmbeddingClient`) — used for **duplicate avoidance**: each saved question is embedded (`embedForSave`); on generation, the candidate is embedded and compared against workspace embeddings via cosine similarity (`EmbeddingSimilarity`). On a match above `ai.embedding.similarity-threshold`, the assistant retries once with feedback; second match → 502. Embedding columns: `embedding`, `embedding_model`, `embedding_text_hash` (migration `V00049`); a `model+hash` mismatch invalidates the cached embedding.
+
+Configuration: `application.properties` (`ai.token`, `ai.model`, `ai.embedding.model`, `ai.embedding.similarity-threshold`). See `docs/dev-environment/how-to-develop.md`.
+
+## Robin AI (frontend)
+
+Robin AI is the FAB + sheet UI on top of `/api/.../ai-assistant`. Lives at `frontend/src/pages/make/create-question/robin-ai/`:
+
+- `RobinFab` — floating button (portal).
+- `RobinSheet` — drawer with two modes: `'classic'` (single-shot, used by question form) and `'chat'` (used by workspace).
+- `useRobinPromptForm` — submit/loading/error/drafts/messages state.
+- `useRobinUndoBuffer` — captures the form state before applying a draft so "Previous version" works.
+- **`RobinFormBinding { snapshot, applyPatch }`** is the contract between Robin and the form. Robin never imports form internals — it reads via `snapshot()` and writes via `applyPatch(patch)`.
+
+The workspace flavor (`pages/make/workspace/workspace-robin-ai-helper.tsx`) reuses `RobinSheet` in `'chat'` mode with a different `generateRequest`.
+
+## MCP Server
+
+The `mcp/` package exposes Quizmaster as a Model Context Protocol server (stdio transport) so AI clients can read and manage workspaces, questions, quizzes, stats, and AI drafts through the existing REST API.
+
+- **Boundary:** the MCP server is a thin REST shim. It never reads the database directly, never duplicates backend validation, and uses the same authorization model as other clients (see `specs/features/mcpserver/rest-auth-spec.md`).
+- **Specs and configuration:** `specs/features/mcpserver/mcp-spec.md`, `mcp-server-configuration.md`, `rest-auth-spec.md`. Local entry point: `mcp/README.md`.
+- **Workspace-scoped REST routes** (`/api/workspaces/{guid}/...`) exist alongside legacy `/api/workspace/...` (with `X-Workspace-Key` header) precisely so MCP and the FE can share controllers. Do not drop either family without coordinating with both clients.
