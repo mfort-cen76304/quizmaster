@@ -3,7 +3,7 @@
 ## Source Quality
 
 - Changes are committed to the master branch of the mono-repo.
-- The code and tests follow [code style](./code-style.md)
+- The code and tests follow [code style](../conventions/code-style.md)
 - The code, tests, and documentation are free of lint and formatting errors.
 - All code, tests, and documentation changes are reviewed by at least one other developer.
   - Code from pair/mob programming is considered reviewed.

@@ -74,7 +74,7 @@ Each domain has its own package under `cz.scrumdojo.quizmaster`:
 - `config/` — `FeatureFlag`, `OpenApiConfig`, `WebMvcConfig`, `ResourceResolver`
 - `aiassistant/` — `AiAssistantController`, `AiAssistantService`, `AiAssistantRequest`, plus the embedding stack: `OpenRouterEmbeddingClient`, `QuestionEmbeddingService`, `QuestionEmbeddingText`, `EmbeddingSimilarity`
 
-**Style guides:** See `docs/controller-style.md` and `docs/code-style.md`.
+**Style guides:** See `docs/conventions/controller-style.md` and `docs/conventions/code-style.md`.
 
 ## API Endpoints
 
@@ -131,7 +131,7 @@ Each domain has its own package under `cz.scrumdojo.quizmaster`:
 
 BDD specs in `specs/features/`, organized into `make/` (creating) and `take/` (answering).
 
-**Style guide:** See `docs/e2e-style-guide.md` and `docs/code-style.md`.
+**Style guide:** See `docs/conventions/e2e-style-guide.md` and `docs/conventions/code-style.md`.
 
 **Test layers:**
 - **Page Objects** (`specs/src/pages/`) — DOM abstraction, queries and actions
