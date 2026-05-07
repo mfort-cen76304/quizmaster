@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Map;
@@ -32,18 +33,21 @@ public class QuizTakeController {
     private final AttemptRepository attemptRepository;
     private final QuestionScoringService questionScoringService;
     private final AttemptScoreService attemptScoreService;
+    private final Clock clock;
 
     public QuizTakeController(
             QuizService quizService,
             QuizRepository quizRepository,
             AttemptRepository attemptRepository,
             QuestionScoringService questionScoringService,
-            AttemptScoreService attemptScoreService) {
+            AttemptScoreService attemptScoreService,
+            Clock clock) {
         this.quizService = quizService;
         this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository;
         this.questionScoringService = questionScoringService;
         this.attemptScoreService = attemptScoreService;
+        this.clock = clock;
     }
 
     @GetMapping("/{id}")
@@ -57,7 +61,7 @@ public class QuizTakeController {
             @RequestBody(required = false) QuizAttemptStartRequest request) {
         return quizRepository.findById(id)
             .map(quiz -> {
-                if (!QuizAvailability.isAvailable(quiz, LocalDateTime.now())) {
+                if (!QuizAvailability.isAvailable(quiz, LocalDateTime.now(clock))) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
                         .body(Map.of("message", "Quiz is not currently available."));
                 }
@@ -66,7 +70,7 @@ public class QuizTakeController {
                 var selectedQuestionIds = selectedQuestions.stream()
                     .mapToInt(Question::getId)
                     .toArray();
-                var startedAt = request != null && request.startedAt() != null ? request.startedAt() : LocalDateTime.now();
+                var startedAt = request != null && request.startedAt() != null ? request.startedAt() : LocalDateTime.now(clock);
                 Attempt attempt = Attempt.builder()
                     .quizId(id)
                     .questionIds(selectedQuestionIds)
@@ -100,7 +104,7 @@ public class QuizTakeController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
-        existing.setTimedOutAt(LocalDateTime.now());
+        existing.setTimedOutAt(LocalDateTime.now(clock));
         attemptRepository.save(existing);
         return ResponseEntity.noContent().build();
     }
@@ -167,7 +171,7 @@ public class QuizTakeController {
         updatedAttempt.setCorrectAnswers(correct);
         updatedAttempt.setPartiallyCorrectAnswers(partial);
         updatedAttempt.setIncorrectAnswers(incorrect);
-        updatedAttempt.setFinishedAt(request.finishedAt() != null ? request.finishedAt() : LocalDateTime.now());
+        updatedAttempt.setFinishedAt(request.finishedAt() != null ? request.finishedAt() : LocalDateTime.now(clock));
         if (request.timedOutAt() != null) {
             updatedAttempt.setTimedOutAt(request.timedOutAt());
         }
@@ -213,7 +217,7 @@ public class QuizTakeController {
 
         double score = questionScoringService.score(question.get(), request);
         attemptScoreService.recordSubmission(
-            quiz.get().getMode(), attemptId, questionId, ScoreOutcome.from(score), LocalDateTime.now());
+            quiz.get().getMode(), attemptId, questionId, ScoreOutcome.from(score), LocalDateTime.now(clock));
 
         if (quiz.get().getMode() == QuizMode.EXAM) {
             return ResponseEntity.ok(new QuestionEvaluationResponse(score == 1, score, null));
