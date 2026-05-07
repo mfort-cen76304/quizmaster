@@ -2,10 +2,9 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { useApi } from '#api/hooks.ts'
-import { fetchQuiz } from '#api/quiz.ts'
-import { createAttempt } from '#api/stats.ts'
+import { createAttempt, fetchQuiz } from '#api/quiz.ts'
 import { urls } from '#fe/urls.ts'
-import type { QuizMetadata } from '#model/quiz.ts'
+import type { QuizMetadata, QuizTake } from '#model/quiz.ts'
 
 import { isQuizAvailable } from '../quiz-availability.ts'
 import { storeQuizAnswers, setQuizRun } from '../quiz-session.ts'
@@ -28,12 +27,10 @@ export const QuizWelcomePage = () => {
         storeQuizAnswers(null)
 
         try {
-            const attempt = await createAttempt(quiz.id, {
-                quizId: quiz.id,
-                startedAt: new Date().toISOString(),
-            })
-            setQuizRun(attempt.id, quiz.id)
-            navigate(urls.quizTake(quiz.id))
+            const { attemptId, questions } = await createAttempt(quiz.id)
+            const playableQuiz: QuizTake = { ...quiz, questions }
+            setQuizRun(attemptId, quiz.id)
+            navigate(urls.quizTake(quiz.id), { state: { quiz: playableQuiz } })
         } catch {
             setIsStarting(false)
         }

@@ -79,3 +79,12 @@ export interface QuizEvaluationResponse {
     readonly totalQuestions: number
     readonly questions?: readonly Question[]
 }
+
+export interface QuizAttemptStartRequest {
+    readonly startedAt: string
+}
+
+export interface QuizAttemptStartResponse {
+    readonly attemptId: number
+    readonly questions: readonly QuestionTake[]
+}

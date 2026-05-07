@@ -88,7 +88,7 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void createAttemptPersistsSelectedRandomQuestionIdsAndRefreshReturnsSameQuestions() throws Exception {
+    public void createAttemptReturnsAttemptIdAndFrozenQuestions() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
         Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
@@ -98,16 +98,17 @@ public class QuizTakeControllerTest {
             .randomQuestionCount(2)
             .build());
 
-        var result = mockMvc.perform(post("/api/quiz/{id}/attempts", quiz.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"quizId": %d, "startedAt": "2026-01-01T10:00:00"}
-                    """.formatted(quiz.getId())))
+        var result = mockMvc.perform(post("/api/quiz/{id}/attempts", quiz.getId()))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").isNumber())
+            .andExpect(jsonPath("$.attemptId").isNumber())
+            .andExpect(jsonPath("$.questions.length()").value(2))
+            .andExpect(jsonPath("$.questions[0].id").isNumber())
+            .andExpect(content().string(not(containsString("correctAnswers"))))
+            .andExpect(content().string(not(containsString("explanations"))))
+            .andExpect(content().string(not(containsString("workspaceGuid"))))
             .andReturn();
 
-        Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.id");
+        Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
         var attempt = attemptRepository.findById(attemptId).orElseThrow();
         assertThat(attempt.getQuestionIds()).hasSize(2);
 
@@ -115,8 +116,7 @@ public class QuizTakeControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.questions.length()").value(2))
             .andExpect(jsonPath("$.questions[0].id").value(attempt.getQuestionIds()[0]))
-            .andExpect(jsonPath("$.questions[1].id").value(attempt.getQuestionIds()[1]))
-            .andExpect(content().string(not(containsString("correctAnswers"))));
+            .andExpect(jsonPath("$.questions[1].id").value(attempt.getQuestionIds()[1]));
     }
 
     @Test

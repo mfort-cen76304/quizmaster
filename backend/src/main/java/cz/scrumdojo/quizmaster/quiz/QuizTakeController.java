@@ -2,7 +2,6 @@ package cz.scrumdojo.quizmaster.quiz;
 
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
-import cz.scrumdojo.quizmaster.attempt.AttemptRequest;
 import cz.scrumdojo.quizmaster.attempt.AttemptResponse;
 import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
 import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
@@ -12,6 +11,7 @@ import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
 import cz.scrumdojo.quizmaster.question.QuestionEvaluationResponse;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.question.QuestionScoringService;
+import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,7 +54,7 @@ public class QuizTakeController {
     @PostMapping("/{id}/attempts")
     public ResponseEntity<?> createAttempt(
             @PathVariable Integer id,
-            @RequestBody(required = false) AttemptRequest request) {
+            @RequestBody(required = false) QuizAttemptStartRequest request) {
         return quizRepository.findById(id)
             .map(quiz -> {
                 if (!QuizAvailability.isAvailable(quiz, LocalDateTime.now())) {
@@ -62,7 +62,8 @@ public class QuizTakeController {
                         .body(Map.of("message", "Quiz is not currently available."));
                 }
 
-                var selectedQuestionIds = quizService.selectQuestions(quiz).stream()
+                var selectedQuestions = quizService.selectQuestions(quiz);
+                var selectedQuestionIds = selectedQuestions.stream()
                     .mapToInt(Question::getId)
                     .toArray();
                 var startedAt = request != null && request.startedAt() != null ? request.startedAt() : LocalDateTime.now();
@@ -74,7 +75,12 @@ public class QuizTakeController {
                     .partiallyCorrectAnswers(0)
                     .incorrectAnswers(0)
                     .build();
-                return ResponseEntity.ok(AttemptResponse.from(attemptRepository.save(attempt)));
+                Attempt persisted = attemptRepository.save(attempt);
+
+                QuestionTakeResponse[] questions = selectedQuestions.stream()
+                    .map(QuestionTakeResponse::from)
+                    .toArray(QuestionTakeResponse[]::new);
+                return ResponseEntity.ok(new QuizAttemptStartResponse(persisted.getId(), questions));
             })
             .orElse(ResponseEntity.notFound().build());
     }
