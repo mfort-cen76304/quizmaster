@@ -15,6 +15,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/workspaces/{workspaceGuid}/quizzes")
 public class WorkspaceQuizController {
@@ -98,11 +102,14 @@ public class WorkspaceQuizController {
         if (questionIds == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz questions must belong to the workspace.");
         }
+        if (questionIds.length == 0) {
+            return;
+        }
 
-        for (int questionId : questionIds) {
-            if (questionRepository.findByIdAndWorkspaceGuid(questionId, workspaceGuid).isEmpty()) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz questions must belong to the workspace.");
-            }
+        Set<Integer> uniqueIds = Arrays.stream(questionIds).boxed().collect(Collectors.toSet());
+        long matched = questionRepository.countByIdInAndWorkspaceGuid(uniqueIds, workspaceGuid);
+        if (matched != uniqueIds.size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz questions must belong to the workspace.");
         }
     }
 }
