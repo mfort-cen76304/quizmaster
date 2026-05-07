@@ -10,6 +10,29 @@ Quizmaster is a training application for Scrum workshops at ScrumDojo.cz. Core f
 
 Built incrementally using thin slices of functionality — a key learning objective of the training.
 
+## Documentation
+
+The repo's prose documentation lives in two places:
+
+- **`docs/`** describes what is real in the codebase today.
+  - `architecture.md`, `domain-language.md`, `ai-assistant.md` — system-level
+  - `mcp/` — MCP server (overview, configuration, current REST auth state)
+  - `conventions/` — code, controller, and E2E style guides
+  - `team/` — definition of done, working agreement
+  - `devenv/` — how to set up and run the project locally
+- **`backlog/`** holds planning material: target specs, design notes, and
+  pending refactors. Anything aspirational or not-yet-implemented goes here,
+  not in `docs/`.
+
+**When you change code, update related documentation in the same change.**
+If you touch a domain entity, check `docs/domain-language.md`. If you touch
+the AI assistant pipeline, check `docs/ai-assistant.md`. If you touch the
+MCP server's tools or configuration, check `docs/mcp/`. If you change the
+public REST surface or routes, check `CLAUDE.md` itself. If a doc claim no
+longer matches the code, fix the doc — do not leave drift behind. If a
+change makes a planned item from `backlog/` real, move the relevant content
+into `docs/` and delete or trim the backlog entry.
+
 ## Architecture
 
 **Monorepo with frontend built into backend:**
