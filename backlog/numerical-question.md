@@ -16,6 +16,12 @@ values, but it deserves more thorough exercise than the current single E2E
 scenario in `Question.Take.Numerical.feature` ("Tolerance widens the accepted
 range, boundaries inclusive") gives it.
 
+**Note (2026-05):** the backend now scores numerical answers too —
+`QuestionScoringService.scoreNumerical` ships the same `FLOAT_EPSILON = 1e-9`
+constant. Whatever fix lands on the frontend should land on the backend in the
+same commit; otherwise the two halves drift on edge values. Cover both with the
+unit-test push below.
+
 E2E coverage is expensive (one scenario per case is roughly one full quiz-take
 flow), so the right place to grind through edge cases is **Vitest unit tests**,
 which we don't yet have in the repo. Cases worth covering once Vitest lands:
