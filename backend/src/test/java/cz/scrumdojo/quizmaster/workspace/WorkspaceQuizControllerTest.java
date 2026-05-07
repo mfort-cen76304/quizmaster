@@ -73,6 +73,17 @@ public class WorkspaceQuizControllerTest {
     }
 
     @Test
+    public void getQuizFromWrongWorkspaceReturns404() throws Exception {
+        Workspace workspace1 = fixtures.save(fixtures.workspace());
+        Workspace workspace2 = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace1));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace1.getGuid()).build());
+
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace2.getGuid(), quiz.getId()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void getWorkspaceQuizReturnsAllQuestionsForRandomQuiz() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));

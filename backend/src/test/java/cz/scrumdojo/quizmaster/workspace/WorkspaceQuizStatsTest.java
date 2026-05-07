@@ -117,4 +117,10 @@ public class WorkspaceQuizStatsTest {
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), -1))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    public void missingWorkspaceReturns404() throws Exception {
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", "non-existent-guid", -1))
+                .andExpect(status().isNotFound());
+    }
 }

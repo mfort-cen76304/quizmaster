@@ -2,6 +2,7 @@ package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.quiz.Quiz;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -173,5 +174,19 @@ public class WorkspaceQuestionControllerTest {
                     }
                     """))
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void deleteQuestionReferencedByQuizLeavesDanglingReference() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
+
+        mockMvc.perform(delete("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId()))
+            .andExpect(status().isNoContent());
+
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.questions.length()").value(0));
     }
 }
