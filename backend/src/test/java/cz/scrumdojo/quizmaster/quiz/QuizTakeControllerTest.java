@@ -220,7 +220,7 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void submitAttemptQuestionRecordsExamQuizQuestionWithoutRevealingScore() throws Exception {
+    public void submitAttemptQuestionInExamReturnsScoreWithoutLeakingFeedback() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question)
@@ -239,11 +239,14 @@ public class QuizTakeControllerTest {
                 .content("""
                     {"type": "choice", "selectedIdxs": [1]}
                     """))
-            .andExpect(status().isNoContent())
-            .andExpect(content().string(""));
+            .andExpect(status().isOk())
+            .andExpect(content().json("""
+                {"correct": true, "score": 1.0}
+                """))
+            .andExpect(jsonPath("$.question").doesNotExist());
 
         var storedAttempt = attemptRepository.findById(attempt.getId()).orElseThrow();
-        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(1);
+        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(0);
         assertThat(storedAttempt.getIncorrectAnswers()).isEqualTo(0);
         assertThat(storedAttempt.getPartiallyCorrectAnswers()).isEqualTo(0);
     }

@@ -182,12 +182,7 @@ public class QuizTakeController {
 
         if (quiz.get().getMode() == QuizMode.EXAM) {
             double score = questionScoringService.score(question.get(), request);
-            var updatedAttempt = attempt.get();
-            if (score == 1) updatedAttempt.setCorrectAnswers(updatedAttempt.getCorrectAnswers() + 1);
-            else if (score == 0.5) updatedAttempt.setPartiallyCorrectAnswers(updatedAttempt.getPartiallyCorrectAnswers() + 1);
-            else updatedAttempt.setIncorrectAnswers(updatedAttempt.getIncorrectAnswers() + 1);
-            attemptRepository.save(updatedAttempt);
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok(new QuestionEvaluationResponse(score == 1, score, null));
         }
 
         return ResponseEntity.ok(questionScoringService.evaluate(question.get(), request));

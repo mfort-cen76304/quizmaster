@@ -1,7 +1,7 @@
 import './quiz-play.scss'
 import { useRef, useState } from 'react'
 
-import { patchAttempt, recordQuizQuestionAnswer, submitQuizQuestionAnswer } from '#api/stats.ts'
+import { patchAttempt, submitQuizQuestionAnswer } from '#api/stats.ts'
 import { type AnswerIdxs, type QuestionAnswer, type QuestionEvaluation, evaluateAnswer } from '#model/question.ts'
 import type { Quiz, QuizMode, QuizTake } from '#model/quiz.ts'
 import { QuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
@@ -28,7 +28,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     const nav = useQuizNavigationState(props.quiz, props.questionsBaseUrl)
     const bookmarks = useQuizBookmarkState()
     const [selectedAnswerIdxs, setSelectedAnswerIdxs] = useState<AnswerIdxs | undefined>(undefined)
-    const answerCounts = useRef({ correct: 0, partial: 0, incorrect: 0 })
+    const scoresByQuestionId = useRef<Map<number, number>>(new Map())
 
     const answer = (questionAnswer: QuestionAnswer) => {
         answerQuestion(nav.currentQuestionIdx, questionAnswer)
@@ -84,40 +84,33 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
         }
     }
 
-    const adjustCount = (score: number, delta: 1 | -1) => {
-        if (score === 1) answerCounts.current.correct += delta
-        else if (score === 0.5) answerCounts.current.partial += delta
-        else answerCounts.current.incorrect += delta
+    const recordScore = (questionId: number, score: number) => {
+        if (props.quiz.mode === 'learn' && scoresByQuestionId.current.has(questionId)) return
+        scoresByQuestionId.current.set(questionId, score)
     }
 
-    const revertPreviousAnswerCount = () => {
-        if (currentAnswer !== undefined && authoringQuestion) {
-            const previousResult = evaluateAnswer(authoringQuestion, currentAnswer)
-            adjustCount(previousResult.score, -1)
+    const computeCounts = () => {
+        let correct = 0
+        let partial = 0
+        let incorrect = 0
+        for (const score of scoresByQuestionId.current.values()) {
+            if (score === 1) correct++
+            else if (score === 0.5) partial++
+            else incorrect++
         }
+        return { correctAnswers: correct, partiallyCorrectAnswers: partial, incorrectAnswers: incorrect }
     }
 
     const handleAnswerSubmitted = async (questionAnswer: QuestionAnswer): Promise<QuestionEvaluation | void> => {
-        revertPreviousAnswerCount()
         const result = authoringQuestion
             ? evaluateAnswer(authoringQuestion, questionAnswer)
-            : props.quizRunId !== null && props.quiz.mode === 'learn'
+            : props.quizRunId !== null
               ? await submitQuizQuestionAnswer(props.quiz.id, props.quizRunId, currentQuestion.id, questionAnswer)
               : undefined
 
-        if (!authoringQuestion && props.quizRunId !== null && props.quiz.mode === 'exam') {
-            await recordQuizQuestionAnswer(props.quiz.id, props.quizRunId, currentQuestion.id, questionAnswer)
-        }
-
-        if (result) {
-            adjustCount(result.score, 1)
-        }
         if (props.quizRunId !== null && result) {
-            patchAttempt(props.quizRunId, {
-                correctAnswers: answerCounts.current.correct,
-                partiallyCorrectAnswers: answerCounts.current.partial,
-                incorrectAnswers: answerCounts.current.incorrect,
-            })
+            recordScore(currentQuestion.id, result.score)
+            await patchAttempt(props.quizRunId, computeCounts())
         }
 
         if (props.quiz.mode === 'learn') {

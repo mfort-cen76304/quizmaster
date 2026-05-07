@@ -162,6 +162,41 @@ Feature: Show stats
       | Started | Finished | Unfinished | Timeout |
       |       1 |        1 |          0 |       0 |
 
+  Scenario: Exam mode retake updates the stats to the latest answer
+    Going back to re-answer a question in exam mode replaces the
+    previous answer in the in-progress stats; it does not accumulate
+    both attempts.
+
+    Given quiz "Exam Quiz" with 2 questions
+      | mode | exam |
+
+    When I start quiz "Exam Quiz"
+    * I answer incorrectly
+    * I go back to previous question
+    * I answer correctly
+
+    When I open quiz "Exam Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status      |
+      |          | 1/2    | 1 (50%)         | 0 (0%)            | 50    | In Progress |
+
+  Scenario: Learn mode retake keeps the stats as the first answer
+    Re-answering the current question in learn mode keeps the first
+    answer in the in-progress stats. The retake updates the feedback
+    shown to the taker, not the stats record.
+
+    Given quiz "Learn Quiz" with 2 questions
+      | mode | learn |
+
+    When I start quiz "Learn Quiz"
+    * I answer incorrectly
+    * I answer correctly
+
+    When I open quiz "Learn Quiz" statistics
+    Then I see attempt stats table
+      | Duration | Points | Correct Answers | Incorrect Answers | Score | Status      |
+      |          | 0/2    | 0 (0%)          | 1 (50%)           | 0     | In Progress |
+
   Scenario: Partially correct answer is reflected in stats
     Given workspace "Mixed" with questions
       | bookmark | question                           | answers                                      |
