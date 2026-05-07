@@ -20,7 +20,7 @@
         "test:fmt": "vitest run test/gherkin-fmt",
 
         "coverage:clean": "rm -rf coverage",
-        "coverage:test:e2e": "pnpm coverage:clean && ENABLE_COVERAGE=1 c8 --experimental-monocart pnpm playwright:test",
+        "coverage:test:e2e": "pnpm coverage:clean && . ../scripts/load-env.sh && bddgen && wait-on tcp:${E2E_BASE_PORT:-$BE_PORT} && ENABLE_COVERAGE=1 c8 --experimental-monocart playwright test",
         "coverage:report": "node src/coverage/report.js",
     },
     "dependencies": {
