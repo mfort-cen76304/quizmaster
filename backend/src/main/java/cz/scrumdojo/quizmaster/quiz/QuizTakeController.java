@@ -56,9 +56,7 @@ public class QuizTakeController {
     }
 
     @PostMapping("/{id}/attempts")
-    public ResponseEntity<?> createAttempt(
-            @PathVariable Integer id,
-            @RequestBody(required = false) QuizAttemptStartRequest request) {
+    public ResponseEntity<?> createAttempt(@PathVariable Integer id) {
         return quizRepository.findById(id)
             .map(quiz -> {
                 if (!QuizAvailability.isAvailable(quiz, LocalDateTime.now(clock))) {
@@ -70,11 +68,10 @@ public class QuizTakeController {
                 var selectedQuestionIds = selectedQuestions.stream()
                     .mapToInt(Question::getId)
                     .toArray();
-                var startedAt = request != null && request.startedAt() != null ? request.startedAt() : LocalDateTime.now(clock);
                 Attempt attempt = Attempt.builder()
                     .quizId(id)
                     .questionIds(selectedQuestionIds)
-                    .startedAt(startedAt)
+                    .startedAt(LocalDateTime.now(clock))
                     .correctAnswers(0)
                     .partiallyCorrectAnswers(0)
                     .incorrectAnswers(0)
@@ -171,10 +168,7 @@ public class QuizTakeController {
         updatedAttempt.setCorrectAnswers(correct);
         updatedAttempt.setPartiallyCorrectAnswers(partial);
         updatedAttempt.setIncorrectAnswers(incorrect);
-        updatedAttempt.setFinishedAt(request.finishedAt() != null ? request.finishedAt() : LocalDateTime.now(clock));
-        if (request.timedOutAt() != null) {
-            updatedAttempt.setTimedOutAt(request.timedOutAt());
-        }
+        updatedAttempt.setFinishedAt(LocalDateTime.now(clock));
 
         var feedbackQuestions = Arrays.stream(expectedQuestionIds)
             .mapToObj(questionsById::get)

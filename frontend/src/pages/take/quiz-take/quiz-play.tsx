@@ -18,7 +18,7 @@ interface QuizPlayFormProps {
     readonly quiz: Quiz | QuizTake
     readonly quizRunId: number | null
     readonly questionsBaseUrl: string
-    readonly onEvaluate: (quizAnswers: QuizAnswers, timedOut?: boolean) => void
+    readonly onEvaluate: (quizAnswers: QuizAnswers) => void
 }
 
 const feedbackModeLabel = (mode: QuizMode): string => (mode === 'learn' ? 'Continuous feedback' : 'Feedback at the end')
@@ -43,7 +43,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     }))
 
     const evaluate = () => {
-        props.onEvaluate(quizAnswers, false)
+        props.onEvaluate(quizAnswers)
     }
 
     const handleTimeOut = async () => {
@@ -52,7 +52,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     }
 
     const evaluateTimedOut = () => {
-        props.onEvaluate(quizAnswers, true)
+        props.onEvaluate(quizAnswers)
     }
 
     const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
@@ -76,7 +76,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
             const allAnswered = props.quiz.questions.every((_, idx) => updatedFinalAnswers[idx] !== undefined)
 
             if (allAnswered) {
-                props.onEvaluate({ firstAnswers: quizAnswers.firstAnswers, finalAnswers: updatedFinalAnswers }, false)
+                props.onEvaluate({ firstAnswers: quizAnswers.firstAnswers, finalAnswers: updatedFinalAnswers })
             } else {
                 nav.next()
             }

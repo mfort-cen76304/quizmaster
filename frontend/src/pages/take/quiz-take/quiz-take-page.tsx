@@ -37,7 +37,7 @@ export const QuizTakePage = () => {
         navigate(urls.quizWelcome(quizId), { replace: true })
     }, [quizId, canTakeQuiz, navigate, quiz, quizRunId])
 
-    async function handleEvaluate(answers: QuizAnswers | null, timedOut = false) {
+    async function handleEvaluate(answers: QuizAnswers | null) {
         if (!quiz) return
 
         navigate(urls.quizTake(quiz.id))
@@ -52,8 +52,6 @@ export const QuizTakePage = () => {
                 const answer = answers.finalAnswers[index]
                 return answer ? [{ ...answer, questionId: question.id }] : []
             }),
-            finishedAt: new Date().toISOString(),
-            timedOutAt: timedOut ? new Date().toISOString() : undefined,
         })
         setScoredQuiz(response)
     }

@@ -1,12 +1,5 @@
 import type { IdResponse } from '#shared/types/id-response.ts'
-import type {
-    Quiz,
-    QuizAttemptStartRequest,
-    QuizAttemptStartResponse,
-    QuizMetadata,
-    QuizRequest,
-    QuizTake,
-} from '#shared/types/quiz.ts'
+import type { Quiz, QuizAttemptStartResponse, QuizMetadata, QuizRequest, QuizTake } from '#shared/types/quiz.ts'
 
 import { fetchJson, postJson, putJson, callDelete } from './helpers.ts'
 
@@ -18,9 +11,7 @@ export const fetchQuizAttempt = async (quizId: number, attemptId: number) =>
     await fetchJson<QuizTake>(`/api/quiz/${quizId}/attempts/${attemptId}`)
 
 export const createAttempt = async (quizId: number): Promise<QuizAttemptStartResponse> =>
-    await postJson<QuizAttemptStartRequest, QuizAttemptStartResponse>(`/api/quiz/${quizId}/attempts`, {
-        startedAt: new Date().toISOString(),
-    })
+    await postJson<undefined, QuizAttemptStartResponse>(`/api/quiz/${quizId}/attempts`, undefined)
 
 export const fetchWorkspaceQuiz = async (workspaceGuid: string, quizId: string) =>
     await fetchJson<Quiz>(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}`)

@@ -63,8 +63,6 @@ export type QuizSubmittedAnswer =
 export interface QuizEvaluationRequest {
     readonly questionIds: readonly number[]
     readonly answers: readonly QuizSubmittedAnswer[]
-    readonly finishedAt: string
-    readonly timedOutAt?: string
 }
 
 export interface QuizEvaluationResponse {
@@ -78,10 +76,6 @@ export interface QuizEvaluationResponse {
     readonly score: number
     readonly totalQuestions: number
     readonly questions?: readonly Question[]
-}
-
-export interface QuizAttemptStartRequest {
-    readonly startedAt: string
 }
 
 export interface QuizAttemptStartResponse {

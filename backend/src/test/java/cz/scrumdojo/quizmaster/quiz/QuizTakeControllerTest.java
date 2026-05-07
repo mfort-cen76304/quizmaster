@@ -188,8 +188,7 @@ public class QuizTakeControllerTest {
                         "answers": [
                             {"questionId": %d, "type": "choice", "selectedIdxs": [1]},
                             {"questionId": %d, "type": "choice", "selectedIdxs": [0]}
-                        ],
-                        "finishedAt": "2026-01-01T10:05:00"
+                        ]
                     }
                     """.formatted(q1.getId(), q2.getId(), q1.getId(), q2.getId())))
             .andExpect(status().isOk())
@@ -216,8 +215,7 @@ public class QuizTakeControllerTest {
                 .content("""
                     {
                         "questionIds": [%d],
-                        "answers": [],
-                        "finishedAt": "2026-01-01T10:05:00"
+                        "answers": []
                     }
                     """.formatted(q2.getId())))
             .andExpect(status().isBadRequest());
@@ -244,8 +242,7 @@ public class QuizTakeControllerTest {
                         "questionIds": [%d],
                         "answers": [
                             {"questionId": %d, "type": "choice", "selectedIdxs": [0]}
-                        ],
-                        "finishedAt": "2026-01-01T10:05:00"
+                        ]
                     }
                     """.formatted(question.getId(), question.getId())))
             .andExpect(status().isConflict());
