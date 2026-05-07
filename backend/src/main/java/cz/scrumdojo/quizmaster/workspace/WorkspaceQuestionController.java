@@ -85,12 +85,8 @@ public class WorkspaceQuestionController {
         if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        return questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
-            .map(existing -> {
-                questionRepository.deleteById(id);
-                return ResponseEntity.noContent().<Void>build();
-            })
-            .orElse(ResponseEntity.notFound().build());
+        int deleted = questionRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
+        return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     private void embedBestEffort(Question question) {

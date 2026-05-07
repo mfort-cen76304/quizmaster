@@ -91,11 +91,8 @@ public class WorkspaceQuizController {
         if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        if (quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid).isEmpty())
-            return ResponseEntity.notFound().build();
-
-        quizRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+        int deleted = quizRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
+        return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
     }
 
     private void validateQuestionsBelongToWorkspace(int[] questionIds, String workspaceGuid) {

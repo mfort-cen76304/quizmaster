@@ -1,7 +1,9 @@
 package cz.scrumdojo.quizmaster.quiz;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,4 +20,8 @@ public interface QuizRepository extends JpaRepository<Quiz, Integer> {
 
     @Query(value = "SELECT DISTINCT unnest(questions) FROM quiz WHERE workspace_guid = ?", nativeQuery = true)
     Set<Integer> findQuestionIdsInQuizzesByWorkspaceGuid(String workspaceGuid);
+
+    @Modifying
+    @Query("DELETE FROM Quiz q WHERE q.id = :id AND q.workspaceGuid = :workspaceGuid")
+    int deleteByIdAndWorkspaceGuid(@Param("id") Integer id, @Param("workspaceGuid") String workspaceGuid);
 }
