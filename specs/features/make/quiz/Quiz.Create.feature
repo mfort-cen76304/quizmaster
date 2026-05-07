@@ -23,6 +23,7 @@ Feature: Create Quiz from Workspace
     Then I see the quiz "Math Quiz" in the workspace
     * I take quiz "Math Quiz"
 
+
   Scenario: Create quiz with randomized question pool
     Given workspace "Quiz Creation" with questions
       | question                       | answers            |
@@ -50,6 +51,7 @@ Feature: Create Quiz from Workspace
     * I see quiz description "Very hard math quiz"
     * I see question count 3
 
+
   Scenario Outline: Filter questions in quiz creation form
     Given workspace "Quiz Filter" with questions
       | question                       | answers            |
@@ -69,12 +71,13 @@ Feature: Create Quiz from Workspace
 
     Examples:
       | filter    | visibleQuestion1      | visibleQuestion2               | hiddenQuestion1       | hiddenQuestion2                |
-      |         2 |             2 + 2 = ? |                      4 / 2 = ? |             3 * 3 = ? | Jaký nábytek má Ikea?          |
-      | Ikea      | Jaký nábytek má Ikea? | Jaké nádobí má Ikea?           |             2 + 2 = ? |                      3 * 3 = ? |
-      | nábytek   | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |             2 + 2 = ? |                      4 / 2 = ? |
-      | nábyt     | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |             2 + 2 = ? |                      4 / 2 = ? |
-      | má nádobí | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           |             2 + 2 = ? |                      4 / 2 = ? |
+      | 2         | 2 + 2 = ?             | 4 / 2 = ?                      | 3 * 3 = ?             | Jaký nábytek má Ikea?          |
+      | Ikea      | Jaký nábytek má Ikea? | Jaké nádobí má Ikea?           | 2 + 2 = ?             | 3 * 3 = ?                      |
+      | nábytek   | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? | 2 + 2 = ?             | 4 / 2 = ?                      |
+      | nábyt     | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? | 2 + 2 = ?             | 4 / 2 = ?                      |
+      | má nádobí | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | 2 + 2 = ?             | 4 / 2 = ?                      |
       | má nád    | Jaké má nádobí Ikea?  | Jaké nádobí má Ikea?           | Jaký nábytek má Ikea? | Jaký venkovní Nábytek má Ikea? |
+
 
   Scenario: Filter questions in quiz creation by tag
     Given workspace "Tags" with questions
@@ -86,11 +89,12 @@ Feature: Create Quiz from Workspace
     Then I see quiz question "What is a Sprint?"
     And I don't see quiz questions "What is a Backlog?"
 
-Scenario: Quiz time limit formatting
-  Given workspace "Testworkspace"
-  When I start creating a new quiz
-  And I see the quiz creation page
-  Then form reacts correctly to all given inputs
+
+  Scenario: Quiz time limit formatting
+    Given workspace "Testworkspace"
+    When I start creating a new quiz
+    And I see the quiz creation page
+    Then form reacts correctly to all given inputs
       | timeLimit | formattedTimeLimit |
       | 10s       | 0h 0m 10s          |
       | 120s      | 0h 2m 0s           |
@@ -103,21 +107,22 @@ Scenario: Quiz time limit formatting
       | 90S100m   | 1h 41m 30s         |
       |           | Not valid format   |
 
-Scenario Outline: Quiz start and end date
-  Given workspace "Testquizdates" with questions
-      | question                       | answers            |
-      | 2 + 2 = ?                      | 4 (*), 5           |
-      | 3 * 3 = ?                      | 9 (*), 6           |
-  When I start creating a new quiz
-  * I enter quiz name "Math Quiz"
-  * I enter quiz description "Very hard math quiz"
-  * I select question "2 + 2 = ?"
-  * I select question "3 * 3 = ?"
-  * I set quiz availability start "<startDate>" and end "<endDate>"
-  * I submit the quiz
-  Then I see the quiz "Math Quiz" in the workspace
 
-  Examples:
+  Scenario Outline: Quiz start and end date
+    Given workspace "Testquizdates" with questions
+      | question  | answers  |
+      | 2 + 2 = ? | 4 (*), 5 |
+      | 3 * 3 = ? | 9 (*), 6 |
+    When I start creating a new quiz
+    * I enter quiz name "Math Quiz"
+    * I enter quiz description "Very hard math quiz"
+    * I select question "2 + 2 = ?"
+    * I select question "3 * 3 = ?"
+    * I set quiz availability start "<startDate>" and end "<endDate>"
+    * I submit the quiz
+    Then I see the quiz "Math Quiz" in the workspace
+
+    Examples:
       | startDate        | endDate          |
       | 2026-04-14T10:00 | 2026-04-14T23:00 |
       | 2026-04-14T10:00 |                  |

@@ -6,7 +6,6 @@ Feature: Question answer feedback
     incorrect selected) plus per-answer color coding (green for correct,
     red for selected-incorrect, neutral for unselected-incorrect)
 
-
   Scenario Outline: Single choice question feedback
     Question is answered correctly if the correct answer is selected
 
@@ -33,15 +32,16 @@ Feature: Question answer feedback
 
     Given question "Which of the following are planets?"
     * with answers:
-      | Mars    | * |
-      | Pluto   |   |
-      | Titan   |   |
-      | Venus   | * |
+      | Mars  | * |
+      | Pluto |   |
+      | Titan |   |
+      | Venus | * |
     * saved and bookmarked as "Planets"
     When I take question "Planets"
     And I answer "<answer>"
     Then I see feedback "<feedback>"
     And I see score "Score: <score>"
+
     Examples:
       | answer                    | score | feedback           |
       | Mars, Venus               | 1     | Correct!           |
@@ -60,10 +60,10 @@ Feature: Question answer feedback
 
     Given question "Which of the following are planets?"
     * with answers:
-      | Mars    | * |
-      | Pluto   |   |
-      | Titan   |   |
-      | Venus   | * |
+      | Mars  | * |
+      | Pluto |   |
+      | Titan |   |
+      | Venus | * |
     * saved and bookmarked as "Planets"
     When I take question "Planets"
     And I answer "<answer>"
@@ -75,9 +75,9 @@ Feature: Question answer feedback
       | Titan  | <titan> |
 
     Examples:
-      | answer                    | mars    | pluto   | venus   | titan   |
-      | Mars, Venus               | 🟩🟩🟩 | ◼️◼️◼️ | 🟩🟩🟩 | ◼️◼️◼️ |
-      | Mars, Venus, Titan        | 🟩🟩🟩 | ◼️◼️◼️ | 🟩🟩🟩 | 🟥🟥🟥 |
-      | Mars, Pluto               | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | ◼️◼️◼️ |
-      | Mars, Pluto, Venus, Titan | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | 🟥🟥🟥 |
-      | Pluto, Titan              | 🟩🟩🟩 | 🟥🟥🟥 | 🟩🟩🟩 | 🟥🟥🟥 |
+      | answer                    | mars | pluto  | venus | titan  |
+      | Mars, Venus               | 🟩🟩🟩  | ◼️◼️◼️ | 🟩🟩🟩   | ◼️◼️◼️ |
+      | Mars, Venus, Titan        | 🟩🟩🟩  | ◼️◼️◼️ | 🟩🟩🟩   | 🟥🟥🟥    |
+      | Mars, Pluto               | 🟩🟩🟩  | 🟥🟥🟥    | 🟩🟩🟩   | ◼️◼️◼️ |
+      | Mars, Pluto, Venus, Titan | 🟩🟩🟩  | 🟥🟥🟥    | 🟩🟩🟩   | 🟥🟥🟥    |
+      | Pluto, Titan              | 🟩🟩🟩  | 🟥🟥🟥    | 🟩🟩🟩   | 🟥🟥🟥    |

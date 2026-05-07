@@ -13,6 +13,7 @@ Feature: Create question form
     * I see 2 default empty answers
     * I see empty question explanation
 
+
   Scenario: Delete second answer out of three
     When I start creating a new question
     * I enter answers
@@ -23,6 +24,7 @@ Feature: Create question form
     * I see the answers fields
       | AA | * |
       | CC |   |
+
 
   Scenario: Explanation fields are hidden by default
     When I start creating a new question

@@ -17,6 +17,7 @@ Feature: Quiz answer state
     Then I see question "Sky"
     And no answer is selected
 
+
   Scenario: After page refresh no answer is selected
     Given workspace "Regression" with questions
       | bookmark | question                            | answers                              |
@@ -29,6 +30,7 @@ Feature: Quiz answer state
     And I refresh the page
     Then no answer is selected
 
+
   Scenario: After next page is displayed, no answer and explanation is displayed
     Given workspace "Regression" with questions
       | bookmark | question                            | answers                              |
@@ -39,6 +41,7 @@ Feature: Quiz answer state
     Given I start quiz "Quiz"
     When I answer "Green"
     Then no answer is selected
+
 
   Scenario: After completing the quiz and restarting, the quiz starts from the beginning
     Given workspace "Regression" with questions
@@ -55,6 +58,7 @@ Feature: Quiz answer state
     Then I see question "Sky"
     And no answer is selected
 
+
   Scenario: User reloads page on answered question
     Given workspace "Flow" with questions
       | question                    | answers                                            |
@@ -68,6 +72,7 @@ Feature: Quiz answer state
     * I refresh the page
     Then no answer is selected
 
+
   Scenario: Remembered answer after back button
     Given workspace "Flow" with questions
       | question                    | answers                                            |
@@ -79,6 +84,7 @@ Feature: Quiz answer state
     Then I see question "What is capital of France?"
     When I go back to previous question
     Then I see answer "Elephant" checked
+
 
   Scenario: Remembered multiple choices after back button
     Given workspace "Flow" with questions
@@ -94,6 +100,7 @@ Feature: Quiz answer state
     Then I see answer "Elephant" checked
     Then I see answer "Anteater" checked
 
+
   Scenario: When proceeding answer is submitted
     Given workspace "Flow" with questions
       | question                    | answers                                            |
@@ -107,6 +114,7 @@ Feature: Quiz answer state
     Then I see question "What is capital of France?"
     When I go back to previous question
     Then I see answer "Elephant" checked
+
 
   Scenario: When going back answer is submitted
     Given workspace "Flow 3Q" with questions

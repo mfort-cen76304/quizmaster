@@ -4,9 +4,9 @@ Feature: Quiz scheduling
 
   Scenario: Quiz is available during the scheduled period
     Given workspace "Welcome" with questions
-      | bookmark | question  | answers    |
-      | Q1       | 1 + 1 = ? | 2 (*), 3  |
-      | Q2       | 2 + 2 = ? | 4 (*), 5  |
+      | bookmark | question  | answers  |
+      | Q1       | 1 + 1 = ? | 2 (*), 3 |
+      | Q2       | 2 + 2 = ? | 4 (*), 5 |
     And quiz "Quiz" with questions "Q1, Q2"
       | description | Description A |
       | mode        | exam          |
@@ -18,11 +18,12 @@ Feature: Quiz scheduling
     Then I see the welcome page
     * I can start the quiz
 
+
   Scenario: Quiz is unavailable before the scheduled period starts
     Given workspace "Welcome" with questions
-      | bookmark | question  | answers    |
-      | Q1       | 1 + 1 = ? | 2 (*), 3  |
-      | Q2       | 2 + 2 = ? | 4 (*), 5  |
+      | bookmark | question  | answers  |
+      | Q1       | 1 + 1 = ? | 2 (*), 3 |
+      | Q2       | 2 + 2 = ? | 4 (*), 5 |
     And quiz "Quiz" with questions "Q1, Q2"
       | description | Description B |
       | mode        | exam          |
@@ -34,11 +35,12 @@ Feature: Quiz scheduling
     Then I see the welcome page
     * I cannot start the quiz
 
+
   Scenario: Direct questions route redirects to welcome page before the scheduled period starts
     Given workspace "Welcome" with questions
-      | bookmark | question  | answers    |
-      | Q1       | 1 + 1 = ? | 2 (*), 3  |
-      | Q2       | 2 + 2 = ? | 4 (*), 5  |
+      | bookmark | question  | answers  |
+      | Q1       | 1 + 1 = ? | 2 (*), 3 |
+      | Q2       | 2 + 2 = ? | 4 (*), 5 |
     And quiz "Quiz" with questions "Q1, Q2"
       | description | Description C |
       | mode        | exam          |

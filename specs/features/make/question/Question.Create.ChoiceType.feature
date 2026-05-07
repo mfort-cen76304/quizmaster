@@ -7,8 +7,10 @@ Feature: Create question - single/multiple choice
   Background:
     Given I start creating a new question
 
+
   Scenario: Default is single choice
     Then the question is single choice
+
 
   Scenario: Single choice: Mark correct answer
     * I enter answers
@@ -21,6 +23,7 @@ Feature: Create question - single/multiple choice
       | Berlin     | * |
       | Bratislava |   |
 
+
   Scenario: Single choice: Change correct answer
     * I enter answers
       | Brno       |   |
@@ -31,6 +34,7 @@ Feature: Create question - single/multiple choice
       | Brno       | * |
       | Berlin     |   |
       | Bratislava |   |
+
 
   Scenario: Multiple choice: Mark multiple correct answers
     * I mark the question as multiple choice
@@ -45,6 +49,7 @@ Feature: Create question - single/multiple choice
       | Berlin     | * |
       | Bratislava | * |
 
+
   Scenario: Switch single to multiple choice: Keep selection
     * I enter answers
       | Brno       |   |
@@ -55,6 +60,7 @@ Feature: Create question - single/multiple choice
       | Brno       |   |
       | Berlin     | * |
       | Bratislava |   |
+
 
   Scenario: Switch multiple to single choice: Keep selection
     If exactly one answer is marked as correct for a multiple choice question,
@@ -71,6 +77,7 @@ Feature: Create question - single/multiple choice
       | Berlin     | * |
       | Bratislava |   |
 
+
   Scenario: Switch multiple to single choice: Reset selection
     If more than one answer is marked as correct for a multiple choice question,
     switching to single choice unmarks all answers.
@@ -86,6 +93,7 @@ Feature: Create question - single/multiple choice
       | Berlin     |  |
       | Bratislava |  |
 
+
   Scenario: Easy: Verify that Easy is visible only for Multiple Choice
     # default case (Single choice)
     Then the question is single choice
@@ -94,6 +102,7 @@ Feature: Create question - single/multiple choice
     When I mark the question as multiple choice
     Then easy is available
     And easy is off
+
 
   Scenario: Switch single choice to numerical
     * I enter question "How many regions does Czechia have?"
@@ -112,6 +121,7 @@ Feature: Create question - single/multiple choice
     And I edit question "How many regions does Czechia have?" from the list
     Then I see question edit page
     And I see numerical correct answer "14"
+
 
   Scenario: Switch multiple choice to numerical
     * I mark the question as multiple choice
@@ -133,6 +143,7 @@ Feature: Create question - single/multiple choice
     Then I see question edit page
     And I see numerical correct answer "14"
 
+
   Scenario: Add tolerance to numerical question
     When I mark the question as numerical choice
     When I enter question "How many regions does Czechia have?"
@@ -143,6 +154,7 @@ Feature: Create question - single/multiple choice
     Then I see question edit page
     Then I see tolerance "3"
 
+
   Scenario: Create numerical question with decimal answer
     When I mark the question as numerical choice
     * I enter question "What is π to two decimal places?"
@@ -151,6 +163,7 @@ Feature: Create question - single/multiple choice
     * I edit question "What is π to two decimal places?" from the list
     Then I see question edit page
     And I see numerical correct answer "3.14"
+
 
   Scenario: Add decimal tolerance to numerical question
     When I mark the question as numerical choice
@@ -162,13 +175,15 @@ Feature: Create question - single/multiple choice
     Then I see question edit page
     And I see tolerance "0.5"
 
-Scenario: Create numerical question with 2 decimal digits
+
+  Scenario: Create numerical question with 2 decimal digits
     When I mark the question as numerical choice
     * I enter question "What is π to two decimal places?"
     * I enter numerical correct answer "3.14"
     Then I see note "2 decimal digits will be required in the answer."
 
-Scenario: Edit numerical question with 2 decimal digits
+
+  Scenario: Edit numerical question with 2 decimal digits
     When I mark the question as numerical choice
     * I enter question "What is π to two decimal places?"
     * I enter numerical correct answer "3.14"
@@ -177,7 +192,8 @@ Scenario: Edit numerical question with 2 decimal digits
     Then I see question edit page
     And I see note "2 decimal digits will be required in the answer."
 
-Scenario: Modify number of decimal digits
+
+  Scenario: Modify number of decimal digits
     When I mark the question as numerical choice
     * I enter question "What is π to two decimal places?"
     * I enter numerical correct answer "3.14"

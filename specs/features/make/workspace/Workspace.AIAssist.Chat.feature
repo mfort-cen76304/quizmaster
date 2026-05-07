@@ -8,15 +8,17 @@ Feature: Show generated questions in workspace Robin AI chat
     When I open Robin AI
     Then Robin AI message composer is docked to the bottom of the chat
 
+
   Scenario: Robin AI chat does not show a Generate button
     Given workspace "Workspace"
     When I open Robin AI
     Then I do not see Robin AI send button
 
+
   Scenario: Pressing Enter sends a Robin AI message from the workspace chat
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question                               | answers                   |
+      | question                               | answers                  |
       | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
       | What is the capital of France?         | Paris (*), Lyon, Nice    |
     When I open Robin AI
@@ -26,10 +28,11 @@ Feature: Show generated questions in workspace Robin AI chat
     And I see 2 generated questions in Robin chat
     And I do not see Robin AI send button
 
+
   Scenario: Robin AI clears the chat composer after sending a message
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question                               | answers                   |
+      | question                               | answers                  |
       | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
       | What is the capital of France?         | Paris (*), Lyon, Nice    |
     When I open Robin AI
@@ -38,10 +41,11 @@ Feature: Show generated questions in workspace Robin AI chat
     Then Robin AI message composer is empty
     And I see 2 generated questions in Robin chat
 
+
   Scenario: Robin AI confirms saving generated questions and clears the previews
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question                               | answers                   |
+      | question                               | answers                  |
       | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
       | What is the capital of France?         | Paris (*), Lyon, Nice    |
     When I remember workspace question count
@@ -54,13 +58,14 @@ Feature: Show generated questions in workspace Robin AI chat
     And I do not see generated questions in Robin chat
     And workspace question count increased by 2
 
+
   @ai @slow
   Scenario: Robin shows generated questions in the workspace chat
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question                               | answers                                 |
-      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin               |
-      | Which of these are European capitals?  | Prague (*), Paris (*), Brno, Ostrava   |
+      | question                               | answers                              |
+      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin             |
+      | Which of these are European capitals?  | Prague (*), Paris (*), Brno, Ostrava |
     When I open Robin AI
     And I ask AI to generate multiple questions:
       | Generate 2 questions about capital cities |
@@ -72,11 +77,12 @@ Feature: Show generated questions in workspace Robin AI chat
     And I do not see question "What is the capital of Czech Republic?" in the list
     And I do not see question "Which of these are European capitals?" in the list
 
+
   @ai @slow
   Scenario: Generated questions are numbered in Robin chat
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question                               | answers                   |
+      | question                               | answers                  |
       | What is the capital of Czech Republic? | Prague (*), Brno, Berlin |
       | What is the capital of France?         | Paris (*), Lyon, Nice    |
     When I open Robin AI
@@ -92,29 +98,30 @@ Feature: Show generated questions in workspace Robin AI chat
     And I do not see question "What is the capital of Czech Republic?" in the list
     And I do not see question "What is the capital of France?" in the list
 
+
   @ai @slow
   Scenario: Robin shows answers and highlights correct ones for generated questions
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question                               | answers                                 |
-      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin               |
-      | Which of these are European capitals?  | Prague (*), Paris (*), Brno, Ostrava   |
+      | question                               | answers                              |
+      | What is the capital of Czech Republic? | Prague (*), Brno, Berlin             |
+      | Which of these are European capitals?  | Prague (*), Paris (*), Brno, Ostrava |
     When I open Robin AI
     And I ask AI to generate multiple questions:
       | Generate 2 questions about capital cities |
       | each with 1 or more correct answers       |
       | and 2 incorrect answers                   |
     Then I see these answers for generated question 1 in Robin chat:
-      | Prague | * | |
-      | Brno   |   | |
-      | Berlin |   | |
+      | Prague | * |  |
+      | Brno   |   |  |
+      | Berlin |   |  |
     And generated question 1 in Robin chat has 3 answers
     And generated question 1 in Robin chat has 1 highlighted correct answers
     And I see these answers for generated question 2 in Robin chat:
-      | Prague  | * | |
-      | Paris   | * | |
-      | Brno    |   | |
-      | Ostrava |   | |
+      | Prague  | * |  |
+      | Paris   | * |  |
+      | Brno    |   |  |
+      | Ostrava |   |  |
     And generated question 2 in Robin chat has 4 answers
     And generated question 2 in Robin chat has 2 highlighted correct answers
     And I see workspace question count 0

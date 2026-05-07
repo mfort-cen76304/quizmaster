@@ -3,13 +3,12 @@ Feature: Show stats
   The stats page displays a summary table (started, finished, unfinished, timeout)
   and an attempt table with duration, score, and status per attempt.
 
-
   Scenario: Show empty stats page for quiz
     Given quiz "Quiz" with 2 questions
     When I open quiz "Quiz" statistics
     Then I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       0 |        0 |          0 |       0 |
+      | 0       | 0        | 0          | 0       |
     And I see empty attempt stats table
 
 
@@ -50,7 +49,7 @@ Feature: Show stats
       | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       4 |        2 |          0 |       2 |
+      | 4       | 2        | 0          | 2       |
 
 
   Scenario: In-progress attempt shows in statistics
@@ -66,7 +65,7 @@ Feature: Show stats
       |          | 1/2    | 1 (50%)         | 0 (0%)            | 50    | In Progress |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       1 |        0 |          1 |       0 |
+      | 1       | 0        | 1          | 0       |
 
 
   Scenario: Abandoned attempt shows in statistics when time limit expires
@@ -83,7 +82,8 @@ Feature: Show stats
       |          | 1/2    | 1 (50%)         | 0 (0%)            | 50    | Abandoned |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       1 |        0 |          1 |       0 |
+      | 1       | 0        | 1          | 0       |
+
 
   Scenario: Overwriting a correct answer with incorrect one updates statistics
     Given quiz "Stats Quiz" with 2 questions
@@ -102,7 +102,8 @@ Feature: Show stats
       | 10s      | 1/2    | 1 (50%)         | 1 (50%)           | 50    | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       1 |        1 |          0 |       0 |
+      | 1       | 1        | 0          | 0       |
+
 
   Scenario: Overwriting an incorrect answer with correct one updates statistics
     Given quiz "Stats Quiz" with 2 questions
@@ -121,10 +122,10 @@ Feature: Show stats
       | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       1 |        1 |          0 |       0 |
+      | 1       | 1        | 0          | 0       |
+
 
   Scenario: Overwriting an incorrect answer with incorrect one updates statistics
-
     Given quiz "Stats Quiz" with 2 questions
       | time limit | 30s |
 
@@ -138,10 +139,11 @@ Feature: Show stats
     When I open quiz "Stats Quiz" statistics
     Then I see attempt stats table
       | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   |
-      | 10s      | 0/2    | 0 (0%)          | 2 (100%)         | 0     | Finished |
+      | 10s      | 0/2    | 0 (0%)          | 2 (100%)          | 0     | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       1 |        1 |          0 |       0 |
+      | 1       | 1        | 0          | 0       |
+
 
   Scenario: Overwriting an correct answer with correct one updates statistics
     Given quiz "Stats Quiz" with 2 questions
@@ -160,7 +162,8 @@ Feature: Show stats
       | 10s      | 2/2    | 2 (100%)        | 0 (0%)            | 100   | Finished |
     And I see summary stats table
       | Started | Finished | Unfinished | Timeout |
-      |       1 |        1 |          0 |       0 |
+      | 1       | 1        | 0          | 0       |
+
 
   Scenario: Exam mode retake updates the stats to the latest answer
     Going back to re-answer a question in exam mode replaces the
@@ -181,6 +184,7 @@ Feature: Show stats
       | Duration | Points | Correct Answers | Incorrect Answers | Score | Status      |
       |          | 1/2    | 1 (50%)         | 0 (0%)            | 50    | In Progress |
 
+
   Scenario: Learn mode retake keeps the stats as the first answer
     Re-answering the current question in learn mode keeps the first
     answer in the in-progress stats. The retake updates the feedback
@@ -197,6 +201,7 @@ Feature: Show stats
     Then I see attempt stats table
       | Duration | Points | Correct Answers | Incorrect Answers | Score | Status      |
       |          | 0/2    | 0 (0%)          | 1 (50%)           | 0     | In Progress |
+
 
   Scenario: Partially correct answer is reflected in stats
     Given workspace "Mixed" with questions

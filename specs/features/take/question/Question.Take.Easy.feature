@@ -19,6 +19,7 @@ Feature: Take an easy question
     When I take question "Europe"
     Then I see that the question has 3 correct answers
 
+
   Scenario: Multiple choice easy question - correct answers is 2
     Given question "Which of these countries are in Europe?"
     * with answers:
@@ -33,6 +34,7 @@ Feature: Take an easy question
     When I take question "Europe"
     Then I see that the question has 2 correct answers
 
+
   Scenario: Multiple choice question not easy - no correct answers count
     Given question "Which of these countries are in Europe?"
     * with answers:
@@ -45,6 +47,7 @@ Feature: Take an easy question
 
     When I take question "Europe"
     Then I do not see correct answers count
+
 
   Scenario: Single choice question - no correct answers count
     Given question "Which of these countries is not in Europe?"

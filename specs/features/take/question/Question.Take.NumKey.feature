@@ -3,36 +3,36 @@ Feature: Answer question using numeric keys
   on the keys, matching the answer's position in the list.
   Impossible to answer 10th option.
 
-Background:
+  Background:
     Given question "Which country is in Europe?"
-      * with answers:
-        | Italy   | * |
-        | Mexico  |   |
-        | Morocco |   |
-        | USA     |   |
-        | Canada  |   |
-        | Iran    |   |
-        | China   |   |
-        | Japan   |   |
-        | Israel  |   |
-        | Kuwait  |   |
-      * saved and bookmarked as "Single"
+    * with answers:
+      | Italy   | * |
+      | Mexico  |   |
+      | Morocco |   |
+      | USA     |   |
+      | Canada  |   |
+      | Iran    |   |
+      | China   |   |
+      | Japan   |   |
+      | Israel  |   |
+      | Kuwait  |   |
+    * saved and bookmarked as "Single"
     And question "Which countries are in Europe?"
-      * with answers:
-        | Italy   | * |
-        | Mexico  |   |
-        | Germany | * |
-        | USA     |   |
-        | Canada  |   |
-        | Iran    |   |
-        | China   |   |
-        | Japan   |   |
-        | Israel  |   |
-        | Kuwait  |   |
-      * saved and bookmarked as "Multiple"
+    * with answers:
+      | Italy   | * |
+      | Mexico  |   |
+      | Germany | * |
+      | USA     |   |
+      | Canada  |   |
+      | Iran    |   |
+      | China   |   |
+      | Japan   |   |
+      | Israel  |   |
+      | Kuwait  |   |
+    * saved and bookmarked as "Multiple"
     And question "How many regions does Czechia have?"
-      * with numerical answer "14"
-      * saved and bookmarked as "Numerical"
+    * with numerical answer "14"
+    * saved and bookmarked as "Numerical"
 
 
   Scenario Outline: Single choice question - numeric key selects an answer
@@ -47,19 +47,22 @@ Background:
       | 5   | Incorrect! |
       | 9   | Incorrect! |
 
-Scenario Outline: Multiple choice question - numeric key selects an answer
+
+  Scenario Outline: Multiple choice question - numeric key selects an answer
     When I take question "Multiple"
     And I press the key <key>
     And I press enter to submit
     Then I see feedback "<feedback>"
+
     Examples:
       | key | feedback   |
-      | 1,3   | Correct!   |
-      | 1,2   | Incorrect! |
-      | 2,3   | Incorrect! |
-      | 2,4   | Incorrect! |
+      | 1,3 | Correct!   |
+      | 1,2 | Incorrect! |
+      | 2,3 | Incorrect! |
+      | 2,4 | Incorrect! |
 
-Scenario Outline: Numerical question - numeric input submits an answer
+
+  Scenario Outline: Numerical question - numeric input submits an answer
     When I take question "Numerical"
     Then I see a number input
     And I enter "<answer>"
@@ -70,5 +73,3 @@ Scenario Outline: Numerical question - numeric input submits an answer
       | answer | feedback   |
       | 48     | Incorrect! |
       | 14     | Correct!   |
-
-

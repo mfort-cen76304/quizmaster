@@ -22,6 +22,7 @@ Feature: Question explanations after answering
     # Then I see the answer explanation "Naples is the capital of Campania region"
     * I see the question explanation
 
+
   Scenario: Multiple choice question explanations
     Explanation is displayed after answering the question
     - for all answers individually, selected or not
@@ -47,13 +48,15 @@ Feature: Question explanations after answering
       | Canada  | Located in America.                                                         |
     * I see the question explanation
 
+
   Scenario: Numerical question explanation
     Explanation is displayed after answering a numerical question
     - for the whole question
+
     Given question "One and only correct numerical answer"
-      * with numerical answer "54"
-      * with explanation "54 is the correct answer because of reasons."
-      * saved and bookmarked as "Numbers"
+    * with numerical answer "54"
+    * with explanation "54 is the correct answer because of reasons."
+    * saved and bookmarked as "Numbers"
     When I take question "Numbers"
     And I enter "14"
     Then I see the question explanation

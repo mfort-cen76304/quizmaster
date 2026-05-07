@@ -5,23 +5,23 @@ Feature: Quiz Welcome page
 
   Scenario Outline: Quiz welcome page
     Given workspace "Welcome" with questions
-      | bookmark | question  | answers    |
-      | Q1       | 1 + 1 = ? | 2 (*), 3  |
-      | Q2       | 2 + 2 = ? | 4 (*), 5  |
-      | Q3       | 3 + 3 = ? | 6 (*), 7  |
-      | Q4       | 4 + 4 = ? | 8 (*), 9  |
+      | bookmark | question  | answers  |
+      | Q1       | 1 + 1 = ? | 2 (*), 3 |
+      | Q2       | 2 + 2 = ? | 4 (*), 5 |
+      | Q3       | 3 + 3 = ? | 6 (*), 7 |
+      | Q4       | 4 + 4 = ? | 8 (*), 9 |
     And quiz "Quiz A" with questions "Q1, Q2, Q3"
       | description | Description A |
       | mode        | exam          |
       | pass score  | 66            |
-      | time limit  | 120s           |
-      # | start date | 2026-04-14T10:00 |
-      # | end date | 2026-04-15T10:00 |
+      | time limit  | 120s          |
+    # | start date | 2026-04-14T10:00 |
+    # | end date | 2026-04-15T10:00 |
     And quiz "Quiz B" with questions "Q1, Q2, Q3, Q4"
       | description | Description B |
       | mode        | learn         |
       | pass score  | 75            |
-      | time limit  | 60s            |
+      | time limit  | 60s           |
     When I open quiz "<quiz>"
     Then I see the welcome page
     * I see quiz name "<name>"
@@ -30,9 +30,9 @@ Feature: Quiz Welcome page
     * I see time limit set to "<time limit>" seconds
     * I see pass score <score> %
     * I see feedback type "<mode>"
-    # * I see availability time "<period>"
 
+    # * I see availability time "<period>"
     Examples:
       | quiz   | name   | description   | count | score | mode                | time limit |
-      | Quiz A | Quiz A | Description A | 3     | 66    | Feedback at the end | 120       |
-      | Quiz B | Quiz B | Description B | 4     | 75    | Continuous feedback | 60        |
+      | Quiz A | Quiz A | Description A | 3     | 66    | Feedback at the end | 120        |
+      | Quiz B | Quiz B | Description B | 4     | 75    | Continuous feedback | 60         |

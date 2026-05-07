@@ -14,6 +14,7 @@ Feature: Create question - validations
       | empty-answer      |
       | no-correct-answer |
 
+
   Scenario: Empty question text
     Given I start creating a new question
     * I enter answer 1 text "4" and mark it as correct
@@ -21,6 +22,7 @@ Feature: Create question - validations
     When I attempt to submit the question
     Then I see error messages
       | empty-question |
+
 
   Scenario: All answers must be filled in
     For single-choice question, exactly one correct answer is required
@@ -33,6 +35,7 @@ Feature: Create question - validations
     Then I see error messages
       | empty-answer |
 
+
   Scenario: Add an empty answer
     Given I start creating a new question
     * I enter question "What is 2 + 2?"
@@ -42,6 +45,7 @@ Feature: Create question - validations
     When I attempt to submit the question
     Then I see error messages
       | empty-answer |
+
 
   Scenario: Answer explanations missing
     Either all or no answer explanations are required
@@ -56,6 +60,7 @@ Feature: Create question - validations
     Then I see error messages
       | empty-answer-explanation |
 
+
   Scenario: All answer explanations
     Either all or no answer explanations are required
 
@@ -69,6 +74,7 @@ Feature: Create question - validations
     When I attempt to submit the question
     Then I see no error messages
 
+
   Scenario: Single-choice question: No correct answer
     For single-choice question, exactly one correct answer is required
 
@@ -79,6 +85,7 @@ Feature: Create question - validations
     When I attempt to submit the question
     Then I see error messages
       | no-correct-answer |
+
 
   Scenario: Single-choice question: No correct answer message disappears after selecting a correct answer
     For single-choice question, exactly one correct answer is required
@@ -92,6 +99,7 @@ Feature: Create question - validations
     When I attempt to submit the question
     Then I see no error messages
 
+
   Scenario: Empty question text error message disappears after adding question text
     Given I start creating a new question
     * I enable explanations
@@ -101,6 +109,7 @@ Feature: Create question - validations
     * I enter question "What is 2 + 2?"
     When I attempt to submit the question
     Then I see no error messages
+
 
   Scenario: Create multiple choice question without correct answer
     Given I start creating a new question
@@ -113,6 +122,7 @@ Feature: Create question - validations
     When I attempt to submit the question
     Then I see error messages
       | no-correct-answer |
+
 
   Scenario: Create multiple choice question with one correct answer
     Given I start creating a new question
@@ -128,6 +138,7 @@ Feature: Create question - validations
     Then I see error messages
       | few-correct-answers |
 
+
   Scenario: Create multiple choice question with all correct answers
     Given I start creating a new question
     * I enter question "What are cities of Czech Republic?"
@@ -142,6 +153,7 @@ Feature: Create question - validations
     * I mark answer 1 as correct
     When I attempt to submit the question
     Then I see no error messages
+
 
   Scenario: Numerical question validates number format
     Given I start creating a new question

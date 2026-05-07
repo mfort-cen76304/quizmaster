@@ -19,11 +19,12 @@ Feature: Generate numerical question preview from workspace using AI
     And generated question 1 in Robin chat shows a numerical answer
     And generated question 1 in Robin chat has numerical answer "2"
 
+
   @ai @slow
   Scenario: Generate a numerical question with tolerance preview directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question      | answers    |
+      | question       | answers    |
       | What is 5 / 2? | 2.5 ± 0.25 |
     When I open Robin AI
     And I ask AI for numerical question:
@@ -36,11 +37,12 @@ Feature: Generate numerical question preview from workspace using AI
     And generated question 1 in Robin chat has numerical answer "2.5"
     And generated question 1 in Robin chat shows tolerance
 
+
   @ai @slow
   Scenario: Generate a numerical question with question explanation preview directly in workspace
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question              | answers | explanation                           |
+      | question               | answers | explanation                              |
       | What is triangle area? | 12      | Multiply base by height and divide by 2. |
     When I open Robin AI
     And I ask AI for numerical question:
@@ -53,11 +55,12 @@ Feature: Generate numerical question preview from workspace using AI
     And generated question 1 in Robin chat has numerical answer "12"
     And generated question 1 in Robin chat shows question explanation
 
+
   @ai @slow
   Scenario Outline: Vague tolerance request from workspace yields a non-zero tolerance bounded by the answer in Robin chat
     Given workspace "Workspace"
     And Robin AI will return these generated questions:
-      | question | answers              |
+      | question | answers                |
       | <prompt> | <answer> ± <tolerance> |
     When I open Robin AI
     And I ask AI for numerical question:
@@ -74,6 +77,6 @@ Feature: Generate numerical question preview from workspace using AI
     And generated question 1 in Robin chat has tolerance less than <answer-magnitude>
 
     Examples:
-      | prompt             | answer | tolerance | answer-magnitude |
-      | "What is 5 / 2?"   | 2.5    | 0.25      | "2.5"            |
-      | "What is -5 / 2?"  | -2.5   | 0.25      | "2.5"            |
+      | prompt            | answer | tolerance | answer-magnitude |
+      | "What is 5 / 2?"  | 2.5    | 0.25      | "2.5"            |
+      | "What is -5 / 2?" | -2.5   | 0.25      | "2.5"            |

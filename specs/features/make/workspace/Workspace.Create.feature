@@ -8,5 +8,3 @@ Feature: Create workspace
     When I submit the workspace
     Then I see the workspace "My List"
     * I see an empty workspace
-
-

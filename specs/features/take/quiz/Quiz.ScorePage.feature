@@ -20,6 +20,7 @@ Feature: Quiz score page display
       | What is the standard colour of sky? |
       | What is capital of France?          |
 
+
   Scenario: Show options of question on score page
     Given workspace "Score Options" with questions
       | bookmark | question                            | answers                              | explanation |
@@ -32,6 +33,7 @@ Feature: Quiz score page display
     * I answer "Marseille"
     * I evaluate the quiz
     Then I see all options for question "Sky"
+
 
   Scenario: Show question explanation of question on score page
     Given workspace "Score Explanation" with questions
@@ -46,6 +48,7 @@ Feature: Quiz score page display
     * I evaluate the quiz
     Then I see question explanation "Rayleigh" for question "Sky"
 
+
   Scenario: Show user select
     Given workspace "Score Select" with questions
       | bookmark | question                            | answers                              | explanation |
@@ -59,11 +62,12 @@ Feature: Quiz score page display
     * I evaluate the quiz
     Then I see user select "Blue" for question "Sky"
 
+
   Scenario: Show user selection for numeric question
     Given workspace "Score Numeric Select" with questions
-      | bookmark | question                            | answers                              | explanation |
-      | Tooth    | How many teeth do healthy adults have? | 32 ± 0.3|8 Incisors, 4 Canines, 8 Premolars, and 12 Molars |
-      | Leg    | How many legs does a dog have? | 4 ± 0.3| |
+      | bookmark | question                               | answers  | explanation                                       |
+      | Tooth    | How many teeth do healthy adults have? | 32 ± 0.3 | 8 Incisors, 4 Canines, 8 Premolars, and 12 Molars |
+      | Leg      | How many legs does a dog have?         | 4 ± 0.3  |                                                   |
     And quiz "Numeric Select Quiz" with all questions
       | pass score | 100 |
     Given I start quiz "Numeric Select Quiz"

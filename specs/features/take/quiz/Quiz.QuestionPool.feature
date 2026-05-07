@@ -15,6 +15,7 @@ Feature: Quiz question pool size
     And quiz "Full" with all questions
       | pass score | 100 |
 
+
   Scenario: Normal mode
     - Quiz with question pool size displayed same value in question count at welcome page.
 
@@ -28,6 +29,7 @@ Feature: Quiz question pool size
     Then I see the quiz result
       | Correct Answers | Score | Result | Pass Score |
       | 2 / 2           | 100   | passed | 100        |
+
 
   Scenario: Empty mode
     - Quiz with question pool size displayed same value in question count at welcome page.

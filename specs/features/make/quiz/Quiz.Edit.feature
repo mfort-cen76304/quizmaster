@@ -11,6 +11,7 @@ Feature: Edit Quiz in Workspace
       | 4 / 2 = ? | 2 (*), 3 |
     And quiz "Math Quiz" with all questions
 
+
   Scenario: Edit quiz title and description
     When I navigate to edit quiz "Math Quiz"
     * I enter quiz name "Advanced Math"

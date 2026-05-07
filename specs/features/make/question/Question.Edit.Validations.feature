@@ -23,6 +23,7 @@ Feature: Edit question - validations
       | empty-answer             |
       | empty-answer-explanation |
 
+
   Scenario: Empty multiple choice question form
     Given question "What are cities of Czech Republic?"
     * with answers:

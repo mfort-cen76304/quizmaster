@@ -14,6 +14,7 @@ Feature: Quiz exam and learn mode
     And quiz "Learn Quiz" with all questions
       | mode | learn |
 
+
   Scenario: Exam mode
     - Submitting an answer proceeds directly to the next question
 
@@ -21,6 +22,7 @@ Feature: Quiz exam and learn mode
     And I see question "Jaký nábytek má Ikea?"
     When I answer "Stůl"
     Then I see question "Jaké nádobí má Ikea?"
+
 
   Scenario: Learn mode
     - Shows feedback after each question, manual proceed required
@@ -31,6 +33,7 @@ Feature: Quiz exam and learn mode
     Then I see feedback "Correct!"
     When I proceed to the next question
     Then I see question "Jaké nádobí má Ikea?"
+
 
   Scenario: Learn mode - Retake question
     - User can retake a question and see updated feedback

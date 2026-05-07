@@ -7,9 +7,10 @@ Feature: Bookmark questions during a quiz
     Given workspace "Bookmarks" with questions
       | bookmark  | question                                 | answers              |
       | Planet    | Which planet is known as the Red Planet? | Mars (*), Venus      |
-      | Australia | What's the capital city of Australia?     | Sydney, Canberra (*) |
+      | Australia | What's the capital city of Australia?    | Sydney, Canberra (*) |
     And quiz "Quiz" with questions "Planet, Australia"
       | pass score | 85 |
+
 
   Scenario: Mark bookmark and return to bookmark
     When I start quiz "Quiz"
@@ -25,6 +26,7 @@ Feature: Bookmark questions during a quiz
     When I click bookmark "Planet"
     Then I see question "Planet"
 
+
   Scenario: Remove bookmark
     When I start quiz "Quiz"
     Then I see question "Planet"
@@ -35,6 +37,7 @@ Feature: Bookmark questions during a quiz
 
     When I delete bookmark "Which planet is known as the Red Planet?"
     Then I don't see bookmark link "Which planet is known as the Red Planet?"
+
 
   Scenario: Unmark bookmark
     When I start quiz "Quiz"

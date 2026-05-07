@@ -10,41 +10,46 @@ Feature: Workspace page management
     Then I see workspace question count 0
     And I see workspace quiz count 0
 
+
   Scenario: Workspace summary shows one question after creating a question
     Given workspace "Workspace" with questions
-      | question           | answers              |
-      | What is 2 + 2?     | 4 (*), 5             |
+      | question       | answers  |
+      | What is 2 + 2? | 4 (*), 5 |
     Then I see workspace question count 1
     And I see workspace quiz count 0
 
+
   Scenario: Workspace summary shows two questions and one quiz
     Given workspace "Workspace" with questions
-      | question              | answers             |
-      | What is 2 + 2?        | 4 (*), 5            |
-      | What is 3 * 3?        | 9 (*), 6            |
+      | question       | answers  |
+      | What is 2 + 2? | 4 (*), 5 |
+      | What is 3 * 3? | 9 (*), 6 |
     And quiz "Math Quiz" with all questions
     Then I see workspace question count 2
     And I see workspace quiz count 1
 
+
   Scenario: Workspace summary updates after removing a question
     Given workspace "Workspace" with questions
-      | question              | answers             |
-      | What is 2 + 2?        | 4 (*), 5            |
-      | What is 3 * 3?        | 9 (*), 6            |
+      | question       | answers  |
+      | What is 2 + 2? | 4 (*), 5 |
+      | What is 3 * 3? | 9 (*), 6 |
     When I delete question "What is 2 + 2?" from the list
     Then I see workspace question count 1
     And I see workspace quiz count 0
 
+
   Scenario: Workspace summary updates after removing a quiz
     Given workspace "Workspace" with questions
-      | question              | answers             |
-      | What is 2 + 2?        | 4 (*), 5            |
-      | What is 3 * 3?        | 9 (*), 6            |
+      | question       | answers  |
+      | What is 2 + 2? | 4 (*), 5 |
+      | What is 3 * 3? | 9 (*), 6 |
     And quiz "Math Quiz" with all questions
     When I delete quiz "Math Quiz" from the workspace
     And I confirm the deletion
     Then I see workspace question count 2
     And I see workspace quiz count 0
+
 
   Scenario: Take question in a workspace
     Given workspace "Workspace" with questions
@@ -54,6 +59,7 @@ Feature: Workspace page management
     When I take question "2 + 2 = ?" from the list
     Then I see the question and the answers
 
+
   Scenario: Delete question in a workspace
     Given workspace "Workspace" with questions
       | question  | answers  |
@@ -61,11 +67,12 @@ Feature: Workspace page management
     When I delete question "2 + 2 = ?" from the list
     Then I see an empty workspace
 
+
   Scenario: Do not show delete button for question used in a quiz
     Given workspace "Workspace" with questions
-      | question                       | answers            |
-      | Jaký nábytek má Ikea?          | Stůl (*), Auto     |
-      | Jaké nádobí má Ikea?           | Talíř (*), Kolo    |
+      | question              | answers         |
+      | Jaký nábytek má Ikea? | Stůl (*), Auto  |
+      | Jaké nádobí má Ikea?  | Talíř (*), Kolo |
     When I start creating a new quiz
     And I enter quiz name "Math Quiz"
     And I select exam mode
@@ -75,6 +82,7 @@ Feature: Workspace page management
     Then I see the quiz "Math Quiz" in the workspace
     Then I cannot delete question "Jaký nábytek má Ikea?"
 
+
   Scenario: Edit question in a workspace
     Given workspace "Workspace" with questions
       | question  | answers  |
@@ -83,6 +91,7 @@ Feature: Workspace page management
     When I edit question "2 + 2 = ?" from the list
     Then I see question edit page
     And I see question text "2 + 2 = ?"
+
 
   Scenario: Show edited question in a workspace
     Given workspace "Workspace" with questions
@@ -95,10 +104,11 @@ Feature: Workspace page management
     When I submit the question
     Then I see question in list "A + B = ?"
 
+
   Scenario: Question with image shows thumbnail in workspace
     Given workspace "Workspace" with questions
-      | question              | answers      | image                                 |
-      | Which animal is this? | Cat (*), Dog | https://placekitten.com/300/200.jpg   |
-      | 2 + 2 = ?             | 4 (*), 5     |                                       |
+      | question              | answers      | image                               |
+      | Which animal is this? | Cat (*), Dog | https://placekitten.com/300/200.jpg |
+      | 2 + 2 = ?             | 4 (*), 5     |                                     |
     Then I see image thumbnail for question "Which animal is this?"
     And I do not see image thumbnail for question "2 + 2 = ?"

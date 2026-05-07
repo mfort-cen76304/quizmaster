@@ -13,13 +13,15 @@ Feature: Make-side back button navigation
       | question |
       | quiz     |
 
+
   Scenario: Back from question editing
     Given workspace "Navigation" with questions
-      | question  | answers    |
-      | 2 + 2 = ? | 4 (*), 5   |
+      | question  | answers  |
+      | 2 + 2 = ? | 4 (*), 5 |
     When I edit question "2 + 2 = ?" from the list
     And I navigate back to the workspace
     Then I see the workspace "Navigation"
+
 
   Scenario: Back from quiz editing
     Given workspace "Navigation"

@@ -15,6 +15,7 @@ Feature: Create quiz - validations
       | 3 * 3 = ? | 9 (*), 6 |
       | 4 / 2 = ? | 2 (*), 3 |
 
+
   Scenario: Create quiz with default values
     When I start creating a new quiz
     Then I see empty quiz title
@@ -24,6 +25,7 @@ Feature: Create quiz - validations
     * I see quiz question "2 + 2 = ?"
     * I see quiz question "3 * 3 = ?"
     * I see quiz question "4 / 2 = ?"
+
 
   Scenario: Create quiz with more questions in randomized than available
     When I start creating a new quiz
@@ -36,12 +38,14 @@ Feature: Create quiz - validations
     Then I see error messages in quiz form
       | too-many-randomized-questions |
 
+
   Scenario: Quiz form with only default values
     When I start creating a new quiz
     * I submit the quiz
     Then I see error messages in quiz form
       | empty-title   |
       | few-questions |
+
 
   Scenario: Display error when score is above 100
     When I start creating a new quiz
@@ -51,6 +55,7 @@ Feature: Create quiz - validations
     Then I see error messages in quiz form
       | score-above-max |
 
+
   Scenario: Display error when limit is over 21600
     When I start creating a new quiz
     * I enter quiz name "Math Quiz"
@@ -59,6 +64,7 @@ Feature: Create quiz - validations
     Then I see error messages in quiz form
       | time-limit-above-max |
 
+
   @skip
   Scenario: When time limit is cleared, "0" is automatically set
     When I start creating a new quiz
@@ -66,6 +72,7 @@ Feature: Create quiz - validations
     * I clear time limit
     Then I see no error messages in quiz form
     * I see time limit "0s" seconds
+
 
   Scenario: When pass score is cleared, "0" is automatically set
     When I start creating a new quiz

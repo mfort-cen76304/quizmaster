@@ -18,6 +18,7 @@ Feature: Generate numerical question using AI
     When I submit the question
     Then the question is saved in the workspace
 
+
   @ai @slow
   Scenario: Numerical question with tolerance
     Given I start creating a new question
@@ -30,6 +31,7 @@ Feature: Generate numerical question using AI
     And I see non-empty numerical correct answer
     And I see non-empty tolerance
 
+
   @ai @slow
   Scenario: Numerical question with question explanation
     Given I start creating a new question
@@ -41,6 +43,7 @@ Feature: Generate numerical question using AI
     And the question is numerical choice
     And I see non-empty numerical correct answer
     And I see non-empty question explanation
+
 
   @ai @slow
   Scenario Outline: Vague tolerance request yields a non-zero tolerance bounded by the answer
@@ -58,6 +61,6 @@ Feature: Generate numerical question using AI
     And tolerance is less than <answer-magnitude>
 
     Examples:
-      | prompt             | answer | answer-magnitude |
-      | "What is 5 / 2?"   | "2.5"  | "2.5"            |
-      | "What is -5 / 2?"  | "-2.5" | "2.5"            |
+      | prompt            | answer | answer-magnitude |
+      | "What is 5 / 2?"  | "2.5"  | "2.5"            |
+      | "What is -5 / 2?" | "-2.5" | "2.5"            |

@@ -6,7 +6,7 @@ Feature: Evaluate quiz score
 
   Scenario Outline: Quiz score with mixed question types
     Given workspace "Mixed" with questions
-      | bookmark | question                           | answers                                      |
+      | bookmark | question                            | answers                                      |
       | Capital  | What is the capital of Italy?       | Rome (*), Naples, Florence                   |
       | Planets  | Which are planets in solar system?  | Mars (*), Pluto, Venus (*), Titan, Earth (*) |
       | Boiling  | What is the boiling point of water? | 100 ±5                                       |
@@ -22,22 +22,23 @@ Feature: Evaluate quiz score
       | <points> / 3    | <percentage> | <result> | 66         |
 
     Examples:
-      | capital | planets                      | boiling | points | percentage | result |
-      | Rome    | Mars, Venus, Earth           | 100     | 3      | 100        | passed |
-      | Rome    | Mars, Venus, Earth           | 106     | 2      | 67         | passed |
-      | Rome    | Mars, Venus                  | 100     | 2.5    | 83         | passed |
-      | Naples  | Mars, Pluto                  | 95      | 1      | 33         | failed |
-      | Naples  | Mars, Venus, Earth, Pluto    | 106     | 0.5    | 17         | failed |
-      | Naples  | Pluto, Titan                 | 106     | 0      | 0          | failed |
+      | capital | planets                   | boiling | points | percentage | result |
+      | Rome    | Mars, Venus, Earth        | 100     | 3      | 100        | passed |
+      | Rome    | Mars, Venus, Earth        | 106     | 2      | 67         | passed |
+      | Rome    | Mars, Venus               | 100     | 2.5    | 83         | passed |
+      | Naples  | Mars, Pluto               | 95      | 1      | 33         | failed |
+      | Naples  | Mars, Venus, Earth, Pluto | 106     | 0.5    | 17         | failed |
+      | Naples  | Pluto, Titan              | 106     | 0      | 0          | failed |
+
 
   Scenario Outline: Numerical answer within tolerance is shown as correct on the score page
     A numerical answer that lies inside the tolerance band must be displayed
     as the correct selection on the per-question feedback, not flagged as wrong.
 
     Given workspace "Tolerance display" with questions
-      | bookmark | question                  | answers   |
-      | Boiling  | Boiling point of water?   | 100 ±5    |
-      | Pi       | Value of π?               | 1.01 ±0.01 |
+      | bookmark | question                | answers    |
+      | Boiling  | Boiling point of water? | 100 ±5     |
+      | Pi       | Value of π?             | 1.01 ±0.01 |
     And quiz "Tolerance Quiz" with all questions
       | pass score | 100 |
     When I start the quiz
@@ -55,6 +56,7 @@ Feature: Evaluate quiz score
       | 100     | 1.01 |
       | 95      | 1    |
       | 105     | 1.02 |
+
 
   @skip
   Scenario: Quiz score in learning mode
@@ -80,4 +82,3 @@ Feature: Evaluate quiz score
       | Correct Answers | Score | Result | Pass Score |
       | 2 / 2           | 100   | passed | 100        |
     And I see the original result 1, 50%, failed
-
