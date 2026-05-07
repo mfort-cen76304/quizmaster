@@ -3,8 +3,8 @@
 ## Frontend
 
 - TypeScript strict mode
-- Biome with default rules, except:
-  - Single quotes in TypeScrips, double quotes in JSX/TSX
+- oxlint + oxfmt with default rules, except:
+  - Single quotes in TypeScript, double quotes in JSX/TSX
   - No semicolons
 - File names kebab-case
 

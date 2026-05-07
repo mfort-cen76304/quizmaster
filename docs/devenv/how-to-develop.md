@@ -50,7 +50,7 @@ Run before committing:
 pnpm code
 ```
 
-This runs TypeScript type checking and Biome linting/formatting on both frontend and specs.
+This runs TypeScript type checking, oxlint, and oxfmt on the frontend, specs, and mcp packages.
 
 <!-- markdownlint-disable-next-line MD045 MD033-->
 ## <img alt="Vite logo" src="https://vitejs.dev/logo.svg" height="20"> Running Vite Development Server

@@ -48,7 +48,7 @@ into `docs/` and delete or trim the backlog entry.
 ## Tech Stack
 
 - **Backend:** Java 21, Spring Boot 3, Gradle (Kotlin DSL), Lombok
-- **Frontend:** TypeScript, React 19, Vite, Biome (linting)
+- **Frontend:** TypeScript, React 19, Vite, oxlint (linting), oxfmt (formatting)
 - **E2E Testing:** Cucumber + Playwright (separate `specs/` package)
 - **Database:** PostgreSQL
 - **MCP Server:** TypeScript package at `mcp/` exposing Quizmaster as Model Context Protocol tools/resources/prompts. See `docs/mcp/overview.md`.
@@ -62,7 +62,7 @@ All commands run from the **project root**.
 pnpm install:all                   # All dependencies + Playwright browsers
 
 # Code quality (run before committing)
-pnpm code                          # TypeScript + Biome lint/format (frontend + specs)
+pnpm code                          # TypeScript + oxlint + oxfmt (frontend, specs, mcp)
 
 # Backend tests
 pnpm test:be                       # All backend tests
