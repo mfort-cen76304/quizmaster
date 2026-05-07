@@ -76,79 +76,41 @@ pnpm test:e2e
 
 ## Domain Model
 
-**Three entities:**
-1. **Question** — `id`, `question`, `answers[]`, `correctAnswers[]`, `explanations[]`, `questionExplanation`, `isEasy`, `imageUrl`, `tolerance`, `workspaceGuid`
-   - Questions are edited by numeric `id`, scoped to a workspace
-2. **Workspace** — `guid` (UUID), `title`
-3. **Quiz** — `id`, `title`, `description`, `questionIds[]` (int array), `passScore`, `timeLimit`, `mode` (EXAM/LEARN), `difficulty` (EASY/HARD/KEEP_QUESTION), `randomQuestionCount`, `workspaceGuid`
-
-**Key concepts:**
-- `EXAM` mode = feedback at end; `LEARN` mode = feedback after each question
-- `randomQuestionCount` limits quiz to N random questions from the pool
+Entities: **Workspace**, **Question**, **Quiz**, **Attempt**. See
+`docs/domain-language.md` for the model. Backend entity classes live in their
+respective packages (see *Backend Structure*).
 
 ## Backend Structure
 
-Each domain has its own package under `cz.scrumdojo.quizmaster`:
-- `question/` — `QuestionMakeController`, `QuestionTakeController`, `QuestionRepository`, `Question`, `QuestionRequest`, `QuestionResponse`
-- `quiz/` — `QuizMakeController`, `QuizTakeController`, `QuizService`, `QuizRepository`, `Quiz`, `QuizMode`, `Difficulty`, `QuizRequest`, `QuizResponse`
-- `workspace/` — `WorkspaceController`, `WorkspaceRepository`, `Workspace`, `WorkspaceRequest`, `WorkspaceResponse`, `WorkspaceCreateResponse`, `QuestionListItem`, `QuizListItem`
-- `attempt/` — `AttemptController`, `AttemptRepository`, `Attempt`, `AttemptStatus`, `AttemptRequest`, `AttemptResponse`
-- `common/` — `IdResponse` (shared record for POST/PUT responses), `ResponseHelper`
-- `config/` — `FeatureFlag`, `OpenApiConfig`, `WebMvcConfig`, `ResourceResolver`
-- `aiassistant/` — `AiAssistantController`, `AiAssistantService`, `AiAssistantRequest`, plus the embedding stack: `OpenRouterEmbeddingClient`, `QuestionEmbeddingService`, `QuestionEmbeddingText`, `EmbeddingSimilarity`
+Each domain has its own package under `cz.scrumdojo.quizmaster`: `question/`,
+`quiz/`, `workspace/`, `attempt/`, `aiassistant/`, plus `common/` and
+`config/`. Style: `docs/conventions/controller-style.md` and
+`docs/conventions/code-style.md`.
 
-**Style guides:** See `docs/conventions/controller-style.md` and `docs/conventions/code-style.md`.
+## REST API
 
-## API Endpoints
+Endpoints live under `/api/`. Two flavors:
 
-**Workspaces** (`WorkspaceController`):
-- `GET /api/workspaces/{guid}` — get workspace
-- `POST /api/workspaces` — create workspace
-- `GET /api/workspaces/{guid}/questions` — list questions in workspace
-- `GET /api/workspaces/{guid}/quizzes` — list quizzes in workspace
+- **Authoring** is workspace-scoped: `/api/workspaces/{guid}/...` for
+  questions, quizzes, and AI drafting (used by MCP and the newer FE paths).
+  A legacy unscoped form `/api/workspace/...` with `X-Workspace-Key` header
+  exists for the original FE; both map to the same controllers.
+- **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
+  `/api/question/{id}`, `/api/attempt/...`.
+- Plus `POST /api/ai-assistant` and `GET /api/feature-flag`.
 
-**Questions — editing** (`QuestionMakeController`):
-- `GET /api/workspaces/{guid}/questions/{id}` — get question for editing
-- `POST /api/workspaces/{guid}/questions` — create question (returns `IdResponse`)
-- `PATCH /api/workspaces/{guid}/questions/{id}` — update question
-- `DELETE /api/workspaces/{guid}/questions/{id}` — delete question
-
-**Questions — taking** (`QuestionTakeController`):
-- `GET /api/question/{id}` — get question for taking
-
-**Quizzes — editing** (`QuizMakeController`):
-- `POST /api/workspaces/{guid}/quizzes` — create quiz (returns `IdResponse`)
-- `PUT /api/workspaces/{guid}/quizzes/{id}` — update quiz
-
-**Quizzes — taking** (`QuizTakeController`):
-- `GET /api/quiz/{id}` — get quiz with questions
-
-**Attempts** (`AttemptController`):
-- `GET /api/attempt/quiz/{quizId}` — get attempts for a quiz
-- `GET /api/attempt/{id}` — get attempt
-- `POST /api/attempt` — create attempt
-- `PUT /api/attempt/{id}` — update attempt
-- `DELETE /api/attempt/{id}` — delete attempt
-
-**Other:**
-- `POST /api/ai-assistant` — AI question generation
-- `GET /api/feature-flag` — feature flag status
+Controllers are the source of truth: `*MakeController`, `*TakeController`,
+`AttemptController`, `WorkspaceController`, `AiAssistantController`. See
+`docs/mcp/rest-auth.md` for the (absent) auth state.
 
 ## Frontend Routes
 
-```
-/                                          Home
-/question/:id                              Take standalone question
-/workspace/new                             Create workspace
-/workspace/:workspaceId                    View workspace
-/workspace/:workspaceId/question/new       Create question
-/workspace/:workspaceId/question/:id/edit  Edit question
-/workspace/:workspaceId/quiz/new           Create quiz
-/workspace/:workspaceId/quiz/:id/edit      Edit quiz
-/workspace/:workspaceId/quiz/:id/stats     Quiz statistics
-/quiz/:id                                  Quiz welcome page
-/quiz/:id/questions/:questionId?           Take quiz
-```
+The router lives in `frontend/src/`. Path families:
+
+- `/` — home.
+- `/workspace/...` — maker views (workspace, question, quiz CRUD, stats).
+- `/quiz/:id`, `/quiz/:id/questions/:questionId?` — taker views for quizzes.
+- `/question/:id` — taker view for a standalone question.
 
 ## E2E Testing
 
