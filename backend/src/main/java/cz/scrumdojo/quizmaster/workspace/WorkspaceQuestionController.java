@@ -8,10 +8,12 @@ import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/workspaces/{workspaceGuid}/questions")
 public class WorkspaceQuestionController {
@@ -94,7 +96,8 @@ public class WorkspaceQuestionController {
     private void embedBestEffort(Question question) {
         try {
             questionEmbeddingService.embedForSave(question);
-        } catch (RuntimeException ignored) {
+        } catch (RuntimeException e) {
+            log.warn("Embedding failed for question, saving without embedding", e);
             question.setEmbedding(null);
             question.setEmbeddingModel(null);
             question.setEmbeddingTextHash(null);
