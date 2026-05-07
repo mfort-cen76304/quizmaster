@@ -1,57 +1,144 @@
 # Quizmaster Domain Language
 
-| | | | |
-|--------|--------|------|------|
-|[Answer](#answer) | [Learning mode](#learning-mode) | [Question list](#question-list) | [Time limit](#time-limit) |
-|[Bookmark](#bookmark) | [Pass score](#pass-score) | [Quiz](#quiz) | |
-|[Exam mode](#exam-mode) | [Question](#question) | [Skip](#skip) | |
+## Roles
 
-## Answer
-An **answer** is a possible response to a [question](#question).  It can be correct or incorrect.  It can be selected by the user to answer the question.
+A **Quiz maker** is an author. They create and edit [workspaces](#workspace),
+[questions](#question), and [quizzes](#quiz), and review statistics across
+past [attempts](#taking-a-quiz-attempt) to see which questions were answered
+well and which need to be improved.
 
-## Bookmark
-A **Bookmark** is a feature that allows users to later return to the bookmarked question while taking a [Quiz](#Quiz).  Although you can always navigate back to the question, bookmarking is useful when you want to return to a specific question after you have already moved on to the next question.
+A **Quiz taker** is a learner. They open a quiz, work through it, and see their
+score. Takers do not author content.
 
-## Exam mode
+## Workspace
 
-In an **Exam mode** [Quiz](), the user can only see the [questions]() and the answers. Submitting an answer, immediately triggers the next question. The user cannot see the feedback or the explanation until the quiz is completed. The user can take the quiz only once and see the score and the feedback after submitting the quiz.
-
-## Learning mode
-
-In a **Learning mode** [Quiz](), the user can see the [questions](), the answers. The user can see the feedback and the explanation immediately after submitting an answer and must manually proceed to the next question.  The user can submit the quiz multiple times and can see the score and the feedback after submitting the quiz.
-
-## Pass score
-
-A **Pass score** is the minimum score a user must achieve to pass a [Quiz](#Quiz).  It is expressed as a percentage of the total number of questions in the quiz.  For example, a pass score of 80% means that the user must answer 80% of the questions correctly to pass the quiz.
+A **Workspace** is the top-level container — every [question](#question) and
+every [quiz](#quiz) belongs to exactly one workspace. Workspaces have a title
+and exist to group related material, for example one workspace per training
+course.
 
 ## Question
 
-A **Question** tests user's knowledge of a specific topic. The user selects from multiple answers.
-For example:
+A **Question** tests a learner's knowledge of a single topic. Every question
+belongs to a [workspace](#workspace).
 
-```text
-What is the capital of France?
-- Paris
-- Montreal
-- Nice
-- Bordeaux
-```
+Questions come in three **types**:
 
-- **Single-choice** questions have only one correct answer.
-- **Multiple-choice** questions have more than one correct answer. Possibly all answers can be correct.
-- **Feedback** is provided to the user after selecting an answer.
-- Detailed **Explanation** can be provided, either for the whole question, for each individual answer, or both.
+- **Single-choice** — exactly one of the listed answers is correct.
+- **Multiple-choice** — at least two answers are correct; possibly all of them.
+- **Numerical** — the learner enters a number; the question stores one expected
+  value and an optional **tolerance** so close-enough answers count as correct.
 
-## Question list
+A multiple-choice question marked as **easy** displays the actual number of
+correct answers to the [quiz taker](#roles).
 
-A **Question list** is a collection of questions.
+Each question carries the prompt text, optional **image**, and the list of **answers**, which of those
+answers are **correct**, and two kinds of feedback:
+
+- A per-answer **explanation** shown next to each answer when the learner sees
+  results.
+- A single **question explanation** shown below the answers, used for context
+  that applies to the question as a whole.
+
+[Quiz maker](#roles) can organize questions in their workspace using optional
+**tags**.
 
 ## Quiz
 
-A **Quiz** is a [question list](#Question-list) that can be taken by a user.  It can be taken in [Exam mode](#Exam-mode) or [Learning mode](#learning-mode).  Each Quiz has defined a [pass score]() and a [time limit]().
+A **Quiz** is a curated set of [questions](#question) from one
+[workspace](#workspace), configured for [takers](#roles) to work through. It
+carries a title, an optional description, and a question list.
 
-## Skip
-You can **skip** a question which leaves it unanswered and moves to the next question.  You can return to the skipped question later using BACK or a [Bookmark](#bookmark).
+Two settings shape *how* takers experience the quiz:
 
-## Time limit
-A **Time limit** is the maximum amount of time a user has to complete a [Quiz](#Quiz).  It is expressed in minutes.  For example, a time limit of 10 minutes means that the user has 10 minutes to complete the quiz.  If the user does not complete the quiz within the time limit, the quiz is automatically submitted and the user's score is calculated.
+- **Mode** is either **Exam** or **Learning**.
+  - In **Exam mode**, submitting an answer immediately moves to the next
+    question. The taker sees no feedback or explanations until the whole quiz
+    is finished, and the final score and feedback appear once at the end.
+  - In **Learning mode**, feedback and explanations appear after each answer,
+    and the taker advances manually. Learning quizzes can be retaken.
+
+- **Difficulty** is **easy**, **hard**, or **keep**. *Easy* and *hard* override
+  each question's own easy mark at quiz time so the taker sees a uniformly
+  easier or harder variant; *keep* respects whatever each question itself
+  declares.
+
+Three settings shape *which* questions appear and *when*:
+
+- **Pass score** is the percentage of questions a taker must answer correctly
+  to pass.
+- **Time limit** is the maximum time allowed to complete the quiz. When time
+  runs out the quiz is auto-submitted and scored.
+- **Random question count** limits the quiz to N randomly drawn questions from
+  the question list. Unset means use all questions.
+
+A quiz can also be **scheduled** with start and end times that bound when it is
+available to takers.
+
+## Taking a quiz: Attempt
+
+An **Attempt** records one [taker](#roles)'s run through a [quiz](#quiz). It
+captures which quiz and which questions were drawn (important under random
+selection, because two attempts on the same quiz can see different question
+subsets), when it started, and when it finished or timed out.
+
+The score is broken down three ways: fully **correct** answers, **partially
+correct** answers (a multiple-choice question where the learner picked some
+but not all correct options), and **incorrect** answers.
+
+An attempt has a status: **in-progress**, **finished**, **timeout** (timed out
+but evaluated), or **abandoned** (timed out without evaluation).
+
+While taking a quiz, two affordances support navigation:
+
+- **Skip** leaves the current question unanswered and moves on. Skipped
+  questions can be revisited.
+- **Bookmark** marks a question to return to later, useful when the taker
+  wants to come back after seeing later questions.
+
+## AI assistance: Robin AI
+
+[Quiz makers](#roles) can ask **Robin AI** to draft a [question](#question)
+from a short prompt. Robin only drafts; the maker reviews and saves. Robin will
+refuse a draft that is too similar to an existing question in the same
+workspace, prompting the maker to refine the prompt instead.
+
+---
+
+## Alphabetical index
+
+| Term | See |
+| --- | --- |
+| Abandoned | [Attempt](#taking-a-quiz-attempt) |
+| Answer | [Question](#question) |
+| Attempt | [Attempt](#taking-a-quiz-attempt) |
+| Bookmark | [Attempt](#taking-a-quiz-attempt) |
+| Correct answer | [Question](#question) |
+| Difficulty | [Quiz](#quiz) |
+| Easy | [Question](#question), [Quiz](#quiz) |
+| Exam mode | [Quiz](#quiz) |
+| Explanation | [Question](#question) |
+| Finished | [Attempt](#taking-a-quiz-attempt) |
+| Image | [Question](#question) |
+| In-progress | [Attempt](#taking-a-quiz-attempt) |
+| Learning mode | [Quiz](#quiz) |
+| Multiple-choice | [Question](#question) |
+| Numerical | [Question](#question) |
+| Partially correct | [Attempt](#taking-a-quiz-attempt) |
+| Pass score | [Quiz](#quiz) |
+| Question | [Question](#question) |
+| Question explanation | [Question](#question) |
+| Question list | [Quiz](#quiz) |
+| Quiz | [Quiz](#quiz) |
+| Quiz maker | [Roles](#roles) |
+| Quiz taker | [Roles](#roles) |
+| Random question count | [Quiz](#quiz) |
+| Robin AI | [AI assistance](#ai-assistance-robin-ai) |
+| Schedule | [Quiz](#quiz) |
+| Single-choice | [Question](#question) |
+| Skip | [Attempt](#taking-a-quiz-attempt) |
+| Tags | [Question](#question) |
+| Time limit | [Quiz](#quiz) |
+| Timeout | [Attempt](#taking-a-quiz-attempt) |
+| Tolerance | [Question](#question) |
+| Workspace | [Workspace](#workspace) |
