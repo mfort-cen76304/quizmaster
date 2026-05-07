@@ -111,7 +111,7 @@ Given('Robin AI will return these generated questions:', async function (dataTab
     const drafts = dataTable.hashes().map(questionSpecToDraft)
     if (drafts.length === 0) throw new Error('Robin AI stub requires at least one generated question.')
 
-    await this.page.route('**/api/ai-assistant', async route => {
+    await this.page.route('**/ai-assistant', async route => {
         this.lastAiAssistantRequest = route.request().postDataJSON() as {
             question: string
             questionType: string
@@ -124,7 +124,7 @@ Given('Robin AI will return these generated questions:', async function (dataTab
         })
     })
 
-    await this.page.route('**/api/ai-assistant/batch', async route => {
+    await this.page.route('**/ai-assistant/batch', async route => {
         this.lastAiAssistantRequest = route.request().postDataJSON() as {
             question: string
             questionType: string
@@ -482,7 +482,7 @@ When('I ask the application to create a exact question {string}', async function
     await this.robinSheetPage.open()
     await enterAIPrompt(this, `Generate a exact question: ${topic}`)
     await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
             timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
@@ -495,7 +495,7 @@ When('I ask AI:', async function (dataTable: DataTable) {
     // is unreliable on regenerate (the previous response makes "not empty"
     // resolve immediately, before the new response arrives).
     await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
             timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
@@ -505,7 +505,7 @@ When('I ask AI:', async function (dataTable: DataTable) {
 When('I ask AI to generate multiple questions:', async function (dataTable: DataTable) {
     await enterAIPrompt(this, toText(dataTable))
     await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant/batch') && response.ok(), {
+        this.page.waitForResponse(response => response.url().includes('/ai-assistant/batch') && response.ok(), {
             timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
@@ -526,7 +526,7 @@ When('I press Enter to send the Robin AI message', async function () {
 })
 
 When('I ask stubbed AI to {string}', async function (instruction: string) {
-    await this.page.route('**/api/ai-assistant', async route => {
+    await this.page.route('**/ai-assistant', async route => {
         this.lastAiAssistantRequest = route.request().postDataJSON() as {
             question: string
             questionType: string
@@ -540,12 +540,12 @@ When('I ask stubbed AI to {string}', async function (instruction: string) {
     })
     await enterAIPrompt(this, instruction)
     await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
             timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
     ])
-    await this.page.unroute('**/api/ai-assistant')
+    await this.page.unroute('**/ai-assistant')
 })
 
 When(
@@ -554,7 +554,7 @@ When(
         await selectAIQuestionType(this, choice as AIQuestionTypeChoice)
         await enterAIPrompt(this, toText(dataTable))
         await Promise.all([
-            this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+            this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
                 timeout: AI_RESPONSE_TIMEOUT,
             }),
             this.robinSheetPage.generate(),
@@ -568,7 +568,7 @@ When(
         await selectAIQuestionType(this, choice as AIQuestionTypeChoice)
         await enterAIPrompt(this, toText(dataTable))
         await Promise.all([
-            this.page.waitForResponse(response => response.url().includes('/api/ai-assistant/batch') && response.ok(), {
+            this.page.waitForResponse(response => response.url().includes('/ai-assistant/batch') && response.ok(), {
                 timeout: AI_RESPONSE_TIMEOUT,
             }),
             this.robinSheetPage.generate(),
@@ -586,7 +586,7 @@ Given('I start creating a new question when I already have generated content', a
         'Generate a question about capital cities with 1 correct answer and 2 incorrect answers',
     )
     await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
             timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
@@ -599,7 +599,7 @@ When('I generated a question by AI', async function () {
         'Generate a question about capital cities with 1 correct answer and 2 incorrect answers',
     )
     await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
             timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),
@@ -611,7 +611,7 @@ When('I generated a new question by AI', async function () {
         'Generate a question about European history with 1 correct answer and 2 incorrect answers',
     )
     await Promise.all([
-        this.page.waitForResponse(response => response.url().includes('/api/ai-assistant') && response.ok(), {
+        this.page.waitForResponse(response => response.url().includes('/ai-assistant') && response.ok(), {
             timeout: AI_RESPONSE_TIMEOUT,
         }),
         this.robinSheetPage.generate(),

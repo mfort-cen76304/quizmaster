@@ -1,10 +1,13 @@
-package cz.scrumdojo.quizmaster.quiz;
+package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
-import cz.scrumdojo.quizmaster.workspace.WorkspaceKey;
-import cz.scrumdojo.quizmaster.workspace.WorkspaceRepository;
+import cz.scrumdojo.quizmaster.quiz.Quiz;
+import cz.scrumdojo.quizmaster.quiz.QuizRepository;
+import cz.scrumdojo.quizmaster.quiz.QuizRequest;
+import cz.scrumdojo.quizmaster.quiz.QuizResponse;
+import cz.scrumdojo.quizmaster.quiz.QuizService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,15 +16,15 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 @RestController
-@RequestMapping({"/api/workspace/quizzes", "/api/workspaces/{workspaceGuid}/quizzes"})
-public class QuizMakeController {
+@RequestMapping("/api/workspaces/{workspaceGuid}/quizzes")
+public class WorkspaceQuizController {
 
     private final WorkspaceRepository workspaceRepository;
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final QuizService quizService;
 
-    public QuizMakeController(
+    public WorkspaceQuizController(
             WorkspaceRepository workspaceRepository,
             QuizRepository quizRepository,
             QuestionRepository questionRepository,
@@ -34,46 +37,40 @@ public class QuizMakeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<QuizResponse> getQuiz(
-            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
-            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
-        if (!workspaceRepository.existsById(guid))
+        if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        return ResponseHelper.okOrNotFound(quizService.getWorkspaceQuiz(guid, id));
+        return ResponseHelper.okOrNotFound(quizService.getWorkspaceQuiz(workspaceGuid, id));
     }
 
     @PostMapping
     public ResponseEntity<IdResponse> createQuiz(
-            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
-            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable String workspaceGuid,
             @Valid @RequestBody QuizRequest request) {
-        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
-        if (!workspaceRepository.existsById(guid))
+        if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        validateQuestionsBelongToWorkspace(request.questionIds(), guid);
+        validateQuestionsBelongToWorkspace(request.questionIds(), workspaceGuid);
 
-        Quiz output = quizRepository.save(request.toEntity(guid));
+        Quiz output = quizRepository.save(request.toEntity(workspaceGuid));
         return ResponseEntity.ok(new IdResponse(output.getId()));
     }
 
     @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<IdResponse> updateQuiz(
-            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
-            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable String workspaceGuid,
             @PathVariable Integer id,
             @Valid @RequestBody QuizRequest request) {
-        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
-        if (!workspaceRepository.existsById(guid))
+        if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        return quizRepository.findByIdAndWorkspaceGuid(id, guid)
+        return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
-                validateQuestionsBelongToWorkspace(request.questionIds(), guid);
-                Quiz quiz = request.toEntity(guid);
+                validateQuestionsBelongToWorkspace(request.questionIds(), workspaceGuid);
+                Quiz quiz = request.toEntity(workspaceGuid);
                 quiz.setId(existing.getId());
                 quizRepository.save(quiz);
                 return ResponseEntity.ok(new IdResponse(existing.getId()));
@@ -84,14 +81,12 @@ public class QuizMakeController {
     @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteQuiz(
-            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
-            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
-        if (!workspaceRepository.existsById(guid))
+        if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        if (quizRepository.findByIdAndWorkspaceGuid(id, guid).isEmpty())
+        if (quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid).isEmpty())
             return ResponseEntity.notFound().build();
 
         quizRepository.deleteById(id);
@@ -108,11 +103,5 @@ public class QuizMakeController {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Quiz questions must belong to the workspace.");
             }
         }
-    }
-
-    private String workspaceGuid(String pathWorkspaceGuid, String workspaceKey) {
-        return pathWorkspaceGuid == null
-            ? WorkspaceKey.require(workspaceKey)
-            : WorkspaceKey.require(pathWorkspaceGuid);
     }
 }

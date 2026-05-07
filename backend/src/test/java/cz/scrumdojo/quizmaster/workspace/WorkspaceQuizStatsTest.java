@@ -29,8 +29,7 @@ public class WorkspaceQuizStatsTest {
         Question q2 = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
 
-        mockMvc.perform(get("/api/workspace/quizzes/{id}/stats", quiz.getId())
-                .header(WorkspaceKey.HEADER, workspace.getGuid()))
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
                     {
@@ -48,8 +47,7 @@ public class WorkspaceQuizStatsTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         fixtures.save(fixtures.attempt(quiz).correctAnswers(1).incorrectAnswers(1));
 
-        mockMvc.perform(get("/api/workspace/quizzes/{id}/stats", quiz.getId())
-                .header(WorkspaceKey.HEADER, workspace.getGuid()))
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attempts[0].totalQuestions").value(2))
                 .andExpect(jsonPath("$.attempts[0].correctAnswers").value(1))
@@ -66,8 +64,7 @@ public class WorkspaceQuizStatsTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         fixtures.save(fixtures.attempt(quiz).correctAnswers(1));
 
-        mockMvc.perform(get("/api/workspace/quizzes/{id}/stats", quiz.getId())
-                .header(WorkspaceKey.HEADER, workspace.getGuid()))
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attempts[0].status").value("FINISHED"))
                 .andExpect(jsonPath("$.attempts[0].durationSeconds").isNumber());
@@ -80,8 +77,7 @@ public class WorkspaceQuizStatsTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         fixtures.save(fixtures.attemptTimedOut(quiz));
 
-        mockMvc.perform(get("/api/workspace/quizzes/{id}/stats", quiz.getId())
-                .header(WorkspaceKey.HEADER, workspace.getGuid()))
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attempts[0].status").value("TIMEOUT"))
                 .andExpect(jsonPath("$.summary.timeout").value(1));
@@ -94,8 +90,7 @@ public class WorkspaceQuizStatsTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         fixtures.save(fixtures.attemptInProgress(quiz));
 
-        mockMvc.perform(get("/api/workspace/quizzes/{id}/stats", quiz.getId())
-                .header(WorkspaceKey.HEADER, workspace.getGuid()))
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attempts[0].status").value("IN_PROGRESS"))
                 .andExpect(jsonPath("$.attempts[0].durationSeconds").isEmpty())
@@ -109,8 +104,7 @@ public class WorkspaceQuizStatsTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         fixtures.save(fixtures.attemptAbandoned(quiz));
 
-        mockMvc.perform(get("/api/workspace/quizzes/{id}/stats", quiz.getId())
-                .header(WorkspaceKey.HEADER, workspace.getGuid()))
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.attempts[0].status").value("ABANDONED"))
                 .andExpect(jsonPath("$.summary.unfinished").value(1));
@@ -120,8 +114,7 @@ public class WorkspaceQuizStatsTest {
     public void nonExistentQuizReturns404() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(get("/api/workspace/quizzes/{id}/stats", -1)
-                .header(WorkspaceKey.HEADER, workspace.getGuid()))
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), -1))
                 .andExpect(status().isNotFound());
     }
 }

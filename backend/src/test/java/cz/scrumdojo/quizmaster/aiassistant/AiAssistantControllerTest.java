@@ -2,7 +2,6 @@ package cz.scrumdojo.quizmaster.aiassistant;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
-import cz.scrumdojo.quizmaster.workspace.WorkspaceKey;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,7 @@ public class AiAssistantControllerTest {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(post("/api/ai-assistant")
-                .header(WorkspaceKey.HEADER, workspace.getGuid())
+        mockMvc.perform(post("/api/workspaces/{guid}/ai-assistant", workspace.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -60,8 +58,7 @@ public class AiAssistantControllerTest {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(post("/api/ai-assistant")
-                .header(WorkspaceKey.HEADER, workspace.getGuid())
+        mockMvc.perform(post("/api/workspaces/{guid}/ai-assistant", workspace.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -83,8 +80,7 @@ public class AiAssistantControllerTest {
     public void emptyInputReturnsBadRequest() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(post("/api/ai-assistant")
-                .header(WorkspaceKey.HEADER, workspace.getGuid())
+        mockMvc.perform(post("/api/workspaces/{guid}/ai-assistant", workspace.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {"question": "   ", "questionType": "single"}
@@ -96,8 +92,7 @@ public class AiAssistantControllerTest {
     public void emptyBatchInputReturnsBadRequest() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(post("/api/ai-assistant/batch")
-                .header(WorkspaceKey.HEADER, workspace.getGuid())
+        mockMvc.perform(post("/api/workspaces/{guid}/ai-assistant/batch", workspace.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {"question": "   ", "questionType": "single"}
@@ -107,20 +102,6 @@ public class AiAssistantControllerTest {
 
     @Test
     public void unknownWorkspaceReturnsNotFound() throws Exception {
-        mockMvc.perform(post("/api/ai-assistant")
-                .header(WorkspaceKey.HEADER, "non-existent-guid")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "question": "Generate a question about Europe",
-                        "questionType": "single"
-                    }
-"""))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void unknownWorkspaceScopedPathReturnsNotFound() throws Exception {
         mockMvc.perform(post("/api/workspaces/{guid}/ai-assistant", "non-existent-guid")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
@@ -128,16 +109,6 @@ public class AiAssistantControllerTest {
                         "question": "Generate a question about Europe",
                         "questionType": "single"
                     }
-"""))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void missingWorkspaceHeaderReturnsNotFound() throws Exception {
-        mockMvc.perform(post("/api/ai-assistant")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"question": "Generate a question about Europe", "questionType": "single"}
 """))
             .andExpect(status().isNotFound());
     }

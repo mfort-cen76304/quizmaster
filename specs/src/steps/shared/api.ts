@@ -14,8 +14,6 @@ import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/wo
 import type { QuestionSpec, QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
 
-const workspaceHeaders = (workspaceGuid: string) => ({ 'X-Workspace-Key': workspaceGuid })
-
 export const createWorkspaceViaRest = async (world: QuizmasterWorld, name: string): Promise<string> => {
     const body: WorkspaceRequest = { title: name }
     const response = await world.page.request.post('/api/workspaces', { data: body })
@@ -68,10 +66,9 @@ export const createQuestionViaRest = async (
     workspaceGuid: string,
     spec: QuestionSpec,
 ): Promise<number> => {
-    const url = '/api/workspace/questions'
+    const url = `/api/workspaces/${workspaceGuid}/questions`
     const response = await world.page.request.post(url, {
         data: toQuestionPayload(spec),
-        headers: workspaceHeaders(workspaceGuid),
     })
     if (!response.ok()) {
         throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)
@@ -121,10 +118,9 @@ export const createQuizViaRest = async (
     workspaceGuid: string,
     spec: QuizSpec,
 ): Promise<number> => {
-    const url = '/api/workspace/quizzes'
+    const url = `/api/workspaces/${workspaceGuid}/quizzes`
     const response = await world.page.request.post(url, {
         data: toQuizPayload(world, spec),
-        headers: workspaceHeaders(workspaceGuid),
     })
     if (!response.ok()) {
         throw new Error(`POST ${url} failed: ${response.status()} ${await response.text()}`)

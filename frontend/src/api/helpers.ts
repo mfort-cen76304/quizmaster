@@ -1,9 +1,3 @@
-export const WORKSPACE_KEY_HEADER = 'X-Workspace-Key'
-
-export const workspaceKeyHeaders = (workspaceKey: string): HeadersInit => ({
-    [WORKSPACE_KEY_HEADER]: workspaceKey,
-})
-
 const mergeHeaders = (headers: HeadersInit | undefined, extra: HeadersInit): HeadersInit => {
     const merged = new Headers(headers)
     new Headers(extra).forEach((value, key) => merged.set(key, value))

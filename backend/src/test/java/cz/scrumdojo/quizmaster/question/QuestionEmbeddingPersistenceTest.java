@@ -6,7 +6,6 @@ import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingText;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
-import cz.scrumdojo.quizmaster.workspace.WorkspaceKey;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -52,8 +51,7 @@ class QuestionEmbeddingPersistenceTest {
 
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        IdResponse response = objectMapper.readValue(mockMvc.perform(post("/api/workspace/questions")
-                .header(WorkspaceKey.HEADER, workspace.getGuid())
+        IdResponse response = objectMapper.readValue(mockMvc.perform(post("/api/workspaces/{guid}/questions", workspace.getGuid())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(questionJson("Which country is the largest producer of coffee?")))
             .andExpect(status().isOk())
@@ -75,8 +73,7 @@ class QuestionEmbeddingPersistenceTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace).question("What is Scrum?"));
 
-        mockMvc.perform(patch("/api/workspace/questions/{id}", question.getId())
-                .header(WorkspaceKey.HEADER, workspace.getGuid())
+        mockMvc.perform(patch("/api/workspaces/{guid}/questions/{id}", workspace.getGuid(), question.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(questionJson("What is Kanban?")))
             .andExpect(status().isOk());

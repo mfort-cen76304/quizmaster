@@ -1,24 +1,26 @@
-package cz.scrumdojo.quizmaster.question;
+package cz.scrumdojo.quizmaster.workspace;
 
+import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingService;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
-import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingService;
-import cz.scrumdojo.quizmaster.workspace.WorkspaceKey;
-import cz.scrumdojo.quizmaster.workspace.WorkspaceRepository;
+import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.question.QuestionRepository;
+import cz.scrumdojo.quizmaster.question.QuestionRequest;
+import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping({"/api/workspace/questions", "/api/workspaces/{workspaceGuid}/questions"})
-public class QuestionMakeController {
+@RequestMapping("/api/workspaces/{workspaceGuid}/questions")
+public class WorkspaceQuestionController {
 
     private final WorkspaceRepository workspaceRepository;
     private final QuestionRepository questionRepository;
     private final QuestionEmbeddingService questionEmbeddingService;
 
-    public QuestionMakeController(
+    public WorkspaceQuestionController(
         WorkspaceRepository workspaceRepository,
         QuestionRepository questionRepository,
         QuestionEmbeddingService questionEmbeddingService
@@ -31,27 +33,23 @@ public class QuestionMakeController {
     @Transactional(readOnly = true)
     @GetMapping("/{id}")
     public ResponseEntity<QuestionResponse> getWorkspaceQuestion(
-            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
-            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
-        if (!workspaceRepository.existsById(guid))
+        if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        return ResponseHelper.okOrNotFound(questionRepository.findByIdAndWorkspaceGuid(id, guid).map(QuestionResponse::from));
+        return ResponseHelper.okOrNotFound(questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid).map(QuestionResponse::from));
     }
 
     @Transactional
     @PostMapping
     public ResponseEntity<IdResponse> createWorkspaceQuestion(
-            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
-            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable String workspaceGuid,
             @Valid @RequestBody QuestionRequest request) {
-        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
-        if (!workspaceRepository.existsById(guid))
+        if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        var question = request.toEntity(guid);
+        var question = request.toEntity(workspaceGuid);
         embedBestEffort(question);
         var created = questionRepository.save(question);
         return ResponseEntity.ok(new IdResponse(created.getId()));
@@ -60,17 +58,15 @@ public class QuestionMakeController {
     @Transactional
     @PatchMapping("/{id}")
     public ResponseEntity<IdResponse> updateWorkspaceQuestion(
-            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
-            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable String workspaceGuid,
             @PathVariable Integer id,
             @Valid @RequestBody QuestionRequest request) {
-        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
-        if (!workspaceRepository.existsById(guid))
+        if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        return questionRepository.findByIdAndWorkspaceGuid(id, guid)
+        return questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
-                var question = request.toEntity(guid);
+                var question = request.toEntity(workspaceGuid);
                 question.setId(existing.getId());
                 embedBestEffort(question);
                 questionRepository.save(question);
@@ -82,14 +78,12 @@ public class QuestionMakeController {
     @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWorkspaceQuestion(
-            @PathVariable(value = "workspaceGuid", required = false) String pathWorkspaceGuid,
-            @RequestHeader(value = WorkspaceKey.HEADER, required = false) String workspaceKey,
+            @PathVariable String workspaceGuid,
             @PathVariable Integer id) {
-        String guid = workspaceGuid(pathWorkspaceGuid, workspaceKey);
-        if (!workspaceRepository.existsById(guid))
+        if (!workspaceRepository.existsById(workspaceGuid))
             return ResponseEntity.notFound().build();
 
-        return questionRepository.findByIdAndWorkspaceGuid(id, guid)
+        return questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
                 questionRepository.deleteById(id);
                 return ResponseEntity.noContent().<Void>build();
@@ -105,11 +99,5 @@ public class QuestionMakeController {
             question.setEmbeddingModel(null);
             question.setEmbeddingTextHash(null);
         }
-    }
-
-    private String workspaceGuid(String pathWorkspaceGuid, String workspaceKey) {
-        return pathWorkspaceGuid == null
-            ? WorkspaceKey.require(workspaceKey)
-            : WorkspaceKey.require(pathWorkspaceGuid);
     }
 }

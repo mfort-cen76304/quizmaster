@@ -2,7 +2,7 @@ import type { QuestionAnswer, QuestionEvaluation } from '#model/question.ts'
 import type { QuizSubmitRequest, QuizSubmitResponse } from '#model/quiz.ts'
 import type { AttemptRequest, AttemptPatchRequest, AttemptResponse, QuizStatsResponse } from '#model/stats.ts'
 
-import { fetchJson, patchJson, postJson, workspaceKeyHeaders } from './helpers.ts'
+import { fetchJson, patchJson, postJson } from './helpers.ts'
 
 export const createAttempt = async (quizId: number, request: AttemptRequest): Promise<AttemptResponse> => {
     return await postJson<AttemptRequest, AttemptResponse>(`/api/quiz/${quizId}/attempts`, request)
@@ -13,9 +13,7 @@ export const patchAttempt = async (id: number, patch: AttemptPatchRequest): Prom
 }
 
 export const fetchQuizStats = async (workspaceGuid: string, quizId: string): Promise<QuizStatsResponse> => {
-    return await fetchJson<QuizStatsResponse>(`/api/workspace/quizzes/${quizId}/stats`, {
-        headers: workspaceKeyHeaders(workspaceGuid),
-    })
+    return await fetchJson<QuizStatsResponse>(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}/stats`)
 }
 
 export const submitQuiz = async (
