@@ -47,7 +47,7 @@ public class QuizTakeController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<QuizTakeResponse> getQuiz(@PathVariable Integer id) {
+    public ResponseEntity<QuizMetadataResponse> getQuiz(@PathVariable Integer id) {
         return ResponseHelper.okOrNotFound(quizService.getTakeQuiz(id));
     }
 

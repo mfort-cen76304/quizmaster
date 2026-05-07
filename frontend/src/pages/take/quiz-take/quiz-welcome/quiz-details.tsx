@@ -1,17 +1,20 @@
-import type { Quiz, QuizTake } from '#model/quiz.ts'
+import type { QuizMetadata } from '#model/quiz.ts'
 import { Page } from '#pages/components'
 import { StartButton } from '#pages/take/quiz-take/components/buttons.tsx'
 import { TakeCard } from '#pages/take/shared/take-card.tsx'
 
+type QuizDisplayFields = Pick<QuizMetadata, 'title' | 'description' | 'timeLimit' | 'passScore' | 'mode'>
+
 export interface QuizDetailsProps {
-    readonly quiz: Quiz | QuizTake
+    readonly quiz: QuizDisplayFields
+    readonly questionCount: number
     readonly canStart: boolean
     readonly onStart: () => void
 }
 
 const getFeedbackText = (mode: string): string => (mode === 'learn' ? 'Continuous feedback' : 'Feedback at the end')
 
-export const QuizDetails = ({ quiz, canStart, onStart }: QuizDetailsProps) => (
+export const QuizDetails = ({ quiz, questionCount, canStart, onStart }: QuizDetailsProps) => (
     <Page id="quiz-welcome" title="Welcome to the quiz">
         <TakeCard id="quiz-details">
             <header>
@@ -29,7 +32,7 @@ export const QuizDetails = ({ quiz, canStart, onStart }: QuizDetailsProps) => (
                 <div className="detail">
                     <span className="label">Question count</span>
                     <span id="question-count" className="value">
-                        {quiz.randomQuestionCount || quiz.questions.length}
+                        {questionCount}
                     </span>
                 </div>
                 <div className="detail">

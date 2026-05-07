@@ -1,11 +1,11 @@
 import type { IdResponse } from '#shared/types/id-response.ts'
-import type { Quiz, QuizRequest, QuizTake } from '#shared/types/quiz.ts'
+import type { Quiz, QuizMetadata, QuizRequest, QuizTake } from '#shared/types/quiz.ts'
 
 import { fetchJson, postJson, putJson, callDelete } from './helpers.ts'
 
 export type { QuizRequest } from '#shared/types/quiz.ts'
 
-export const fetchQuiz = async (quizId: string) => await fetchJson<QuizTake>(`/api/quiz/${quizId}`)
+export const fetchQuiz = async (quizId: string) => await fetchJson<QuizMetadata>(`/api/quiz/${quizId}`)
 
 export const fetchQuizAttempt = async (quizId: number, attemptId: number) =>
     await fetchJson<QuizTake>(`/api/quiz/${quizId}/attempts/${attemptId}`)

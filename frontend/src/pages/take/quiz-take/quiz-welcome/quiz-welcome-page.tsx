@@ -5,7 +5,7 @@ import { useApi } from '#api/hooks.ts'
 import { fetchQuiz } from '#api/quiz.ts'
 import { createAttempt } from '#api/stats.ts'
 import { urls } from '#fe/urls.ts'
-import type { QuizTake } from '#model/quiz.ts'
+import type { QuizMetadata } from '#model/quiz.ts'
 
 import { isQuizAvailable } from '../quiz-availability.ts'
 import { storeQuizAnswers, setQuizRun } from '../quiz-session.ts'
@@ -14,7 +14,7 @@ import { QuizDetails } from './quiz-details.tsx'
 export const QuizWelcomePage = () => {
     const navigate = useNavigate()
     const params = useParams()
-    const [quiz, setQuiz] = useState<QuizTake>()
+    const [quiz, setQuiz] = useState<QuizMetadata>()
     const [isStarting, setIsStarting] = useState(false)
 
     useApi(params.id, fetchQuiz, setQuiz)
@@ -39,5 +39,5 @@ export const QuizWelcomePage = () => {
         }
     }
 
-    return quiz && <QuizDetails quiz={quiz} canStart={canStart} onStart={onStart} />
+    return quiz && <QuizDetails quiz={quiz} questionCount={quiz.questionCount} canStart={canStart} onStart={onStart} />
 }

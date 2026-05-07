@@ -35,13 +35,15 @@ public class QuizTakeControllerTest {
     private AttemptRepository attemptRepository;
 
     @Test
-    public void getQuiz() throws Exception {
+    public void getQuizReturnsMetadataWithoutLeakingQuestions() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
-        Question question = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(question)
+        Question q1 = fixtures.save(fixtures.questionIn(workspace));
+        Question q2 = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2)
             .workspaceGuid(workspace.getGuid())
             .startAt(LocalDateTime.of(2026, 4, 14, 10, 0))
             .endAt(LocalDateTime.of(2026, 4, 14, 23, 0))
+            .randomQuestionCount(1)
             .build());
 
         mockMvc.perform(get("/api/quiz/{id}", quiz.getId()))
@@ -54,16 +56,29 @@ public class QuizTakeControllerTest {
                     "endAt": "2026-04-14T23:00:00",
                     "mode": "learn",
                     "passScore": 85,
-                    "randomQuestionCount": 1
+                    "randomQuestionCount": 1,
+                    "questionCount": 1
                 }
                 """))
             .andExpect(jsonPath("$.id").value(quiz.getId()))
-            .andExpect(jsonPath("$.questions").isArray())
-            .andExpect(jsonPath("$.questions.length()").value(1))
-            .andExpect(jsonPath("$.questions[0].id").value(question.getId()))
-            .andExpect(jsonPath("$.questions[0].correctAnswers").doesNotExist())
-            .andExpect(jsonPath("$.questions[0].explanations").doesNotExist())
-            .andExpect(jsonPath("$.questions[0].workspaceGuid").doesNotExist());
+            .andExpect(jsonPath("$.questions").doesNotExist());
+    }
+
+    @Test
+    public void getQuizQuestionCountFallsBackToFullPoolWhenNoRandomSubset() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question q1 = fixtures.save(fixtures.questionIn(workspace));
+        Question q2 = fixtures.save(fixtures.questionIn(workspace));
+        Question q3 = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3)
+            .workspaceGuid(workspace.getGuid())
+            .randomQuestionCount(null)
+            .build());
+
+        mockMvc.perform(get("/api/quiz/{id}", quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.questionCount").value(3))
+            .andExpect(jsonPath("$.questions").doesNotExist());
     }
 
     @Test

@@ -26,7 +26,12 @@ export const QuizDryRunWelcomePage = () => {
         quiz && (
             <>
                 <DryRunIndicator />
-                <QuizDetails quiz={quiz} canStart={true} onStart={onStart} />
+                <QuizDetails
+                    quiz={quiz}
+                    questionCount={quiz.randomQuestionCount || quiz.questions.length}
+                    canStart={true}
+                    onStart={onStart}
+                />
             </>
         )
     )

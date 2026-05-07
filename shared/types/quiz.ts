@@ -42,6 +42,20 @@ export interface QuizTake {
     readonly randomQuestionCount?: number
 }
 
+export interface QuizMetadata {
+    readonly id: number
+    readonly title: string
+    readonly description: string
+    readonly startAt: string | null
+    readonly endAt: string | null
+    readonly mode: QuizMode
+    readonly difficulty: Difficulty
+    readonly passScore: number
+    readonly timeLimit: number
+    readonly randomQuestionCount?: number
+    readonly questionCount: number
+}
+
 export type QuizSubmittedAnswer =
     | { readonly questionId: number; readonly type: 'choice'; readonly selectedIdxs: readonly number[] }
     | { readonly questionId: number; readonly type: 'numerical'; readonly value: number }
