@@ -16,6 +16,9 @@
 
         "doc:gen": "node --require esbuild-register src/doc-gen/doc-gen.ts",
 
+        "fmt": "tsx src/gherkin-fmt/cli.ts",
+        "test:fmt": "vitest run test/gherkin-fmt",
+
         "coverage:clean": "rm -rf coverage",
         "coverage:test:e2e": "pnpm coverage:clean && ENABLE_COVERAGE=1 c8 --experimental-monocart pnpm playwright:test",
         "coverage:report": "node src/coverage/report.js",
@@ -53,5 +56,9 @@
         "concurrently": "9.2.1",
         "dotenv": "17.4.0",
         "wait-on": "9.0.4",
+
+        // Gherkin formatter
+        "tsx": "4.21.0",
+        "vitest": "4.1.5",
     }
 }

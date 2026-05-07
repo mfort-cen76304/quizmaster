@@ -36,9 +36,10 @@
         "code:fe": "pnpm code:fe:tsc && pnpm code:fe:lint && pnpm code:fe:format",
 
         "code:specs:tsc": "cd specs && pnpm tsc -b && rm -f *.tsbuildinfo",
-        "code:specs:lint": "oxlint --fix specs/src/",
-        "code:specs:format": "oxfmt specs/src/",
-        "code:specs": "pnpm code:specs:tsc && pnpm code:specs:lint && pnpm code:specs:format",
+        "code:specs:lint": "oxlint --fix specs/src/ specs/test/",
+        "code:specs:format": "oxfmt specs/src/ specs/test/",
+        "code:specs:gherkin": "cd specs && pnpm fmt features",
+        "code:specs": "pnpm code:specs:tsc && pnpm code:specs:lint && pnpm code:specs:format && pnpm code:specs:gherkin",
 
         "code:mcp:tsc": "cd mcp && pnpm tsc -b && rm -f tsconfig.tsbuildinfo",
         "code:mcp:lint": "oxlint --fix mcp/src/ mcp/test/",
@@ -49,6 +50,7 @@
 
         // Unit tests
         "test:mcp": "cd mcp && pnpm test",
+        "test:specs:fmt": "cd specs && pnpm test:fmt",
         "test:be:local": "cd backend && ./gradlew testLocal",
         "test:be:ai": "cd backend && ./gradlew testAi",
         "test:be": "cd backend && ./gradlew test",
@@ -74,9 +76,10 @@
         "build:ci": "pnpm build:ci:fe && pnpm build:ci:be",
 
         "code:ci:tsc": "pnpm code:fe:tsc && pnpm code:specs:tsc && pnpm code:mcp:tsc",
-        "code:ci:lint": "oxlint --deny-warnings frontend/src/ specs/src/ mcp/src/ mcp/test/",
-        "code:ci:format": "oxfmt --check frontend/src/ specs/src/ mcp/src/ mcp/test/",
-        "code:ci": "pnpm code:ci:tsc && pnpm code:ci:lint && pnpm code:ci:format",
+        "code:ci:lint": "oxlint --deny-warnings frontend/src/ specs/src/ specs/test/ mcp/src/ mcp/test/",
+        "code:ci:format": "oxfmt --check frontend/src/ specs/src/ specs/test/ mcp/src/ mcp/test/",
+        "code:ci:gherkin": "cd specs && pnpm fmt --check features",
+        "code:ci": "pnpm code:ci:tsc && pnpm code:ci:lint && pnpm code:ci:format && pnpm code:ci:gherkin",
 
         "test:e2e:ci": "FEATURE_FLAG=true ./scripts/test-e2e.sh",
     },
