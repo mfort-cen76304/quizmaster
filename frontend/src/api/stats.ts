@@ -1,5 +1,5 @@
 import type { QuestionAnswer, QuestionEvaluation } from '#model/question.ts'
-import type { QuizSubmitRequest, QuizSubmitResponse } from '#model/quiz.ts'
+import type { QuizEvaluationRequest, QuizEvaluationResponse } from '#model/quiz.ts'
 import type { AttemptRequest, AttemptPatchRequest, AttemptResponse, QuizStatsResponse } from '#model/stats.ts'
 
 import { fetchJson, patchJson, postJson } from './helpers.ts'
@@ -16,12 +16,15 @@ export const fetchQuizStats = async (workspaceGuid: string, quizId: string): Pro
     return await fetchJson<QuizStatsResponse>(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}/stats`)
 }
 
-export const submitQuiz = async (
+export const evaluateQuiz = async (
     quizId: number,
     attemptId: number,
-    request: QuizSubmitRequest,
-): Promise<QuizSubmitResponse> =>
-    await postJson<QuizSubmitRequest, QuizSubmitResponse>(`/api/quiz/${quizId}/attempts/${attemptId}/submit`, request)
+    request: QuizEvaluationRequest,
+): Promise<QuizEvaluationResponse> =>
+    await postJson<QuizEvaluationRequest, QuizEvaluationResponse>(
+        `/api/quiz/${quizId}/attempts/${attemptId}/evaluate`,
+        request,
+    )
 
 export const submitQuizQuestionAnswer = async (
     quizId: number,

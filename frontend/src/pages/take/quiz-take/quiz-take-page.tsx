@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
 
-import { submitQuiz } from '#api/stats.ts'
+import { evaluateQuiz } from '#api/stats.ts'
 import { urls } from '#fe/urls.ts'
-import type { QuizSubmitResponse } from '#model/quiz.ts'
+import type { QuizEvaluationResponse } from '#model/quiz.ts'
 
 import { useQuizApi, useQuizAttemptApi } from './hooks.ts'
 import type { QuizAnswers } from './quiz-answers-state.ts'
@@ -17,7 +17,7 @@ export const QuizTakePage = () => {
     const quizRunId = baseQuiz ? getStoredQuizRunId(baseQuiz.id) : null
     const quiz = useQuizAttemptApi(quizRunId)
     const [quizAnswers, setQuizAnswers] = useState<QuizAnswers | null>(() => loadQuizAnswers())
-    const [scoredQuiz, setScoredQuiz] = useState<QuizSubmitResponse | null>(null)
+    const [scoredQuiz, setScoredQuiz] = useState<QuizEvaluationResponse | null>(null)
     const navigate = useNavigate()
     const isAvailable = baseQuiz ? isQuizAvailable(baseQuiz) : false
     const canTakeQuiz = baseQuiz !== undefined && quiz !== undefined && isAvailable && quizRunId !== null
@@ -40,7 +40,7 @@ export const QuizTakePage = () => {
 
         if (!answers || quizRunId === null) return
 
-        const response = await submitQuiz(quiz.id, quizRunId, {
+        const response = await evaluateQuiz(quiz.id, quizRunId, {
             questionIds: quiz.questions.map(question => question.id),
             answers: quiz.questions.flatMap((question, index) => {
                 const answer = answers.finalAnswers[index]

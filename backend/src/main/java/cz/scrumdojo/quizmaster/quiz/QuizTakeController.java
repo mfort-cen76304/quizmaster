@@ -92,11 +92,11 @@ public class QuizTakeController {
         return ResponseHelper.okOrNotFound(quizService.getTakeQuizForAttempt(id, attempt.get().getQuestionIds()));
     }
 
-    @PostMapping("/{id}/attempts/{attemptId}/submit")
-    public ResponseEntity<QuizSubmitResponse> submitQuiz(
+    @PostMapping("/{id}/attempts/{attemptId}/evaluate")
+    public ResponseEntity<QuizEvaluationResponse> evaluateQuiz(
             @PathVariable Integer id,
             @PathVariable Integer attemptId,
-            @RequestBody QuizSubmitRequest request) {
+            @RequestBody QuizEvaluationRequest request) {
         var quiz = quizRepository.findById(id);
         var attempt = attemptRepository.findById(attemptId)
             .filter(existing -> Objects.equals(existing.getQuizId(), id));
@@ -151,7 +151,7 @@ public class QuizTakeController {
             .map(QuestionResponse::feedbackFrom)
             .toArray(QuestionResponse[]::new);
 
-        return ResponseEntity.ok(new QuizSubmitResponse(
+        return ResponseEntity.ok(new QuizEvaluationResponse(
             AttemptResponse.from(attemptRepository.save(updatedAttempt)),
             score,
             expectedQuestionIds.length,

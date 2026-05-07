@@ -104,7 +104,7 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void submitQuizScoresPersistedAttemptQuestionsOnly() throws Exception {
+    public void evaluateQuizScoresPersistedAttemptQuestionsOnly() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Question q2 = fixtures.save(fixtures.questionIn(workspace)
@@ -116,7 +116,7 @@ public class QuizTakeControllerTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{q1.getId(), q2.getId()}));
 
-        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/submit", quiz.getId(), attempt.getId())
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -140,14 +140,14 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void submitQuizRejectsQuestionIdsOutsidePersistedAttempt() throws Exception {
+    public void evaluateQuizRejectsQuestionIdsOutsidePersistedAttempt() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Question q2 = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{q1.getId()}));
 
-        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/submit", quiz.getId(), attempt.getId())
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
@@ -163,7 +163,7 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void submitQuizRejectsFinishedAttempt() throws Exception {
+    public void evaluateQuizRejectsFinishedAttempt() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
@@ -173,7 +173,7 @@ public class QuizTakeControllerTest {
             .incorrectAnswers(0)
             .partiallyCorrectAnswers(0));
 
-        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/submit", quiz.getId(), attempt.getId())
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {

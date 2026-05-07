@@ -4,7 +4,7 @@ import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
 
 import java.time.LocalDateTime;
 
-public record QuizSubmitRequest(
+public record QuizEvaluationRequest(
     int[] questionIds,
     QuestionAnswerRequest[] answers,
     LocalDateTime finishedAt,

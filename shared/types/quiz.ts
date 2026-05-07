@@ -46,14 +46,14 @@ export type QuizSubmittedAnswer =
     | { readonly questionId: number; readonly type: 'choice'; readonly selectedIdxs: readonly number[] }
     | { readonly questionId: number; readonly type: 'numerical'; readonly value: number }
 
-export interface QuizSubmitRequest {
+export interface QuizEvaluationRequest {
     readonly questionIds: readonly number[]
     readonly answers: readonly QuizSubmittedAnswer[]
     readonly finishedAt: string
     readonly timedOutAt?: string
 }
 
-export interface QuizSubmitResponse {
+export interface QuizEvaluationResponse {
     readonly attempt: {
         readonly id: number
         readonly quizId: number

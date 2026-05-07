@@ -1,5 +1,5 @@
 import './quiz-score-page.scss'
-import type { Quiz, QuizSubmitResponse, QuizTake } from '#model/quiz.ts'
+import type { Quiz, QuizEvaluationResponse, QuizTake } from '#model/quiz.ts'
 
 import { QuestionSummary } from './components/question-summary.tsx'
 import type { QuizAnswers } from './quiz-answers-state.ts'
@@ -8,7 +8,7 @@ import { evaluate } from './quiz-score.ts'
 interface QuizScorePageProps {
     readonly quiz: Quiz | QuizTake
     readonly quizAnswers?: QuizAnswers
-    readonly result?: Pick<QuizSubmitResponse, 'score' | 'totalQuestions' | 'questions'>
+    readonly result?: Pick<QuizEvaluationResponse, 'score' | 'totalQuestions' | 'questions'>
 }
 
 const canShowAnswerOverview = (quiz: Quiz | QuizTake): quiz is Quiz =>
