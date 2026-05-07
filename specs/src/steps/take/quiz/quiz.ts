@@ -1,3 +1,4 @@
+import { advanceServerClock } from '#steps/clock.ts'
 import { expectTextToBe } from '#steps/common.ts'
 import { Given, When, Then } from '#steps/fixture.ts'
 import { expectQuestion } from '#steps/question/expects.ts'
@@ -65,6 +66,7 @@ Then('progress shows {int} of {int}', async function (current: number, max: numb
 When('{int} seconds pass', async function (seconds: number) {
     await this.questionPage.timerLocator().waitFor({ state: 'visible' })
 
+    await advanceServerClock(this, seconds)
     // Advance fake clock in 1-second chunks. A single runFor/fastForward with large
     // values (60s+) is too slow — Playwright processes thousands of rAF callbacks
     // synchronously, exceeding the test timeout. The await between chunks also gives

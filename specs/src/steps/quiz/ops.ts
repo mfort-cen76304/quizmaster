@@ -1,5 +1,6 @@
 import type { Response as PlaywrightResponse } from '@playwright/test'
 
+import { advanceServerClock } from '#steps/clock.ts'
 import type { QuizmasterWorld } from '#steps/world'
 
 export const openQuiz = async (world: QuizmasterWorld, quizBookmark: string) => {
@@ -67,6 +68,7 @@ export const repeatAsync = async (n: number, fn: () => Promise<void>) => {
 }
 
 export const finishQuizInSeconds = async (world: QuizmasterWorld, seconds: number) => {
+    await advanceServerClock(world, seconds)
     await world.page.clock.fastForward(seconds * 1000)
     await world.questionPage.evaluateButtonLocator().click()
     await world.workspacePage.goto(world.workspaceGuid)

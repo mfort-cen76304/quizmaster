@@ -32,5 +32,5 @@ require_ports_free
 for arg in "$@"; do inner_cmd+=" $(printf '%q' "$arg")"; done
 
 concurrently --kill-others --success first \
-    "pnpm build:fe:dev && cd backend && ./gradlew bootRun" \
+    "pnpm build:fe:dev && cd backend && ./gradlew bootRun --args='--spring.profiles.active=e2e'" \
     "$inner_cmd"

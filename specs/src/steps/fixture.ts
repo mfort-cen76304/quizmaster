@@ -3,6 +3,7 @@ import path from 'node:path'
 import { test as base, createBdd } from 'playwright-bdd'
 
 import { mcr } from '#coverage/mcr.config.ts'
+import { initServerClock } from '#steps/clock.ts'
 import { QuizmasterWorld } from '#steps/world/world.ts'
 
 export const test = base.extend<{ world: QuizmasterWorld }>({
@@ -32,6 +33,8 @@ BeforeScenario(async function ({ $tags, $test, $testInfo }) {
     if (hasNotFeatureFlag && FEATURE_FLAG_ENABLED) $test.skip()
     if (isAi && !AI_ENABLED) $test.skip()
     if (isSlow) $testInfo.setTimeout($testInfo.timeout * 3)
+
+    await initServerClock(this)
 
     if (!ENABLE_COVERAGE) return
 

@@ -88,6 +88,7 @@ export class QuizmasterWorld {
     }
     correctAnswersCounts: Record<string, string> = {}
     clockInstalled = false
+    scenarioClockNow?: Date
     lastAnsweredTitle?: string
     rememberedAiQuestion = ''
     lastAiAssistantRequest?: {
