@@ -93,5 +93,5 @@ Default plan: do Stage 1 + 2; revisit Stage 3 after measuring.
   redoing the API client when it changes.
 - **Independent of:** Robin UX, AI service refactor, MCP refinements, workspace routing,
   foreign-concept docs.
-- This concern is the natural follow-up to the rest-auth foundation — once auth is in,
-  the make bundle is the one that gets the auth code, and the take bundle stays light.
+- If REST auth is ever introduced, the make bundle is the natural place for the auth
+  code; the take bundle stays light.

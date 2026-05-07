@@ -16,7 +16,5 @@ The current API has these important security gaps:
 The MCP server is wired to send `Authorization: Bearer ${QUIZMASTER_AUTH_TOKEN}`
 when configured, but the backend has no filter to validate it.
 
-The target authentication and authorization model lives in
-[backlog/rest-auth.md](../../backlog/rest-auth.md). Acceptance scenarios for
-that work are tracked as `@skip`-ed scenarios in
-`specs/features/mcpserver/RestApi.SecurityFoundation.feature`.
+Acceptance scenarios for the target auth model are tracked as `@skip`-ed
+scenarios in `specs/features/mcpserver/RestApi.SecurityFoundation.feature`.

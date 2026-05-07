@@ -141,6 +141,6 @@ Architecture, contracts (`RobinFormBinding`), file layout, and OpenRouter config
 
 The `mcp/` package exposes Quizmaster as a Model Context Protocol server (stdio transport) so AI clients can read and manage workspaces, questions, quizzes, stats, and AI drafts through the existing REST API.
 
-- **Boundary:** the MCP server is a thin REST shim. It never reads the database directly and never duplicates backend validation. The backend currently has no authentication layer; MCP is wired to send a bearer token but the backend does not validate it yet. See `docs/mcp/rest-auth.md` for the current state and `backlog/rest-auth.md` for the target model.
+- **Boundary:** the MCP server is a thin REST shim. It never reads the database directly and never duplicates backend validation. The backend currently has no authentication layer; MCP is wired to send a bearer token but the backend does not validate it yet. See `docs/mcp/rest-auth.md` for the current state.
 - **Docs:** `docs/mcp/overview.md` (what it is), `docs/mcp/configuration.md` (how to run it), `docs/mcp/rest-auth.md` (current REST auth state).
 - **Workspace-scoped REST routes** (`/api/workspaces/{guid}/...`) are shared between MCP and the FE.

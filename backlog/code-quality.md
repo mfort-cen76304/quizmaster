@@ -2,18 +2,38 @@
 
 ## Oxlint rule expansion
 
-- Enable `suspicious` and `perf` rule categories for broader bug detection
-- Enable `react` plugin for hooks rules and React-specific lint checks
+`.oxlintrc.json` currently enables `eslint`, `unicorn`, `typescript`, `oxc`,
+`import` plugins with two explicit rules. No category-level config and no
+React plugin.
 
-## Formatting
+- Enable `suspicious` and `perf` rule categories for broader bug detection.
+- Enable `react` plugin (frontend is React 19 — currently zero hooks-rules
+  coverage). Likely turns up `react-hooks/exhaustive-deps` issues; budget
+  cleanup time.
 
-- Enable oxfmt member sorting within import braces once supported (e.g., `{ b, a }` → `{ a, b }`)
-- Eliminate `#fe/` catch-all alias by moving root-level files (`helpers.ts`, `urls.ts`, `app.tsx`) into a proper directory (e.g., `src/lib/` or `src/utils/`)
+## `#fe/` alias is a catch-all
 
-## IDE integration
+`#fe/*` resolves the entire frontend source root and is used in 26 imports
+across `helpers.ts`, `urls.ts`, `app.tsx`, `assets/`, `format/`. Two
+sub-issues:
 
-- Verify and configure IntelliJ oxc plugin for IntelliJ/WebStorm users
+- The alias hides where things live. `#fe/helpers.ts` and `#fe/urls.ts`
+  could move under a proper directory (`#fe/lib/`) so the alias points at
+  a directory, not a grab-bag of root-level files.
+- A boundary rule between `pages/make/**` and `pages/take/**` (see
+  `frontend-bundle-split.md`) is harder to enforce while everything is one
+  flat alias.
 
-## Dependencies
+Worth doing alongside the bundle split, not before.
 
-- Upgrade `concurrently` 9.1.2 → 9.2.1 in root `package.json5`
+## Wait-on-tooling
+
+- oxfmt member sorting within import braces (`{ b, a }` → `{ a, b }`) — not
+  yet supported. Recheck on oxfmt updates.
+- IntelliJ oxc plugin — verify and document for IntelliJ/WebStorm users
+  once the plugin is mature.
+
+## Removed from this backlog
+
+- ~~Upgrade `concurrently` 9.1.2 → 9.2.1~~ — trivial dep bump, do it as a
+  one-liner when convenient; not backlog-worthy.
