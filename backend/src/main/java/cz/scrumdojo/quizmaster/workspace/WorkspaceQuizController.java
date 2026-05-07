@@ -8,6 +8,8 @@ import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.quiz.QuizResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizService;
+import cz.scrumdojo.quizmaster.quiz.stats.QuizStatsResponse;
+import cz.scrumdojo.quizmaster.quiz.stats.QuizStatsService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,16 +30,33 @@ public class WorkspaceQuizController {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final QuizService quizService;
+    private final QuizStatsService quizStatsService;
 
     public WorkspaceQuizController(
             WorkspaceGuard workspaceGuard,
             QuizRepository quizRepository,
             QuestionRepository questionRepository,
-            QuizService quizService) {
+            QuizService quizService,
+            QuizStatsService quizStatsService) {
         this.workspaceGuard = workspaceGuard;
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.quizService = quizService;
+        this.quizStatsService = quizStatsService;
+    }
+
+    @Transactional(readOnly = true)
+    @GetMapping
+    public ResponseEntity<List<QuizListItem>> getWorkspaceQuizzes(@PathVariable String workspaceGuid) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        List<Quiz> quizzes = quizRepository.findByWorkspaceGuid(workspaceGuid);
+
+        var items = quizzes.stream()
+            .map(quiz -> new QuizListItem(quiz.getId(), quiz.getTitle()))
+            .toList();
+
+        return ResponseEntity.ok(items);
     }
 
     @GetMapping("/{id}")
@@ -46,6 +66,15 @@ public class WorkspaceQuizController {
         workspaceGuard.requireExists(workspaceGuid);
 
         return ResponseHelper.okOrNotFound(quizService.getWorkspaceQuiz(workspaceGuid, id));
+    }
+
+    @GetMapping("/{id}/stats")
+    public ResponseEntity<QuizStatsResponse> getQuizStats(
+            @PathVariable String workspaceGuid,
+            @PathVariable Integer id) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        return ResponseHelper.okOrNotFound(quizStatsService.getStats(workspaceGuid, id));
     }
 
     @Transactional

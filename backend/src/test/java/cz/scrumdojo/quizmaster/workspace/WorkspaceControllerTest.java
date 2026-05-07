@@ -1,8 +1,6 @@
 package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
-import cz.scrumdojo.quizmaster.question.Question;
-import cz.scrumdojo.quizmaster.quiz.Quiz;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -66,52 +64,5 @@ public class WorkspaceControllerTest {
     public void getWorkspaceNotFound() throws Exception {
         mockMvc.perform(get("/api/workspaces/{guid}", "non-existent-guid"))
             .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void getWorkspaceQuestionsNotFound() throws Exception {
-        mockMvc.perform(get("/api/workspaces/{guid}/questions", "non-existent-guid"))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void getWorkspaceQuizzesNotFound() throws Exception {
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", "non-existent-guid"))
-            .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void getWorkspaceQuestions() throws Exception {
-        Workspace workspace = fixtures.save(fixtures.workspace());
-        Question question1 = fixtures.save(fixtures.questionIn(workspace));
-        Question question2 = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.quiz(question2).workspaceGuid(workspace.getGuid()).build();
-        fixtures.save(quiz);
-
-        mockMvc.perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
-            .andExpect(status().isOk())
-            .andExpect(content().json("""
-                [
-                    {"id": %d, "isInAnyQuiz": false},
-                    {"id": %d, "isInAnyQuiz": true}
-                ]
-                """.formatted(question1.getId(), question2.getId())));
-    }
-
-    @Test
-    public void getWorkspaceQuizzes() throws Exception {
-        Workspace workspace = fixtures.save(fixtures.workspace());
-        Quiz quiz1 = fixtures.save(fixtures.quizIn(workspace));
-        Quiz quiz2 = fixtures.save(fixtures.quizIn(workspace));
-        fixtures.save(fixtures.quiz()); // Quiz without workspace
-
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", workspace.getGuid()))
-            .andExpect(status().isOk())
-            .andExpect(content().json("""
-                [
-                    {"id": %d, "title": "Test Quiz"},
-                    {"id": %d, "title": "Test Quiz"}
-                ]
-                """.formatted(quiz1.getId(), quiz2.getId())));
     }
 }

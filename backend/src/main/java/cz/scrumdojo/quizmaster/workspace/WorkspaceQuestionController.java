@@ -7,11 +7,15 @@ import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
+import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -20,16 +24,34 @@ public class WorkspaceQuestionController {
 
     private final WorkspaceGuard workspaceGuard;
     private final QuestionRepository questionRepository;
+    private final QuizRepository quizRepository;
     private final QuestionEmbeddingService questionEmbeddingService;
 
     public WorkspaceQuestionController(
         WorkspaceGuard workspaceGuard,
         QuestionRepository questionRepository,
+        QuizRepository quizRepository,
         QuestionEmbeddingService questionEmbeddingService
     ) {
         this.workspaceGuard = workspaceGuard;
         this.questionRepository = questionRepository;
+        this.quizRepository = quizRepository;
         this.questionEmbeddingService = questionEmbeddingService;
+    }
+
+    @Transactional(readOnly = true)
+    @GetMapping
+    public ResponseEntity<List<QuestionListItem>> getWorkspaceQuestions(@PathVariable String workspaceGuid) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        List<Question> questions = questionRepository.findByWorkspaceGuid(workspaceGuid);
+        Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
+
+        var items = questions.stream()
+            .map(q -> QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId())))
+            .toList();
+
+        return ResponseEntity.ok(items);
     }
 
     @Transactional(readOnly = true)

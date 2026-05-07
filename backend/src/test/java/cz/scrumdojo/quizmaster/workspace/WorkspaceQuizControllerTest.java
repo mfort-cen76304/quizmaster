@@ -37,6 +37,29 @@ public class WorkspaceQuizControllerTest {
     private QuizRepository quizRepository;
 
     @Test
+    public void getWorkspaceQuizzesNotFound() throws Exception {
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", "non-existent-guid"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void getWorkspaceQuizzes() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Quiz quiz1 = fixtures.save(fixtures.quizIn(workspace));
+        Quiz quiz2 = fixtures.save(fixtures.quizIn(workspace));
+        fixtures.save(fixtures.quiz()); // Quiz without workspace
+
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", workspace.getGuid()))
+            .andExpect(status().isOk())
+            .andExpect(content().json("""
+                [
+                    {"id": %d, "title": "Test Quiz"},
+                    {"id": %d, "title": "Test Quiz"}
+                ]
+                """.formatted(quiz1.getId(), quiz2.getId())));
+    }
+
+    @Test
     public void createQuizInWorkspace() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
