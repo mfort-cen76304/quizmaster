@@ -246,8 +246,86 @@ public class QuizTakeControllerTest {
             .andExpect(jsonPath("$.question").doesNotExist());
 
         var storedAttempt = attemptRepository.findById(attempt.getId()).orElseThrow();
-        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(0);
+        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(1);
         assertThat(storedAttempt.getIncorrectAnswers()).isEqualTo(0);
+        assertThat(storedAttempt.getPartiallyCorrectAnswers()).isEqualTo(0);
+    }
+
+    @Test
+    public void submitAttemptQuestionInExamRetakeOverwritesPriorOutcome() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question)
+            .workspaceGuid(workspace.getGuid())
+            .mode(QuizMode.EXAM)
+            .randomQuestionCount(null)
+            .build());
+        var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+
+        mockMvc.perform(post(
+                    "/api/quiz/{id}/attempts/{attemptId}/questions/{questionId}/submit",
+                    quiz.getId(),
+                    attempt.getId(),
+                    question.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"type": "choice", "selectedIdxs": [0]}
+                    """))
+            .andExpect(status().isOk());
+
+        mockMvc.perform(post(
+                    "/api/quiz/{id}/attempts/{attemptId}/questions/{questionId}/submit",
+                    quiz.getId(),
+                    attempt.getId(),
+                    question.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"type": "choice", "selectedIdxs": [1]}
+                    """))
+            .andExpect(status().isOk());
+
+        var storedAttempt = attemptRepository.findById(attempt.getId()).orElseThrow();
+        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(1);
+        assertThat(storedAttempt.getIncorrectAnswers()).isEqualTo(0);
+        assertThat(storedAttempt.getPartiallyCorrectAnswers()).isEqualTo(0);
+    }
+
+    @Test
+    public void submitAttemptQuestionInLearnRetakePreservesFirstOutcome() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question)
+            .workspaceGuid(workspace.getGuid())
+            .mode(QuizMode.LEARN)
+            .randomQuestionCount(null)
+            .build());
+        var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+
+        mockMvc.perform(post(
+                    "/api/quiz/{id}/attempts/{attemptId}/questions/{questionId}/submit",
+                    quiz.getId(),
+                    attempt.getId(),
+                    question.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"type": "choice", "selectedIdxs": [0]}
+                    """))
+            .andExpect(status().isOk());
+
+        mockMvc.perform(post(
+                    "/api/quiz/{id}/attempts/{attemptId}/questions/{questionId}/submit",
+                    quiz.getId(),
+                    attempt.getId(),
+                    question.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"type": "choice", "selectedIdxs": [1]}
+                    """))
+            .andExpect(status().isOk());
+
+        var storedAttempt = attemptRepository.findById(attempt.getId()).orElseThrow();
+        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(0);
+        assertThat(storedAttempt.getIncorrectAnswers()).isEqualTo(1);
         assertThat(storedAttempt.getPartiallyCorrectAnswers()).isEqualTo(0);
     }
 }

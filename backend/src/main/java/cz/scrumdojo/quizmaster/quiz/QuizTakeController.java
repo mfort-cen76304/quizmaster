@@ -4,6 +4,8 @@ import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRequest;
 import cz.scrumdojo.quizmaster.attempt.AttemptResponse;
+import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
+import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
@@ -29,16 +31,19 @@ public class QuizTakeController {
     private final QuizRepository quizRepository;
     private final AttemptRepository attemptRepository;
     private final QuestionScoringService questionScoringService;
+    private final AttemptScoreService attemptScoreService;
 
     public QuizTakeController(
             QuizService quizService,
             QuizRepository quizRepository,
             AttemptRepository attemptRepository,
-            QuestionScoringService questionScoringService) {
+            QuestionScoringService questionScoringService,
+            AttemptScoreService attemptScoreService) {
         this.quizService = quizService;
         this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository;
         this.questionScoringService = questionScoringService;
+        this.attemptScoreService = attemptScoreService;
     }
 
     @GetMapping("/{id}")
@@ -180,8 +185,11 @@ public class QuizTakeController {
             return ResponseEntity.notFound().build();
         }
 
+        double score = questionScoringService.score(question.get(), request);
+        attemptScoreService.recordSubmission(
+            quiz.get().getMode(), attemptId, questionId, ScoreOutcome.from(score), LocalDateTime.now());
+
         if (quiz.get().getMode() == QuizMode.EXAM) {
-            double score = questionScoringService.score(question.get(), request);
             return ResponseEntity.ok(new QuestionEvaluationResponse(score == 1, score, null));
         }
 

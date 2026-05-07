@@ -173,6 +173,7 @@ Feature: Show stats
     When I start quiz "Exam Quiz"
     * I answer incorrectly
     * I go back to previous question
+    * I see question "Q1"
     * I answer correctly
 
     When I open quiz "Exam Quiz" statistics
