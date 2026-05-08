@@ -27,7 +27,7 @@ public class QuizStatsService {
     @Transactional(readOnly = true)
     public Optional<QuizStatsResponse> getStats(String workspaceGuid, Integer quizId) {
         return quizRepository.findByIdAndWorkspaceGuid(quizId, workspaceGuid).map(quiz -> {
-            List<Attempt> attempts = attemptRepository.findByQuizIdOrderByStartedAtDesc(quizId);
+            List<Attempt> attempts = attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quizId);
             List<AttemptStatsRecord> records = attempts.stream()
                     .map(attempt -> toRecord(quiz, getTotalQuestions(quiz, attempt), attempt))
                     .toList();

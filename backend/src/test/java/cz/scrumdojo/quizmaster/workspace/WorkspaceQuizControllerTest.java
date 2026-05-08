@@ -377,6 +377,84 @@ public class WorkspaceQuizControllerTest {
             .andExpect(status().isNotFound());
     }
 
+    @Test
+    public void createDryRunPersistsFlaggedAttempt() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
+
+        var result = mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.attemptId").isNumber())
+            .andExpect(jsonPath("$.questions.length()").value(1))
+            .andReturn();
+
+        Integer attemptId = com.jayway.jsonpath.JsonPath
+            .read(result.getResponse().getContentAsString(), "$.attemptId");
+        Attempt persisted = attemptRepository.findById(attemptId).orElseThrow();
+        assertThat(persisted.getIsDryRun()).isTrue();
+        assertThat(persisted.getQuizId()).isEqualTo(quiz.getId());
+    }
+
+    @Test
+    public void createDryRunBypassesPreAvailabilityWindow() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question)
+            .workspaceGuid(workspace.getGuid())
+            .randomQuestionCount(null)
+            .startAt(LocalDateTime.now().plusDays(1))
+            .endAt(LocalDateTime.now().plusDays(2))
+            .build());
+
+        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void createDryRunBypassesPostAvailabilityWindow() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question)
+            .workspaceGuid(workspace.getGuid())
+            .randomQuestionCount(null)
+            .startAt(LocalDateTime.now().minusDays(2))
+            .endAt(LocalDateTime.now().minusDays(1))
+            .build());
+
+        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk());
+    }
+
+    @Test
+    public void createDryRunResponseDoesNotLeakAuthoringFields() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
+
+        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.questions[0].correctAnswers").doesNotExist())
+            .andExpect(jsonPath("$.questions[0].explanations").doesNotExist());
+    }
+
+    @Test
+    public void createDryRunInWrongWorkspaceReturns404() throws Exception {
+        Workspace workspace1 = fixtures.save(fixtures.workspace());
+        Workspace workspace2 = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace1));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace1.getGuid()).build());
+
+        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace2.getGuid(), quiz.getId()))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void createDryRunInNonExistentWorkspaceReturns404() throws Exception {
+        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", "non-existent-guid", -1))
+            .andExpect(status().isNotFound());
+    }
+
     private Quiz latestQuiz() {
         return quizRepository.findAll().stream()
             .max(Comparator.comparing(Quiz::getId))

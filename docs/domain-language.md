@@ -89,6 +89,11 @@ but not all correct options), and **incorrect** answers.
 An attempt has a status: **in-progress**, **finished**, **timeout** (timed out
 but evaluated), or **abandoned** (timed out without evaluation).
 
+An attempt can be flagged as a **dry run**: an author preview of their own
+quiz. Dry-run attempts bypass the quiz's availability window and are excluded
+from quiz statistics. Otherwise they behave identically to a regular attempt
+(same per-question submission, evaluation, and timeout pipeline).
+
 While taking a quiz, two affordances support navigation:
 
 - **Skip** leaves the current question unanswered and moves on. Skipped

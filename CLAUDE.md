@@ -96,7 +96,8 @@ Each domain has its own package under `cz.scrumdojo.quizmaster`: `question/`,
 Endpoints live under `/api/`. Two flavors:
 
 - **Authoring** is workspace-scoped: `/api/workspaces/{guid}/...` for
-  questions, quizzes, and AI drafting. Shared by FE and MCP.
+  questions, quizzes, and AI drafting. Shared by FE and MCP. Includes
+  `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
   `/api/question/{id}`, `/api/attempt/...`.
 - Plus `GET /api/feature-flag`.

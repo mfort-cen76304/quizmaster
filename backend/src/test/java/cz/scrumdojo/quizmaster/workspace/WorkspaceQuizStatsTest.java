@@ -132,6 +132,25 @@ public class WorkspaceQuizStatsTest {
     }
 
     @Test
+    public void dryRunAttemptsAreExcludedFromStats() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question q1 = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
+        fixtures.save(fixtures.attempt(quiz).correctAnswers(1));
+        fixtures.save(fixtures.attempt(quiz).correctAnswers(0).incorrectAnswers(1).isDryRun(true));
+
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
+                .andExpect(status().isOk())
+                .andExpect(content().json("""
+                    {
+                        "summary": { "started": 1, "finished": 1 },
+                        "attempts": [{ "correctAnswers": 1 }]
+                    }
+                """))
+                .andExpect(jsonPath("$.attempts.length()").value(1));
+    }
+
+    @Test
     public void nonExistentQuizReturns404() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 

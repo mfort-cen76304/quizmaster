@@ -46,4 +46,8 @@ public class Attempt {
 
     @Column(name = "timed_out_at")
     private LocalDateTime timedOutAt;
+
+    @Builder.Default
+    @Column(name = "is_dry_run", nullable = false)
+    private Boolean isDryRun = false;
 }

@@ -1,9 +1,14 @@
 package cz.scrumdojo.quizmaster.workspace;
 
+import cz.scrumdojo.quizmaster.attempt.Attempt;
+import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
+import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
+import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
+import cz.scrumdojo.quizmaster.quiz.QuizAttemptStartResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.quiz.QuizResponse;
@@ -17,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -31,18 +38,24 @@ public class WorkspaceQuizController {
     private final QuestionRepository questionRepository;
     private final QuizService quizService;
     private final QuizStatsService quizStatsService;
+    private final AttemptRepository attemptRepository;
+    private final Clock clock;
 
     public WorkspaceQuizController(
             WorkspaceGuard workspaceGuard,
             QuizRepository quizRepository,
             QuestionRepository questionRepository,
             QuizService quizService,
-            QuizStatsService quizStatsService) {
+            QuizStatsService quizStatsService,
+            AttemptRepository attemptRepository,
+            Clock clock) {
         this.workspaceGuard = workspaceGuard;
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.quizService = quizService;
         this.quizStatsService = quizStatsService;
+        this.attemptRepository = attemptRepository;
+        this.clock = clock;
     }
 
     @Transactional(readOnly = true)
@@ -105,6 +118,38 @@ public class WorkspaceQuizController {
                 quiz.setId(existing.getId());
                 quizRepository.save(quiz);
                 return ResponseEntity.ok(new IdResponse(existing.getId()));
+            })
+            .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Transactional
+    @PostMapping("/{id}/dry-runs")
+    public ResponseEntity<QuizAttemptStartResponse> createDryRun(
+            @PathVariable String workspaceGuid,
+            @PathVariable Integer id) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
+            .map(quiz -> {
+                List<Question> selectedQuestions = quizService.selectQuestions(quiz);
+                int[] selectedQuestionIds = selectedQuestions.stream()
+                    .mapToInt(Question::getId)
+                    .toArray();
+                Attempt attempt = Attempt.builder()
+                    .quizId(quiz.getId())
+                    .questionIds(selectedQuestionIds)
+                    .startedAt(LocalDateTime.now(clock))
+                    .correctAnswers(0)
+                    .partiallyCorrectAnswers(0)
+                    .incorrectAnswers(0)
+                    .isDryRun(true)
+                    .build();
+                Attempt persisted = attemptRepository.save(attempt);
+
+                QuestionTakeResponse[] questions = selectedQuestions.stream()
+                    .map(QuestionTakeResponse::from)
+                    .toArray(QuestionTakeResponse[]::new);
+                return ResponseEntity.ok(new QuizAttemptStartResponse(persisted.getId(), questions));
             })
             .orElse(ResponseEntity.notFound().build());
     }
