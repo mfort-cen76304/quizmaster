@@ -3,7 +3,7 @@ import { CoverageReport } from 'monocart-coverage-reports'
 const coverageReport = new CoverageReport({
     name: 'Quizmaster Frontend Coverage',
     inputDir: ['./coverage/node/raw', './coverage/frontend/raw'],
-    outputDir: '../site/coverage',
+    outputDir: '../site/coverage/frontend',
     reports: ['v8'],
     baseDir: 'frontend/src',
     sourceFilter: {
