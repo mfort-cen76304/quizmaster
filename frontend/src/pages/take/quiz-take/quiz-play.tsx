@@ -2,8 +2,8 @@ import './quiz-play.scss'
 import { useState } from 'react'
 
 import { recordTimeout, submitQuizQuestionAnswer } from '#api/stats.ts'
-import { type AnswerIdxs, type QuestionAnswer, type QuestionEvaluation, evaluateAnswer } from '#model/question.ts'
-import type { Quiz, QuizMode, QuizTake } from '#model/quiz.ts'
+import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#model/question.ts'
+import type { QuizMode, QuizTake } from '#model/quiz.ts'
 import { QuestionForm, QuizQuestionProvider } from '#pages/take/question-take/index.ts'
 
 import { BookmarkList } from './components/bookmark-list.tsx'
@@ -15,8 +15,8 @@ import { useQuizNavigationState } from './quiz-navigation-state.ts'
 import { TimeLimit } from './time-limit/with-time-limit.tsx'
 
 interface QuizPlayFormProps {
-    readonly quiz: Quiz | QuizTake
-    readonly quizRunId: number | null
+    readonly quiz: QuizTake
+    readonly quizRunId: number
     readonly questionsBaseUrl: string
     readonly onEvaluate: (quizAnswers: QuizAnswers) => void
 }
@@ -47,7 +47,6 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     }
 
     const handleTimeOut = async () => {
-        if (props.quizRunId === null) return
         await recordTimeout(props.quiz.id, props.quizRunId)
     }
 
@@ -57,7 +56,6 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
 
     const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
     const currentAnswer = quizAnswers.finalAnswers[nav.currentQuestionIdx]
-    const authoringQuestion = 'correctAnswers' in currentQuestion ? currentQuestion : undefined
     const isAnswered = currentAnswer !== undefined
     const hasSelectedAnswer = selectedAnswerIdxs !== undefined && selectedAnswerIdxs.length > 0
 
@@ -84,11 +82,12 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     }
 
     const handleAnswerSubmitted = async (questionAnswer: QuestionAnswer): Promise<QuestionEvaluation | void> => {
-        const result = authoringQuestion
-            ? evaluateAnswer(authoringQuestion, questionAnswer)
-            : props.quizRunId !== null
-              ? await submitQuizQuestionAnswer(props.quiz.id, props.quizRunId, currentQuestion.id, questionAnswer)
-              : undefined
+        const result = await submitQuizQuestionAnswer(
+            props.quiz.id,
+            props.quizRunId,
+            currentQuestion.id,
+            questionAnswer,
+        )
 
         if (props.quiz.mode === 'learn') {
             answer(questionAnswer)

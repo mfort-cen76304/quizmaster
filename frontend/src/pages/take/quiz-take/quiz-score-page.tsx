@@ -1,36 +1,17 @@
 import './quiz-score-page.scss'
-import type { Quiz, QuizEvaluationResponse, QuizTake } from '#model/quiz.ts'
+import type { QuizEvaluationResponse, QuizTake } from '#model/quiz.ts'
 
 import { QuestionSummary } from './components/question-summary.tsx'
 import type { QuizAnswers } from './quiz-answers-state.ts'
-import { evaluate } from './quiz-score.ts'
 
 interface QuizScorePageProps {
-    readonly quiz: Quiz | QuizTake
-    readonly quizAnswers?: QuizAnswers
-    readonly result?: Pick<QuizEvaluationResponse, 'score' | 'totalQuestions' | 'questions'>
+    readonly quiz: QuizTake
+    readonly quizAnswers: QuizAnswers
+    readonly result: Pick<QuizEvaluationResponse, 'score' | 'totalQuestions' | 'questions'>
 }
 
-const canShowAnswerOverview = (quiz: Quiz | QuizTake): quiz is Quiz =>
-    quiz.questions.every(question => 'correctAnswers' in question)
-
 export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps) => {
-    const reviewQuiz = result?.questions ? { ...quiz, questions: result.questions } : quiz
-    const evaluation = quizAnswers && canShowAnswerOverview(reviewQuiz) ? evaluate(reviewQuiz, quizAnswers) : undefined
-    const total = result?.totalQuestions ?? evaluation?.total ?? reviewQuiz.questions.length
-    const score = result?.score ?? evaluation?.score ?? 0
-    const answerOverview =
-        quizAnswers && canShowAnswerOverview(reviewQuiz) ? (
-            <>
-                <h2>Answer overview</h2>
-                {reviewQuiz.questions.map((question, idx) => {
-                    const answer = quizAnswers.finalAnswers[idx]
-                    return <QuestionSummary key={question.id} question={question} answer={answer} />
-                })}
-            </>
-        ) : null
-
-    const percentage = (score / total) * 100
+    const percentage = (result.score / result.totalQuestions) * 100
     const passed = percentage >= quiz.passScore
     const outcome = passed ? 'passed' : 'failed'
 
@@ -54,9 +35,9 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
                     <div className="metric">
                         <dt>Points</dt>
                         <dd>
-                            <span id="correct-answers">{score}</span>
+                            <span id="correct-answers">{result.score}</span>
                             <span className="separator"> / </span>
-                            <span id="total-questions">{total}</span>
+                            <span id="total-questions">{result.totalQuestions}</span>
                         </dd>
                     </div>
                     <div className="metric">
@@ -68,7 +49,14 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
                 </dl>
             </section>
 
-            {answerOverview}
+            {result.questions && (
+                <>
+                    <h2>Answer overview</h2>
+                    {result.questions.map((question, idx) => (
+                        <QuestionSummary key={question.id} question={question} answer={quizAnswers.finalAnswers[idx]} />
+                    ))}
+                </>
+            )}
         </div>
     )
 }

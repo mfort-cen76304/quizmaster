@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useParams } from 'react-router'
 
 import { useApi } from '#api/hooks.ts'
-import { fetchQuizAttempt, fetchWorkspaceQuiz } from '#api/quiz.ts'
-import type { Quiz, QuizTake } from '#model/quiz.ts'
+import { fetchQuizAttempt } from '#api/quiz.ts'
+import type { QuizTake } from '#model/quiz.ts'
 
 export const useQuizAttemptApi = (quizRunId: number | null) => {
     const params = useParams()
@@ -15,16 +15,6 @@ export const useQuizAttemptApi = (quizRunId: number | null) => {
         () => fetchQuizAttempt(Number(quizId), quizRunId!),
         setQuiz,
     )
-
-    return quiz
-}
-
-export const useWorkspaceQuizApi = (workspaceId: string) => {
-    const params = useParams()
-    const quizId = params.id
-
-    const [quiz, setQuiz] = useState<Quiz>()
-    useApi(quizId, id => fetchWorkspaceQuiz(workspaceId, id), setQuiz)
 
     return quiz
 }
