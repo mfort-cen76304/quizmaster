@@ -70,6 +70,10 @@ pnpm test:be:local                 # Local tests only (no API key needed)
 
 # E2E tests — builds frontend, starts backend, runs all specs, then stops backend
 pnpm test:e2e
+
+# Coverage — reports land under site/coverage/{frontend,backend}/
+pnpm coverage:be                   # BE merged report (unit only, no E2E run)
+pnpm coverage:e2e                  # FE + BE merged report (unit + E2E exec data)
 ```
 
 **If `pnpm test:e2e` fails with "Ports 8080 and/or 5173 are in use"**, stop the running backend/frontend first. Do NOT attempt to kill the processes automatically — ask the user to stop them.

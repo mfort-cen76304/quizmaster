@@ -82,6 +82,11 @@ For development, with backend and Vite already running via `pnpm start`:
 - `pnpm test:e2e:dev` — run tests against the Vite dev server
 - `pnpm test:e2e:ui` — open Playwright UI at `http://localhost:3333`
 
+## 📊 Code coverage
+
+- `pnpm coverage:be` — runs unit tests with JaCoCo and writes the merged backend report to `site/coverage/backend/`.
+- `pnpm coverage:e2e` — runs the full E2E suite with both FE (c8/monocart) and BE (JaCoCo) instrumentation. FE report lands at `site/coverage/frontend/`, BE merged report (unit + E2E exec data) at `site/coverage/backend/`.
+
 ## Swagger UI ###
 For easier testing, Swagger UI is available at `http://localhost:<BE_PORT>/swagger-ui/index.html` (default port `8080`).
 
