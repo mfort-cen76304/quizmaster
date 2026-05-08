@@ -21,10 +21,11 @@ require_ports_free() {
     fi
 }
 
+coverage_mode=
 case "${1:-}" in
 --dev)      shift; require_servers_up; exec pnpm test:e2e:vite          -- "$@" ;;
 --ui)       shift; require_servers_up; exec pnpm test:e2e:playwright-ui -- "$@" ;;
---coverage) shift; inner_cmd="pnpm coverage:e2e:run" ;;
+--coverage) shift; export ENABLE_BACKEND_COVERAGE=1; coverage_mode=1; inner_cmd="pnpm coverage:e2e:run" ;;
 *)                 inner_cmd="pnpm test:e2e:be" ;;
 esac
 
@@ -34,3 +35,8 @@ for arg in "$@"; do inner_cmd+=" $(printf '%q' "$arg")"; done
 concurrently --kill-others --success first \
     "pnpm build:fe:dev && cd backend && ./gradlew bootRun --args='--spring.profiles.active=e2e'" \
     "$inner_cmd"
+
+# bootRun has now exited, so JaCoCo has flushed e2e.exec — generate the BE report.
+if [[ -n "$coverage_mode" ]]; then
+    (cd backend && ./gradlew jacocoE2eReport)
+fi

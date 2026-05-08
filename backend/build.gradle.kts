@@ -87,9 +87,28 @@ fun ProcessForkOptions.forwardSharedEnv() {
     }
 }
 
+val jacocoPlugin = the<JacocoPluginExtension>()
+
 tasks.withType<BootRun> {
     environment("BE_PORT", env.fetch("BE_PORT", "8080"))
     forwardSharedEnv()
+
+    jacocoPlugin.applyTo(this)
+    extensions.configure<JacocoTaskExtension> {
+        isEnabled = System.getenv("ENABLE_BACKEND_COVERAGE") == "1"
+        setDestinationFile(layout.buildDirectory.file("jacoco/e2e.exec").get().asFile)
+    }
+}
+
+tasks.register<JacocoReport>("jacocoE2eReport") {
+    executionData(layout.buildDirectory.file("jacoco/e2e.exec"))
+    sourceSets(sourceSets["main"])
+    reports {
+        html.required = true
+        html.outputLocation = layout.projectDirectory.dir("../site/coverage/backend/e2e")
+        xml.required = true
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/e2e/e2e.xml")
+    }
 }
 
 tasks.withType<Test> {
