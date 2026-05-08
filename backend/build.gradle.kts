@@ -6,9 +6,14 @@ import org.springframework.boot.gradle.tasks.run.BootRun
 
 plugins {
     java
+    jacoco
     id("org.springframework.boot") version "3.5.12"
     id("io.spring.dependency-management") version "1.1.7"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
+}
+
+jacoco {
+    toolVersion = "0.8.13"
 }
 
 group = "cz.scrumdojo"
@@ -102,6 +107,16 @@ tasks.withType<Test> {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
+}
+
+tasks.named<JacocoReport>("jacocoTestReport") {
+    dependsOn(tasks.named("test"))
+    reports {
+        html.required = true
+        html.outputLocation = layout.projectDirectory.dir("../site/coverage/backend")
+        xml.required = true
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/test/test.xml")
+    }
 }
 
 fun Test.useTestSourceSet() {
