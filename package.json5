@@ -54,7 +54,7 @@
         "test:be:local": "cd backend && ./gradlew testLocal",
         "test:be:ai": "cd backend && ./gradlew testAi",
         "test:be": "cd backend && ./gradlew test",
-        "coverage:be": "cd backend && ./gradlew jacocoTestReport",
+        "coverage:be": "cd backend && ./gradlew test jacocoMergedReport",
 
         // Helper scripts, do not run directly
         "test:e2e:vite": ". scripts/load-env.sh && export E2E_BASE_PORT=$FE_PORT && cd specs && pnpm playwright:test",

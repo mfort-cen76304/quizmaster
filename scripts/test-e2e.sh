@@ -36,7 +36,7 @@ concurrently --kill-others --success first \
     "pnpm build:fe:dev && cd backend && ./gradlew bootRun --args='--spring.profiles.active=e2e'" \
     "$inner_cmd"
 
-# bootRun has now exited, so JaCoCo has flushed e2e.exec — generate the BE report.
+# bootRun has now exited, so JaCoCo has flushed e2e.exec — generate the merged BE report.
 if [[ -n "$coverage_mode" ]]; then
-    (cd backend && ./gradlew jacocoE2eReport)
+    (cd backend && ./gradlew jacocoMergedReport)
 fi

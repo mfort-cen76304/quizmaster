@@ -100,14 +100,20 @@ tasks.withType<BootRun> {
     }
 }
 
-tasks.register<JacocoReport>("jacocoE2eReport") {
-    executionData(layout.buildDirectory.file("jacoco/e2e.exec"))
+tasks.register<JacocoReport>("jacocoMergedReport") {
+    mustRunAfter(tasks.named("test"))
+    executionData.from(
+        files(
+            layout.buildDirectory.file("jacoco/test.exec"),
+            layout.buildDirectory.file("jacoco/e2e.exec")
+        ).filter { it.exists() }
+    )
     sourceSets(sourceSets["main"])
     reports {
         html.required = true
-        html.outputLocation = layout.projectDirectory.dir("../site/coverage/backend/e2e")
+        html.outputLocation = layout.projectDirectory.dir("../site/coverage/backend")
         xml.required = true
-        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/e2e/e2e.xml")
+        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/merged/merged.xml")
     }
 }
 
@@ -126,16 +132,6 @@ tasks.withType<Test> {
 
 tasks.named<Test>("test") {
     useJUnitPlatform()
-}
-
-tasks.named<JacocoReport>("jacocoTestReport") {
-    dependsOn(tasks.named("test"))
-    reports {
-        html.required = true
-        html.outputLocation = layout.projectDirectory.dir("../site/coverage/backend")
-        xml.required = true
-        xml.outputLocation = layout.buildDirectory.file("reports/jacoco/test/test.xml")
-    }
 }
 
 fun Test.useTestSourceSet() {
