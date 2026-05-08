@@ -13,6 +13,12 @@ export const fetchQuizAttempt = async (quizId: number, attemptId: number) =>
 export const createAttempt = async (quizId: number): Promise<QuizAttemptStartResponse> =>
     await postJson<undefined, QuizAttemptStartResponse>(`/api/quiz/${quizId}/attempts`, undefined)
 
+export const createDryRun = async (workspaceGuid: string, quizId: number): Promise<QuizAttemptStartResponse> =>
+    await postJson<undefined, QuizAttemptStartResponse>(
+        `/api/workspaces/${workspaceGuid}/quizzes/${quizId}/dry-runs`,
+        undefined,
+    )
+
 export const fetchWorkspaceQuiz = async (workspaceGuid: string, quizId: string) =>
     await fetchJson<Quiz>(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}`)
 

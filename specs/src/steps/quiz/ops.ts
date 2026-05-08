@@ -50,9 +50,7 @@ export const answerNth = async (world: QuizmasterWorld, n: number) => {
     await world.takeQuestionPage.waitForLoaded()
     const progressBefore = await world.questionPage.progressCurrent()
     const progressMax = await world.questionPage.progressMax()
-    const submitResponse = world.page.url().includes('/dry-run/')
-        ? undefined
-        : world.page.waitForResponse(isQuizQuestionSubmitResponse)
+    const submitResponse = world.page.waitForResponse(isQuizQuestionSubmitResponse)
 
     await world.takeQuestionPage.selectAnswerNth(n)
     await world.takeQuestionPage.submit()
