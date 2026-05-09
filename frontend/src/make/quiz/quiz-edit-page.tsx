@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
-import { useApi } from '#fe/api/hooks.ts'
-import { postQuiz, fetchWorkspaceQuiz, putQuiz } from '#fe/api/quiz.ts'
-import { fetchWorkspaceQuestions } from '#fe/api/workspace.ts'
 import { tryCatch } from '#fe/helpers.ts'
+import { postQuiz, fetchWorkspaceQuiz, putQuiz } from '#fe/make/api/quiz.ts'
+import { fetchWorkspaceQuestions } from '#fe/make/api/workspace.ts'
 import type { QuestionListItem } from '#fe/model/question-list-item.ts'
 import type { Quiz } from '#fe/model/quiz.ts'
 import { Alert, Page } from '#fe/shared'
+import { useApi } from '#fe/shared/api/hooks.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 
 import { QuizEditForm } from './quiz-edit-form.tsx'

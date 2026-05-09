@@ -1,6 +1,5 @@
 import type { QuestionDraft, QuestionType } from '#fe/model/question.ts'
-
-import { postJson } from './helpers.ts'
+import { postJson } from '#fe/shared/api/helpers.ts'
 
 interface AiAssistantRequest {
     readonly question: string

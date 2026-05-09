@@ -1,9 +1,8 @@
 import type { QuestionListItem } from '#fe/model/question-list-item.ts'
 import type { QuizListItem } from '#fe/model/quiz-list-item.ts'
 import type { Workspace } from '#fe/model/workspace.ts'
+import { postJson, fetchJson } from '#fe/shared/api/helpers.ts'
 import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
-
-import { postJson, fetchJson } from './helpers.ts'
 
 export type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
 

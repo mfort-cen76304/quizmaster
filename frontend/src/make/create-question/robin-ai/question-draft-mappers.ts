@@ -1,4 +1,4 @@
-import type { QuestionRequest } from '#fe/api/question.ts'
+import type { QuestionRequest } from '#fe/make/api/question.ts'
 import type { QuestionDraft } from '#fe/model/question.ts'
 
 import type { QuestionFormStatePatch } from '../form/question-form-state.ts'

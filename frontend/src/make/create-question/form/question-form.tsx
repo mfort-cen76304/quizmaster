@@ -1,4 +1,4 @@
-import type { QuestionRequest } from '#fe/api/question.ts'
+import type { QuestionRequest } from '#fe/make/api/question.ts'
 import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#fe/make/create-question/form'
 import { RobinAiHelper } from '#fe/make/create-question/robin-ai'
 import type { Question } from '#fe/model/question.ts'

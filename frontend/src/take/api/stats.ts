@@ -1,15 +1,9 @@
 import type { QuestionAnswer, QuestionEvaluation } from '#fe/model/question.ts'
 import type { QuizEvaluationRequest, QuizEvaluationResponse } from '#fe/model/quiz.ts'
-import type { QuizStatsResponse } from '#fe/model/stats.ts'
-
-import { fetchJson, postJson, postNoContent } from './helpers.ts'
+import { postJson, postNoContent } from '#fe/shared/api/helpers.ts'
 
 export const recordTimeout = async (quizId: number, attemptId: number): Promise<void> =>
     await postNoContent(`/api/quiz/${quizId}/attempts/${attemptId}/timeout`)
-
-export const fetchQuizStats = async (workspaceGuid: string, quizId: string): Promise<QuizStatsResponse> => {
-    return await fetchJson<QuizStatsResponse>(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}/stats`)
-}
 
 export const evaluateQuiz = async (
     quizId: number,

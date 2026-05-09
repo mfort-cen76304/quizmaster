@@ -1,7 +1,7 @@
 import './create-question.scss'
 import { useNavigate } from 'react-router'
 
-import { type QuestionRequest, saveQuestion } from '#fe/api/question.ts'
+import { type QuestionRequest, saveQuestion } from '#fe/make/api/question.ts'
 import { Page } from '#fe/shared/page.tsx'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 

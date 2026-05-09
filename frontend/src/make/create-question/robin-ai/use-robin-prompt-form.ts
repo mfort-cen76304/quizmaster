@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { postAiAssistant } from '#fe/api/ai-assistant.ts'
+import { postAiAssistant } from '#fe/make/api/ai-assistant.ts'
 import type { QuestionDraft, QuestionType } from '#fe/model/question.ts'
 
 import type { QuestionFormStatePatch } from '../form/question-form-state.ts'

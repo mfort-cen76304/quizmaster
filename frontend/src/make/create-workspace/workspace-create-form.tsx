@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import type { WorkspaceRequest } from '#fe/api/workspace.ts'
+import type { WorkspaceRequest } from '#fe/make/api/workspace.ts'
 import { Field, SubmitButton, TextInput, Form, Row, Button } from '#fe/shared'
 
 interface WorkspaceCreateProps {

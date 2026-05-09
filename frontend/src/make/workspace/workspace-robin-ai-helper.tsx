@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { postAiAssistant, postAiAssistantBatch } from '#fe/api/ai-assistant.ts'
-import { saveQuestion } from '#fe/api/question.ts'
+import { postAiAssistant, postAiAssistantBatch } from '#fe/make/api/ai-assistant.ts'
+import { saveQuestion } from '#fe/make/api/question.ts'
 import { questionDraftToRequest } from '#fe/make/create-question/robin-ai/question-draft-mappers.ts'
 import { RobinFab } from '#fe/make/create-question/robin-ai/robin-fab.tsx'
 import { RobinSheet } from '#fe/make/create-question/robin-ai/robin-sheet.tsx'

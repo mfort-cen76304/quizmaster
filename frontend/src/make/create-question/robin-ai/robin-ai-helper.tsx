@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { postAiAssistant } from '#fe/api/ai-assistant.ts'
-import type { QuestionRequest } from '#fe/api/question.ts'
+import { postAiAssistant } from '#fe/make/api/ai-assistant.ts'
+import type { QuestionRequest } from '#fe/make/api/question.ts'
 import type { QuestionDraft, QuestionType } from '#fe/model/question.ts'
 import './robin-ai.scss'
 import { questionToPatch } from './question-draft-mappers.ts'

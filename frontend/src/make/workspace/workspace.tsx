@@ -1,14 +1,14 @@
 import './workspace.scss'
 import { useState } from 'react'
 
-import { useApi } from '#fe/api/hooks.ts'
-import { deleteQuestion } from '#fe/api/question.ts'
-import { deleteQuiz } from '#fe/api/quiz.ts'
-import { fetchWorkspace, fetchWorkspaceQuestions, fetchWorkspaceQuizzes } from '#fe/api/workspace.ts'
+import { deleteQuestion } from '#fe/make/api/question.ts'
+import { deleteQuiz } from '#fe/make/api/quiz.ts'
+import { fetchWorkspace, fetchWorkspaceQuestions, fetchWorkspaceQuizzes } from '#fe/make/api/workspace.ts'
 import type { QuestionListItem } from '#fe/model/question-list-item.ts'
 import type { QuizListItem } from '#fe/model/quiz-list-item.ts'
 import type { Workspace } from '#fe/model/workspace.ts'
 import { ItemList, LinkButton } from '#fe/shared'
+import { useApi } from '#fe/shared/api/hooks.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 
 import { QuestionItem } from './question-item.tsx'
