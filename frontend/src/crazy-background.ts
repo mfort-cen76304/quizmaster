@@ -1,5 +1,3 @@
-import { useEffect, useRef } from 'react'
-
 // ─── angel + heart types ─────────────────────────────────────────────────────
 
 type Heart = {
@@ -709,353 +707,331 @@ function drawSatan(ctx: CanvasRenderingContext2D, satan: Satan, scale = 1, opaci
     ctx.restore()
 }
 
-// ─── main component ──────────────────────────────────────────────────────────
+// ─── bootstrap ───────────────────────────────────────────────────────────────
 
-export function CrazyBackground() {
-    const canvasRef = useRef<HTMLCanvasElement>(null)
+const isAutomatedBrowser = typeof navigator !== 'undefined' && navigator.webdriver
 
-    useEffect(() => {
-        const canvas = canvasRef.current
-        if (!canvas) return
-        const ctx = canvas.getContext('2d')
-        if (!ctx) return
+if (!isAutomatedBrowser) {
+    start()
+}
 
-        let raf: number
-        let w = 0
-        let h = 0
-        const angels: Angel[] = []
-        const satans: Satan[] = []
-        const splats: SplatParticle[] = []
-        const goalStars: GoalStar[] = []
-        let angelScore = 0
-        let satanScore = 0
-        let nextGiantSatanAt = performance.now() + randomGiantSatanDelayMs()
-        let giantSatan: GiantSatan | null = null
+function start() {
+    const canvas = document.querySelector<HTMLCanvasElement>('#crazy-bg')
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
 
-        function resize() {
-            w = canvas!.width = window.innerWidth
-            h = canvas!.height = window.innerHeight
-        }
-        resize()
-        window.addEventListener('resize', resize)
+    let w = 0
+    let h = 0
+    const angels: Angel[] = []
+    const satans: Satan[] = []
+    const splats: SplatParticle[] = []
+    const goalStars: GoalStar[] = []
+    let angelScore = 0
+    let satanScore = 0
+    let nextGiantSatanAt = performance.now() + randomGiantSatanDelayMs()
+    let giantSatan: GiantSatan | null = null
 
-        // seed angels
-        for (let i = 0; i < 15; i++) angels.push(makeAngel(w, h))
-        for (let i = 0; i < 7; i++) satans.push(makeSatan(w, h))
+    const resize = () => {
+        w = canvas.width = window.innerWidth
+        h = canvas.height = window.innerHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
 
-        function tick(now: number) {
-            ctx!.clearRect(0, 0, w, h)
-            ctx!.globalAlpha = 1
+    for (let i = 0; i < 15; i++) angels.push(makeAngel(w, h))
+    for (let i = 0; i < 7; i++) satans.push(makeSatan(w, h))
 
-            if (!giantSatan && now >= nextGiantSatanAt) {
-                giantSatan = makeGiantSatan(w, h, now)
-            }
+    function tick(now: number) {
+        ctx!.clearRect(0, 0, w, h)
+        ctx!.globalAlpha = 1
 
-            // ── angels ────────────────────────────────────
-            for (let i = angels.length - 1; i >= 0; i--) {
-                const a = angels[i]
-                a.t++
-                a.wingAngle += 0.14
-                a.x += a.vx
-                a.y += a.vy + Math.sin(a.t * 0.03) * 0.55
-
-                // spawn hearts
-                a.shootCooldown--
-                if (a.shootCooldown <= 0) {
-                    a.shootCooldown = 55 + Math.floor(Math.random() * 60)
-                    const dir = a.flip ? -1 : 1
-                    a.hearts.push({
-                        x: a.x + dir * 36,
-                        y: a.y - 2,
-                        vx: dir * (3.5 + Math.random() * 2.5),
-                        vy: (Math.random() - 0.5) * 2,
-                        size: 7 + Math.random() * 7,
-                        opacity: 1,
-                        hue: Math.random() * 60 + 330,
-                    })
-                }
-
-                // update & draw hearts
-                for (let j = a.hearts.length - 1; j >= 0; j--) {
-                    const hrt = a.hearts[j]
-                    hrt.x += hrt.vx
-                    hrt.y += hrt.vy
-                    hrt.vy += 0.04
-                    hrt.opacity -= 0.008
-
-                    const hitSatanIdx = satans.findIndex(s => hitTest(hrt, s.x, s.y, 30 + hrt.size))
-                    if (hitSatanIdx !== -1) {
-                        angelScore += 1
-                        splats.push(...makeSatanBloodSplat(satans[hitSatanIdx].x, satans[hitSatanIdx].y))
-                        satans[hitSatanIdx] = makeSatan(w, h)
-                        a.hearts.splice(j, 1)
-                        continue
-                    }
-
-                    if (giantSatan && hitTest(hrt, giantSatan.x, giantSatan.y, 58 * giantSatan.scale + hrt.size)) {
-                        angelScore += 1
-                        giantSatan.health--
-
-                        if (giantSatan.health <= 0) {
-                            splats.push(...makeSatanBloodSplat(giantSatan.x, giantSatan.y))
-                            angelScore += 20
-                            giantSatan = null
-                            nextGiantSatanAt = now + randomGiantSatanDelayMs()
-                        } else if (Math.random() < 0.64) {
-                            splats.push(...makeSatanHitSparks(hrt.x, hrt.y))
-                        }
-
-                        a.hearts.splice(j, 1)
-                        continue
-                    }
-
-                    if (hrt.opacity <= 0) {
-                        a.hearts.splice(j, 1)
-                        continue
-                    }
-                    drawColoredHeart(ctx!, hrt.x, hrt.y, hrt.size, hrt.opacity, hrt.hue, hrt.color)
-                }
-
-                drawAngel(ctx!, a)
-
-                if (a.x >= w - 36) {
-                    angelScore += 20
-                    goalStars.push(
-                        makeGoalStar(
-                            Math.max(36, w - 36),
-                            clamp(a.y, 44, h - 44),
-                            '#facc15',
-                            '#fff7b3',
-                            'rgba(250, 204, 21, 0.98)',
-                        ),
-                    )
-                    angels[i] = makeAngel(w, h)
-                    continue
-                }
-
-                // recycle when off-screen
-                if (a.x < -100 || a.x > w + 100) {
-                    angels[i] = makeAngel(w, h)
-                }
-            }
-
-            // -- satans -------------------------------------------------
-            for (let i = satans.length - 1; i >= 0; i--) {
-                const s = satans[i]
-                s.t++
-                s.wingAngle += 0.18
-                s.tailAngle += 0.12
-                s.x += s.vx
-                s.y += s.vy + Math.sin(s.t * 0.04) * 0.7
-
-                s.shootCooldown--
-                if (s.shootCooldown <= 0) {
-                    s.shootCooldown = 38 + Math.floor(Math.random() * 50)
-                    const dir = s.flip ? -1 : 1
-                    s.hearts.push({
-                        x: s.x + dir * 38,
-                        y: s.y - 3,
-                        vx: dir * (4.4 + Math.random() * 2.8),
-                        vy: (Math.random() - 0.5) * 2.4,
-                        size: 6 + Math.random() * 6,
-                        opacity: 0.95,
-                        hue: 0,
-                        color: '#050505',
-                    })
-                }
-
-                for (let j = s.hearts.length - 1; j >= 0; j--) {
-                    const hrt = s.hearts[j]
-                    hrt.x += hrt.vx
-                    hrt.y += hrt.vy
-                    hrt.vy += 0.025
-                    hrt.opacity -= 0.01
-
-                    const hitAngelIdx = angels.findIndex(a => hitTest(hrt, a.x, a.y, 26 + hrt.size))
-                    if (hitAngelIdx !== -1) {
-                        satanScore += 1
-                        splats.push(...makeAngelSplat(angels[hitAngelIdx].x, angels[hitAngelIdx].y))
-                        angels[hitAngelIdx] = makeAngel(w, h)
-                        s.hearts.splice(j, 1)
-                        continue
-                    }
-
-                    if (hrt.opacity <= 0) {
-                        s.hearts.splice(j, 1)
-                        continue
-                    }
-                    drawColoredHeart(ctx!, hrt.x, hrt.y, hrt.size, hrt.opacity, hrt.hue, hrt.color)
-                }
-
-                drawSatan(ctx!, s)
-
-                if (s.x <= 36) {
-                    satanScore += 50
-                    goalStars.push(
-                        makeGoalStar(36, clamp(s.y, 44, h - 44), '#050505', '#991b1b', 'rgba(248, 113, 113, 0.68)'),
-                    )
-                    satans[i] = makeSatan(w, h)
-                    continue
-                }
-
-                if (s.x < -120 || s.x > w + 120) {
-                    satans[i] = makeSatan(w, h)
-                }
-            }
-
-            // -- giant satan -------------------------------------------
-            if (giantSatan) {
-                const s = giantSatan
-                const targetCluster = findLargestAngelCluster(angels, w, h)
-                steerGiantSatanTowardCluster(s, targetCluster, w, h)
-
-                s.t++
-                s.wingAngle += 0.25
-                s.tailAngle += 0.18
-                s.x += s.vx
-                s.y += s.vy + Math.sin(s.t * 0.035) * 0.62
-
-                const verticalMargin = Math.min(92, Math.max(48, h * 0.2))
-                const maxY = Math.max(verticalMargin, h - verticalMargin)
-                if (s.y <= verticalMargin || s.y >= maxY) s.vy *= -1
-                s.y = clamp(s.y, verticalMargin, maxY)
-
-                s.fireCooldown--
-                if (s.fireCooldown <= 0 && targetCluster) {
-                    if (s.burstShotsLeft <= 0) {
-                        s.burstShotsLeft = 10 + Math.floor(Math.random() * 8)
-                    }
-
-                    fireGiantSatanMachineGun(s, targetCluster)
-                    s.burstShotsLeft--
-                    s.fireCooldown =
-                        s.burstShotsLeft > 0 ? 2 + Math.floor(Math.random() * 2) : 16 + Math.floor(Math.random() * 14)
-                }
-
-                for (let j = s.hearts.length - 1; j >= 0; j--) {
-                    const hrt = s.hearts[j]
-                    hrt.x += hrt.vx
-                    hrt.y += hrt.vy
-                    hrt.opacity -= 0.012
-
-                    const hitAngelIdx = angels.findIndex(a => hitTest(hrt, a.x, a.y, 28 + hrt.size))
-                    if (hitAngelIdx !== -1) {
-                        satanScore += 1
-                        splats.push(...makeAngelSplat(angels[hitAngelIdx].x, angels[hitAngelIdx].y))
-                        angels[hitAngelIdx] = makeAngel(w, h)
-                        s.hearts.splice(j, 1)
-                        continue
-                    }
-
-                    if (hrt.opacity <= 0 || hrt.x < -90 || hrt.x > w + 90 || hrt.y < -90 || hrt.y > h + 90) {
-                        s.hearts.splice(j, 1)
-                        continue
-                    }
-                    drawColoredHeart(ctx!, hrt.x, hrt.y, hrt.size, hrt.opacity, hrt.hue, hrt.color)
-                }
-
-                const fadeMs = 900
-                const opacity = clamp(Math.min(now - s.spawnedAt, s.expiresAt - now) / fadeMs, 0, 1)
-                drawSatan(ctx!, s, s.scale, opacity)
-                drawGiantSatanHealth(ctx!, s, opacity)
-
-                if (s.x <= 36 + 38 * s.scale) {
-                    satanScore += 45
-                    goalStars.push(
-                        makeGoalStar(36, clamp(s.y, 44, h - 44), '#050505', '#f87171', 'rgba(248, 113, 113, 0.88)'),
-                    )
-                    giantSatan = null
-                    nextGiantSatanAt = now + randomGiantSatanDelayMs()
-                } else if (now >= s.expiresAt || s.x < -220 || s.x > w + 220) {
-                    giantSatan = null
-                    nextGiantSatanAt = now + randomGiantSatanDelayMs()
-                }
-            }
-
-            for (let i = splats.length - 1; i >= 0; i--) {
-                const p = splats[i]
-                p.x += p.vx
-                p.y += p.vy
-                p.vy += p.gravity ?? 0.05
-                p.opacity -= p.fade ?? 0.018
-                p.size *= p.shrink ?? 0.985
-                if (p.opacity <= 0) {
-                    splats.splice(i, 1)
-                    continue
-                }
-
-                ctx!.save()
-                ctx!.globalAlpha = p.opacity
-                ctx!.fillStyle = p.color
-                ctx!.beginPath()
-                ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2)
-                ctx!.fill()
-                ctx!.restore()
-            }
-
-            for (let i = goalStars.length - 1; i >= 0; i--) {
-                const star = goalStars[i]
-                star.rotation += star.spin
-                star.scale += 0.026
-                star.opacity -= 0.012
-                if (star.opacity <= 0) {
-                    goalStars.splice(i, 1)
-                    continue
-                }
-                drawGoalStar(ctx!, star)
-            }
-
-            const stackedPanels = w < 330
-            const panelWidth = Math.min(168, Math.max(118, stackedPanels ? w - 36 : w * 0.18))
-            drawScorePanel(ctx!, {
-                x: 18,
-                y: 18,
-                width: panelWidth,
-                label: 'Certici',
-                score: satanScore,
-                align: 'left',
-                background: 'rgba(17, 24, 39, 0.78)',
-                border: 'rgba(248, 113, 113, 0.62)',
-                labelColor: '#fca5a5',
-                scoreColor: '#fff7ed',
-                glow: 'rgba(127, 29, 29, 0.45)',
-            })
-            drawScorePanel(ctx!, {
-                x: stackedPanels ? 18 : Math.max(18, w - panelWidth - 18),
-                y: stackedPanels ? 92 : 18,
-                width: panelWidth,
-                label: 'Andilci',
-                score: angelScore,
-                align: 'right',
-                background: 'rgba(255, 255, 255, 0.74)',
-                border: 'rgba(255, 228, 168, 0.96)',
-                labelColor: '#7c3aed',
-                scoreColor: '#1f2937',
-                glow: 'rgba(255, 255, 255, 0.36)',
-            })
-
-            raf = requestAnimationFrame(tick)
+        if (!giantSatan && now >= nextGiantSatanAt) {
+            giantSatan = makeGiantSatan(w, h, now)
         }
 
-        raf = requestAnimationFrame(tick)
+        // ── angels ────────────────────────────────────
+        for (let i = angels.length - 1; i >= 0; i--) {
+            const a = angels[i]
+            a.t++
+            a.wingAngle += 0.14
+            a.x += a.vx
+            a.y += a.vy + Math.sin(a.t * 0.03) * 0.55
 
-        return () => {
-            cancelAnimationFrame(raf)
-            window.removeEventListener('resize', resize)
+            a.shootCooldown--
+            if (a.shootCooldown <= 0) {
+                a.shootCooldown = 55 + Math.floor(Math.random() * 60)
+                const dir = a.flip ? -1 : 1
+                a.hearts.push({
+                    x: a.x + dir * 36,
+                    y: a.y - 2,
+                    vx: dir * (3.5 + Math.random() * 2.5),
+                    vy: (Math.random() - 0.5) * 2,
+                    size: 7 + Math.random() * 7,
+                    opacity: 1,
+                    hue: Math.random() * 60 + 330,
+                })
+            }
+
+            for (let j = a.hearts.length - 1; j >= 0; j--) {
+                const hrt = a.hearts[j]
+                hrt.x += hrt.vx
+                hrt.y += hrt.vy
+                hrt.vy += 0.04
+                hrt.opacity -= 0.008
+
+                const hitSatanIdx = satans.findIndex(s => hitTest(hrt, s.x, s.y, 30 + hrt.size))
+                if (hitSatanIdx !== -1) {
+                    angelScore += 1
+                    splats.push(...makeSatanBloodSplat(satans[hitSatanIdx].x, satans[hitSatanIdx].y))
+                    satans[hitSatanIdx] = makeSatan(w, h)
+                    a.hearts.splice(j, 1)
+                    continue
+                }
+
+                if (giantSatan && hitTest(hrt, giantSatan.x, giantSatan.y, 58 * giantSatan.scale + hrt.size)) {
+                    angelScore += 1
+                    giantSatan.health--
+
+                    if (giantSatan.health <= 0) {
+                        splats.push(...makeSatanBloodSplat(giantSatan.x, giantSatan.y))
+                        angelScore += 20
+                        giantSatan = null
+                        nextGiantSatanAt = now + randomGiantSatanDelayMs()
+                    } else if (Math.random() < 0.64) {
+                        splats.push(...makeSatanHitSparks(hrt.x, hrt.y))
+                    }
+
+                    a.hearts.splice(j, 1)
+                    continue
+                }
+
+                if (hrt.opacity <= 0) {
+                    a.hearts.splice(j, 1)
+                    continue
+                }
+                drawColoredHeart(ctx!, hrt.x, hrt.y, hrt.size, hrt.opacity, hrt.hue, hrt.color)
+            }
+
+            drawAngel(ctx!, a)
+
+            if (a.x >= w - 36) {
+                angelScore += 20
+                goalStars.push(
+                    makeGoalStar(
+                        Math.max(36, w - 36),
+                        clamp(a.y, 44, h - 44),
+                        '#facc15',
+                        '#fff7b3',
+                        'rgba(250, 204, 21, 0.98)',
+                    ),
+                )
+                angels[i] = makeAngel(w, h)
+                continue
+            }
+
+            if (a.x < -100 || a.x > w + 100) {
+                angels[i] = makeAngel(w, h)
+            }
         }
-    }, [])
 
-    return (
-        <canvas
-            ref={canvasRef}
-            style={{
-                position: 'fixed',
-                inset: 0,
-                width: '100%',
-                height: '100%',
-                pointerEvents: 'none',
-                zIndex: 0,
-            }}
-        />
-    )
+        // -- satans -------------------------------------------------
+        for (let i = satans.length - 1; i >= 0; i--) {
+            const s = satans[i]
+            s.t++
+            s.wingAngle += 0.18
+            s.tailAngle += 0.12
+            s.x += s.vx
+            s.y += s.vy + Math.sin(s.t * 0.04) * 0.7
+
+            s.shootCooldown--
+            if (s.shootCooldown <= 0) {
+                s.shootCooldown = 38 + Math.floor(Math.random() * 50)
+                const dir = s.flip ? -1 : 1
+                s.hearts.push({
+                    x: s.x + dir * 38,
+                    y: s.y - 3,
+                    vx: dir * (4.4 + Math.random() * 2.8),
+                    vy: (Math.random() - 0.5) * 2.4,
+                    size: 6 + Math.random() * 6,
+                    opacity: 0.95,
+                    hue: 0,
+                    color: '#050505',
+                })
+            }
+
+            for (let j = s.hearts.length - 1; j >= 0; j--) {
+                const hrt = s.hearts[j]
+                hrt.x += hrt.vx
+                hrt.y += hrt.vy
+                hrt.vy += 0.025
+                hrt.opacity -= 0.01
+
+                const hitAngelIdx = angels.findIndex(a => hitTest(hrt, a.x, a.y, 26 + hrt.size))
+                if (hitAngelIdx !== -1) {
+                    satanScore += 1
+                    splats.push(...makeAngelSplat(angels[hitAngelIdx].x, angels[hitAngelIdx].y))
+                    angels[hitAngelIdx] = makeAngel(w, h)
+                    s.hearts.splice(j, 1)
+                    continue
+                }
+
+                if (hrt.opacity <= 0) {
+                    s.hearts.splice(j, 1)
+                    continue
+                }
+                drawColoredHeart(ctx!, hrt.x, hrt.y, hrt.size, hrt.opacity, hrt.hue, hrt.color)
+            }
+
+            drawSatan(ctx!, s)
+
+            if (s.x <= 36) {
+                satanScore += 50
+                goalStars.push(
+                    makeGoalStar(36, clamp(s.y, 44, h - 44), '#050505', '#991b1b', 'rgba(248, 113, 113, 0.68)'),
+                )
+                satans[i] = makeSatan(w, h)
+                continue
+            }
+
+            if (s.x < -120 || s.x > w + 120) {
+                satans[i] = makeSatan(w, h)
+            }
+        }
+
+        // -- giant satan -------------------------------------------
+        if (giantSatan) {
+            const s = giantSatan
+            const targetCluster = findLargestAngelCluster(angels, w, h)
+            steerGiantSatanTowardCluster(s, targetCluster, w, h)
+
+            s.t++
+            s.wingAngle += 0.25
+            s.tailAngle += 0.18
+            s.x += s.vx
+            s.y += s.vy + Math.sin(s.t * 0.035) * 0.62
+
+            const verticalMargin = Math.min(92, Math.max(48, h * 0.2))
+            const maxY = Math.max(verticalMargin, h - verticalMargin)
+            if (s.y <= verticalMargin || s.y >= maxY) s.vy *= -1
+            s.y = clamp(s.y, verticalMargin, maxY)
+
+            s.fireCooldown--
+            if (s.fireCooldown <= 0 && targetCluster) {
+                if (s.burstShotsLeft <= 0) {
+                    s.burstShotsLeft = 10 + Math.floor(Math.random() * 8)
+                }
+
+                fireGiantSatanMachineGun(s, targetCluster)
+                s.burstShotsLeft--
+                s.fireCooldown =
+                    s.burstShotsLeft > 0 ? 2 + Math.floor(Math.random() * 2) : 16 + Math.floor(Math.random() * 14)
+            }
+
+            for (let j = s.hearts.length - 1; j >= 0; j--) {
+                const hrt = s.hearts[j]
+                hrt.x += hrt.vx
+                hrt.y += hrt.vy
+                hrt.opacity -= 0.012
+
+                const hitAngelIdx = angels.findIndex(a => hitTest(hrt, a.x, a.y, 28 + hrt.size))
+                if (hitAngelIdx !== -1) {
+                    satanScore += 1
+                    splats.push(...makeAngelSplat(angels[hitAngelIdx].x, angels[hitAngelIdx].y))
+                    angels[hitAngelIdx] = makeAngel(w, h)
+                    s.hearts.splice(j, 1)
+                    continue
+                }
+
+                if (hrt.opacity <= 0 || hrt.x < -90 || hrt.x > w + 90 || hrt.y < -90 || hrt.y > h + 90) {
+                    s.hearts.splice(j, 1)
+                    continue
+                }
+                drawColoredHeart(ctx!, hrt.x, hrt.y, hrt.size, hrt.opacity, hrt.hue, hrt.color)
+            }
+
+            const fadeMs = 900
+            const opacity = clamp(Math.min(now - s.spawnedAt, s.expiresAt - now) / fadeMs, 0, 1)
+            drawSatan(ctx!, s, s.scale, opacity)
+            drawGiantSatanHealth(ctx!, s, opacity)
+
+            if (s.x <= 36 + 38 * s.scale) {
+                satanScore += 45
+                goalStars.push(
+                    makeGoalStar(36, clamp(s.y, 44, h - 44), '#050505', '#f87171', 'rgba(248, 113, 113, 0.88)'),
+                )
+                giantSatan = null
+                nextGiantSatanAt = now + randomGiantSatanDelayMs()
+            } else if (now >= s.expiresAt || s.x < -220 || s.x > w + 220) {
+                giantSatan = null
+                nextGiantSatanAt = now + randomGiantSatanDelayMs()
+            }
+        }
+
+        for (let i = splats.length - 1; i >= 0; i--) {
+            const p = splats[i]
+            p.x += p.vx
+            p.y += p.vy
+            p.vy += p.gravity ?? 0.05
+            p.opacity -= p.fade ?? 0.018
+            p.size *= p.shrink ?? 0.985
+            if (p.opacity <= 0) {
+                splats.splice(i, 1)
+                continue
+            }
+
+            ctx!.save()
+            ctx!.globalAlpha = p.opacity
+            ctx!.fillStyle = p.color
+            ctx!.beginPath()
+            ctx!.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+            ctx!.fill()
+            ctx!.restore()
+        }
+
+        for (let i = goalStars.length - 1; i >= 0; i--) {
+            const star = goalStars[i]
+            star.rotation += star.spin
+            star.scale += 0.026
+            star.opacity -= 0.012
+            if (star.opacity <= 0) {
+                goalStars.splice(i, 1)
+                continue
+            }
+            drawGoalStar(ctx!, star)
+        }
+
+        const stackedPanels = w < 330
+        const panelWidth = Math.min(168, Math.max(118, stackedPanels ? w - 36 : w * 0.18))
+        drawScorePanel(ctx!, {
+            x: 18,
+            y: 18,
+            width: panelWidth,
+            label: 'Certici',
+            score: satanScore,
+            align: 'left',
+            background: 'rgba(17, 24, 39, 0.78)',
+            border: 'rgba(248, 113, 113, 0.62)',
+            labelColor: '#fca5a5',
+            scoreColor: '#fff7ed',
+            glow: 'rgba(127, 29, 29, 0.45)',
+        })
+        drawScorePanel(ctx!, {
+            x: stackedPanels ? 18 : Math.max(18, w - panelWidth - 18),
+            y: stackedPanels ? 92 : 18,
+            width: panelWidth,
+            label: 'Andilci',
+            score: angelScore,
+            align: 'right',
+            background: 'rgba(255, 255, 255, 0.74)',
+            border: 'rgba(255, 228, 168, 0.96)',
+            labelColor: '#7c3aed',
+            scoreColor: '#1f2937',
+            glow: 'rgba(255, 255, 255, 0.36)',
+        })
+
+        requestAnimationFrame(tick)
+    }
+
+    requestAnimationFrame(tick)
 }

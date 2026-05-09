@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { BrowserRouter, Route, Routes } from 'react-router'
 
-import { CrazyBackground } from '#fe/crazy-background.tsx'
 import { ROUTES } from '#fe/urls.ts'
 import { CreateQuestionPage } from '#pages/make/create-question/create-question-page.tsx'
 import { EditQuestionPage } from '#pages/make/create-question/edit-question-page.tsx'
@@ -13,9 +12,6 @@ import { WorkspacePage } from '#pages/make/workspace/workspace.tsx'
 import { QuestionTakePage } from '#pages/take/question-take'
 import { QuizTakePage } from '#pages/take/quiz-take/quiz-take-page.tsx'
 import { QuizWelcomePage } from '#pages/take/quiz-take/quiz-welcome/quiz-welcome-page.tsx'
-
-const isAutomatedBrowser = typeof navigator !== 'undefined' && navigator.webdriver
-const shouldRenderCrazyBackground = !isAutomatedBrowser
 
 type PiCornerToggleProps = {
     readonly animationOnly: boolean
@@ -74,8 +70,6 @@ export const App = () => {
 
     return (
         <BrowserRouter>
-            {/* Crazy Background takes too long in tests and makes timeouts */}
-            {shouldRenderCrazyBackground && <CrazyBackground />}
             <div style={{ display: animationOnly ? 'none' : undefined, position: 'relative', zIndex: 1 }}>
                 <Routes>
                     <Route path={ROUTES.home} element={<HomePage />} />
