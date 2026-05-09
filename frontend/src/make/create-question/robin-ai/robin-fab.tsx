@@ -1,4 +1,4 @@
-import robinIcon from '#fe/assets/icons/Robin.svg'
+import robinIcon from './Robin.svg'
 
 interface RobinFabProps {
     readonly onOpen: () => void

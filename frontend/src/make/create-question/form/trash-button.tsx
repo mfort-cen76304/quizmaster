@@ -1,6 +1,6 @@
-import trashIcon from '#fe/assets/icons/trash-delete-bin.svg'
+import { Button } from '#fe/shared/button.tsx'
 
-import { Button } from './button.tsx'
+import trashIcon from './trash-delete-bin.svg'
 import './trash-button.scss'
 
 type TrashButtonProps = {

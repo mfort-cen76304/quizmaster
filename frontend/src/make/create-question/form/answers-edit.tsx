@@ -1,8 +1,8 @@
 import { Button, Field, TextInput, Row, CheckField } from '#fe/shared'
 import { ErrorMessage } from '#fe/shared/forms/validations.tsx'
-import TrashButton from '#fe/shared/trash-button.tsx'
 
 import type { AnswerState } from './question-form-state.ts'
+import TrashButton from './trash-button.tsx'
 
 interface AnswerRowProps {
     readonly state: AnswerState

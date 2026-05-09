@@ -1,7 +1,7 @@
-import { formatDuration } from '#fe/format/duration.ts'
 import type { AttemptStatsRecord, QuizStatsResponse, SummaryStats } from '#fe/make/model/stats.ts'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
 
+import { formatDuration } from './duration.ts'
 import { StatsTable } from './stats-table.tsx'
 import './quiz-stats-component.scss'
 
