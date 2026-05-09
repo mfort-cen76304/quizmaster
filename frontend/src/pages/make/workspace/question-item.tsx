@@ -1,7 +1,7 @@
+import type { QuestionListItem } from '#fe/model/question-list-item.ts'
+import { tagToColor } from '#fe/model/tag.ts'
+import { Button, LinkButton } from '#fe/pages/components'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
-import type { QuestionListItem } from '#model/question-list-item.ts'
-import { tagToColor } from '#model/tag.ts'
-import { Button, LinkButton } from '#pages/components'
 
 interface Props {
     readonly question: QuestionListItem

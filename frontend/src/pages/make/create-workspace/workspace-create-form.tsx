@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
-import type { WorkspaceRequest } from '#api/workspace.ts'
-import { Field, SubmitButton, TextInput, Form, Row, Button } from '#pages/components'
+import type { WorkspaceRequest } from '#fe/api/workspace.ts'
+import { Field, SubmitButton, TextInput, Form, Row, Button } from '#fe/pages/components'
 
 interface WorkspaceCreateProps {
     readonly onSubmit: (data: WorkspaceRequest) => void

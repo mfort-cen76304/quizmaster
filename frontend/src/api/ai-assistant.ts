@@ -1,4 +1,4 @@
-import type { QuestionDraft, QuestionType } from '#model/question.ts'
+import type { QuestionDraft, QuestionType } from '#fe/model/question.ts'
 
 import { postJson } from './helpers.ts'
 

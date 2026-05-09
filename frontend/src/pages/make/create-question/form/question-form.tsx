@@ -1,5 +1,5 @@
-import type { QuestionRequest } from '#api/question.ts'
-import type { Question } from '#model/question.ts'
+import type { QuestionRequest } from '#fe/api/question.ts'
+import type { Question } from '#fe/model/question.ts'
 import {
     SubmitButton,
     Form,
@@ -9,10 +9,10 @@ import {
     CheckField,
     Row,
     QuestionTypeRadioSet,
-} from '#pages/components'
-import { ErrorMessage, createValidator } from '#pages/components/forms/validations.tsx'
-import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#pages/make/create-question/form'
-import { RobinAiHelper } from '#pages/make/create-question/robin-ai'
+} from '#fe/pages/components'
+import { ErrorMessage, createValidator } from '#fe/pages/components/forms/validations.tsx'
+import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#fe/pages/make/create-question/form'
+import { RobinAiHelper } from '#fe/pages/make/create-question/robin-ai'
 
 import { useQuestionFormState } from './question-form-state.ts'
 import { validateQuestionFormState, errorMessage } from './validators.ts'

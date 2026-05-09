@@ -1,5 +1,5 @@
+import { LinkButton } from '#fe/pages/components'
 import { urls } from '#fe/urls.ts'
-import { LinkButton } from '#pages/components'
 import './home.scss'
 
 const highlights = [

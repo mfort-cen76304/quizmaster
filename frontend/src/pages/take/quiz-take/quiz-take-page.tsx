@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 
-import { evaluateQuiz } from '#api/stats.ts'
+import { evaluateQuiz } from '#fe/api/stats.ts'
+import type { QuizEvaluationResponse, QuizTake } from '#fe/model/quiz.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
-import type { QuizEvaluationResponse, QuizTake } from '#model/quiz.ts'
 
 import { DryRunIndicator } from './dry-run-indicator.tsx'
 import { useQuizAttemptApi } from './hooks.ts'

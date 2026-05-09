@@ -1,6 +1,6 @@
-import { countDecimalDigits } from '#model/question.ts'
-import { DecimalInput, Field, NumberInput } from '#pages/components'
-import { ErrorMessage } from '#pages/components/forms/validations.tsx'
+import { countDecimalDigits } from '#fe/model/question.ts'
+import { DecimalInput, Field, NumberInput } from '#fe/pages/components'
+import { ErrorMessage } from '#fe/pages/components/forms/validations.tsx'
 
 interface NumericalAnswerEditProps {
     readonly answer: string

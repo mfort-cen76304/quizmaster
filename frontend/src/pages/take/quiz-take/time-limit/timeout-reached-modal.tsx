@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import './timeout-reached-modal.scss'
-import { EvaluateButton } from '#pages/take/quiz-take/components/buttons.tsx'
+import { EvaluateButton } from '#fe/pages/take/quiz-take/components/buttons.tsx'
 
 interface TimeOutReachedModalProps {
     readonly onConfirm: () => void

@@ -1,5 +1,5 @@
 import './quiz-score-page.scss'
-import type { QuizEvaluationResponse, QuizTake } from '#model/quiz.ts'
+import type { QuizEvaluationResponse, QuizTake } from '#fe/model/quiz.ts'
 
 import { QuestionSummary } from './components/question-summary.tsx'
 import type { QuizAnswers } from './quiz-answers-state.ts'

@@ -1,4 +1,4 @@
-import type { Difficulty } from '#model/quiz.ts'
+import type { Difficulty } from '#fe/model/quiz.ts'
 
 export const shouldShowAnswerCount = (
     isMultipleChoice: boolean,

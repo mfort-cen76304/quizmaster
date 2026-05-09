@@ -1,4 +1,4 @@
-import type { QuestionAnswer } from '#model/question.ts'
+import type { QuestionAnswer } from '#fe/model/question.ts'
 import type { IdResponse } from '#shared/types/id-response.ts'
 import type { Question, QuestionEvaluation, QuestionRequest, QuestionTake } from '#shared/types/question.ts'
 

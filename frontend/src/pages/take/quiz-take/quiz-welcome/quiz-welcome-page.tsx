@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
-import { useApi } from '#api/hooks.ts'
-import { createAttempt, createDryRun, fetchQuiz } from '#api/quiz.ts'
+import { useApi } from '#fe/api/hooks.ts'
+import { createAttempt, createDryRun, fetchQuiz } from '#fe/api/quiz.ts'
+import type { QuizMetadata, QuizTake } from '#fe/model/quiz.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
-import type { QuizMetadata, QuizTake } from '#model/quiz.ts'
 
 import { DryRunIndicator } from '../dry-run-indicator.tsx'
 import { isQuizAvailable } from '../quiz-availability.ts'

@@ -1,6 +1,6 @@
-import type { QuestionAnswer, QuestionEvaluation } from '#model/question.ts'
-import type { QuizEvaluationRequest, QuizEvaluationResponse } from '#model/quiz.ts'
-import type { QuizStatsResponse } from '#model/stats.ts'
+import type { QuestionAnswer, QuestionEvaluation } from '#fe/model/question.ts'
+import type { QuizEvaluationRequest, QuizEvaluationResponse } from '#fe/model/quiz.ts'
+import type { QuizStatsResponse } from '#fe/model/stats.ts'
 
 import { fetchJson, postJson, postNoContent } from './helpers.ts'
 

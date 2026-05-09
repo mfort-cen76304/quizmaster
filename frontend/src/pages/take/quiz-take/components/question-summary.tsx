@@ -1,7 +1,7 @@
 import './question-summary.scss'
-import type { Question, QuestionAnswer } from '#model/question.ts'
-import { Answer, QuestionExplanation } from '#pages/take/question-take'
-import { NumericalResult } from '#pages/take/question-take/components/numerical-result.tsx'
+import type { Question, QuestionAnswer } from '#fe/model/question.ts'
+import { Answer, QuestionExplanation } from '#fe/pages/take/question-take'
+import { NumericalResult } from '#fe/pages/take/question-take/components/numerical-result.tsx'
 
 interface QuestionSummaryProps {
     readonly question: Question

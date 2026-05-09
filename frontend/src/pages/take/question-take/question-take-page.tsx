@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useParams } from 'react-router'
 
-import { useApi } from '#api/hooks.ts'
-import { fetchQuestion, submitQuestionAnswer } from '#api/question.ts'
-import type { QuestionTake } from '#model/question.ts'
+import { useApi } from '#fe/api/hooks.ts'
+import { fetchQuestion, submitQuestionAnswer } from '#fe/api/question.ts'
+import type { QuestionTake } from '#fe/model/question.ts'
 
 import { QuestionForm } from './question-form.tsx'
 import { QuizQuestionProvider } from './quiz-question-context.tsx'

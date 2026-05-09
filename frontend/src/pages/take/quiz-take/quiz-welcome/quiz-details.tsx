@@ -1,7 +1,7 @@
-import type { QuizMetadata } from '#model/quiz.ts'
-import { Page } from '#pages/components'
-import { StartButton } from '#pages/take/quiz-take/components/buttons.tsx'
-import { TakeCard } from '#pages/take/shared/take-card.tsx'
+import type { QuizMetadata } from '#fe/model/quiz.ts'
+import { Page } from '#fe/pages/components'
+import { StartButton } from '#fe/pages/take/quiz-take/components/buttons.tsx'
+import { TakeCard } from '#fe/pages/take/shared/take-card.tsx'
 
 type QuizDisplayFields = Pick<QuizMetadata, 'title' | 'description' | 'timeLimit' | 'passScore' | 'mode'>
 

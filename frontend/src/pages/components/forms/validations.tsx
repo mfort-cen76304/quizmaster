@@ -1,6 +1,6 @@
 import { createContext, useContext } from 'react'
 
-import { Alert } from '#pages/components/alert.tsx'
+import { Alert } from '#fe/pages/components/alert.tsx'
 
 type ErrorMessages<K extends string> = Record<K, string>
 

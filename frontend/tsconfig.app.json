@@ -7,9 +7,6 @@
         "skipLibCheck": true,
 
         "paths": {
-            "#api/*": ["./src/api/*"],
-            "#model/*": ["./src/model/*"],
-            "#pages/*": ["./src/pages/*"],
             "#fe/*": ["./src/*"],
             "#shared/*": ["../shared/*"]
         },

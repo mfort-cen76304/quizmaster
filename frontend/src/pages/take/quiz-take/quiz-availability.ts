@@ -1,4 +1,4 @@
-import type { Quiz } from '#model/quiz.ts'
+import type { Quiz } from '#fe/model/quiz.ts'
 
 const toDate = (value: string | null) => (value ? new Date(value) : null)
 

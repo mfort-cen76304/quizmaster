@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import { createPortal } from 'react-dom'
 
-import { postAiAssistant, postAiAssistantBatch } from '#api/ai-assistant.ts'
-import { saveQuestion } from '#api/question.ts'
-import type { QuestionDraft, QuestionType } from '#model/question.ts'
-import { questionDraftToRequest } from '#pages/make/create-question/robin-ai/question-draft-mappers.ts'
-import { RobinFab } from '#pages/make/create-question/robin-ai/robin-fab.tsx'
-import { RobinSheet } from '#pages/make/create-question/robin-ai/robin-sheet.tsx'
+import { postAiAssistant, postAiAssistantBatch } from '#fe/api/ai-assistant.ts'
+import { saveQuestion } from '#fe/api/question.ts'
+import type { QuestionDraft, QuestionType } from '#fe/model/question.ts'
+import { questionDraftToRequest } from '#fe/pages/make/create-question/robin-ai/question-draft-mappers.ts'
+import { RobinFab } from '#fe/pages/make/create-question/robin-ai/robin-fab.tsx'
+import { RobinSheet } from '#fe/pages/make/create-question/robin-ai/robin-sheet.tsx'
 import type {
     RobinGenerateRequest,
     RobinGenerationResult,
-} from '#pages/make/create-question/robin-ai/use-robin-prompt-form.ts'
-import type { RobinUndoBuffer } from '#pages/make/create-question/robin-ai/use-robin-undo-buffer.ts'
+} from '#fe/pages/make/create-question/robin-ai/use-robin-prompt-form.ts'
+import type { RobinUndoBuffer } from '#fe/pages/make/create-question/robin-ai/use-robin-undo-buffer.ts'
 
 const noUndo: RobinUndoBuffer = {
     hasPrevious: false,

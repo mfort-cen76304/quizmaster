@@ -1,8 +1,8 @@
 import { useRef, useState } from 'react'
 
-import type { QuestionRequest } from '#api/question.ts'
+import type { QuestionRequest } from '#fe/api/question.ts'
 import { updated } from '#fe/helpers.ts'
-import type { Question, QuestionType } from '#model/question.ts'
+import type { Question, QuestionType } from '#fe/model/question.ts'
 import { NUM_DEFAULT_ANSWERS } from '#shared/defaults/question.ts'
 
 const emptyAnswerSlots = <T>(value: T): readonly T[] => Array(NUM_DEFAULT_ANSWERS).fill(value)
