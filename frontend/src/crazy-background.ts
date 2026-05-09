@@ -709,9 +709,7 @@ function drawSatan(ctx: CanvasRenderingContext2D, satan: Satan, scale = 1, opaci
 
 // ─── bootstrap ───────────────────────────────────────────────────────────────
 
-const isAutomatedBrowser = typeof navigator !== 'undefined' && navigator.webdriver
-
-if (!isAutomatedBrowser) {
+if (!window.__noCrazyBackground) {
     start()
 }
 

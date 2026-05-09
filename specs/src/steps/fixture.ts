@@ -7,6 +7,12 @@ import { initServerClock } from '#steps/clock.ts'
 import { QuizmasterWorld } from '#steps/world/world.ts'
 
 export const test = base.extend<{ world: QuizmasterWorld }>({
+    page: async ({ page }, use) => {
+        await page.addInitScript(() => {
+            ;(globalThis as { __noCrazyBackground?: boolean }).__noCrazyBackground = true
+        })
+        await use(page)
+    },
     world: async ({ page }, use, testInfo) => {
         const world = new QuizmasterWorld(page, testInfo)
         await use(world)
