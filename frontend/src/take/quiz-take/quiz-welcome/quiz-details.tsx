@@ -1,5 +1,5 @@
-import type { QuizMetadata } from '#fe/model/quiz.ts'
 import { Page } from '#fe/shared'
+import type { QuizMetadata } from '#fe/shared/model/quiz.ts'
 import { StartButton } from '#fe/take/quiz-take/components/buttons.tsx'
 import { TakeCard } from '#fe/take/shared/take-card.tsx'
 

@@ -1,10 +1,10 @@
 import './quiz-edit-form.scss'
 import { useState } from 'react'
 
-import type { QuestionListItem } from '#fe/model/question-list-item.ts'
-import type { Quiz } from '#fe/model/quiz.ts'
+import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
 import { Field, Form, NumberInput, RadioSet, Row, SubmitButton, TextArea, TextInput } from '#fe/shared'
 import { ErrorMessage, createValidator } from '#fe/shared/forms/validations.tsx'
+import type { Quiz } from '#fe/shared/model/quiz.ts'
 import { parseTimeLimitToSeconds } from '#shared/parsers/time-limit.ts'
 
 import { QuestionCountInfo } from './components/question-count-info.tsx'

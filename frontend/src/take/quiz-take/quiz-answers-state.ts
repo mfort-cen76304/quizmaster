@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { updated } from '#fe/helpers.ts'
-import type { QuestionAnswer } from '#fe/model/question.ts'
+import type { QuestionAnswer } from '#fe/take/model/question.ts'
 
 export type QuizAnswers = {
     readonly firstAnswers: readonly QuestionAnswer[]

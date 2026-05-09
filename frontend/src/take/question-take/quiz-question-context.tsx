@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 
-import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/model/question.ts'
-import type { Difficulty } from '#fe/model/quiz.ts'
+import type { Difficulty } from '#fe/shared/model/quiz.ts'
+import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
 
 export interface QuizQuestionContextValue {
     readonly selectedAnswerIdxs: AnswerIdxs

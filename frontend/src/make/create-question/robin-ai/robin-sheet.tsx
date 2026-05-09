@@ -1,8 +1,8 @@
 import type { KeyboardEvent } from 'react'
 
-import type { QuestionType } from '#fe/model/question.ts'
-import type { QuestionDraft } from '#fe/model/question.ts'
 import { Alert, Button, Field, QuestionTypeRadioSet, TextArea } from '#fe/shared'
+import type { QuestionType } from '#fe/shared/model/question.ts'
+import type { QuestionDraft } from '#fe/shared/model/question.ts'
 
 import { useRobinPromptForm } from './use-robin-prompt-form.ts'
 import type { RobinGenerateRequest, RobinGenerationResult } from './use-robin-prompt-form.ts'

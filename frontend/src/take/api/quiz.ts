@@ -1,5 +1,5 @@
-import type { QuizAttemptStartResponse, QuizMetadata, QuizTake } from '#fe/model/quiz.ts'
 import { fetchJson, postJson } from '#fe/shared/api/helpers.ts'
+import type { QuizAttemptStartResponse, QuizMetadata, QuizTake } from '#fe/shared/model/quiz.ts'
 
 export const fetchQuiz = async (quizId: string) => await fetchJson<QuizMetadata>(`/api/quiz/${quizId}`)
 

@@ -1,4 +1,4 @@
-import type { QuizListItem } from '#fe/model/quiz-list-item.ts'
+import type { QuizListItem } from '#fe/make/model/quiz-list-item.ts'
 import { LinkButton } from '#fe/shared'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 

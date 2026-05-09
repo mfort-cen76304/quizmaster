@@ -1,7 +1,8 @@
-import type { Question } from '#shared/types/question.ts'
+import type { Question } from '#fe/shared/model/question.ts'
 
-export type { AnswerIdxs, QuestionType } from '#shared/types/enums.ts'
-export type { Question, QuestionDraft, QuestionEvaluation, QuestionTake } from '#shared/types/question.ts'
+export type { AnswerIdxs, QuestionType } from '#fe/shared/model/question.ts'
+export type { Question, QuestionDraft, QuestionEvaluation, QuestionTake } from '#fe/shared/model/question.ts'
+export { countDecimalDigits } from '#fe/shared/model/question.ts'
 
 export type QuestionAnswer =
     | { readonly type: 'choice'; readonly selectedIdxs: readonly number[] }
@@ -10,12 +11,6 @@ export type QuestionAnswer =
 export interface QuestionResult {
     readonly correct: boolean
     readonly score: number
-}
-
-export interface Answers {
-    readonly correctAnswers: readonly number[]
-    readonly explanations: readonly string[]
-    readonly questionExplanation: string
 }
 
 // Smart constructors. Return undefined when the input is not a valid answer
@@ -27,12 +22,6 @@ export const choiceAnswer = (selectedIdxs: readonly number[]): QuestionAnswer | 
 export const numericalAnswer = (input: string): QuestionAnswer | undefined => {
     const value = Number.parseFloat(input.trim())
     return Number.isNaN(value) ? undefined : { type: 'numerical', value }
-}
-
-export const countDecimalDigits = (answer: string): number => {
-    const dotIndex = answer.indexOf('.')
-    if (dotIndex === -1) return 0
-    return Math.max(0, answer.length - dotIndex - 1)
 }
 
 // Single public scoring entry point. Always called with a real answer;

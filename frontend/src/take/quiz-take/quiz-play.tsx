@@ -1,9 +1,9 @@
 import './quiz-play.scss'
 import { useState } from 'react'
 
-import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/model/question.ts'
-import type { QuizMode, QuizTake } from '#fe/model/quiz.ts'
+import type { QuizMode, QuizTake } from '#fe/shared/model/quiz.ts'
 import { recordTimeout, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
+import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
 import { QuestionForm, QuizQuestionProvider } from '#fe/take/question-take/index.ts'
 
 import { BookmarkList } from './components/bookmark-list.tsx'

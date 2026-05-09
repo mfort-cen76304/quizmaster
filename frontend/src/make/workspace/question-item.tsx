@@ -1,5 +1,5 @@
-import type { QuestionListItem } from '#fe/model/question-list-item.ts'
-import { tagToColor } from '#fe/model/tag.ts'
+import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
+import { tagToColor } from '#fe/make/model/tag.ts'
 import { Button, LinkButton } from '#fe/shared'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 

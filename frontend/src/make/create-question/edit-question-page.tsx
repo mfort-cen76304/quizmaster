@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { fetchWorkspaceQuestion, type QuestionRequest, updateQuestion } from '#fe/make/api/question.ts'
-import type { Question } from '#fe/model/question.ts'
 import { useApi } from '#fe/shared/api/hooks.ts'
+import type { Question } from '#fe/shared/model/question.ts'
 import { Page } from '#fe/shared/page.tsx'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 

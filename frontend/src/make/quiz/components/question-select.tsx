@@ -1,6 +1,6 @@
 import './question-select.scss'
-import type { QuestionListItem } from '#fe/model/question-list-item.ts'
-import { tagToColor } from '#fe/model/tag.ts'
+import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
+import { tagToColor } from '#fe/make/model/tag.ts'
 
 interface QuestionItemProps {
     readonly question: QuestionListItem

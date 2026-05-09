@@ -1,9 +1,9 @@
 import type { QuestionRequest } from '#fe/make/api/question.ts'
 import { AnswersEdit, NumericalAnswerEdit, stateToQuestionApiData } from '#fe/make/create-question/form'
 import { RobinAiHelper } from '#fe/make/create-question/robin-ai'
-import type { Question } from '#fe/model/question.ts'
 import { SubmitButton, Form, Field, TextArea, TextInput, CheckField, Row, QuestionTypeRadioSet } from '#fe/shared'
 import { ErrorMessage, createValidator } from '#fe/shared/forms/validations.tsx'
+import type { Question } from '#fe/shared/model/question.ts'
 
 import { useQuestionFormState } from './question-form-state.ts'
 import { validateQuestionFormState, errorMessage } from './validators.ts'

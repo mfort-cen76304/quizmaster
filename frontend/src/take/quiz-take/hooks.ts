@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useParams } from 'react-router'
 
-import type { QuizTake } from '#fe/model/quiz.ts'
 import { useApi } from '#fe/shared/api/hooks.ts'
+import type { QuizTake } from '#fe/shared/model/quiz.ts'
 import { fetchQuizAttempt } from '#fe/take/api/quiz.ts'
 
 export const useQuizAttemptApi = (quizRunId: number | null) => {

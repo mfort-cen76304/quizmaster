@@ -10,7 +10,7 @@ import {
     choiceAnswer,
     evaluateAnswer,
     numericalAnswer,
-} from '#fe/model/question.ts'
+} from '#fe/take/model/question.ts'
 
 import { shouldShowAnswerCount } from './question-display.ts'
 import { useQuizQuestionContext } from './quiz-question-context.tsx'

@@ -11,7 +11,7 @@ import type {
     RobinGenerationResult,
 } from '#fe/make/create-question/robin-ai/use-robin-prompt-form.ts'
 import type { RobinUndoBuffer } from '#fe/make/create-question/robin-ai/use-robin-undo-buffer.ts'
-import type { QuestionDraft, QuestionType } from '#fe/model/question.ts'
+import type { QuestionDraft, QuestionType } from '#fe/shared/model/question.ts'
 
 const noUndo: RobinUndoBuffer = {
     hasPrevious: false,

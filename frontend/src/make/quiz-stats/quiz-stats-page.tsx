@@ -3,9 +3,9 @@ import { useParams } from 'react-router'
 
 import { fetchWorkspaceQuiz } from '#fe/make/api/quiz.ts'
 import { fetchQuizStats } from '#fe/make/api/stats.ts'
-import type { Quiz } from '#fe/model/quiz.ts'
-import type { QuizStatsResponse } from '#fe/model/stats.ts'
+import type { QuizStatsResponse } from '#fe/make/model/stats.ts'
 import { useApi } from '#fe/shared/api/hooks.ts'
+import type { Quiz } from '#fe/shared/model/quiz.ts'
 
 import { QuizStats } from './quiz-stats-component.tsx'
 

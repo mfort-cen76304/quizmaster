@@ -1,5 +1,5 @@
 import './question-summary.scss'
-import type { Question, QuestionAnswer } from '#fe/model/question.ts'
+import type { Question, QuestionAnswer } from '#fe/take/model/question.ts'
 import { Answer, QuestionExplanation } from '#fe/take/question-take'
 import { NumericalResult } from '#fe/take/question-take/components/numerical-result.tsx'
 

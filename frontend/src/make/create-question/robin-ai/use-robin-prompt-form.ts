@@ -1,7 +1,7 @@
 import { useState } from 'react'
 
 import { postAiAssistant } from '#fe/make/api/ai-assistant.ts'
-import type { QuestionDraft, QuestionType } from '#fe/model/question.ts'
+import type { QuestionDraft, QuestionType } from '#fe/shared/model/question.ts'
 
 import type { QuestionFormStatePatch } from '../form/question-form-state.ts'
 import type { RobinUndoBuffer } from './use-robin-undo-buffer.ts'

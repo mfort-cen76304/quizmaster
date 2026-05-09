@@ -2,9 +2,9 @@ import { useMemo, useState } from 'react'
 
 import { useStateSet } from '#fe/helpers.ts'
 import type { QuizRequest } from '#fe/make/api/quiz.ts'
-import type { QuestionListItem } from '#fe/model/question-list-item.ts'
-import type { Quiz } from '#fe/model/quiz.ts'
-import type { QuizMode, Difficulty } from '#fe/model/quiz.ts'
+import type { QuestionListItem } from '#fe/make/model/question-list-item.ts'
+import type { Quiz } from '#fe/shared/model/quiz.ts'
+import type { QuizMode, Difficulty } from '#fe/shared/model/quiz.ts'
 import {
     DEFAULT_DIFFICULTY,
     DEFAULT_MODE,

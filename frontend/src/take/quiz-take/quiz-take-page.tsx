@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate, useParams } from 'react-router'
 
-import type { QuizEvaluationResponse, QuizTake } from '#fe/model/quiz.ts'
+import type { QuizEvaluationResponse, QuizTake } from '#fe/shared/model/quiz.ts'
 import { evaluateQuiz } from '#fe/take/api/stats.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 

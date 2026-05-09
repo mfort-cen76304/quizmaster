@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
-import type { QuizMetadata, QuizTake } from '#fe/model/quiz.ts'
 import { useApi } from '#fe/shared/api/hooks.ts'
+import type { QuizMetadata, QuizTake } from '#fe/shared/model/quiz.ts'
 import { createAttempt, createDryRun, fetchQuiz } from '#fe/take/api/quiz.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 

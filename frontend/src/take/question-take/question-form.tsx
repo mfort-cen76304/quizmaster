@@ -1,7 +1,7 @@
 import './question-form.scss'
-import type { Question, QuestionTake } from '#fe/model/question.ts'
-import { countDecimalDigits } from '#fe/model/question.ts'
 import { Form } from '#fe/shared'
+import type { Question, QuestionTake } from '#fe/take/model/question.ts'
+import { countDecimalDigits } from '#fe/take/model/question.ts'
 
 import { AnswerCountHint } from './components/answer-count-hint.tsx'
 import { ChoiceAnswerList } from './components/choice-answer-list.tsx'

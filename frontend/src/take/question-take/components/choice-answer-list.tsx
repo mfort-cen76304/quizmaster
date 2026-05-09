@@ -1,4 +1,4 @@
-import type { Question, QuestionTake } from '#fe/model/question.ts'
+import type { Question, QuestionTake } from '#fe/take/model/question.ts'
 
 import { Answer } from './answer.tsx'
 

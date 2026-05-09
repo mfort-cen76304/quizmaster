@@ -1,6 +1,6 @@
-import type { QuestionAnswer, QuestionEvaluation } from '#fe/model/question.ts'
-import type { QuizEvaluationRequest, QuizEvaluationResponse } from '#fe/model/quiz.ts'
 import { postJson, postNoContent } from '#fe/shared/api/helpers.ts'
+import type { QuizEvaluationRequest, QuizEvaluationResponse } from '#fe/shared/model/quiz.ts'
+import type { QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
 
 export const recordTimeout = async (quizId: number, attemptId: number): Promise<void> =>
     await postNoContent(`/api/quiz/${quizId}/attempts/${attemptId}/timeout`)

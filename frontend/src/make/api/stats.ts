@@ -1,4 +1,4 @@
-import type { QuizStatsResponse } from '#fe/model/stats.ts'
+import type { QuizStatsResponse } from '#fe/make/model/stats.ts'
 import { fetchJson } from '#fe/shared/api/helpers.ts'
 
 export const fetchQuizStats = async (workspaceGuid: string, quizId: string): Promise<QuizStatsResponse> => {

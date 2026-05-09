@@ -1,5 +1,5 @@
 import './numerical-result.scss'
-import { type Question, evaluateAnswer, numericalAnswer } from '#fe/model/question.ts'
+import { type Question, evaluateAnswer, numericalAnswer } from '#fe/take/model/question.ts'
 
 interface NumericalResultProps {
     readonly question: Question
