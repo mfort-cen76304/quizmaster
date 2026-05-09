@@ -10,10 +10,16 @@
             "files": ["frontend/src/take/**"],
             "rules": {
                 "no-restricted-imports": ["error", {
-                    "patterns": [{
-                        "group": ["#fe/make/**"],
-                        "message": "take/ must not import from make/. Both halves can use #fe/shared, #fe/api, #fe/model, #shared."
-                    }]
+                    "patterns": [
+                        {
+                            "group": ["#fe/make/**"],
+                            "message": "take/ must not import from make/. Both halves can use #fe/shared/** and root infrastructure (#fe/urls.ts)."
+                        },
+                        {
+                            "group": ["#shared/**"],
+                            "message": "take/ must not import from #shared/** (the FE↔specs contract zone — currently holds make-only fixture types). Use #fe/shared/** instead; if you need a shared contract type, expose it via shared/model/."
+                        }
+                    ]
                 }]
             }
         },
@@ -23,7 +29,7 @@
                 "no-restricted-imports": ["error", {
                     "patterns": [{
                         "group": ["#fe/take/**"],
-                        "message": "make/ must not import from take/. Both halves can use #fe/shared, #fe/api, #fe/model, #shared."
+                        "message": "make/ must not import from take/. Both halves can use #fe/shared/** and root infrastructure (#fe/urls.ts). #shared/** is allowed for make."
                     }]
                 }]
             }
