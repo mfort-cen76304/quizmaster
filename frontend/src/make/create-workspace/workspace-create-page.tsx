@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 
-import { tryCatch } from '#fe/helpers.ts'
 import { postWorkspace, type WorkspaceRequest } from '#fe/make/api/workspace.ts'
 import { Alert, Page } from '#fe/shared'
+import { tryCatch } from '#fe/shared/helpers.ts'
 import { urls } from '#fe/urls.ts'
 
 import { WorkspaceCreateForm } from './workspace-create-form.tsx'

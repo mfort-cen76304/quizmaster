@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import { updated } from '#fe/helpers.ts'
+import { updated } from '#fe/shared/helpers.ts'
 import type { QuestionAnswer } from '#fe/take/model/question.ts'
 
 export type QuizAnswers = {

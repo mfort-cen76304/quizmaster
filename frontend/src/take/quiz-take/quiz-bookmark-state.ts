@@ -1,4 +1,4 @@
-import { useStateSet } from '#fe/helpers.ts'
+import { useStateSet } from '#fe/shared/helpers.ts'
 
 interface QuizBookmarkState {
     readonly questionIdxs: ReadonlySet<number>

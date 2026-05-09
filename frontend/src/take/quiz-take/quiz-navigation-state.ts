@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router'
 
-import { useStateSet } from '#fe/helpers.ts'
+import { useStateSet } from '#fe/shared/helpers.ts'
 import type { QuizTake } from '#fe/shared/model/quiz.ts'
 
 export interface QuizNavigationState {

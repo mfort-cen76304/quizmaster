@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 
-import { updated } from '#fe/helpers.ts'
 import type { QuestionRequest } from '#fe/make/api/question.ts'
+import { updated } from '#fe/shared/helpers.ts'
 import type { Question, QuestionType } from '#fe/shared/model/question.ts'
 import { NUM_DEFAULT_ANSWERS } from '#shared/defaults/question.ts'
 
