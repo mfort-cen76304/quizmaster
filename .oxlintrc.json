@@ -4,5 +4,29 @@
     "rules": {
         "import/extensions": ["error", "always", { "ignorePackages": true }],
         "typescript/ban-ts-comment": "error"
-    }
+    },
+    "overrides": [
+        {
+            "files": ["frontend/src/take/**"],
+            "rules": {
+                "no-restricted-imports": ["error", {
+                    "patterns": [{
+                        "group": ["#fe/make/**"],
+                        "message": "take/ must not import from make/. Both halves can use #fe/shared, #fe/api, #fe/model, #shared."
+                    }]
+                }]
+            }
+        },
+        {
+            "files": ["frontend/src/make/**"],
+            "rules": {
+                "no-restricted-imports": ["error", {
+                    "patterns": [{
+                        "group": ["#fe/take/**"],
+                        "message": "make/ must not import from take/. Both halves can use #fe/shared, #fe/api, #fe/model, #shared."
+                    }]
+                }]
+            }
+        }
+    ]
 }
