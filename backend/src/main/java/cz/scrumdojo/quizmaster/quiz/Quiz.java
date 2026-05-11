@@ -7,6 +7,8 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Builder
 @Getter
@@ -46,4 +48,9 @@ public class Quiz {
 
     @Column(name = "random_question_count")
     private Integer randomQuestionCount;
+
+    @Builder.Default
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinColumn(name = "quiz_id")
+    private List<Cohort> cohorts = new ArrayList<>();
 }

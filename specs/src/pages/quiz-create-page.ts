@@ -60,4 +60,17 @@ export class QuizCreatePage {
         expect(this.questionTagBadgeLocator(question)).toHaveText(tag)
     expectQuestionTagBadgeNotVisible = (question: string) =>
         expect(this.questionTagBadgeLocator(question)).not.toBeVisible()
+
+    // ── Cohorts ──────────────────────────────────────
+
+    private cohortInput = () => this.page.locator('#cohort-input')
+    private addCohortButton = () => this.page.locator('#add-cohort-button')
+    addCohort = async (name: string) => {
+        await this.cohortInput().fill(name)
+        await this.addCohortButton().click()
+    }
+
+    // ── Back navigation ──────────────────────────────
+
+    clickBack = () => this.page.getByRole('link', { name: 'Back to workspace' }).click()
 }

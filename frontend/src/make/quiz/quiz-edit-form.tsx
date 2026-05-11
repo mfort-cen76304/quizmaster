@@ -7,6 +7,7 @@ import { ErrorMessage, createValidator } from '#fe/shared/forms/validations.tsx'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
 import { parseTimeLimitToSeconds } from '#shared/parsers/time-limit.ts'
 
+import { CohortsSection } from './components/cohorts-section.tsx'
 import { QuestionCountInfo } from './components/question-count-info.tsx'
 import { QuestionSelect } from './components/question-select.tsx'
 import { RandomSubsetSection } from './components/random-subset-section.tsx'
@@ -119,6 +120,7 @@ export const QuizEditForm = ({ questions, onSubmit, quiz }: QuizEditFormProps) =
                 count={state.randomQuestionCount}
                 onCountChange={state.setRandomQuestionCount}
             />
+            <CohortsSection cohortNames={state.cohortNames} onAdd={state.addCohort} onRemove={state.removeCohort} />
             <SubmitButton />
         </Form>
     )

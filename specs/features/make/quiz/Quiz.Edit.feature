@@ -22,7 +22,6 @@ Feature: Edit Quiz in Workspace
     * I see quiz description "Challenging mathematics questions"
 
 
-  @skip
   Scenario: Add a cohort to a quiz
     When I navigate to edit quiz "Math Quiz"
     * I create a new cohort "Girls"
@@ -32,7 +31,6 @@ Feature: Edit Quiz in Workspace
     And quiz "Math Quiz" contains cohort "Boys"
 
 
-  @skip
   Scenario: Reject duplicate cohort name
     Given quiz "Math Quiz" has a cohort named "Girls"
     When I navigate to edit quiz "Math Quiz"
@@ -43,7 +41,6 @@ Feature: Edit Quiz in Workspace
       | duplicate-cohort-name |
 
 
-  @skip
   Scenario: Discard unsaved cohort on leaving the edit page
     When I navigate to edit quiz "Math Quiz"
     * I create a new cohort "Girls"
@@ -51,7 +48,6 @@ Feature: Edit Quiz in Workspace
     Then quiz "Math Quiz" does not contain cohort "Girls"
 
 
-  @skip
   Scenario Outline: Cohort name length limit
     When I create a new cohort "<name>" for quiz "Math Quiz"
     Then quiz "Math Quiz" <result> cohort "<name>"
