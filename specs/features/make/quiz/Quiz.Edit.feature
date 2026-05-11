@@ -21,6 +21,7 @@ Feature: Edit Quiz in Workspace
     * I take quiz "Advanced Math"
     * I see quiz description "Challenging mathematics questions"
 
+
   @skip
   Scenario: Add Cohort to Quiz in Workspace
     When I create a new cohort "Girls" to quiz "Math Quiz"
