@@ -107,7 +107,8 @@ public class TestFixtures {
             Difficulty.KEEP_QUESTION,
             85,
             null,
-            1
+            1,
+            null
         );
     }
 

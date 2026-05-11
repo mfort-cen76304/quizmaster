@@ -3,6 +3,7 @@ import type { DataTable } from '@cucumber/cucumber'
 import { Given } from '#steps/fixture.ts'
 import { createQuestion } from '#steps/make/question/ops.ts'
 import { createQuiz } from '#steps/make/quiz/ops.ts'
+import { addCohortToQuizViaRest } from '#steps/shared/api.ts'
 import type { QuizSpec } from '#steps/shared/specs.ts'
 import { parseKey } from '#steps/world'
 
@@ -86,3 +87,7 @@ Given(
         await createQuiz(this, spec)
     },
 )
+
+Given('quiz {string} has a cohort named {string}', async function (quizName: string, cohortName: string) {
+    await addCohortToQuizViaRest(this, quizName, cohortName)
+})

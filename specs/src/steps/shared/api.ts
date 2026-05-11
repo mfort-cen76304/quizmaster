@@ -9,7 +9,7 @@ import { parseTimeLimitToSeconds } from '#shared/parsers/time-limit.ts'
 import type { Difficulty, QuestionType, QuizMode } from '#shared/types/enums.ts'
 import type { IdResponse } from '#shared/types/id-response.ts'
 import type { QuestionRequest } from '#shared/types/question.ts'
-import type { QuizRequest } from '#shared/types/quiz.ts'
+import type { Quiz, QuizRequest } from '#shared/types/quiz.ts'
 import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
 import type { QuestionSpec, QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
@@ -127,4 +127,49 @@ export const createQuizViaRest = async (
     }
     const { id } = (await response.json()) as IdResponse
     return id
+}
+
+const resolveQuizId = (world: QuizmasterWorld, quizName: string): string => {
+    const bookmark = world.quizBookmarks[quizName]
+    if (!bookmark) throw new Error(`No quiz bookmark for "${quizName}"`)
+    const id = bookmark.split('/').pop()
+    if (!id) throw new Error(`Could not extract quiz id from bookmark "${bookmark}"`)
+    return id
+}
+
+export const fetchWorkspaceQuizViaRest = async (world: QuizmasterWorld, quizName: string): Promise<Quiz> => {
+    const id = resolveQuizId(world, quizName)
+    const url = `/api/workspaces/${world.workspaceGuid}/quizzes/${id}`
+    const response = await world.page.request.get(url)
+    if (!response.ok()) {
+        throw new Error(`GET ${url} failed: ${response.status()} ${await response.text()}`)
+    }
+    return (await response.json()) as Quiz
+}
+
+export const addCohortToQuizViaRest = async (
+    world: QuizmasterWorld,
+    quizName: string,
+    cohortName: string,
+): Promise<void> => {
+    const id = resolveQuizId(world, quizName)
+    const quiz = await fetchWorkspaceQuizViaRest(world, quizName)
+    const url = `/api/workspaces/${world.workspaceGuid}/quizzes/${id}`
+    const body: QuizRequest = {
+        title: quiz.title,
+        description: quiz.description,
+        startAt: quiz.startAt,
+        endAt: quiz.endAt,
+        questionIds: quiz.questions.map(q => q.id),
+        mode: quiz.mode,
+        difficulty: quiz.difficulty,
+        passScore: quiz.passScore,
+        timeLimit: quiz.timeLimit,
+        randomQuestionCount: quiz.randomQuestionCount,
+        cohortNames: [...(quiz.cohortNames ?? []), cohortName],
+    }
+    const response = await world.page.request.put(url, { data: body })
+    if (!response.ok()) {
+        throw new Error(`PUT ${url} failed: ${response.status()} ${await response.text()}`)
+    }
 }

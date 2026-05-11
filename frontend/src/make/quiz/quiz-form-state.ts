@@ -31,6 +31,10 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
     const [checkRandomize, setCheckRandomize] = useState(!!quiz?.randomQuestionCount)
     const [feedbackMode, setFeedbackMode] = useState<QuizMode>(quiz?.mode || DEFAULT_MODE)
     const [difficulty, setDifficulty] = useState<Difficulty>(quiz?.difficulty || DEFAULT_DIFFICULTY)
+    const [cohortNames, setCohortNames] = useState<readonly string[]>(quiz?.cohortNames ?? [])
+
+    const addCohort = (name: string) => setCohortNames(prev => [...prev, name])
+    const removeCohort = (index: number) => setCohortNames(prev => prev.filter((_, i) => i !== index))
 
     const filteredQuestions = useMemo(() => {
         const normalizedFilter = filter.trim().toLowerCase()
@@ -58,6 +62,7 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
         filteredQuestions,
         feedbackMode,
         difficulty,
+        cohortNames,
         setTitle,
         setDescription,
         setStartAt,
@@ -70,6 +75,8 @@ export const useQuizFormState = (questions: readonly QuestionListItem[], quiz?: 
         setCheckRandomize,
         setFeedbackMode,
         setDifficulty,
+        addCohort,
+        removeCohort,
     }
 }
 
@@ -84,4 +91,5 @@ export const stateToQuizApiData = (state: ReturnType<typeof useQuizFormState>): 
     passScore: state.passScore,
     timeLimit: state.timeLimit,
     randomQuestionCount: state.randomQuestionCount,
+    cohortNames: state.cohortNames,
 })
