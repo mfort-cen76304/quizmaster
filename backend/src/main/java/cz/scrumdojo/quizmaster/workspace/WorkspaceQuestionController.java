@@ -68,20 +68,7 @@ public class WorkspaceQuestionController {
                 .filter(l -> "ANSWERED".equals(l.getEventType()) && isCorrectAnswer(l.getEventDetail()))
                 .count();
             int successRate = timesAsked > 0 ? (int) Math.round(100.0 * correct / timesAsked) : 0;
-            // Průměrný čas odpovědi (pokud je v eventDetail)
-            double avgTime = logs.stream()
-                .filter(l -> "ANSWERED".equals(l.getEventType()) && l.getEventDetail() != null && l.getEventDetail().contains("answeredAt"))
-                .mapToLong(l -> {
-                    try {
-                        // eventDetail: {"score":1,"answeredAt":"2026-05-12T12:34:56"}
-                        String detail = l.getEventDetail();
-                        int idx = detail.indexOf("\"answeredAt\":\"");
-                        if (idx < 0) return 0L;
-                        // Zde by bylo ideální mít i čas zadání otázky, ale není-li, ignoruj
-                        return 0L;
-                    } catch (Exception e) { return 0L; }
-                }).filter(x -> x > 0).average().orElse(0);
-            int averageTime = (int) Math.round(avgTime); // TODO: pokud bude čas k dispozici
+            int averageTime = 0; // not yet implemented — needs per-question start time logging
 
             var stats = new QuestionStats(timesAsked, successRate, averageTime, skipped);
             return QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId()), stats);

@@ -1,6 +1,5 @@
 package cz.scrumdojo.quizmaster.workspace;
 
-import cz.scrumdojo.quizmaster.TestFixtures;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,9 +16,6 @@ public class WorkspaceControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
-    @Autowired
-    private TestFixtures fixtures;
 
     @Test
     public void saveAndGetWorkspace() throws Exception {
