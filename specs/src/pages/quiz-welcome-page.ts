@@ -1,5 +1,7 @@
 import { expect, type Page } from '@playwright/test'
 
+import { expectTextToBe } from '#steps/common.ts'
+
 export class QuizWelcomePage {
     constructor(private page: Page) {}
 
@@ -10,6 +12,11 @@ export class QuizWelcomePage {
     private feedbackLocator = () => this.page.locator('#question-feedback')
     private passScoreLocator = () => this.page.locator('#pass-score')
     private timeLimitLocator = () => this.page.locator('#time-limit')
+    private cohortLeaderboardTableLocator = () => this.page.getByTestId('cohort-leaderboard-table')
+
+    private tableCaptionLocator = () => this.cohortLeaderboardTableLocator().locator('caption')
+    private tableHeaderCellsLocator = () => this.cohortLeaderboardTableLocator().locator('thead th')
+    private tableBodyRowsLocator = () => this.cohortLeaderboardTableLocator().locator('tbody tr')
 
     expectHeader = (text: string) => expect(this.headerLocator()).toHaveText(text)
     expectName = (name: string) => expect(this.nameLocator()).toHaveText(name)
@@ -24,6 +31,27 @@ export class QuizWelcomePage {
 
     startButton = () => this.page.locator('button#start')
     start = () => this.startButton().click()
+
+    expectCohortLeaderboard = async (captionText: string, headerCells: string[], bodyRows: string[][]) => {
+        await expectTextToBe(this.tableCaptionLocator(), captionText)
+
+        for (let i = 0; i < headerCells.length; i++) {
+            if (headerCells[i] !== '') {
+                await expectTextToBe(this.tableHeaderCellsLocator().nth(i), headerCells[i])
+            }
+        }
+
+        const rows = this.tableBodyRowsLocator()
+        await expect(rows).toHaveCount(bodyRows.length)
+
+        for (let i = 0; i < bodyRows.length; i++) {
+            for (let j = 0; j < bodyRows[i].length; j++) {
+                if (bodyRows[i][j] !== '') {
+                    await expectTextToBe(rows.nth(i).locator('td').nth(j), bodyRows[i][j])
+                }
+            }
+        }
+    }
 
     private dryRunIndicatorLocator = () => this.page.getByTestId('dry-run-indicator')
     expectDryRunIndicatorVisible = () => expect(this.dryRunIndicatorLocator()).toBeVisible()

@@ -1,5 +1,13 @@
 declare const FEATURE_FLAG_ENABLED: boolean
 
+interface ImportMetaEnv {
+    readonly DEV: boolean
+}
+
+interface ImportMeta {
+    readonly env: ImportMetaEnv
+}
+
 declare module '*.svg' {
     const content: string
     export default content

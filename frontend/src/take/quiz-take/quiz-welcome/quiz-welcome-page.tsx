@@ -15,6 +15,14 @@ interface QuizWelcomePageProps {
     readonly isDryRun: boolean
 }
 
+const MOCKED_COHORT_LEADERBOARD = [
+    { rank: 1, cohort: 'Team Rocket', score: 92 },
+    { rank: 2, cohort: 'Scrum Ninjas', score: 88 },
+    { rank: 3, cohort: 'Retro Masters', score: 75 },
+] as const
+
+const shouldShowMockedLeaderboard = import.meta.env.DEV || FEATURE_FLAG_ENABLED
+
 export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
     const navigate = useNavigate()
     const params = useParams()
@@ -49,7 +57,13 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
         quiz && (
             <>
                 {isDryRun && <DryRunIndicator />}
-                <QuizDetails quiz={quiz} questionCount={quiz.questionCount} canStart={canStart} onStart={onStart} />
+                <QuizDetails
+                    quiz={quiz}
+                    questionCount={quiz.questionCount}
+                    canStart={canStart}
+                    cohortLeaderboard={shouldShowMockedLeaderboard ? MOCKED_COHORT_LEADERBOARD : []}
+                    onStart={onStart}
+                />
             </>
         )
     )

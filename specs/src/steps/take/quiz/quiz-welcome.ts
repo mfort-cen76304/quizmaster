@@ -1,4 +1,7 @@
+import type { DataTable } from '@cucumber/cucumber'
+
 import { Then } from '#steps/fixture.ts'
+import { expectCohortLeaderboardTable } from '#steps/quiz/expects.ts'
 
 Then('I see the welcome page', async function () {
     await this.quizWelcomePage.expectHeader('Welcome to the quiz')
@@ -34,4 +37,8 @@ Then('I can start the quiz', async function () {
 
 Then('I cannot start the quiz', async function () {
     await this.quizWelcomePage.expectStartDisabled()
+})
+
+Then('I see the cohort leaderboard', async function (data: DataTable) {
+    await expectCohortLeaderboardTable(this.quizWelcomePage, data)
 })

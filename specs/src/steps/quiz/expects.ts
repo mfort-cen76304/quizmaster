@@ -1,7 +1,14 @@
 import type { DataTable } from '@cucumber/cucumber'
 import { expect } from '@playwright/test'
 
-import type { QuestionPage, QuizCreatePage, QuizScorePage, QuizStatsPage, TakeQuestionPage } from '#pages/index.ts'
+import type {
+    QuestionPage,
+    QuizCreatePage,
+    QuizScorePage,
+    QuizStatsPage,
+    QuizWelcomePage,
+    TakeQuestionPage,
+} from '#pages/index.ts'
 import type { AnswerSpec } from '#steps/shared/specs.ts'
 
 export const expectQuizResult = async (
@@ -82,6 +89,8 @@ const parseStatsData = (data: DataTable) => {
     return { headerCells, bodyRows: filteredBodyRows }
 }
 
+export const parseTableData = (data: DataTable) => parseStatsData(data)
+
 export const expectSummaryStatsTable = async (quizStatsPage: QuizStatsPage, data: DataTable) => {
     const { headerCells, bodyRows } = parseStatsData(data)
     await quizStatsPage.expectLabeledTable('summary', 'Summary', headerCells, bodyRows)
@@ -90,6 +99,11 @@ export const expectSummaryStatsTable = async (quizStatsPage: QuizStatsPage, data
 export const expectAttemptStatsTable = async (quizStatsPage: QuizStatsPage, data: DataTable) => {
     const { headerCells, bodyRows } = parseStatsData(data)
     await quizStatsPage.expectLabeledTable('attempt', 'Attempts', headerCells, bodyRows)
+}
+
+export const expectCohortLeaderboardTable = async (quizWelcomePage: QuizWelcomePage, data: DataTable) => {
+    const { headerCells, bodyRows } = parseTableData(data)
+    await quizWelcomePage.expectCohortLeaderboard('Cohort leaderboard', headerCells, bodyRows)
 }
 
 export const expectCorrectAnswersCounts = (correctAnswersCounts: Record<string, string>, rows: string[][]) => {

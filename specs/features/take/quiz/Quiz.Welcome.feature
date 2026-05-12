@@ -36,3 +36,18 @@ Feature: Quiz Welcome page
       | quiz   | name   | description   | count | score | mode                | time limit |
       | Quiz A | Quiz A | Description A | 3     | 66    | Feedback at the end | 120        |
       | Quiz B | Quiz B | Description B | 4     | 75    | Continuous feedback | 60         |
+
+
+  @feature-flag
+  Scenario: Quiz welcome page shows cohort leaderboard before start
+    Given workspace "Welcome" with questions
+      | bookmark | question  | answers  |
+      | Q1       | 1 + 1 = ? | 2 (*), 3 |
+    And quiz "Quiz A" with questions "Q1"
+    When I open quiz "Quiz A"
+    Then I see the welcome page
+    And I see the cohort leaderboard
+      | Rank | Cohort        | Score |
+      | 1    | Team Rocket   | 92    |
+      | 2    | Scrum Ninjas  | 88    |
+      | 3    | Retro Masters | 75    |
