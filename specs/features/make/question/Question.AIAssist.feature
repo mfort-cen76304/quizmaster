@@ -190,28 +190,28 @@ Feature: Generate question using AI
 
   @ai @slow @skip
   Scenario: After I restore the previous version I can restore the next version
-      Given I restore the previous version
-      When I open Robin AI
-      Then I can restore the next version
+    Given I restore the previous version
+    When I open Robin AI
+    Then I can restore the next version
 
 
   @ai @slow @skip
   Scenario: After I restore the next version I see the next generated content
-      Given I restore the previous version
-      When I open Robin AI
-      And I restore the next version
-      Then I see the next generated version
+    Given I restore the previous version
+    When I open Robin AI
+    And I restore the next version
+    Then I see the next generated version
   
 
   @ai @slow @skip
   Scenario: Afrer I restore the previous version I can restore the previous previous version
-      Given I restore the previous version 
-      When I open Robin AI
-      Then I can restore the previous version
+    Given I restore the previous version 
+    When I open Robin AI
+    Then I can restore the previous version
 
 
   @ai @slow @skip
   Scenario: Afrer I restore the next version I can restore the next next version
-      Given I restore the next version 
-      When I open Robin AI
-      Then I can restore the next version
+    Given I restore the next version 
+    When I open Robin AI
+    Then I can restore the next version
