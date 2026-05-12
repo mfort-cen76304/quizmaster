@@ -34,7 +34,10 @@ export class QuestionEditPage {
     }
     isMultipleChoice = async () => (await this.questionType()) === 'multiple'
     isNumericalChoice = async () => (await this.questionType()) === 'numerical'
-    setMultipleChoice = () => this.questionTypeRadio('multiple').check()
+    setMultipleChoice = async () => {
+        await this.questionTypeRadio('multiple').check()
+        await this.page.locator('.answer-row input[type="checkbox"]').first().waitFor({ state: 'visible' })
+    }
     setSingleChoice = () => this.questionTypeRadio('single').check()
     setNumericalChoice = () => this.questionTypeRadio('numerical').check()
 
