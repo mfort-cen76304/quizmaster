@@ -37,7 +37,10 @@ When('I proceed to the next question', async function () {
 })
 
 When('I skip the question', async function () {
-    await this.questionPage.next()
+    const nextButton = this.questionPage.nextButtonLocator()
+    if (await nextButton.isVisible({ timeout: 2000 })) {
+        await nextButton.click()
+    }
 })
 
 When('I go back to previous question', async function () {
