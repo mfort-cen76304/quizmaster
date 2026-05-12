@@ -2,6 +2,8 @@ services:
     quizmaster:
         image: ghcr.io/scrumdojo/dev-quizmaster:v4
         hostname: quizmaster
+        environment: 
+            - SSH_START=true
         ports:
             - 2222:22
         volumes:
