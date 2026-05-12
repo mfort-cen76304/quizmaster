@@ -58,7 +58,9 @@
 
         // Helper scripts, do not run directly
         "test:e2e:vite": ". scripts/load-env.sh && export E2E_BASE_PORT=$FE_PORT && cd specs && pnpm playwright:test",
+        "test:e2e:vite:failed": ". scripts/load-env.sh && export E2E_BASE_PORT=$FE_PORT && cd specs && pnpm playwright:test:failed",
         "test:e2e:be": ". scripts/load-env.sh && export E2E_BASE_PORT=$BE_PORT && cd specs && pnpm playwright:test",
+        "test:e2e:failed": ". scripts/load-env.sh && export E2E_BASE_PORT=$BE_PORT && cd specs && pnpm playwright:test:failed",
         "test:e2e:playwright-ui": ". scripts/load-env.sh && export E2E_BASE_PORT=$FE_PORT && cd specs && pnpm playwright:ui",
         "coverage:e2e:run": ". scripts/load-env.sh && export E2E_BASE_PORT=$BE_PORT && cd specs && pnpm coverage:run && pnpm coverage:report",
 

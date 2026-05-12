@@ -4,18 +4,11 @@ When('I open the workspace', async function () {
     await this.workspacePage.goto(this.workspaceGuid)
     await this.workspacePage.waitForUrl(this.workspaceGuid)
 })
-// ── Navigation ──────────────────────────────────────────
-
-When('I open the workspace', async function () {
-    await this.workspacePage.goto(this.workspaceGuid)
-    await this.workspacePage.waitForUrl(this.workspaceGuid)
-})
 // ── Question stats assertions ─────────────────────────────
 
 Then('I see stats for question {string}', async function (question: string, table) {
     // Table: | Times asked | Success rate | Average time | Skipped |
-    const row = table.rowsHash?.() || (table[0] ? table[0] : {})
-    // Normalize keys for robustness
+    const row = table.hashes()[0]
     const stats = {
         timesAsked: row['Times asked'] ?? row['timesAsked'] ?? row['asked'] ?? '0',
         successRate: row['Success rate'] ?? row['successRate'] ?? row['success'] ?? '0%',

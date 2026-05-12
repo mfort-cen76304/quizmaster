@@ -1,8 +1,8 @@
 package cz.scrumdojo.quizmaster.question;
 
 import jakarta.persistence.*;
-import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
-import org.hibernate.annotations.Type;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.*;
 import java.time.LocalDateTime;
 
@@ -33,7 +33,7 @@ public class QuestionStatsLog {
     @Column(name = "event_type", nullable = false, length = 32)
     private String eventType;
 
-    @Type(JsonBinaryType.class)
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "event_detail", columnDefinition = "jsonb")
     private String eventDetail;
 

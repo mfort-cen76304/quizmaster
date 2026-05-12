@@ -8,6 +8,7 @@
         "install:playwright": "pnpm playwright install chromium",
 
         "playwright:test": ". ../scripts/load-env.sh; bddgen && wait-on tcp:${E2E_BASE_PORT:-$BE_PORT} && playwright test",
+        "playwright:test:failed": ". ../scripts/load-env.sh; bddgen && wait-on tcp:${E2E_BASE_PORT:-$BE_PORT} && playwright test --last-failed",
         "playwright:watch": "chokidar 'features/**/*.feature' 'src/**/*.ts' -c bddgen",
         "playwright:ui": "concurrently 'pnpm playwright:watch' 'pnpm playwright:test --ui-host=0.0.0.0 --ui-port=3333'",
 

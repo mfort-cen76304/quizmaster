@@ -79,7 +79,6 @@ public class QuizTakeController {
     }
 
     @PostMapping("/{id}/attempts")
-    @Transactional
     public ResponseEntity<?> createAttempt(@PathVariable Integer id) {
         return quizRepository.findById(id)
             .map(quiz -> {

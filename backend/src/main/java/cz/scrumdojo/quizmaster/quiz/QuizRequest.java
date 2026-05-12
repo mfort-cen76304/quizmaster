@@ -23,7 +23,7 @@ public record QuizRequest(
             .startAt(startAt)
             .endAt(endAt)
             .questionIds(questionIds)
-            .mode(mode)
+            .mode(mode != null ? mode : QuizMode.EXAM)
             .difficulty(difficulty != null ? difficulty : Difficulty.KEEP_QUESTION)
             .passScore(passScore)
             .timeLimit(timeLimit)
