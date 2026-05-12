@@ -12,6 +12,11 @@ import cz.scrumdojo.quizmaster.question.QuestionEvaluationResponse;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.question.QuestionScoringService;
 import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
+import cz.scrumdojo.quizmaster.question.QuestionStatsLog;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import cz.scrumdojo.quizmaster.question.QuestionStatsLog;
+import cz.scrumdojo.quizmaster.question.QuestionStatsLogRepository;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +40,8 @@ public class QuizTakeController {
     private final QuestionScoringService questionScoringService;
     private final AttemptScoreService attemptScoreService;
     private final Clock clock;
+    private final QuestionStatsLogRepository questionStatsLogRepository;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public QuizTakeController(
             QuizService quizService,
@@ -42,13 +49,15 @@ public class QuizTakeController {
             AttemptRepository attemptRepository,
             QuestionScoringService questionScoringService,
             AttemptScoreService attemptScoreService,
-            Clock clock) {
+            Clock clock,
+            QuestionStatsLogRepository questionStatsLogRepository) {
         this.quizService = quizService;
         this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository;
         this.questionScoringService = questionScoringService;
         this.attemptScoreService = attemptScoreService;
         this.clock = clock;
+        this.questionStatsLogRepository = questionStatsLogRepository;
     }
 
     @GetMapping("/{id}")
@@ -70,6 +79,7 @@ public class QuizTakeController {
     }
 
     @PostMapping("/{id}/attempts")
+    @Transactional
     public ResponseEntity<?> createAttempt(@PathVariable Integer id) {
         return quizRepository.findById(id)
             .map(quiz -> {
@@ -91,6 +101,19 @@ public class QuizTakeController {
                     .incorrectAnswers(0)
                     .build();
                 Attempt persisted = attemptRepository.save(attempt);
+
+                // Log ABANDONED for each question (default stav)
+                for (Question q : selectedQuestions) {
+                    QuestionStatsLog log = QuestionStatsLog.builder()
+                        .questionId(q.getId())
+                        .quizId(id)
+                        .attemptId(persisted.getId())
+                        .eventType("ABANDONED")
+                        .eventDetail("{}")
+                        .createdAt(LocalDateTime.now(clock))
+                        .build();
+                    questionStatsLogRepository.save(log);
+                }
 
                 QuestionTakeResponse[] questions = selectedQuestions.stream()
                     .map(QuestionTakeResponse::from)
@@ -130,6 +153,24 @@ public class QuizTakeController {
             return ResponseEntity.notFound().build();
         }
 
+        // Log VIEWED pro všechny otázky v attemptu (pokud jsou stále ABANDONED)
+        int[] qids = attempt.get().getQuestionIds();
+        if (qids != null) {
+            for (int qid : qids) {
+                var logs = questionStatsLogRepository.findAll();
+                logs.stream()
+                    .filter(l -> l.getQuestionId().equals(qid)
+                            && l.getAttemptId() != null && l.getAttemptId().equals(attemptId)
+                            && "ABANDONED".equals(l.getEventType()))
+                    .findFirst()
+                    .ifPresent(l -> {
+                        l.setEventType("VIEWED");
+                        l.setCreatedAt(LocalDateTime.now(clock));
+                        questionStatsLogRepository.save(l);
+                    });
+            }
+        }
+
         return ResponseHelper.okOrNotFound(quizService.getTakeQuizForAttempt(id, attempt.get().getQuestionIds()));
     }
 
@@ -155,6 +196,7 @@ public class QuizTakeController {
             return ResponseEntity.badRequest().build();
         }
 
+
         var questionsById = quizService.loadQuestions(expectedQuestionIds).stream()
             .collect(Collectors.toMap(Question::getId, Function.identity()));
         var answerByQuestionId = request.answers() == null
@@ -172,11 +214,31 @@ public class QuizTakeController {
             if (question == null) {
                 return ResponseEntity.notFound().build();
             }
-            double questionScore = questionScoringService.score(question, answerByQuestionId.get(questionId));
+            QuestionAnswerRequest answer = answerByQuestionId.get(questionId);
+            double questionScore = questionScoringService.score(question, answer);
             score += questionScore;
             if (questionScore == 1) correct++;
             else if (questionScore == 0.5) partial++;
             else incorrect++;
+
+            // SKIPPED: pokud není odpověď, aktualizuj ABANDONED na SKIPPED
+            if (answer == null) {
+                try {
+                    var logs = questionStatsLogRepository.findAll();
+                    logs.stream()
+                        .filter(l -> l.getQuestionId().equals(questionId)
+                                && l.getAttemptId() != null && l.getAttemptId().equals(attemptId)
+                                && "ABANDONED".equals(l.getEventType()))
+                        .findFirst()
+                        .ifPresent(l -> {
+                            l.setEventType("SKIPPED");
+                            l.setCreatedAt(LocalDateTime.now(clock));
+                            questionStatsLogRepository.save(l);
+                        });
+                } catch (Exception e) {
+                    // ignore logging error
+                }
+            }
         }
 
         updatedAttempt.setCorrectAnswers(correct);
@@ -226,6 +288,43 @@ public class QuizTakeController {
         double score = questionScoringService.score(question.get(), request);
         attemptScoreService.recordSubmission(
             quiz.get().getMode(), attemptId, questionId, ScoreOutcome.from(score), LocalDateTime.now(clock));
+
+        // Update ABANDONED to ANSWERED for this question/attempt (nebo vytvoř nový záznam)
+        try {
+            String eventDetail = objectMapper.writeValueAsString(Map.of(
+                "score", score,
+                "correct", score >= 1.0,
+                "answeredAt", LocalDateTime.now(clock).toString()
+            ));
+            // Najdi ABANDONED záznam a aktualizuj na ANSWERED
+            var logs = questionStatsLogRepository.findAll();
+            logs.stream()
+                .filter(l -> l.getQuestionId().equals(questionId)
+                        && l.getAttemptId() != null && l.getAttemptId().equals(attemptId)
+                        && "ABANDONED".equals(l.getEventType()))
+                .findFirst()
+                .ifPresentOrElse(
+                    l -> {
+                        l.setEventType("ANSWERED");
+                        l.setEventDetail(eventDetail);
+                        l.setCreatedAt(LocalDateTime.now(clock));
+                        questionStatsLogRepository.save(l);
+                    },
+                    () -> {
+                        QuestionStatsLog log = QuestionStatsLog.builder()
+                            .questionId(questionId)
+                            .quizId(id)
+                            .attemptId(attemptId)
+                            .eventType("ANSWERED")
+                            .eventDetail(eventDetail)
+                            .createdAt(LocalDateTime.now(clock))
+                            .build();
+                        questionStatsLogRepository.save(log);
+                    }
+                );
+        } catch (Exception e) {
+            // ignore logging error
+        }
 
         if (quiz.get().getMode() == QuizMode.EXAM) {
             return ResponseEntity.ok(new QuestionEvaluationResponse(score == 1, score, null));

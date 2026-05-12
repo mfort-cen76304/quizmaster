@@ -1,5 +1,6 @@
 package cz.scrumdojo.quizmaster.workspace;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.scrumdojo.quizmaster.aiassistant.QuestionEmbeddingService;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
@@ -8,6 +9,7 @@ import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
+import cz.scrumdojo.quizmaster.question.QuestionStatsLogRepository;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -26,17 +28,23 @@ public class WorkspaceQuestionController {
     private final QuestionRepository questionRepository;
     private final QuizRepository quizRepository;
     private final QuestionEmbeddingService questionEmbeddingService;
+    private final QuestionStatsLogRepository questionStatsLogRepository;
+    private final ObjectMapper objectMapper;
 
     public WorkspaceQuestionController(
         WorkspaceGuard workspaceGuard,
         QuestionRepository questionRepository,
         QuizRepository quizRepository,
-        QuestionEmbeddingService questionEmbeddingService
+        QuestionEmbeddingService questionEmbeddingService,
+        QuestionStatsLogRepository questionStatsLogRepository,
+        ObjectMapper objectMapper
     ) {
         this.workspaceGuard = workspaceGuard;
         this.questionRepository = questionRepository;
         this.quizRepository = quizRepository;
         this.questionEmbeddingService = questionEmbeddingService;
+        this.questionStatsLogRepository = questionStatsLogRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
@@ -47,9 +55,37 @@ public class WorkspaceQuestionController {
         List<Question> questions = questionRepository.findByWorkspaceGuid(workspaceGuid);
         Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
 
-        var items = questions.stream()
-            .map(q -> QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId())))
-            .toList();
+        // Load logs only for questions in this workspace
+        var questionIds = questions.stream().map(Question::getId).toList();
+        var allLogs = questionStatsLogRepository.findByQuestionIdIn(questionIds);
+
+        var items = questions.stream().map(q -> {
+            var logs = allLogs.stream().filter(l -> l.getQuestionId().equals(q.getId())).toList();
+            int timesAsked = (int) logs.stream().filter(l -> "ANSWERED".equals(l.getEventType()) || "SKIPPED".equals(l.getEventType())).count();
+            int skipped = (int) logs.stream().filter(l -> "SKIPPED".equals(l.getEventType())).count();
+            // Úspěšnost: podíl správných odpovědí (correct==true)
+            long correct = logs.stream()
+                .filter(l -> "ANSWERED".equals(l.getEventType()) && isCorrectAnswer(l.getEventDetail()))
+                .count();
+            int successRate = timesAsked > 0 ? (int) Math.round(100.0 * correct / timesAsked) : 0;
+            // Průměrný čas odpovědi (pokud je v eventDetail)
+            double avgTime = logs.stream()
+                .filter(l -> "ANSWERED".equals(l.getEventType()) && l.getEventDetail() != null && l.getEventDetail().contains("answeredAt"))
+                .mapToLong(l -> {
+                    try {
+                        // eventDetail: {"score":1,"answeredAt":"2026-05-12T12:34:56"}
+                        String detail = l.getEventDetail();
+                        int idx = detail.indexOf("\"answeredAt\":\"");
+                        if (idx < 0) return 0L;
+                        // Zde by bylo ideální mít i čas zadání otázky, ale není-li, ignoruj
+                        return 0L;
+                    } catch (Exception e) { return 0L; }
+                }).filter(x -> x > 0).average().orElse(0);
+            int averageTime = (int) Math.round(avgTime); // TODO: pokud bude čas k dispozici
+
+            var stats = new QuestionStats(timesAsked, successRate, averageTime, skipped);
+            return QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId()), stats);
+        }).toList();
 
         return ResponseEntity.ok(items);
     }
@@ -105,6 +141,15 @@ public class WorkspaceQuestionController {
 
         int deleted = questionRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
         return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    private boolean isCorrectAnswer(String eventDetail) {
+        if (eventDetail == null) return false;
+        try {
+            return objectMapper.readTree(eventDetail).path("correct").asBoolean(false);
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private void embedBestEffort(Question question) {

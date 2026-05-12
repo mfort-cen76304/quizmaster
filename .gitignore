@@ -20,3 +20,4 @@ specs/test-results
 site/coverage/
 site/docs/screenshots/
 site/docs/*.html
+PLAN-question-stats.md

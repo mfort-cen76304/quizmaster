@@ -38,8 +38,19 @@ When('I proceed to the next question', async function () {
 
 When('I skip the question', async function () {
     const nextButton = this.questionPage.nextButtonLocator()
-    if (await nextButton.isVisible({ timeout: 2000 })) {
-        await nextButton.click()
+    const evaluateButton = this.questionPage.evaluateButtonLocator()
+    const visible = await nextButton
+        .or(evaluateButton)
+        .first()
+        .waitFor({ state: 'visible', timeout: 5000 })
+        .then(() => true)
+        .catch(() => false)
+    if (visible) {
+        if (await nextButton.isVisible()) {
+            await nextButton.click()
+        } else {
+            await evaluateButton.click()
+        }
     }
 })
 

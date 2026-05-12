@@ -115,7 +115,6 @@ Feature: Workspace page management
     And I do not see image thumbnail for question "2 + 2 = ?"
 
 
-  @skip
   Scenario: Question with no attempts shows zero stats
     Given workspace "Workspace" with questions
       | question       | answers  |
@@ -126,7 +125,6 @@ Feature: Workspace page management
       | 0           | 0%           | 0s           | 0       |
 
 
-  @skip
   Scenario: Question stats reflect correct and incorrect answers across attempts
     Given workspace "Workspace" with questions
       | question       | answers  |
@@ -150,7 +148,6 @@ Feature: Workspace page management
       | 2           | 50%          | 0s           | 0       |
 
 
-  @skip
   Scenario: Question stats count skipped answers
     Given workspace "Workspace" with questions
       | question        | answers  |
