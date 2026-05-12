@@ -4,6 +4,8 @@ export type {
     QuizAttemptStartResponse,
     QuizEvaluationRequest,
     QuizEvaluationResponse,
+    QuizLeaderboardCohort,
+    QuizLeaderboardResponse,
     QuizMetadata,
     QuizTake,
 } from '#shared/types/quiz.ts'

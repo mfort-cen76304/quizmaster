@@ -56,6 +56,16 @@ export interface QuizMetadata {
     readonly questionCount: number
 }
 
+export interface QuizLeaderboardCohort {
+    readonly rank: number
+    readonly cohort: string
+    readonly score: number
+}
+
+export interface QuizLeaderboardResponse {
+    readonly cohorts: readonly QuizLeaderboardCohort[]
+}
+
 export type QuizSubmittedAnswer =
     | { readonly questionId: number; readonly type: 'choice'; readonly selectedIdxs: readonly number[] }
     | { readonly questionId: number; readonly type: 'numerical'; readonly value: number }

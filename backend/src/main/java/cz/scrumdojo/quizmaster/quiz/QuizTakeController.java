@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
@@ -53,6 +54,19 @@ public class QuizTakeController {
     @GetMapping("/{id}")
     public ResponseEntity<QuizMetadataResponse> getQuiz(@PathVariable Integer id) {
         return ResponseHelper.okOrNotFound(quizService.getTakeQuiz(id));
+    }
+
+    @GetMapping("/{id}/leaderboard")
+    public ResponseEntity<QuizLeaderboardResponse> getQuizLeaderboard(@PathVariable Integer id) {
+        return quizRepository.findById(id)
+            .map(quiz -> ResponseEntity.ok(new QuizLeaderboardResponse(
+                List.of(
+                    new QuizLeaderboardCohortResponse(1, "Team Rocket", 92),
+                    new QuizLeaderboardCohortResponse(2, "Scrum Ninjas", 88),
+                    new QuizLeaderboardCohortResponse(3, "Retro Masters", 75)
+                ).toArray(QuizLeaderboardCohortResponse[]::new)
+            )))
+            .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}/attempts")

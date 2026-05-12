@@ -2,8 +2,8 @@ import { useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 
 import { useApi } from '#fe/shared/api/hooks.ts'
-import type { QuizMetadata, QuizTake } from '#fe/shared/model/quiz.ts'
-import { createAttempt, createDryRun, fetchQuiz } from '#fe/take/api/quiz.ts'
+import type { QuizLeaderboardCohort, QuizMetadata, QuizTake } from '#fe/shared/model/quiz.ts'
+import { createAttempt, createDryRun, fetchQuiz, fetchQuizLeaderboard } from '#fe/take/api/quiz.ts'
 import { urls, useWorkspaceId } from '#fe/urls.ts'
 
 import { DryRunIndicator } from '../dry-run-indicator.tsx'
@@ -15,12 +15,6 @@ interface QuizWelcomePageProps {
     readonly isDryRun: boolean
 }
 
-const MOCKED_COHORT_LEADERBOARD = [
-    { rank: 1, cohort: 'Team Rocket', score: 92 },
-    { rank: 2, cohort: 'Scrum Ninjas', score: 88 },
-    { rank: 3, cohort: 'Retro Masters', score: 75 },
-] as const
-
 const shouldShowMockedLeaderboard = import.meta.env.DEV || FEATURE_FLAG_ENABLED
 
 export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
@@ -28,9 +22,13 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
     const params = useParams()
     const workspaceId = useWorkspaceId()
     const [quiz, setQuiz] = useState<QuizMetadata>()
+    const [leaderboard, setLeaderboard] = useState<readonly QuizLeaderboardCohort[]>([])
     const [isStarting, setIsStarting] = useState(false)
 
     useApi(params.id, fetchQuiz, setQuiz)
+    useApi(shouldShowMockedLeaderboard ? params.id : undefined, fetchQuizLeaderboard, response =>
+        setLeaderboard(response.cohorts),
+    )
 
     const canStart = quiz ? !isStarting && (isDryRun || isQuizAvailable(quiz)) : false
 
@@ -61,7 +59,7 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
                     quiz={quiz}
                     questionCount={quiz.questionCount}
                     canStart={canStart}
-                    cohortLeaderboard={shouldShowMockedLeaderboard ? MOCKED_COHORT_LEADERBOARD : []}
+                    cohortLeaderboard={leaderboard}
                     onStart={onStart}
                 />
             </>

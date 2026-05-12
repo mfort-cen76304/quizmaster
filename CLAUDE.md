@@ -99,6 +99,7 @@ Endpoints live under `/api/`. Two flavors:
   questions, quizzes, and AI drafting. Shared by FE and MCP. Includes
   `POST /api/workspaces/{guid}/quizzes/{id}/dry-runs` for author previews.
 - **Taking** is unscoped by quiz/question id: `/api/quiz/{id}`,
+  `/api/quiz/{id}/leaderboard`,
   `/api/question/{id}`, `/api/attempt/...`.
 - Plus `GET /api/feature-flag`.
 

@@ -1,7 +1,15 @@
 import { fetchJson, postJson } from '#fe/shared/api/helpers.ts'
-import type { QuizAttemptStartResponse, QuizMetadata, QuizTake } from '#fe/shared/model/quiz.ts'
+import type {
+    QuizAttemptStartResponse,
+    QuizLeaderboardResponse,
+    QuizMetadata,
+    QuizTake,
+} from '#fe/shared/model/quiz.ts'
 
 export const fetchQuiz = async (quizId: string) => await fetchJson<QuizMetadata>(`/api/quiz/${quizId}`)
+
+export const fetchQuizLeaderboard = async (quizId: string) =>
+    await fetchJson<QuizLeaderboardResponse>(`/api/quiz/${quizId}/leaderboard`)
 
 export const fetchQuizAttempt = async (quizId: number, attemptId: number) =>
     await fetchJson<QuizTake>(`/api/quiz/${quizId}/attempts/${attemptId}`)

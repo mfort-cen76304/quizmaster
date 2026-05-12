@@ -88,6 +88,34 @@ public class QuizTakeControllerTest {
     }
 
     @Test
+    public void getQuizLeaderboardReturnsMockedCohortsWrappedInResponse() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question q1 = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(q1)
+            .workspaceGuid(workspace.getGuid())
+            .randomQuestionCount(null)
+            .build());
+
+        mockMvc.perform(get("/api/quiz/{id}/leaderboard", quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().json("""
+                {
+                    "cohorts": [
+                        {"rank": 1, "cohort": "Team Rocket", "score": 92},
+                        {"rank": 2, "cohort": "Scrum Ninjas", "score": 88},
+                        {"rank": 3, "cohort": "Retro Masters", "score": 75}
+                    ]
+                }
+                """));
+    }
+
+    @Test
+    public void getQuizLeaderboardNotFound() throws Exception {
+        mockMvc.perform(get("/api/quiz/{id}/leaderboard", -1))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
     public void createAttemptReturnsAttemptIdAndFrozenQuestions() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
