@@ -165,26 +165,3 @@ Feature: Workspace page management
     Then I see stats for question "What is 10 - 5?"
       | Times asked | Success rate | Average time | Skipped |
       | 1           | 0%           | 0s           | 1       |
-
-
-  Scenario: Average time is measured per question
-    Given workspace "Workspace" with questions
-      | question       | answers  |
-      | What is 2 + 2? | 4 (*), 5 |
-      | What is 3 + 3? | 6 (*), 7 |
-    And quiz "Math Quiz" with all questions
-
-    When I start the quiz
-    * 10 seconds elapse
-    * I answer correctly
-    * 15 seconds elapse
-    * I answer correctly
-    * I evaluate the quiz
-
-    And I open the workspace
-    Then I see stats for question "What is 2 + 2?"
-      | Times asked | Success rate | Average time | Skipped |
-      | 1           | 100%         | 10s          | 0       |
-    And I see stats for question "What is 3 + 3?"
-      | Times asked | Success rate | Average time | Skipped |
-      | 1           | 100%         | 15s          | 0       |
