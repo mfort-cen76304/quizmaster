@@ -80,7 +80,8 @@ available to takers.
 An **Attempt** records one [taker](#roles)'s run through a [quiz](#quiz). It
 captures which quiz and which questions were drawn (important under random
 selection, because two attempts on the same quiz can see different question
-subsets), when it started, and when it finished or timed out.
+subsets), an optional cohort id for future team-based grouping, when it started,
+and when it finished or timed out.
 
 The score is broken down three ways: fully **correct** answers, **partially
 correct** answers (a multiple-choice question where the learner picked some

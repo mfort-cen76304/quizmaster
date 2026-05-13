@@ -25,6 +25,9 @@ public class Attempt {
     @Column(name = "quiz_id", nullable = false)
     private Integer quizId;
 
+    @Column(name = "cohort_id")
+    private Integer cohortId;
+
     @Column(name = "question_ids", columnDefinition = "int[]")
     @JdbcTypeCode(SqlTypes.ARRAY)
     private int[] questionIds;

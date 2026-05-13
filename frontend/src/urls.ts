@@ -16,6 +16,7 @@ export const ROUTES = {
     workspaceQuizDryRunTake: '/workspace/:workspaceId/quiz/:id/dry-run/questions/:questionId?',
 
     quizWelcome: '/quiz/:id',
+    quizWelcomeWithCohort: '/quiz/:id/cohort/:cohortGuid',
     quizTake: '/quiz/:id/questions/:questionId?',
 } as const
 
@@ -37,6 +38,7 @@ export const urls = {
         `/workspace/${workspaceId}/quiz/${id}/dry-run/questions`,
 
     quizWelcome: (id: number | string) => `/quiz/${id}`,
+    quizWelcomeWithCohort: (id: number | string, cohortGuid: string) => `/quiz/${id}/cohort/${cohortGuid}`,
     quizTake: (id: number | string) => `/quiz/${id}/questions`,
 }
 

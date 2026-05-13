@@ -1,5 +1,6 @@
 import { fetchJson, postJson } from '#fe/shared/api/helpers.ts'
 import type {
+    QuizAttemptStartRequest,
     QuizAttemptStartResponse,
     QuizLeaderboardResponse,
     QuizMetadata,
@@ -14,8 +15,11 @@ export const fetchQuizLeaderboard = async (quizId: string) =>
 export const fetchQuizAttempt = async (quizId: number, attemptId: number) =>
     await fetchJson<QuizTake>(`/api/quiz/${quizId}/attempts/${attemptId}`)
 
-export const createAttempt = async (quizId: number): Promise<QuizAttemptStartResponse> =>
-    await postJson<undefined, QuizAttemptStartResponse>(`/api/quiz/${quizId}/attempts`, undefined)
+export const createAttempt = async (quizId: number, cohortGuid?: string): Promise<QuizAttemptStartResponse> =>
+    await postJson<QuizAttemptStartRequest | undefined, QuizAttemptStartResponse>(
+        `/api/quiz/${quizId}/attempts`,
+        cohortGuid ? { cohortGuid } : undefined,
+    )
 
 export const createDryRun = async (workspaceGuid: string, quizId: number): Promise<QuizAttemptStartResponse> =>
     await postJson<undefined, QuizAttemptStartResponse>(

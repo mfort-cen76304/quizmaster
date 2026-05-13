@@ -21,6 +21,7 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
     const navigate = useNavigate()
     const params = useParams()
     const workspaceId = useWorkspaceId()
+    const cohortGuid = params.cohortGuid
     const [quiz, setQuiz] = useState<QuizMetadata>()
     const [leaderboard, setLeaderboard] = useState<readonly QuizLeaderboardCohort[]>([])
     const [isStarting, setIsStarting] = useState(false)
@@ -41,7 +42,7 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
         try {
             const { attemptId, questions } = isDryRun
                 ? await createDryRun(workspaceId, quiz.id)
-                : await createAttempt(quiz.id)
+                : await createAttempt(quiz.id, cohortGuid)
             const playableQuiz: QuizTake = { ...quiz, questions }
             setQuizRun(attemptId, quiz.id)
             const target = isDryRun ? urls.workspaceQuizDryRunTake(workspaceId, quiz.id) : urls.quizTake(quiz.id)

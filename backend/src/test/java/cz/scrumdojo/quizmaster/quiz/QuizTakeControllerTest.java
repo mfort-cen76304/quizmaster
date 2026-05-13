@@ -148,6 +148,33 @@ public class QuizTakeControllerTest {
     }
 
     @Test
+    public void createAttemptAcceptsOptionalCohortGuidAndIgnoresItForNow() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
+        Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2)
+            .workspaceGuid(workspace.getGuid())
+            .randomQuestionCount(null)
+            .build());
+
+        var result = mockMvc.perform(post("/api/quiz/{id}/attempts", quiz.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "cohortGuid": "f5d8d75d-21b9-47c3-b1d7-d6b0da5a6f72"
+                    }
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.attemptId").isNumber())
+            .andReturn();
+
+        Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
+        var attempt = attemptRepository.findById(attemptId).orElseThrow();
+
+        assertThat(attempt.getCohortId()).isNull();
+    }
+
+    @Test
     public void recordTimeoutStampsServerSideTimestamp() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));

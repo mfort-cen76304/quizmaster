@@ -77,7 +77,9 @@ public class QuizTakeController {
     }
 
     @PostMapping("/{id}/attempts")
-    public ResponseEntity<?> createAttempt(@PathVariable Integer id) {
+    public ResponseEntity<?> createAttempt(
+            @PathVariable Integer id,
+            @RequestBody(required = false) QuizAttemptStartRequest request) {
         return quizRepository.findById(id)
             .map(quiz -> {
                 if (!QuizAvailability.isAvailable(quiz, LocalDateTime.now(clock))) {

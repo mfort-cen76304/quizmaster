@@ -1,4 +1,3 @@
-
 CREATE TABLE question_event_type (
     code VARCHAR(32) PRIMARY KEY,
     description TEXT
@@ -17,7 +16,7 @@ CREATE TABLE question_stats_log (
     attempt_id INTEGER REFERENCES attempt(id) ON DELETE SET NULL,
     user_id INTEGER,
     event_type VARCHAR(32) NOT NULL REFERENCES question_event_type(code),
-    event_detail JSONB, -- volitelné detaily (správnost, čas odpovědi, device, ...)
+    event_detail JSONB,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

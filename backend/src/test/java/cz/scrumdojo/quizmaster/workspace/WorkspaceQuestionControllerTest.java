@@ -48,6 +48,20 @@ public class WorkspaceQuestionControllerTest {
     }
 
     @Test
+    public void getWorkspaceQuestionsIncludesZeroStatsWhenQuestionHasNoAttempts() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+
+        mockMvc.perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].id").value(question.getId()))
+            .andExpect(jsonPath("$[0].stats.timesAsked").value(0))
+            .andExpect(jsonPath("$[0].stats.successRate").value(0))
+            .andExpect(jsonPath("$[0].stats.averageTime").value(0))
+            .andExpect(jsonPath("$[0].stats.skipped").value(0));
+    }
+
+    @Test
     public void getWorkspaceQuestion() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));

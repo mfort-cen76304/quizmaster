@@ -92,3 +92,7 @@ export interface QuizAttemptStartResponse {
     readonly attemptId: number
     readonly questions: readonly QuestionTake[]
 }
+
+export interface QuizAttemptStartRequest {
+    readonly cohortGuid?: string
+}

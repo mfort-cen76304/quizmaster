@@ -92,6 +92,7 @@ export const App = () => {
 
                     {/* Quiz taking (public) */}
                     <Route path={ROUTES.quizWelcome} element={<QuizWelcomePage isDryRun={false} />} />
+                    <Route path={ROUTES.quizWelcomeWithCohort} element={<QuizWelcomePage isDryRun={false} />} />
                     <Route path={ROUTES.quizTake} element={<QuizTakePage isDryRun={false} />} />
                 </Routes>
             </div>
