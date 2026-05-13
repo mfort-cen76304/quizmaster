@@ -29,12 +29,12 @@ public class AttemptScoreServiceTest {
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        service.recordExamScore(attempt.getId(), question.getId(), ScoreOutcome.INCORRECT, LocalDateTime.now());
-        service.recordExamScore(attempt.getId(), question.getId(), ScoreOutcome.CORRECT, LocalDateTime.now());
+        service.recordExamScore(attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
+        service.recordExamScore(attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
 
         var rows = scoreRepository.findByAttemptId(attempt.getId());
         assertThat(rows).hasSize(1);
-        assertThat(rows.get(0).getScore()).isEqualTo(ScoreOutcome.CORRECT);
+        assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.CORRECT);
     }
 
     @Test
@@ -43,11 +43,11 @@ public class AttemptScoreServiceTest {
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        service.recordLearnScore(attempt.getId(), question.getId(), ScoreOutcome.INCORRECT, LocalDateTime.now());
-        service.recordLearnScore(attempt.getId(), question.getId(), ScoreOutcome.CORRECT, LocalDateTime.now());
+        service.recordLearnScore(attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
+        service.recordLearnScore(attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
 
         var rows = scoreRepository.findByAttemptId(attempt.getId());
         assertThat(rows).hasSize(1);
-        assertThat(rows.get(0).getScore()).isEqualTo(ScoreOutcome.INCORRECT);
+        assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.INCORRECT);
     }
 }

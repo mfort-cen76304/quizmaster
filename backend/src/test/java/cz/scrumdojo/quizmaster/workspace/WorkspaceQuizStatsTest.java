@@ -1,9 +1,9 @@
 package cz.scrumdojo.quizmaster.workspace;
 import cz.scrumdojo.quizmaster.TestFixtures;
+import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
-import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import org.junit.jupiter.api.Test;
@@ -48,8 +48,8 @@ public class WorkspaceQuizStatsTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         Attempt attempt = fixtures.save(fixtures.attempt(quiz)
                 .questionIds(new int[]{q1.getId(), q2.getId()}));
-        saveScore(attempt, q1, ScoreOutcome.CORRECT, LocalDateTime.now());
-        saveScore(attempt, q2, ScoreOutcome.INCORRECT, LocalDateTime.now());
+        saveScore(attempt, q1, AnswerStatus.CORRECT, LocalDateTime.now());
+        saveScore(attempt, q2, AnswerStatus.INCORRECT, LocalDateTime.now());
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
@@ -72,7 +72,7 @@ public class WorkspaceQuizStatsTest {
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         Attempt attempt = fixtures.save(fixtures.attempt(quiz).questionIds(new int[]{q1.getId()}));
-        saveScore(attempt, q1, ScoreOutcome.CORRECT, LocalDateTime.now());
+        saveScore(attempt, q1, AnswerStatus.CORRECT, LocalDateTime.now());
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
@@ -132,9 +132,9 @@ public class WorkspaceQuizStatsTest {
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         Attempt realAttempt = fixtures.save(fixtures.attempt(quiz).questionIds(new int[]{q1.getId()}));
-        saveScore(realAttempt, q1, ScoreOutcome.CORRECT, LocalDateTime.now());
+        saveScore(realAttempt, q1, AnswerStatus.CORRECT, LocalDateTime.now());
         Attempt dryRunAttempt = fixtures.save(fixtures.attempt(quiz).questionIds(new int[]{q1.getId()}).isDryRun(true));
-        saveScore(dryRunAttempt, q1, ScoreOutcome.INCORRECT, LocalDateTime.now());
+        saveScore(dryRunAttempt, q1, AnswerStatus.INCORRECT, LocalDateTime.now());
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
@@ -166,18 +166,18 @@ public class WorkspaceQuizStatsTest {
                 .startedAt(now.minusSeconds(10))
                 .finishedAt(now.minusSeconds(5))
                 .timedOutAt(now.minusSeconds(5)));
-        saveScore(firstQuizTimeoutAttempt, shared, ScoreOutcome.PARTIAL, now.minusSeconds(8));
+        saveScore(firstQuizTimeoutAttempt, shared, AnswerStatus.PARTIAL, now.minusSeconds(8));
         Attempt firstQuizAbandonedAttempt = fixtures.save(fixtures.attemptAbandoned(firstQuiz)
                 .questionIds(new int[]{shared.getId(), skipped.getId(), timeout.getId()})
                 .startedAt(now.minusSeconds(4))
                 .timedOutAt(now.minusSeconds(1)));
-        saveScore(firstQuizAbandonedAttempt, shared, ScoreOutcome.CORRECT, now.minusSeconds(3));
+        saveScore(firstQuizAbandonedAttempt, shared, AnswerStatus.CORRECT, now.minusSeconds(3));
         Attempt secondQuizFinishedAttempt = fixtures.save(fixtures.attempt(secondQuiz)
                 .questionIds(new int[]{shared.getId(), correct.getId()})
                 .startedAt(now.minusSeconds(20))
                 .finishedAt(now.minusSeconds(12)));
-        saveScore(secondQuizFinishedAttempt, shared, ScoreOutcome.INCORRECT, now.minusSeconds(18));
-        saveScore(secondQuizFinishedAttempt, correct, ScoreOutcome.CORRECT, now.minusSeconds(14));
+        saveScore(secondQuizFinishedAttempt, shared, AnswerStatus.INCORRECT, now.minusSeconds(18));
+        saveScore(secondQuizFinishedAttempt, correct, AnswerStatus.CORRECT, now.minusSeconds(14));
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), firstQuiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
@@ -246,11 +246,11 @@ public class WorkspaceQuizStatsTest {
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", "non-existent-guid", -1))
                 .andExpect(status().isNotFound());
     }
-    private void saveScore(Attempt attempt, Question question, ScoreOutcome scoreOutcome, LocalDateTime answeredAt) {
+    private void saveScore(Attempt attempt, Question question, AnswerStatus status, LocalDateTime answeredAt) {
         attemptQuestionScoreRepository.save(AttemptQuestionScore.builder()
                 .attemptId(attempt.getId())
                 .questionId(question.getId())
-                .score(scoreOutcome)
+                .status(status)
                 .answeredAt(answeredAt)
                 .build());
     }

@@ -2,6 +2,7 @@ package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
+import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.Question;
@@ -39,6 +40,7 @@ public class WorkspaceQuizController {
     private final QuizService quizService;
     private final QuizStatsService quizStatsService;
     private final AttemptRepository attemptRepository;
+    private final AttemptScoreService attemptScoreService;
     private final Clock clock;
 
     public WorkspaceQuizController(
@@ -48,6 +50,7 @@ public class WorkspaceQuizController {
             QuizService quizService,
             QuizStatsService quizStatsService,
             AttemptRepository attemptRepository,
+            AttemptScoreService attemptScoreService,
             Clock clock) {
         this.workspaceGuard = workspaceGuard;
         this.quizRepository = quizRepository;
@@ -55,6 +58,7 @@ public class WorkspaceQuizController {
         this.quizService = quizService;
         this.quizStatsService = quizStatsService;
         this.attemptRepository = attemptRepository;
+        this.attemptScoreService = attemptScoreService;
         this.clock = clock;
     }
 
@@ -160,6 +164,7 @@ public class WorkspaceQuizController {
                     .isDryRun(true)
                     .build();
                 Attempt persisted = attemptRepository.save(attempt);
+                attemptScoreService.seedUnansweredPlaceholders(persisted.getId(), selectedQuestionIds);
 
                 QuestionTakeResponse[] questions = selectedQuestions.stream()
                     .map(QuestionTakeResponse::from)

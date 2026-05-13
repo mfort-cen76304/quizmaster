@@ -1,10 +1,10 @@
 package cz.scrumdojo.quizmaster.quiz;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
+import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
-import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
@@ -115,8 +115,8 @@ public class QuizTakeController {
             return 0;
         }
 
-        int correctAnswers = (int) scores.stream().filter(s -> s.getScore() == ScoreOutcome.CORRECT).count();
-        int partiallyCorrectAnswers = (int) scores.stream().filter(s -> s.getScore() == ScoreOutcome.PARTIAL).count();
+        int correctAnswers = (int) scores.stream().filter(s -> s.getStatus() == AnswerStatus.CORRECT).count();
+        int partiallyCorrectAnswers = (int) scores.stream().filter(s -> s.getStatus() == AnswerStatus.PARTIAL).count();
         float earnedPoints = correctAnswers + 0.5f * partiallyCorrectAnswers;
         return Math.round(earnedPoints / totalQuestions * 100);
     }
@@ -163,6 +163,7 @@ public class QuizTakeController {
                     .startedAt(now)
                     .build();
                 Attempt persisted = attemptRepository.save(attempt);
+                attemptScoreService.seedUnansweredPlaceholders(persisted.getId(), selectedQuestionIds);
                 QuestionTakeResponse[] questions = selectedQuestions.stream()
                     .map(QuestionTakeResponse::from)
                     .toArray(QuestionTakeResponse[]::new);
@@ -279,7 +280,7 @@ public class QuizTakeController {
         var answeredAt = LocalDateTime.now(clock);
         double score = questionScoringService.score(question.get(), request);
         attemptScoreService.recordSubmission(
-            quiz.get().getMode(), attemptId, questionId, ScoreOutcome.from(score), answeredAt);
+            quiz.get().getMode(), attemptId, questionId, AnswerStatus.from(score), answeredAt);
         if (quiz.get().getMode() == QuizMode.EXAM) {
             return ResponseEntity.ok(new QuestionEvaluationResponse(score == 1, score, null));
         }

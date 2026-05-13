@@ -31,13 +31,13 @@ public class AttemptQuestionScoreRepositoryTest {
         scoreRepository.save(AttemptQuestionScore.builder()
             .attemptId(attempt.getId())
             .questionId(question.getId())
-            .score(ScoreOutcome.CORRECT)
+            .status(AnswerStatus.CORRECT)
             .answeredAt(LocalDateTime.now())
             .build());
 
         var found = scoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId());
         assertThat(found).isPresent();
-        assertThat(found.get().getScore()).isEqualTo(ScoreOutcome.CORRECT);
+        assertThat(found.get().getStatus()).isEqualTo(AnswerStatus.CORRECT);
     }
 
     @Test
@@ -49,10 +49,10 @@ public class AttemptQuestionScoreRepositoryTest {
 
         scoreRepository.save(AttemptQuestionScore.builder()
             .attemptId(attempt.getId()).questionId(q1.getId())
-            .score(ScoreOutcome.CORRECT).answeredAt(LocalDateTime.now()).build());
+            .status(AnswerStatus.CORRECT).answeredAt(LocalDateTime.now()).build());
         scoreRepository.save(AttemptQuestionScore.builder()
             .attemptId(attempt.getId()).questionId(q2.getId())
-            .score(ScoreOutcome.PARTIAL).answeredAt(LocalDateTime.now()).build());
+            .status(AnswerStatus.PARTIAL).answeredAt(LocalDateTime.now()).build());
 
         var rows = scoreRepository.findByAttemptId(attempt.getId());
         assertThat(rows).hasSize(2);
@@ -66,11 +66,11 @@ public class AttemptQuestionScoreRepositoryTest {
 
         scoreRepository.save(AttemptQuestionScore.builder()
             .attemptId(attempt.getId()).questionId(question.getId())
-            .score(ScoreOutcome.CORRECT).answeredAt(LocalDateTime.now()).build());
+            .status(AnswerStatus.CORRECT).answeredAt(LocalDateTime.now()).build());
 
         assertThatThrownBy(() -> scoreRepository.saveAndFlush(AttemptQuestionScore.builder()
                 .attemptId(attempt.getId()).questionId(question.getId())
-                .score(ScoreOutcome.INCORRECT).answeredAt(LocalDateTime.now()).build()))
+                .status(AnswerStatus.INCORRECT).answeredAt(LocalDateTime.now()).build()))
             .isInstanceOf(DataIntegrityViolationException.class);
     }
 }

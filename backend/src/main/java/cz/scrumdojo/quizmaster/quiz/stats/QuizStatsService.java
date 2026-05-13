@@ -1,10 +1,10 @@
 package cz.scrumdojo.quizmaster.quiz.stats;
+import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptStatus;
-import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
@@ -81,11 +81,14 @@ public class QuizStatsService {
             Question question,
             int drawCount,
             List<AttemptQuestionScore> scores) {
-        int answered = scores.size();
+        List<AttemptQuestionScore> answeredScores = scores.stream()
+                .filter(s -> s.getStatus() != AnswerStatus.UNANSWERED)
+                .toList();
+        int answered = answeredScores.size();
         int unanswered = drawCount - answered;
-        int correctAnswers = countByScore(scores, ScoreOutcome.CORRECT);
-        int partiallyCorrectAnswers = countByScore(scores, ScoreOutcome.PARTIAL);
-        int incorrectAnswers = countByScore(scores, ScoreOutcome.INCORRECT);
+        int correctAnswers = countByStatus(answeredScores, AnswerStatus.CORRECT);
+        int partiallyCorrectAnswers = countByStatus(answeredScores, AnswerStatus.PARTIAL);
+        int incorrectAnswers = countByStatus(answeredScores, AnswerStatus.INCORRECT);
         return new QuestionStatsRecord(
                 question.getQuestion(),
                 answered,
@@ -95,9 +98,9 @@ public class QuizStatsService {
                 unanswered
         );
     }
-    private int countByScore(List<AttemptQuestionScore> scores, ScoreOutcome scoreOutcome) {
+    private int countByStatus(List<AttemptQuestionScore> scores, AnswerStatus status) {
         return (int) scores.stream()
-                .filter(score -> score.getScore() == scoreOutcome)
+                .filter(s -> s.getStatus() == status)
                 .count();
     }
     private int getTotalQuestions(Quiz quiz) {
@@ -122,11 +125,11 @@ public class QuizStatsService {
         if (durationSeconds != null && attempt.getTimedOutAt() != null && quiz.getTimeLimit() != null) {
             durationSeconds = Math.min(durationSeconds, quiz.getTimeLimit());
         }
-        int correctAnswers = countByScore(scores, ScoreOutcome.CORRECT);
-        int partiallyCorrectAnswers = countByScore(scores, ScoreOutcome.PARTIAL);
+        int correctAnswers = countByStatus(scores, AnswerStatus.CORRECT);
+        int partiallyCorrectAnswers = countByStatus(scores, AnswerStatus.PARTIAL);
         int incorrectAnswers = attempt.getFinishedAt() != null
                 ? totalQuestions - correctAnswers - partiallyCorrectAnswers
-                : countByScore(scores, ScoreOutcome.INCORRECT);
+                : countByStatus(scores, AnswerStatus.INCORRECT);
         float earnedPoints = correctAnswers + 0.5f * partiallyCorrectAnswers;
         int score = totalQuestions > 0
                 ? Math.round(earnedPoints / totalQuestions * 100)

@@ -32,8 +32,11 @@ public class AttemptQuestionScore {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 16)
-    private ScoreOutcome score;
+    private AnswerStatus status;
 
-    @Column(name = "answered_at", nullable = false)
+    @Column
+    private Integer position;
+
+    @Column(name = "answered_at")
     private LocalDateTime answeredAt;
 }
