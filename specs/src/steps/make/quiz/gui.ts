@@ -108,6 +108,15 @@ Then('I see error messages in quiz form', async function (table: DataTable) {
     )
 })
 
+Then('I see error {string} in quiz form', async function (error: string) {
+    if (error === '') {
+        const hasError = await this.quizCreatePage.hasAnyError()
+        expect(hasError).toBe(false)
+    } else {
+        await expectQuizFormErrors(this.quizCreatePage, [error])
+    }
+})
+
 Then('I see no error messages in quiz form', async function () {
     const hasError = await this.quizCreatePage.hasAnyError()
     expect(hasError).toBe(false)
