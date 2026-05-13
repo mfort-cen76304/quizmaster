@@ -37,9 +37,7 @@ Feature: Edit Quiz in Workspace
     * I create a new cohort "Girls"
     Then quiz "Math Quiz" has 1 cohort
     And quiz "Math Quiz" contains cohort "Girls"
-    And I see error messages in quiz form
-      | duplicate-cohort-name |
-
+    And I see error "duplicate-cohort-name" in quiz form
 
   Scenario: Discard unsaved cohort on leaving the edit page
     When I navigate to edit quiz "Math Quiz"
