@@ -2,7 +2,7 @@ import './quiz-play.scss'
 import { useState } from 'react'
 
 import type { QuizMode, QuizTake } from '#fe/shared/model/quiz.ts'
-import { recordTimeout, skipQuizQuestion, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
+import { recordTimeout, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
 import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
 import { QuestionForm, QuizQuestionProvider } from '#fe/take/question-take/index.ts'
 
@@ -61,7 +61,6 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
 
     const handleNextButton = async () => {
         if (!hasSelectedAnswer) {
-            await skipQuizQuestion(props.quiz.id, props.quizRunId, currentQuestion.id)
             if (!bookmarks.has(nav.currentQuestionIdx)) {
                 bookmarks.toggle(nav.currentQuestionIdx)
             }

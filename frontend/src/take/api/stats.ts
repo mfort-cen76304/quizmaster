@@ -3,8 +3,6 @@ import type { QuizEvaluationRequest, QuizEvaluationResponse } from '#fe/shared/m
 import type { QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
 export const recordTimeout = async (quizId: number, attemptId: number): Promise<void> =>
     await postNoContent(`/api/quiz/${quizId}/attempts/${attemptId}/timeout`)
-export const skipQuizQuestion = async (quizId: number, attemptId: number, questionId: number): Promise<void> =>
-    await postNoContent(`/api/quiz/${quizId}/attempts/${attemptId}/questions/${questionId}/skip`)
 export const evaluateQuiz = async (
     quizId: number,
     attemptId: number,

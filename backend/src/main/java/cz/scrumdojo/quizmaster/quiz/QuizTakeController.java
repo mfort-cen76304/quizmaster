@@ -260,20 +260,6 @@ public class QuizTakeController {
             feedbackQuestions
         ));
     }
-    @PostMapping("/{id}/attempts/{attemptId}/questions/{questionId}/skip")
-    public ResponseEntity<Void> skipAttemptQuestion(
-            @PathVariable Integer id,
-            @PathVariable Integer attemptId,
-            @PathVariable Integer questionId) {
-        var attempt = findActiveAttempt(id, attemptId);
-        if (attempt.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        if (!containsQuestion(attempt.get().getQuestionIds(), questionId)) {
-            return ResponseEntity.badRequest().build();
-        }
-        return ResponseEntity.noContent().build();
-    }
     @PostMapping("/{id}/attempts/{attemptId}/questions/{questionId}/submit")
     public ResponseEntity<?> submitAttemptQuestion(
             @PathVariable Integer id,
