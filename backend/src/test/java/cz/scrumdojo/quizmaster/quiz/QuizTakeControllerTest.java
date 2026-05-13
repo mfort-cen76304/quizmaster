@@ -2,7 +2,10 @@ package cz.scrumdojo.quizmaster.quiz;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
+import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 import com.jayway.jsonpath.JsonPath;
@@ -34,6 +37,18 @@ public class QuizTakeControllerTest {
 
     @Autowired
     private AttemptRepository attemptRepository;
+
+    @Autowired
+    private AttemptQuestionScoreRepository attemptQuestionScoreRepository;
+
+    private void saveScore(Attempt attempt, Question question, ScoreOutcome outcome) {
+        attemptQuestionScoreRepository.save(AttemptQuestionScore.builder()
+            .attemptId(attempt.getId())
+            .questionId(question.getId())
+            .score(outcome)
+            .answeredAt(LocalDateTime.now())
+            .build());
+    }
 
     @Test
     public void getQuizReturnsMetadataWithoutLeakingQuestions() throws Exception {
@@ -105,31 +120,38 @@ public class QuizTakeControllerTest {
             ))
             .build());
 
-        fixtures.save(fixtures.attempt(quiz)
+        Attempt teamRocketAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(0).getId())
-            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
-            .correctAnswers(4)
-            .partiallyCorrectAnswers(0)
-            .incorrectAnswers(0));
-        fixtures.save(fixtures.attempt(quiz)
+            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()}));
+        saveScore(teamRocketAttempt, q1, ScoreOutcome.CORRECT);
+        saveScore(teamRocketAttempt, q2, ScoreOutcome.CORRECT);
+        saveScore(teamRocketAttempt, q3, ScoreOutcome.CORRECT);
+        saveScore(teamRocketAttempt, q4, ScoreOutcome.CORRECT);
+
+        Attempt scrumNinjasAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(1).getId())
-            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
-            .correctAnswers(3)
-            .partiallyCorrectAnswers(0)
-            .incorrectAnswers(1));
-        fixtures.save(fixtures.attempt(quiz)
+            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()}));
+        saveScore(scrumNinjasAttempt, q1, ScoreOutcome.CORRECT);
+        saveScore(scrumNinjasAttempt, q2, ScoreOutcome.CORRECT);
+        saveScore(scrumNinjasAttempt, q3, ScoreOutcome.CORRECT);
+        saveScore(scrumNinjasAttempt, q4, ScoreOutcome.INCORRECT);
+
+        Attempt retroMastersAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(2).getId())
-            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
-            .correctAnswers(2)
-            .partiallyCorrectAnswers(1)
-            .incorrectAnswers(1));
-        fixtures.save(fixtures.attempt(quiz)
+            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()}));
+        saveScore(retroMastersAttempt, q1, ScoreOutcome.CORRECT);
+        saveScore(retroMastersAttempt, q2, ScoreOutcome.CORRECT);
+        saveScore(retroMastersAttempt, q3, ScoreOutcome.PARTIAL);
+        saveScore(retroMastersAttempt, q4, ScoreOutcome.INCORRECT);
+
+        Attempt dryRunAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(0).getId())
             .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
-            .correctAnswers(0)
-            .partiallyCorrectAnswers(0)
-            .incorrectAnswers(4)
             .isDryRun(true));
+        saveScore(dryRunAttempt, q1, ScoreOutcome.INCORRECT);
+        saveScore(dryRunAttempt, q2, ScoreOutcome.INCORRECT);
+        saveScore(dryRunAttempt, q3, ScoreOutcome.INCORRECT);
+        saveScore(dryRunAttempt, q4, ScoreOutcome.INCORRECT);
 
         mockMvc.perform(get("/api/quiz/{id}/leaderboard", quiz.getId()))
             .andExpect(status().isOk())
@@ -431,10 +453,8 @@ public class QuizTakeControllerTest {
                 """))
             .andExpect(jsonPath("$.question").doesNotExist());
 
-        var storedAttempt = attemptRepository.findById(attempt.getId()).orElseThrow();
-        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(1);
-        assertThat(storedAttempt.getIncorrectAnswers()).isEqualTo(0);
-        assertThat(storedAttempt.getPartiallyCorrectAnswers()).isEqualTo(0);
+        var score = attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        assertThat(score.getScore()).isEqualTo(ScoreOutcome.CORRECT);
     }
 
     @Test
@@ -470,10 +490,8 @@ public class QuizTakeControllerTest {
                     """))
             .andExpect(status().isOk());
 
-        var storedAttempt = attemptRepository.findById(attempt.getId()).orElseThrow();
-        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(1);
-        assertThat(storedAttempt.getIncorrectAnswers()).isEqualTo(0);
-        assertThat(storedAttempt.getPartiallyCorrectAnswers()).isEqualTo(0);
+        var score = attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        assertThat(score.getScore()).isEqualTo(ScoreOutcome.CORRECT);
     }
 
     @Test
@@ -509,9 +527,7 @@ public class QuizTakeControllerTest {
                     """))
             .andExpect(status().isOk());
 
-        var storedAttempt = attemptRepository.findById(attempt.getId()).orElseThrow();
-        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(0);
-        assertThat(storedAttempt.getIncorrectAnswers()).isEqualTo(1);
-        assertThat(storedAttempt.getPartiallyCorrectAnswers()).isEqualTo(0);
+        var score = attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        assertThat(score.getScore()).isEqualTo(ScoreOutcome.INCORRECT);
     }
 }

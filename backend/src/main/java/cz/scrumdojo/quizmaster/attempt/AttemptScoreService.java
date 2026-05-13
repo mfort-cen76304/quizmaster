@@ -25,7 +25,6 @@ public class AttemptScoreService {
         } else {
             applyLearnScore(attemptId, questionId, outcome, answeredAt);
         }
-        applyRecomputedCounters(attemptId);
     }
 
     @Transactional

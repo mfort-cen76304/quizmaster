@@ -46,7 +46,10 @@ public class WorkspaceQuizStatsTest {
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Question q2 = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
-        fixtures.save(fixtures.attempt(quiz).correctAnswers(1).incorrectAnswers(1));
+        Attempt attempt = fixtures.save(fixtures.attempt(quiz)
+                .questionIds(new int[]{q1.getId(), q2.getId()}));
+        saveScore(attempt, q1, ScoreOutcome.CORRECT, LocalDateTime.now());
+        saveScore(attempt, q2, ScoreOutcome.INCORRECT, LocalDateTime.now());
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
@@ -68,7 +71,8 @@ public class WorkspaceQuizStatsTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
-        fixtures.save(fixtures.attempt(quiz).correctAnswers(1));
+        Attempt attempt = fixtures.save(fixtures.attempt(quiz).questionIds(new int[]{q1.getId()}));
+        saveScore(attempt, q1, ScoreOutcome.CORRECT, LocalDateTime.now());
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
@@ -127,8 +131,10 @@ public class WorkspaceQuizStatsTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(q1).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
-        fixtures.save(fixtures.attempt(quiz).correctAnswers(1));
-        fixtures.save(fixtures.attempt(quiz).correctAnswers(0).incorrectAnswers(1).isDryRun(true));
+        Attempt realAttempt = fixtures.save(fixtures.attempt(quiz).questionIds(new int[]{q1.getId()}));
+        saveScore(realAttempt, q1, ScoreOutcome.CORRECT, LocalDateTime.now());
+        Attempt dryRunAttempt = fixtures.save(fixtures.attempt(quiz).questionIds(new int[]{q1.getId()}).isDryRun(true));
+        saveScore(dryRunAttempt, q1, ScoreOutcome.INCORRECT, LocalDateTime.now());
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), quiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""

@@ -40,31 +40,36 @@ public class QuizStatsService {
     public Optional<QuizStatsResponse> getStats(String workspaceGuid, Integer quizId) {
         return quizRepository.findByIdAndWorkspaceGuid(quizId, workspaceGuid).map(quiz -> {
             List<Attempt> attempts = attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quizId);
+            List<Integer> attemptIds = attempts.stream().map(Attempt::getId).toList();
+            List<AttemptQuestionScore> allScores = attemptIds.isEmpty()
+                    ? List.of()
+                    : attemptQuestionScoreRepository.findByAttemptIdIn(attemptIds);
+            Map<Integer, List<AttemptQuestionScore>> scoresByAttemptId = allScores.stream()
+                    .collect(Collectors.groupingBy(AttemptQuestionScore::getAttemptId));
             List<AttemptStatsRecord> attemptRecords = attempts.stream()
-                    .map(attempt -> toAttemptRecord(quiz, getTotalQuestions(quiz, attempt), attempt))
+                    .map(attempt -> toAttemptRecord(
+                            quiz,
+                            getTotalQuestions(quiz, attempt),
+                            attempt,
+                            scoresByAttemptId.getOrDefault(attempt.getId(), List.of())))
                     .toList();
             SummaryStats summary = computeSummary(attemptRecords);
-            List<QuestionStatsRecord> questionRecords = buildQuestionRecords(quiz, attempts);
+            List<QuestionStatsRecord> questionRecords = buildQuestionRecords(quiz, attempts, allScores);
             return new QuizStatsResponse(summary, attemptRecords, questionRecords);
         });
     }
-    private List<QuestionStatsRecord> buildQuestionRecords(Quiz quiz, List<Attempt> attempts) {
+    private List<QuestionStatsRecord> buildQuestionRecords(Quiz quiz, List<Attempt> attempts, List<AttemptQuestionScore> allScores) {
         List<Question> questions = quizService.loadQuestions(quiz);
         if (questions.isEmpty()) {
             return List.of();
         }
-        List<Integer> attemptIds = attempts.stream()
-                .map(Attempt::getId)
-                .toList();
         Map<Integer, Long> drawCountsByQuestionId = attempts.stream()
                 .flatMap(attempt -> attempt.getQuestionIds() == null
                         ? Stream.<Integer>empty()
                         : Arrays.stream(attempt.getQuestionIds()).boxed())
                 .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
-        Map<Integer, List<AttemptQuestionScore>> scoresByQuestionId = attemptIds.isEmpty()
-                ? Map.of()
-                : attemptQuestionScoreRepository.findByAttemptIdIn(attemptIds).stream()
-                        .collect(Collectors.groupingBy(AttemptQuestionScore::getQuestionId));
+        Map<Integer, List<AttemptQuestionScore>> scoresByQuestionId = allScores.stream()
+                .collect(Collectors.groupingBy(AttemptQuestionScore::getQuestionId));
         return questions.stream()
                 .map(question -> toQuestionRecord(
                         question,
@@ -107,7 +112,7 @@ public class QuizStatsService {
         }
         return getTotalQuestions(quiz);
     }
-    private AttemptStatsRecord toAttemptRecord(Quiz quiz, int totalQuestions, Attempt attempt) {
+    private AttemptStatsRecord toAttemptRecord(Quiz quiz, int totalQuestions, Attempt attempt, List<AttemptQuestionScore> scores) {
         LocalDateTime endTime = attempt.getTimedOutAt() != null
                 ? attempt.getTimedOutAt()
                 : attempt.getFinishedAt();
@@ -117,13 +122,11 @@ public class QuizStatsService {
         if (durationSeconds != null && attempt.getTimedOutAt() != null && quiz.getTimeLimit() != null) {
             durationSeconds = Math.min(durationSeconds, quiz.getTimeLimit());
         }
-        int correctAnswers = attempt.getCorrectAnswers();
-        int partiallyCorrectAnswers = attempt.getPartiallyCorrectAnswers() != null
-                ? attempt.getPartiallyCorrectAnswers()
-                : 0;
+        int correctAnswers = countByScore(scores, ScoreOutcome.CORRECT);
+        int partiallyCorrectAnswers = countByScore(scores, ScoreOutcome.PARTIAL);
         int incorrectAnswers = attempt.getFinishedAt() != null
                 ? totalQuestions - correctAnswers - partiallyCorrectAnswers
-                : attempt.getIncorrectAnswers();
+                : countByScore(scores, ScoreOutcome.INCORRECT);
         float earnedPoints = correctAnswers + 0.5f * partiallyCorrectAnswers;
         int score = totalQuestions > 0
                 ? Math.round(earnedPoints / totalQuestions * 100)

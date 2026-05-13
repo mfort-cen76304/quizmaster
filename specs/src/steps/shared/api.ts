@@ -223,6 +223,19 @@ export const createFinishedCohortAttemptViaRest = async (
         }
     })
 
+    for (const answer of answers) {
+        const submitResponse = await world.page.request.post(
+            `/api/quiz/${quizId}/attempts/${started.attemptId}/questions/${answer.questionId}/submit`,
+            { data: answer },
+        )
+        if (!submitResponse.ok()) {
+            throw new Error(
+                `POST submit for question ${answer.questionId} failed: ` +
+                    `${submitResponse.status()} ${await submitResponse.text()}`,
+            )
+        }
+    }
+
     const evaluateBody: QuizEvaluationRequest = {
         questionIds: started.questions.map(question => question.id),
         answers,

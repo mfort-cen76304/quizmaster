@@ -1,5 +1,7 @@
 package cz.scrumdojo.quizmaster.quiz;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptResponse;
 import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
@@ -41,6 +43,7 @@ public class QuizTakeController {
     private final AttemptRepository attemptRepository;
     private final QuestionScoringService questionScoringService;
     private final AttemptScoreService attemptScoreService;
+    private final AttemptQuestionScoreRepository attemptQuestionScoreRepository;
     private final Clock clock;
     public QuizTakeController(
             QuizService quizService,
@@ -49,6 +52,7 @@ public class QuizTakeController {
             AttemptRepository attemptRepository,
             QuestionScoringService questionScoringService,
             AttemptScoreService attemptScoreService,
+            AttemptQuestionScoreRepository attemptQuestionScoreRepository,
             Clock clock) {
         this.quizService = quizService;
         this.quizRepository = quizRepository;
@@ -56,6 +60,7 @@ public class QuizTakeController {
         this.attemptRepository = attemptRepository;
         this.questionScoringService = questionScoringService;
         this.attemptScoreService = attemptScoreService;
+        this.attemptQuestionScoreRepository = attemptQuestionScoreRepository;
         this.clock = clock;
     }
     @GetMapping("/{id}")
@@ -70,14 +75,20 @@ public class QuizTakeController {
     }
 
     private QuizLeaderboardCohortResponse[] buildLeaderboard(Quiz quiz) {
+        var attempts = attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quiz.getId());
+        var finishedCohortAttempts = attempts.stream()
+            .filter(a -> a.getFinishedAt() != null && a.getCohortId() != null)
+            .toList();
+        var attemptIds = finishedCohortAttempts.stream().map(Attempt::getId).toList();
+        var scoresByAttemptId = attemptIds.isEmpty()
+            ? Map.<Integer, List<AttemptQuestionScore>>of()
+            : attemptQuestionScoreRepository.findByAttemptIdIn(attemptIds).stream()
+                .collect(Collectors.groupingBy(AttemptQuestionScore::getAttemptId));
         var scoresByCohort = new HashMap<Integer, List<Integer>>();
-        for (Attempt attempt : attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quiz.getId())) {
-            if (attempt.getFinishedAt() == null || attempt.getCohortId() == null) {
-                continue;
-            }
+        for (Attempt attempt : finishedCohortAttempts) {
             scoresByCohort
                 .computeIfAbsent(attempt.getCohortId(), ignored -> new ArrayList<>())
-                .add(calculateAttemptScore(quiz, attempt));
+                .add(calculateAttemptScore(quiz, attempt, scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
         }
 
         var rankedCohorts = quiz.getCohorts().stream()
@@ -97,7 +108,7 @@ public class QuizTakeController {
         return response;
     }
 
-    private int calculateAttemptScore(Quiz quiz, Attempt attempt) {
+    private int calculateAttemptScore(Quiz quiz, Attempt attempt, List<AttemptQuestionScore> scores) {
         int totalQuestions = attempt.getQuestionIds() != null && attempt.getQuestionIds().length > 0
             ? attempt.getQuestionIds().length
             : totalQuestionsForQuiz(quiz);
@@ -105,10 +116,8 @@ public class QuizTakeController {
             return 0;
         }
 
-        int correctAnswers = attempt.getCorrectAnswers() != null ? attempt.getCorrectAnswers() : 0;
-        int partiallyCorrectAnswers = attempt.getPartiallyCorrectAnswers() != null
-            ? attempt.getPartiallyCorrectAnswers()
-            : 0;
+        int correctAnswers = (int) scores.stream().filter(s -> s.getScore() == ScoreOutcome.CORRECT).count();
+        int partiallyCorrectAnswers = (int) scores.stream().filter(s -> s.getScore() == ScoreOutcome.PARTIAL).count();
         float earnedPoints = correctAnswers + 0.5f * partiallyCorrectAnswers;
         return Math.round(earnedPoints / totalQuestions * 100);
     }
