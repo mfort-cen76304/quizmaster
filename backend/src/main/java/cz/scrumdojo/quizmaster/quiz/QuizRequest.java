@@ -26,7 +26,7 @@ public record QuizRequest(
                 cohortEntities.add(Cohort.builder().name(name).build());
             }
         }
-        return Quiz.builder()
+        Quiz quiz = Quiz.builder()
             .title(title)
             .description(description)
             .startAt(startAt)
@@ -38,7 +38,8 @@ public record QuizRequest(
             .timeLimit(timeLimit)
             .workspaceGuid(workspaceGuid)
             .randomQuestionCount(randomQuestionCount)
-            .cohorts(cohortEntities)
             .build();
+        quiz.setCohorts(cohortEntities);
+        return quiz;
     }
 }
