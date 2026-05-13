@@ -1,8 +1,8 @@
 import './quiz-play.scss'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { QuizMode, QuizTake } from '#fe/shared/model/quiz.ts'
-import { recordTimeout, skipQuizQuestion, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
+import { recordTimeout, skipQuizQuestion, startAttemptQuestion, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
 import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
 import { QuestionForm, QuizQuestionProvider } from '#fe/take/question-take/index.ts'
 
@@ -55,6 +55,11 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     }
 
     const currentQuestion = props.quiz.questions[nav.currentQuestionIdx]
+
+    useEffect(() => {
+        void startAttemptQuestion(props.quiz.id, props.quizRunId, currentQuestion.id)
+    }, [currentQuestion.id])
+
     const currentAnswer = quizAnswers.finalAnswers[nav.currentQuestionIdx]
     const isAnswered = currentAnswer !== undefined
     const hasSelectedAnswer = selectedAnswerIdxs !== undefined && selectedAnswerIdxs.length > 0

@@ -16,7 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Duration;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Slf4j
@@ -72,7 +75,22 @@ public class WorkspaceQuestionController {
                 .filter(l -> "ANSWERED".equals(l.getEventType()) && isCorrectAnswer(l.getEventDetail()))
                 .count();
             int successRate = timesAsked > 0 ? (int) Math.round(100.0 * correct / timesAsked) : 0;
-            int averageTime = 0; // not yet implemented — needs per-question start time logging
+            // Average time: diff between STARTED and ANSWERED for the same attempt
+            int averageTime = (int) Math.round(
+                logs.stream()
+                    .filter(l -> "ANSWERED".equals(l.getEventType()))
+                    .flatMapToLong(answered ->
+                        logs.stream()
+                            .filter(s -> "STARTED".equals(s.getEventType())
+                                    && Objects.equals(s.getAttemptId(), answered.getAttemptId()))
+                            .max(Comparator.comparing(s -> s.getCreatedAt()))
+                            .stream()
+                            .mapToLong(started -> Duration.between(started.getCreatedAt(), answered.getCreatedAt()).getSeconds())
+                            .filter(diff -> diff > 0)
+                    )
+                    .average()
+                    .orElse(0)
+            );
 
             var stats = new QuestionStats(timesAsked, successRate, averageTime, skipped);
             return QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId()), stats);

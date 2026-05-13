@@ -277,13 +277,44 @@ public class QuizTakeController {
         }
         return ResponseEntity.ok(questionScoringService.evaluate(question.get(), request));
     }
+
+    @PostMapping("/{id}/attempts/{attemptId}/questions/{questionId}/start")
+    public ResponseEntity<Void> startAttemptQuestion(
+            @PathVariable Integer id,
+            @PathVariable Integer attemptId,
+            @PathVariable Integer questionId) {
+        var attempt = attemptRepository.findById(attemptId)
+            .filter(existing -> Objects.equals(existing.getQuizId(), id));
+        if (attempt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var expectedQuestionIds = attempt.get().getQuestionIds();
+        if (expectedQuestionIds == null || Arrays.stream(expectedQuestionIds).noneMatch(expectedId -> Objects.equals(expectedId, questionId))) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        QuestionStatsLog log = QuestionStatsLog.builder()
+            .questionId(questionId)
+            .quizId(id)
+            .attemptId(attemptId)
+            .eventType("STARTED")
+            .createdAt(LocalDateTime.now(clock))
+            .build();
+        questionStatsLogRepository.save(log);
+
+        return ResponseEntity.noContent().build();
+    }
+
     private Optional<Attempt> findActiveAttempt(Integer quizId, Integer attemptId) {
         return attemptRepository.findById(attemptId)
             .filter(existing -> Objects.equals(existing.getQuizId(), quizId));
     }
+
     private boolean containsQuestion(int[] questionIds, Integer questionId) {
         return questionIds != null && Arrays.stream(questionIds).anyMatch(expectedId -> Objects.equals(expectedId, questionId));
     }
+
     private Integer findTimedOutQuestionId(int[] questionIds, Integer attemptId, boolean timedOut) {
         if (!timedOut) {
             return null;
@@ -301,6 +332,7 @@ public class QuizTakeController {
         }
         return null;
     }
+
     private void finalizeUnansweredQuestion(
             Integer quizId,
             Integer attemptId,
@@ -325,6 +357,7 @@ public class QuizTakeController {
                 }
             });
     }
+
     private String answeredEventDetail(double score, LocalDateTime answeredAt) throws Exception {
         return objectMapper.writeValueAsString(Map.of(
             "score", score,
@@ -332,6 +365,7 @@ public class QuizTakeController {
             "answeredAt", answeredAt.toString()
         ));
     }
+
     private void saveAttemptQuestionLog(
             Integer quizId,
             Integer attemptId,

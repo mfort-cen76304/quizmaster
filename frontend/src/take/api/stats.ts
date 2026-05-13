@@ -14,6 +14,10 @@ export const evaluateQuiz = async (
         `/api/quiz/${quizId}/attempts/${attemptId}/evaluate`,
         request,
     )
+
+export const startAttemptQuestion = async (quizId: number, attemptId: number, questionId: number): Promise<void> =>
+    await postNoContent(`/api/quiz/${quizId}/attempts/${attemptId}/questions/${questionId}/start`)
+
 export const submitQuizQuestionAnswer = async (
     quizId: number,
     attemptId: number,
