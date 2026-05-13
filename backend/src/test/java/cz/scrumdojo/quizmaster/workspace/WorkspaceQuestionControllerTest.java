@@ -1,6 +1,7 @@
 package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
+import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionStatsLog;
 import cz.scrumdojo.quizmaster.question.QuestionStatsLogRepository;
@@ -74,10 +75,12 @@ public class WorkspaceQuestionControllerTest {
         Question answeredQuestion = fixtures.save(fixtures.questionIn(workspace));
         Question timedOutQuestion = fixtures.save(fixtures.questionIn(workspace).question("What is 10 - 5?"));
         Quiz quiz = fixtures.save(fixtures.quiz(answeredQuestion, timedOutQuestion).workspaceGuid(workspace.getGuid()).build());
+        Attempt attempt = fixtures.save(fixtures.attempt(quiz)
+            .questionIds(new int[]{answeredQuestion.getId(), timedOutQuestion.getId()}));
         questionStatsLogRepository.save(QuestionStatsLog.builder()
             .questionId(answeredQuestion.getId())
             .quizId(quiz.getId())
-            .attemptId(101)
+            .attemptId(attempt.getId())
             .eventType("ANSWERED")
             .eventDetail("{\"correct\":true}")
             .createdAt(LocalDateTime.now())
@@ -85,7 +88,7 @@ public class WorkspaceQuestionControllerTest {
         questionStatsLogRepository.save(QuestionStatsLog.builder()
             .questionId(timedOutQuestion.getId())
             .quizId(quiz.getId())
-            .attemptId(101)
+            .attemptId(attempt.getId())
             .eventType("TIMEOUT")
             .eventDetail("{}")
             .createdAt(LocalDateTime.now())
