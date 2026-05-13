@@ -10,14 +10,11 @@ export interface AttemptStatsRecord {
 }
 export interface QuestionStatsRecord {
     readonly question: string
-    readonly shown: number
     readonly answered: number
-    readonly skipped: number
-    readonly timeout: number
-    readonly abandoned: number
     readonly correctAnswers: number
     readonly partiallyCorrectAnswers: number
     readonly incorrectAnswers: number
+    readonly unanswered: number
 }
 export interface SummaryStats {
     readonly started: number

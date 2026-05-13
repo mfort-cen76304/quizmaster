@@ -80,24 +80,20 @@ public class QuizStatsService {
             Question question,
             List<QuestionStatsLog> logs,
             List<AttemptQuestionScore> scores) {
-        int shown = logs.size();
         int answered = scores.size();
-        int skipped = countByEventType(logs, "SKIPPED");
-        int timeout = countByEventType(logs, "TIMEOUT");
-        int abandoned = countByEventType(logs, "ABANDONED");
+        int unanswered = countByEventType(logs, "SKIPPED")
+                + countByEventType(logs, "TIMEOUT")
+                + countByEventType(logs, "ABANDONED");
         int correctAnswers = countByScore(scores, ScoreOutcome.CORRECT);
         int partiallyCorrectAnswers = countByScore(scores, ScoreOutcome.PARTIAL);
         int incorrectAnswers = countByScore(scores, ScoreOutcome.INCORRECT);
         return new QuestionStatsRecord(
                 question.getQuestion(),
-                shown,
                 answered,
-                skipped,
-                timeout,
-                abandoned,
                 correctAnswers,
                 partiallyCorrectAnswers,
-                incorrectAnswers
+                incorrectAnswers,
+                unanswered
         );
     }
     private int countByEventType(List<QuestionStatsLog> logs, String eventType) {

@@ -200,36 +200,27 @@ public class WorkspaceQuizStatsTest {
                       "questionStatistics": [
                         {
                           "question": "Which are planets in solar system?",
-                          "shown": 2,
                           "answered": 2,
-                          "skipped": 0,
-                          "timeout": 0,
-                          "abandoned": 0,
                           "correctAnswers": 1,
                           "partiallyCorrectAnswers": 1,
-                          "incorrectAnswers": 0
+                          "incorrectAnswers": 0,
+                          "unanswered": 0
                         },
                         {
                           "question": "What is the capital of Italy?",
-                          "shown": 2,
                           "answered": 0,
-                          "skipped": 1,
-                          "timeout": 0,
-                          "abandoned": 1,
                           "correctAnswers": 0,
                           "partiallyCorrectAnswers": 0,
-                          "incorrectAnswers": 0
+                          "incorrectAnswers": 0,
+                          "unanswered": 2
                         },
                         {
                           "question": "What color is the sky?",
-                          "shown": 2,
                           "answered": 0,
-                          "skipped": 0,
-                          "timeout": 1,
-                          "abandoned": 1,
                           "correctAnswers": 0,
                           "partiallyCorrectAnswers": 0,
-                          "incorrectAnswers": 0
+                          "incorrectAnswers": 0,
+                          "unanswered": 2
                         }
                       ]
                     }
@@ -241,25 +232,19 @@ public class WorkspaceQuizStatsTest {
                       "questionStatistics": [
                         {
                           "question": "Which are planets in solar system?",
-                          "shown": 1,
                           "answered": 1,
-                          "skipped": 0,
-                          "timeout": 0,
-                          "abandoned": 0,
                           "correctAnswers": 0,
                           "partiallyCorrectAnswers": 0,
-                          "incorrectAnswers": 1
+                          "incorrectAnswers": 1,
+                          "unanswered": 0
                         },
                         {
                           "question": "What is 2 + 2?",
-                          "shown": 1,
                           "answered": 1,
-                          "skipped": 0,
-                          "timeout": 0,
-                          "abandoned": 0,
                           "correctAnswers": 1,
                           "partiallyCorrectAnswers": 0,
-                          "incorrectAnswers": 0
+                          "incorrectAnswers": 0,
+                          "unanswered": 0
                         }
                       ]
                     }

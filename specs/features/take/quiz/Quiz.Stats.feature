@@ -246,12 +246,12 @@ Feature: Show stats
     * I finish the quiz in 8 seconds
     When I open quiz "<quizName>" statistics
     Then I see question stats table
-      | Question    | Shown    | Answered    | Skipped    | Timeout    | Abandoned    | Correct        | Partially Correct   | Incorrect    |
-      | <question1> | <shown1> | <answered1> | <skipped1> | <timeout1> | <abandoned1> | <successRate1> | <partiallyCorrect1> | <incorrect1> |
-      | <question2> | <shown2> | <answered2> | <skipped2> | <timeout2> | <abandoned2> | <successRate2> | <partiallyCorrect2> | <incorrect2> |
-      | <question3> | <shown3> | <answered3> | <skipped3> | <timeout3> | <abandoned3> | <successRate3> | <partiallyCorrect3> | <incorrect3> |
+      | Question    | Answered    | Correct        | Partially Correct   | Incorrect    | Unanswered    |
+      | <question1> | <answered1> | <successRate1> | <partiallyCorrect1> | <incorrect1> | <unanswered1> |
+      | <question2> | <answered2> | <successRate2> | <partiallyCorrect2> | <incorrect2> | <unanswered2> |
+      | <question3> | <answered3> | <successRate3> | <partiallyCorrect3> | <incorrect3> | <unanswered3> |
 
     Examples:
-      | quizName    | question1                          | shown1 | answered1 | skipped1 | timeout1 | abandoned1 | successRate1 | partiallyCorrect1 | incorrect1 | question2                     | shown2 | answered2 | skipped2 | timeout2 | abandoned2 | successRate2 | partiallyCorrect2 | incorrect2 | question3              | shown3 | answered3 | skipped3 | timeout3 | abandoned3 | successRate3 | partiallyCorrect3 | incorrect3 |
-      | First Quiz  | Which are planets in solar system? | 2      | 2         | 0        | 0        | 0          | 50%          | 1 (50%)           | 0 (0%)     | What is the capital of Italy? | 2      | 0         | 1        | 0        | 1          | 0%           | 0 (0%)            | 0 (0%)     | What color is the sky? | 2      | 0         | 0        | 1        | 1          | 0%           | 0 (0%)            | 0 (0%)     |
-      | Second Quiz | Which are planets in solar system? | 1      | 1         | 0        | 0        | 0          | 0%           | 0 (0%)            | 1 (100%)   | What is 2 + 2?                | 1      | 1         | 0        | 0        | 0          | 100%         | 0 (0%)            | 0 (0%)     |                        |        |           |          |          |            |              |                   |            |
+      | quizName    | question1                          | answered1 | successRate1 | partiallyCorrect1 | incorrect1 | unanswered1 | question2                     | answered2 | successRate2 | partiallyCorrect2 | incorrect2 | unanswered2 | question3              | answered3 | successRate3 | partiallyCorrect3 | incorrect3 | unanswered3 |
+      | First Quiz  | Which are planets in solar system? | 2         | 50%          | 1 (50%)           | 0 (0%)     | 0           | What is the capital of Italy? | 0         | 0%           | 0 (0%)            | 0 (0%)     | 2           | What color is the sky? | 0         | 0%           | 0 (0%)            | 0 (0%)     | 2           |
+      | Second Quiz | Which are planets in solar system? | 1         | 0%           | 0 (0%)            | 1 (100%)   | 0           | What is 2 + 2?                | 1         | 100%         | 0 (0%)            | 0 (0%)     | 0           |                        |           |              |                   |            |             |

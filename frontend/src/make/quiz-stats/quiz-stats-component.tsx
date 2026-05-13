@@ -43,14 +43,11 @@ const attemptRow = (attempt: AttemptStatsRecord): string[] => {
 }
 const questionRow = (question: QuestionStatsRecord): string[] => [
     question.question,
-    String(question.shown),
     String(question.answered),
-    String(question.skipped),
-    String(question.timeout),
-    String(question.abandoned),
-    rate(question.correctAnswers, question.shown),
-    pct(question.partiallyCorrectAnswers, question.shown),
-    pct(question.incorrectAnswers, question.shown),
+    rate(question.correctAnswers, question.answered),
+    pct(question.partiallyCorrectAnswers, question.answered),
+    pct(question.incorrectAnswers, question.answered),
+    String(question.unanswered),
 ]
 const averageDuration = (attempts: readonly AttemptStatsRecord[]): string => {
     const durations = attempts.flatMap(attempt => (attempt.durationSeconds == null ? [] : [attempt.durationSeconds]))
@@ -62,14 +59,11 @@ const averageDuration = (attempts: readonly AttemptStatsRecord[]): string => {
 }
 const emptyQuestionStats = (question: string): QuestionStatsRecord => ({
     question,
-    shown: 0,
     answered: 0,
-    skipped: 0,
-    timeout: 0,
-    abandoned: 0,
     correctAnswers: 0,
     partiallyCorrectAnswers: 0,
     incorrectAnswers: 0,
+    unanswered: 0,
 })
 const resolveQuestionStats = (quiz: Quiz, stats: QuizStatsResponse): readonly QuestionStatsRecord[] => {
     const backendQuestionStats = stats.questionStatistics ?? stats.questions ?? stats.questionStats ?? []
@@ -179,17 +173,7 @@ export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
                     <StatsTable
                         testId="question-stats-table"
                         caption="Questions"
-                        columns={[
-                            'Question',
-                            'Shown',
-                            'Answered',
-                            'Skipped',
-                            'Timeout',
-                            'Abandoned',
-                            'Correct',
-                            'Partially Correct',
-                            'Incorrect',
-                        ]}
+                        columns={['Question', 'Answered', 'Correct', 'Partially Correct', 'Incorrect', 'Unanswered']}
                         rows={questions.map(questionRow)}
                     />
                 </section>
