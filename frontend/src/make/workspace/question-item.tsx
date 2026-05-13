@@ -35,14 +35,6 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                         </Button>
                     )}
                 </div>
-                {question.stats && (
-                    <div className="question-stats-row">
-                        <span className="question-stat">Asked: {question.stats.timesAsked}×</span>
-                        <span className="question-stat">Success: {question.stats.successRate}%</span>
-                        <span className="question-stat">Avg time: {question.stats.averageTime}s</span>
-                        <span className="question-stat">Skipped: {question.stats.skipped}×</span>
-                    </div>
-                )}
             </div>
         </div>
     )

@@ -51,23 +51,6 @@ export class WorkspacePage {
     editQuestion = (question: string) => this.questionLocator(question).getByRole('link', { name: 'Edit' }).click()
     editFirstQuestion = () => this.questionsLocator().first().getByRole('link', { name: 'Edit' }).click()
 
-    // ── Question stats assertions ─────────────────────────────
-    /**
-     * Ověří statistiky otázky podle předaných hodnot.
-     * @param question Název otázky
-     * @param stats Objekt: { timesAsked, successRate, averageTime, skipped }
-     */
-    expectQuestionStats = async (
-        question: string,
-        stats: { timesAsked: string; successRate: string; averageTime: string; skipped: string },
-    ) => {
-        const row = this.page.locator('.question-item', { hasText: question }).locator('.question-stats-row')
-        await expect(row).toContainText(`Asked: ${stats.timesAsked}×`)
-        await expect(row).toContainText(`Success: ${stats.successRate}`)
-        await expect(row).toContainText(`Avg time: ${stats.averageTime}`)
-        await expect(row).toContainText(`Skipped: ${stats.skipped}×`)
-    }
-
     private deleteButtonLocator = (question: string) =>
         this.questionLocator(question).getByRole('button', { name: 'Delete' })
     deleteQuestion = async (question: string) => {

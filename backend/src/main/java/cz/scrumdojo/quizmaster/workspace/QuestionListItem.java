@@ -9,18 +9,16 @@ public record QuestionListItem(
     String question,
     boolean isInAnyQuiz,
     String imageUrl,
-    List<String> tags,
-    QuestionStats stats
+    List<String> tags
 ) {
-    public static QuestionListItem from(Question question, boolean isInAnyQuiz, QuestionStats stats) {
+    public static QuestionListItem from(Question question, boolean isInAnyQuiz) {
         String[] tags = question.getTags();
         return new QuestionListItem(
             question.getId(),
             question.getQuestion(),
             isInAnyQuiz,
             question.getImageUrl(),
-            tags == null ? List.of() : Arrays.asList(tags),
-            stats
+            tags == null ? List.of() : Arrays.asList(tags)
         );
     }
 }

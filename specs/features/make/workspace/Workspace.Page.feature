@@ -3,7 +3,6 @@ Feature: Workspace page management
   From here, a quiz maker can:
   - Take, edit, or delete individual questions
   - View updated question text after edits
-  - View answer statistics (success rate, average time, skipped count) per question
   Questions used in a quiz cannot be deleted.
 
   Scenario: Workspace summary shows zero questions and zero quizzes by default
@@ -113,55 +112,3 @@ Feature: Workspace page management
       | 2 + 2 = ?             | 4 (*), 5     |                                     |
     Then I see image thumbnail for question "Which animal is this?"
     And I do not see image thumbnail for question "2 + 2 = ?"
-
-
-  Scenario: Question with no attempts shows zero stats
-    Given workspace "Workspace" with questions
-      | question       | answers  |
-      | What is 2 + 2? | 4 (*), 5 |
-      | What is 3 + 3? | 6 (*), 7 |
-    Then I see stats for question "What is 2 + 2?"
-      | Times asked | Success rate | Average time | Skipped |
-      | 0           | 0%           | 0s           | 0       |
-
-
-  Scenario: Question stats reflect correct and incorrect answers across attempts
-    Given workspace "Workspace" with questions
-      | question       | answers  |
-      | What is 2 + 2? | 4 (*), 5 |
-      | What is 3 + 3? | 6 (*), 7 |
-    And quiz "Math Quiz" with all questions
-
-    When I start the quiz
-    * I answer correctly
-    * I answer correctly
-    * I finish the quiz in 10 seconds
-
-    When I start the quiz
-    * I answer incorrectly
-    * I answer correctly
-    * I finish the quiz in 20 seconds
-
-    And I open the workspace
-    Then I see stats for question "What is 2 + 2?"
-      | Times asked | Success rate | Average time | Skipped |
-      | 2           | 50%          | 0s           | 0       |
-
-
-  Scenario: Question stats count skipped answers
-    Given workspace "Workspace" with questions
-      | question        | answers  |
-      | What is 2 + 2?  | 4 (*), 5 |
-      | What is 10 - 5? | 5 (*), 6 |
-    And quiz "Math Quiz" with all questions
-      | time limit | 10s |
-
-    When I start the quiz
-    * I answer correctly
-    * 10 seconds pass
-    * I evaluate the quiz
-
-    And I open the workspace
-    Then I see stats for question "What is 10 - 5?"
-      | Times asked | Success rate | Average time | Skipped |
-      | 1           | 0%           | 0s           | 1       |
