@@ -4,12 +4,20 @@ const mergeHeaders = (headers: HeadersInit | undefined, extra: HeadersInit): Hea
     return merged
 }
 
+const extractErrorMessage = async (response: Response): Promise<string> => {
+    try {
+        const error = await response.json()
+        return error.message ?? `${response.status} ${response.statusText}`
+    } catch {
+        return `${response.status} ${response.statusText}`
+    }
+}
+
 export const fetchJson = async <T>(url: string, init?: RequestInit): Promise<T> =>
     fetch(url, init)
         .then(async response => {
             if (!response.ok) {
-                const error = await response.json()
-                throw new Error(error.message)
+                throw new Error(await extractErrorMessage(response))
             }
             return response
         })
@@ -42,16 +50,14 @@ export const postNoContent = async <T>(url: string, data?: T, init?: RequestInit
         body: JSON.stringify(data),
     })
     if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message)
+        throw new Error(await extractErrorMessage(response))
     }
 }
 
 export const callDelete = async (url: string, init?: RequestInit) =>
     fetch(url, { ...init, method: 'DELETE' }).then(async response => {
         if (!response.ok) {
-            const error = await response.json()
-            throw new Error(error.message)
+            throw new Error(await extractErrorMessage(response))
         }
         return response
     })
