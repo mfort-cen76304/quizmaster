@@ -176,9 +176,6 @@ public class TestFixtures {
     public Attempt.AttemptBuilder attempt(Quiz quiz) {
         return Attempt.builder()
             .quizId(quiz.getId())
-            .correctAnswers(0)
-            .incorrectAnswers(0)
-            .partiallyCorrectAnswers(0)
             .startedAt(LocalDateTime.now().minusMinutes(2))
             .finishedAt(LocalDateTime.now());
     }
@@ -186,18 +183,12 @@ public class TestFixtures {
     public Attempt.AttemptBuilder attemptInProgress(Quiz quiz) {
         return Attempt.builder()
             .quizId(quiz.getId())
-            .correctAnswers(0)
-            .incorrectAnswers(0)
-            .partiallyCorrectAnswers(0)
             .startedAt(LocalDateTime.now());
     }
 
     public Attempt.AttemptBuilder attemptTimedOut(Quiz quiz) {
         return Attempt.builder()
             .quizId(quiz.getId())
-            .correctAnswers(0)
-            .incorrectAnswers(0)
-            .partiallyCorrectAnswers(0)
             .startedAt(LocalDateTime.now().minusMinutes(5))
             .finishedAt(LocalDateTime.now())
             .timedOutAt(LocalDateTime.now().minusMinutes(5).plusSeconds(300));
@@ -206,9 +197,6 @@ public class TestFixtures {
     public Attempt.AttemptBuilder attemptAbandoned(Quiz quiz) {
         return Attempt.builder()
             .quizId(quiz.getId())
-            .correctAnswers(0)
-            .partiallyCorrectAnswers(0)
-            .incorrectAnswers(0)
             .startedAt(LocalDateTime.now().minusMinutes(5))
             .timedOutAt(LocalDateTime.now().minusMinutes(5).plusSeconds(300));
     }

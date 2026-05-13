@@ -157,9 +157,6 @@ public class WorkspaceQuizController {
                     .quizId(quiz.getId())
                     .questionIds(selectedQuestionIds)
                     .startedAt(LocalDateTime.now(clock))
-                    .correctAnswers(0)
-                    .partiallyCorrectAnswers(0)
-                    .incorrectAnswers(0)
                     .isDryRun(true)
                     .build();
                 Attempt persisted = attemptRepository.save(attempt);

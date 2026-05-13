@@ -7,7 +7,7 @@ import type { QuizAnswers } from './quiz-answers-state.ts'
 interface QuizScorePageProps {
     readonly quiz: QuizTake
     readonly quizAnswers: QuizAnswers
-    readonly result: Pick<QuizEvaluationResponse, 'score' | 'totalQuestions' | 'questions'>
+    readonly result: QuizEvaluationResponse
 }
 
 export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps) => {

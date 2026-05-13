@@ -38,15 +38,6 @@ public class Attempt {
     @Column(name = "finished_at")
     private LocalDateTime finishedAt;
 
-    @Column(name = "correct_answers", nullable = false)
-    private Integer correctAnswers;
-
-    @Column(name = "partially_correct_answers", nullable = false)
-    private Integer partiallyCorrectAnswers;
-
-    @Column(name = "incorrect_answers", nullable = false)
-    private Integer incorrectAnswers;
-
     @Column(name = "timed_out_at")
     private LocalDateTime timedOutAt;
 

@@ -163,26 +163,17 @@ public class WorkspaceQuizStatsTest {
         LocalDateTime now = LocalDateTime.now();
         Attempt firstQuizTimeoutAttempt = fixtures.save(fixtures.attempt(firstQuiz)
                 .questionIds(new int[]{shared.getId(), skipped.getId(), timeout.getId()})
-                .correctAnswers(0)
-                .partiallyCorrectAnswers(1)
-                .incorrectAnswers(0)
                 .startedAt(now.minusSeconds(10))
                 .finishedAt(now.minusSeconds(5))
                 .timedOutAt(now.minusSeconds(5)));
         saveScore(firstQuizTimeoutAttempt, shared, ScoreOutcome.PARTIAL, now.minusSeconds(8));
         Attempt firstQuizAbandonedAttempt = fixtures.save(fixtures.attemptAbandoned(firstQuiz)
                 .questionIds(new int[]{shared.getId(), skipped.getId(), timeout.getId()})
-                .correctAnswers(1)
-                .partiallyCorrectAnswers(0)
-                .incorrectAnswers(0)
                 .startedAt(now.minusSeconds(4))
                 .timedOutAt(now.minusSeconds(1)));
         saveScore(firstQuizAbandonedAttempt, shared, ScoreOutcome.CORRECT, now.minusSeconds(3));
         Attempt secondQuizFinishedAttempt = fixtures.save(fixtures.attempt(secondQuiz)
                 .questionIds(new int[]{shared.getId(), correct.getId()})
-                .correctAnswers(1)
-                .partiallyCorrectAnswers(0)
-                .incorrectAnswers(1)
                 .startedAt(now.minusSeconds(20))
                 .finishedAt(now.minusSeconds(12)));
         saveScore(secondQuizFinishedAttempt, shared, ScoreOutcome.INCORRECT, now.minusSeconds(18));

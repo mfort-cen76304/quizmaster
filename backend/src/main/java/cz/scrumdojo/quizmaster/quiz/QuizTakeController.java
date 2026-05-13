@@ -3,7 +3,6 @@ import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
-import cz.scrumdojo.quizmaster.attempt.AttemptResponse;
 import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
 import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
@@ -162,9 +161,6 @@ public class QuizTakeController {
                     .cohortId(cohortId.orElse(null))
                     .questionIds(selectedQuestionIds)
                     .startedAt(now)
-                    .correctAnswers(0)
-                    .partiallyCorrectAnswers(0)
-                    .incorrectAnswers(0)
                     .build();
                 Attempt persisted = attemptRepository.save(attempt);
                 QuestionTakeResponse[] questions = selectedQuestions.stream()
@@ -238,9 +234,6 @@ public class QuizTakeController {
             : Arrays.stream(request.answers())
                 .filter(answer -> answer.questionId() != null)
                 .collect(Collectors.toMap(QuestionAnswerRequest::questionId, Function.identity(), (left, right) -> right));
-        int correct = 0;
-        int partial = 0;
-        int incorrect = 0;
         double score = 0;
         for (Integer questionId : expectedQuestionIds) {
             var question = questionsById.get(questionId);
@@ -248,22 +241,15 @@ public class QuizTakeController {
                 return ResponseEntity.notFound().build();
             }
             QuestionAnswerRequest answer = answerByQuestionId.get(questionId);
-            double questionScore = questionScoringService.score(question, answer);
-            score += questionScore;
-            if (questionScore == 1) correct++;
-            else if (questionScore == 0.5) partial++;
-            else incorrect++;
+            score += questionScoringService.score(question, answer);
         }
-        updatedAttempt.setCorrectAnswers(correct);
-        updatedAttempt.setPartiallyCorrectAnswers(partial);
-        updatedAttempt.setIncorrectAnswers(incorrect);
         updatedAttempt.setFinishedAt(LocalDateTime.now(clock));
         var feedbackQuestions = Arrays.stream(expectedQuestionIds)
             .mapToObj(questionsById::get)
             .map(QuestionResponse::feedbackFrom)
             .toArray(QuestionResponse[]::new);
+        attemptRepository.save(updatedAttempt);
         return ResponseEntity.ok(new QuizEvaluationResponse(
-            AttemptResponse.from(attemptRepository.save(updatedAttempt)),
             score,
             expectedQuestionIds.length,
             feedbackQuestions

@@ -84,13 +84,6 @@ export interface QuizEvaluationRequest {
 }
 
 export interface QuizEvaluationResponse {
-    readonly attempt: {
-        readonly id: number
-        readonly quizId: number
-        readonly correctAnswers: number
-        readonly incorrectAnswers: number
-        readonly partiallyCorrectAnswers: number
-    }
     readonly score: number
     readonly totalQuestions: number
     readonly questions?: readonly Question[]

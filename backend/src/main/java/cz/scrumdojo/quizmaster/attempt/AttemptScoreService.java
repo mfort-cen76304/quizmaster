@@ -5,16 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class AttemptScoreService {
 
-    private final AttemptRepository attemptRepository;
     private final AttemptQuestionScoreRepository scoreRepository;
 
-    public AttemptScoreService(AttemptRepository attemptRepository, AttemptQuestionScoreRepository scoreRepository) {
-        this.attemptRepository = attemptRepository;
+    public AttemptScoreService(AttemptQuestionScoreRepository scoreRepository) {
         this.scoreRepository = scoreRepository;
     }
 
@@ -37,11 +34,6 @@ public class AttemptScoreService {
         applyLearnScore(attemptId, questionId, outcome, answeredAt);
     }
 
-    @Transactional
-    public void recomputeAttemptCounters(Integer attemptId) {
-        applyRecomputedCounters(attemptId);
-    }
-
     private void applyExamScore(Integer attemptId, Integer questionId, ScoreOutcome outcome, LocalDateTime answeredAt) {
         var existing = scoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId);
         var entity = existing.orElseGet(() -> AttemptQuestionScore.builder()
@@ -61,24 +53,5 @@ public class AttemptScoreService {
             .score(outcome)
             .answeredAt(answeredAt)
             .build());
-    }
-
-    private void applyRecomputedCounters(Integer attemptId) {
-        var attempt = attemptRepository.findById(attemptId).orElseThrow();
-        List<AttemptQuestionScore> rows = scoreRepository.findByAttemptId(attemptId);
-        int correct = 0;
-        int partial = 0;
-        int incorrect = 0;
-        for (AttemptQuestionScore row : rows) {
-            switch (row.getScore()) {
-                case CORRECT -> correct++;
-                case PARTIAL -> partial++;
-                case INCORRECT -> incorrect++;
-            }
-        }
-        attempt.setCorrectAnswers(correct);
-        attempt.setPartiallyCorrectAnswers(partial);
-        attempt.setIncorrectAnswers(incorrect);
-        attemptRepository.save(attempt);
     }
 }

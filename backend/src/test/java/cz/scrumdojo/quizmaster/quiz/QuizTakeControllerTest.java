@@ -341,8 +341,6 @@ public class QuizTakeControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.score").value(1.5))
             .andExpect(jsonPath("$.totalQuestions").value(2))
-            .andExpect(jsonPath("$.attempt.correctAnswers").value(1))
-            .andExpect(jsonPath("$.attempt.partiallyCorrectAnswers").value(1))
             .andExpect(jsonPath("$.questions.length()").value(2))
             .andExpect(jsonPath("$.questions[0].correctAnswers[0]").value(1))
             .andExpect(jsonPath("$.questions[1].correctAnswers.length()").value(2))
@@ -377,10 +375,7 @@ public class QuizTakeControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         var attempt = fixtures.save(fixtures.attempt(quiz)
-            .questionIds(new int[]{question.getId()})
-            .correctAnswers(1)
-            .incorrectAnswers(0)
-            .partiallyCorrectAnswers(0));
+            .questionIds(new int[]{question.getId()}));
 
         mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -393,11 +388,6 @@ public class QuizTakeControllerTest {
                     }
                     """.formatted(question.getId(), question.getId())))
             .andExpect(status().isConflict());
-
-        var storedAttempt = attemptRepository.findById(attempt.getId()).orElseThrow();
-        assertThat(storedAttempt.getCorrectAnswers()).isEqualTo(1);
-        assertThat(storedAttempt.getIncorrectAnswers()).isEqualTo(0);
-        assertThat(storedAttempt.getPartiallyCorrectAnswers()).isEqualTo(0);
     }
 
     @Test
