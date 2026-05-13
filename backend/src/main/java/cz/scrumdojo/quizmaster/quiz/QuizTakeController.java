@@ -242,7 +242,7 @@ public class QuizTakeController {
                 return ResponseEntity.notFound().build();
             }
             QuestionAnswerRequest answer = answerByQuestionId.get(questionId);
-            score += questionScoringService.score(question, answer);
+            score += questionScoringService.score(question, answer).points();
         }
         updatedAttempt.setFinishedAt(LocalDateTime.now(clock));
         var feedbackQuestions = Arrays.stream(expectedQuestionIds)
@@ -278,11 +278,11 @@ public class QuizTakeController {
             return ResponseEntity.notFound().build();
         }
         var answeredAt = LocalDateTime.now(clock);
-        double score = questionScoringService.score(question.get(), request);
+        AnswerStatus status = questionScoringService.score(question.get(), request);
         attemptScoreService.recordSubmission(
-            quiz.get().getMode(), attemptId, questionId, AnswerStatus.from(score), answeredAt);
+            quiz.get().getMode(), attemptId, questionId, status, answeredAt);
         if (quiz.get().getMode() == QuizMode.EXAM) {
-            return ResponseEntity.ok(new QuestionEvaluationResponse(score == 1, score, null));
+            return ResponseEntity.ok(new QuestionEvaluationResponse(status == AnswerStatus.CORRECT, status.points(), null));
         }
         return ResponseEntity.ok(questionScoringService.evaluate(question.get(), request));
     }

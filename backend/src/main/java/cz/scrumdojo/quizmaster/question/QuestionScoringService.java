@@ -1,5 +1,6 @@
 package cz.scrumdojo.quizmaster.question;
 
+import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -10,33 +11,33 @@ public class QuestionScoringService {
     private static final double FLOAT_EPSILON = 1e-9;
 
     public QuestionEvaluationResponse evaluate(Question question, QuestionAnswerRequest answer) {
-        double score = score(question, answer);
-        return new QuestionEvaluationResponse(score == 1, score, QuestionResponse.feedbackFrom(question));
+        AnswerStatus status = score(question, answer);
+        return new QuestionEvaluationResponse(status == AnswerStatus.CORRECT, status.points(), QuestionResponse.feedbackFrom(question));
     }
 
-    public double score(Question question, QuestionAnswerRequest answer) {
+    public AnswerStatus score(Question question, QuestionAnswerRequest answer) {
         return "numerical".equals(question.getQuestionType())
             ? scoreNumerical(question, answer)
             : scoreChoice(question, answer);
     }
 
-    private double scoreNumerical(Question question, QuestionAnswerRequest answer) {
+    private AnswerStatus scoreNumerical(Question question, QuestionAnswerRequest answer) {
         if (answer == null || answer.value() == null || question.getAnswers() == null || question.getAnswers().length == 0) {
-            return 0;
+            return AnswerStatus.INCORRECT;
         }
         double correct = Double.parseDouble(question.getAnswers()[0]);
         double tolerance = question.getTolerance() != null ? question.getTolerance() : 0;
-        return Math.abs(answer.value() - correct) <= tolerance + FLOAT_EPSILON ? 1 : 0;
+        return Math.abs(answer.value() - correct) <= tolerance + FLOAT_EPSILON ? AnswerStatus.CORRECT : AnswerStatus.INCORRECT;
     }
 
-    private double scoreChoice(Question question, QuestionAnswerRequest answer) {
+    private AnswerStatus scoreChoice(Question question, QuestionAnswerRequest answer) {
         if (answer == null || answer.selectedIdxs() == null || answer.selectedIdxs().length == 0) {
-            return 0;
+            return AnswerStatus.INCORRECT;
         }
 
         var correct = question.getCorrectAnswers();
         if (correct == null || correct.length == 0) {
-            return 0;
+            return AnswerStatus.INCORRECT;
         }
 
         var correctSet = new HashSet<Integer>();
@@ -53,8 +54,8 @@ public class QuestionScoringService {
         int selectedIncorrect = selectedSet.size() - matched;
         int mistakes = missedCorrect + selectedIncorrect;
 
-        if (mistakes == 0) return 1;
-        if (mistakes == 1) return 0.5;
-        return 0;
+        if (mistakes == 0) return AnswerStatus.CORRECT;
+        if (mistakes == 1) return AnswerStatus.PARTIAL;
+        return AnswerStatus.INCORRECT;
     }
 }
