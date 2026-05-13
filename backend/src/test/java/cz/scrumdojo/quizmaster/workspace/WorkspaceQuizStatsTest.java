@@ -5,8 +5,6 @@ import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
 import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
 import cz.scrumdojo.quizmaster.question.Question;
-import cz.scrumdojo.quizmaster.question.QuestionStatsLog;
-import cz.scrumdojo.quizmaster.question.QuestionStatsLogRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +23,6 @@ public class WorkspaceQuizStatsTest {
     private MockMvc mockMvc;
     @Autowired
     private TestFixtures fixtures;
-    @Autowired
-    private QuestionStatsLogRepository questionStatsLogRepository;
     @Autowired
     private AttemptQuestionScoreRepository attemptQuestionScoreRepository;
     @Test
@@ -168,9 +164,6 @@ public class WorkspaceQuizStatsTest {
                 .finishedAt(now.minusSeconds(5))
                 .timedOutAt(now.minusSeconds(5)));
         saveScore(firstQuizTimeoutAttempt, shared, ScoreOutcome.PARTIAL, now.minusSeconds(8));
-        saveLog(firstQuizTimeoutAttempt, shared, firstQuiz, "ANSWERED");
-        saveLog(firstQuizTimeoutAttempt, skipped, firstQuiz, "SKIPPED");
-        saveLog(firstQuizTimeoutAttempt, timeout, firstQuiz, "TIMEOUT");
         Attempt firstQuizAbandonedAttempt = fixtures.save(fixtures.attemptAbandoned(firstQuiz)
                 .questionIds(new int[]{shared.getId(), skipped.getId(), timeout.getId()})
                 .correctAnswers(1)
@@ -179,9 +172,6 @@ public class WorkspaceQuizStatsTest {
                 .startedAt(now.minusSeconds(4))
                 .timedOutAt(now.minusSeconds(1)));
         saveScore(firstQuizAbandonedAttempt, shared, ScoreOutcome.CORRECT, now.minusSeconds(3));
-        saveLog(firstQuizAbandonedAttempt, shared, firstQuiz, "ANSWERED");
-        saveLog(firstQuizAbandonedAttempt, skipped, firstQuiz, "ABANDONED");
-        saveLog(firstQuizAbandonedAttempt, timeout, firstQuiz, "ABANDONED");
         Attempt secondQuizFinishedAttempt = fixtures.save(fixtures.attempt(secondQuiz)
                 .questionIds(new int[]{shared.getId(), correct.getId()})
                 .correctAnswers(1)
@@ -191,8 +181,6 @@ public class WorkspaceQuizStatsTest {
                 .finishedAt(now.minusSeconds(12)));
         saveScore(secondQuizFinishedAttempt, shared, ScoreOutcome.INCORRECT, now.minusSeconds(18));
         saveScore(secondQuizFinishedAttempt, correct, ScoreOutcome.CORRECT, now.minusSeconds(14));
-        saveLog(secondQuizFinishedAttempt, shared, secondQuiz, "ANSWERED");
-        saveLog(secondQuizFinishedAttempt, correct, secondQuiz, "ANSWERED");
         mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}/stats", workspace.getGuid(), firstQuiz.getId()))
                 .andExpect(status().isOk())
                 .andExpect(content().json("""
@@ -267,16 +255,6 @@ public class WorkspaceQuizStatsTest {
                 .questionId(question.getId())
                 .score(scoreOutcome)
                 .answeredAt(answeredAt)
-                .build());
-    }
-    private void saveLog(Attempt attempt, Question question, Quiz quiz, String eventType) {
-        questionStatsLogRepository.save(QuestionStatsLog.builder()
-                .questionId(question.getId())
-                .quizId(quiz.getId())
-                .attemptId(attempt.getId())
-                .eventType(eventType)
-                .eventDetail("{}")
-                .createdAt(LocalDateTime.now())
                 .build());
     }
 }

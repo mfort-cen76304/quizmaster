@@ -6,8 +6,6 @@ import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptStatus;
 import cz.scrumdojo.quizmaster.attempt.ScoreOutcome;
 import cz.scrumdojo.quizmaster.question.Question;
-import cz.scrumdojo.quizmaster.question.QuestionStatsLog;
-import cz.scrumdojo.quizmaster.question.QuestionStatsLogRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizService;
@@ -15,26 +13,26 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 @Service
 public class QuizStatsService {
     private final QuizRepository quizRepository;
     private final AttemptRepository attemptRepository;
-    private final QuestionStatsLogRepository questionStatsLogRepository;
     private final AttemptQuestionScoreRepository attemptQuestionScoreRepository;
     private final QuizService quizService;
     public QuizStatsService(
             QuizRepository quizRepository,
             AttemptRepository attemptRepository,
-            QuestionStatsLogRepository questionStatsLogRepository,
             AttemptQuestionScoreRepository attemptQuestionScoreRepository,
             QuizService quizService) {
         this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository;
-        this.questionStatsLogRepository = questionStatsLogRepository;
         this.attemptQuestionScoreRepository = attemptQuestionScoreRepository;
         this.quizService = quizService;
     }
@@ -55,16 +53,14 @@ public class QuizStatsService {
         if (questions.isEmpty()) {
             return List.of();
         }
-        List<Integer> questionIds = questions.stream()
-                .map(Question::getId)
-                .toList();
         List<Integer> attemptIds = attempts.stream()
                 .map(Attempt::getId)
                 .toList();
-        Map<Integer, List<QuestionStatsLog>> logsByQuestionId = questionStatsLogRepository
-                .findByQuizIdAndQuestionIdIn(quiz.getId(), questionIds)
-                .stream()
-                .collect(Collectors.groupingBy(QuestionStatsLog::getQuestionId));
+        Map<Integer, Long> drawCountsByQuestionId = attempts.stream()
+                .flatMap(attempt -> attempt.getQuestionIds() == null
+                        ? Stream.<Integer>empty()
+                        : Arrays.stream(attempt.getQuestionIds()).boxed())
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         Map<Integer, List<AttemptQuestionScore>> scoresByQuestionId = attemptIds.isEmpty()
                 ? Map.of()
                 : attemptQuestionScoreRepository.findByAttemptIdIn(attemptIds).stream()
@@ -72,18 +68,16 @@ public class QuizStatsService {
         return questions.stream()
                 .map(question -> toQuestionRecord(
                         question,
-                        logsByQuestionId.getOrDefault(question.getId(), List.of()),
+                        drawCountsByQuestionId.getOrDefault(question.getId(), 0L).intValue(),
                         scoresByQuestionId.getOrDefault(question.getId(), List.of())))
                 .toList();
     }
     private QuestionStatsRecord toQuestionRecord(
             Question question,
-            List<QuestionStatsLog> logs,
+            int drawCount,
             List<AttemptQuestionScore> scores) {
         int answered = scores.size();
-        int unanswered = countByEventType(logs, "SKIPPED")
-                + countByEventType(logs, "TIMEOUT")
-                + countByEventType(logs, "ABANDONED");
+        int unanswered = drawCount - answered;
         int correctAnswers = countByScore(scores, ScoreOutcome.CORRECT);
         int partiallyCorrectAnswers = countByScore(scores, ScoreOutcome.PARTIAL);
         int incorrectAnswers = countByScore(scores, ScoreOutcome.INCORRECT);
@@ -95,11 +89,6 @@ public class QuizStatsService {
                 incorrectAnswers,
                 unanswered
         );
-    }
-    private int countByEventType(List<QuestionStatsLog> logs, String eventType) {
-        return (int) logs.stream()
-                .filter(log -> eventType.equals(log.getEventType()))
-                .count();
     }
     private int countByScore(List<AttemptQuestionScore> scores, ScoreOutcome scoreOutcome) {
         return (int) scores.stream()
