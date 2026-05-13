@@ -2,7 +2,7 @@ import './quiz-play.scss'
 import { useState } from 'react'
 
 import type { QuizMode, QuizTake } from '#fe/shared/model/quiz.ts'
-import { recordTimeout, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
+import { recordTimeout, skipQuizQuestion, submitQuizQuestionAnswer } from '#fe/take/api/stats.ts'
 import type { AnswerIdxs, QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
 import { QuestionForm, QuizQuestionProvider } from '#fe/take/question-take/index.ts'
 
@@ -59,8 +59,9 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
     const isAnswered = currentAnswer !== undefined
     const hasSelectedAnswer = selectedAnswerIdxs !== undefined && selectedAnswerIdxs.length > 0
 
-    const handleNextButton = () => {
+    const handleNextButton = async () => {
         if (!hasSelectedAnswer) {
+            await skipQuizQuestion(props.quiz.id, props.quizRunId, currentQuestion.id)
             if (!bookmarks.has(nav.currentQuestionIdx)) {
                 bookmarks.toggle(nav.currentQuestionIdx)
             }
@@ -129,7 +130,7 @@ export const QuizPlayForm = (props: QuizPlayFormProps) => {
             <div className="quiz-play-actions">
                 {nav.canBack && <BackButton onClick={nav.back} />}
                 <BookmarkButton isBookmarked={bookmarks.has(nav.currentQuestionIdx)} onClick={bookmark} />
-                {nav.canNext && <NextButton onClick={handleNextButton} />}
+                {nav.canNext && <NextButton onClick={() => void handleNextButton()} />}
                 {isAnswered && !nav.canNext && <EvaluateButton onClick={evaluate} />}
             </div>
 

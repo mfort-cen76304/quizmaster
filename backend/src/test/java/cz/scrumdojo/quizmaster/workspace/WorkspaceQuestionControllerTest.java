@@ -2,6 +2,8 @@ package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.question.QuestionStatsLog;
+import cz.scrumdojo.quizmaster.question.QuestionStatsLogRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +11,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -22,6 +26,9 @@ public class WorkspaceQuestionControllerTest {
 
     @Autowired
     private TestFixtures fixtures;
+
+    @Autowired
+    private QuestionStatsLogRepository questionStatsLogRepository;
 
     @Test
     public void getWorkspaceQuestionsNotFound() throws Exception {
@@ -61,6 +68,34 @@ public class WorkspaceQuestionControllerTest {
             .andExpect(jsonPath("$[0].stats.skipped").value(0));
     }
 
+    @Test
+    public void getWorkspaceQuestionsCountsTimedOutQuestionAsSkipped() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question answeredQuestion = fixtures.save(fixtures.questionIn(workspace));
+        Question timedOutQuestion = fixtures.save(fixtures.questionIn(workspace).question("What is 10 - 5?"));
+        Quiz quiz = fixtures.save(fixtures.quiz(answeredQuestion, timedOutQuestion).workspaceGuid(workspace.getGuid()).build());
+        questionStatsLogRepository.save(QuestionStatsLog.builder()
+            .questionId(answeredQuestion.getId())
+            .quizId(quiz.getId())
+            .attemptId(101)
+            .eventType("ANSWERED")
+            .eventDetail("{\"correct\":true}")
+            .createdAt(LocalDateTime.now())
+            .build());
+        questionStatsLogRepository.save(QuestionStatsLog.builder()
+            .questionId(timedOutQuestion.getId())
+            .quizId(quiz.getId())
+            .attemptId(101)
+            .eventType("TIMEOUT")
+            .eventDetail("{}")
+            .createdAt(LocalDateTime.now())
+            .build());
+        mockMvc.perform(get("/api/workspaces/{guid}/questions", workspace.getGuid()))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[?(@.id == %d)].stats.timesAsked".formatted(timedOutQuestion.getId())).value(1))
+            .andExpect(jsonPath("$[?(@.id == %d)].stats.successRate".formatted(timedOutQuestion.getId())).value(0))
+            .andExpect(jsonPath("$[?(@.id == %d)].stats.skipped".formatted(timedOutQuestion.getId())).value(1));
+    }
     @Test
     public void getWorkspaceQuestion() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());

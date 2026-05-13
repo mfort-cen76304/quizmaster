@@ -1,10 +1,10 @@
 import { postJson, postNoContent } from '#fe/shared/api/helpers.ts'
 import type { QuizEvaluationRequest, QuizEvaluationResponse } from '#fe/shared/model/quiz.ts'
 import type { QuestionAnswer, QuestionEvaluation } from '#fe/take/model/question.ts'
-
 export const recordTimeout = async (quizId: number, attemptId: number): Promise<void> =>
     await postNoContent(`/api/quiz/${quizId}/attempts/${attemptId}/timeout`)
-
+export const skipQuizQuestion = async (quizId: number, attemptId: number, questionId: number): Promise<void> =>
+    await postNoContent(`/api/quiz/${quizId}/attempts/${attemptId}/questions/${questionId}/skip`)
 export const evaluateQuiz = async (
     quizId: number,
     attemptId: number,
@@ -14,7 +14,6 @@ export const evaluateQuiz = async (
         `/api/quiz/${quizId}/attempts/${attemptId}/evaluate`,
         request,
     )
-
 export const submitQuizQuestionAnswer = async (
     quizId: number,
     attemptId: number,

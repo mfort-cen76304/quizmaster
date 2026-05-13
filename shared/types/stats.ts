@@ -8,15 +8,27 @@ export interface AttemptStatsRecord {
     readonly score: number
     readonly status: string
 }
-
+export interface QuestionStatsRecord {
+    readonly question: string
+    readonly shown: number
+    readonly answered: number
+    readonly skipped: number
+    readonly timeout: number
+    readonly abandoned: number
+    readonly correctAnswers: number
+    readonly partiallyCorrectAnswers: number
+    readonly incorrectAnswers: number
+}
 export interface SummaryStats {
     readonly started: number
     readonly finished: number
     readonly unfinished: number
     readonly timeout: number
 }
-
 export interface QuizStatsResponse {
     readonly summary: SummaryStats
     readonly attempts: readonly AttemptStatsRecord[]
+    readonly questions?: readonly QuestionStatsRecord[]
+    readonly questionStats?: readonly QuestionStatsRecord[]
+    readonly questionStatistics?: readonly QuestionStatsRecord[]
 }

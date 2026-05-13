@@ -7,6 +7,7 @@ export class QuizStatsPage {
 
     private pageHeadingLocator = () => this.page.locator('h2')
     private attemptStatsTableLocator = () => this.page.getByTestId('attempt-stats-table')
+    private questionStatsTableLocator = () => this.page.getByTestId('question-stats-table')
     private summaryStatsTableLocator = () => this.page.getByTestId('summary-stats-table')
 
     private tableCaptionLocator = (table: Locator) => table.locator('caption')
@@ -28,12 +29,17 @@ export class QuizStatsPage {
         )
 
     expectLabeledTable = async (
-        table: 'attempt' | 'summary',
+        table: 'attempt' | 'question' | 'summary',
         captionText: string | undefined,
         headerCells: string[],
         bodyRows: string[][],
     ) => {
-        const tableLocator = table === 'attempt' ? this.attemptStatsTableLocator() : this.summaryStatsTableLocator()
+        const tableLocator =
+            table === 'attempt'
+                ? this.attemptStatsTableLocator()
+                : table === 'question'
+                  ? this.questionStatsTableLocator()
+                  : this.summaryStatsTableLocator()
 
         if (captionText) {
             await expectTextToBe(this.tableCaptionLocator(tableLocator), captionText)

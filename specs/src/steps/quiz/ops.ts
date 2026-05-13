@@ -22,6 +22,7 @@ export const startQuiz = async (world: QuizmasterWorld, quizBookmark: string) =>
     await world.page.clock.pauseAt(browserNow + 60_000)
     await world.quizWelcomePage.start()
     world.activeQuizBookmark = quizBookmark
+    world.lastAnsweredTitle = undefined
 }
 
 const isQuizQuestionSubmitResponse = (response: PlaywrightResponse) => {

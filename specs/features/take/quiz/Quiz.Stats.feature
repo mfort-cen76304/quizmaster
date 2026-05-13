@@ -218,3 +218,40 @@ Feature: Show stats
     Then I see attempt stats table
       | Duration | Points | Correct Answers | Incorrect Answers | Score | Status   | Partially Correct Answers |
       | 5s       | 1.5/2  | 1 (50%)         | 0 (0%)            | 75    | Finished | 1 (50%)                   |
+
+
+  Scenario Outline: Question statistics are shown separately for each quiz
+    Given workspace "Per-question stats" with questions
+      | bookmark | question                           | answers                                      |
+      | Shared   | Which are planets in solar system? | Mars (*), Pluto, Venus (*), Titan, Earth (*) |
+      | Skipped  | What is the capital of Italy?      | Rome (*), Naples, Florence                   |
+      | Timeout  | What color is the sky?             | Blue (*), Green, Red                         |
+      | Correct  | What is 2 + 2?                     | 4 (*), 3, 5                                  |
+    And quiz "First Quiz" with questions "Shared, Skipped, Timeout"
+      | time limit | 5s |
+    And quiz "Second Quiz" with questions "Shared, Correct"
+    # First quiz: one timed-out attempt and one abandoned attempt.
+    When I start quiz "First Quiz"
+    * I answer "Mars, Venus"
+    * I skip the question
+    * 5 seconds pass
+    * I evaluate the quiz
+    When I start quiz "First Quiz"
+    * I answer "Mars, Venus, Earth"
+    * 5 seconds pass
+    # Second quiz: one finished attempt with one correct and one incorrect answer.
+    When I start quiz "Second Quiz"
+    * I answer "Pluto"
+    * I answer "4"
+    * I finish the quiz in 8 seconds
+    When I open quiz "<quizName>" statistics
+    Then I see question stats table
+      | Question    | Shown    | Answered    | Skipped    | Timeout    | Abandoned    | Correct        | Partially Correct   | Incorrect    |
+      | <question1> | <shown1> | <answered1> | <skipped1> | <timeout1> | <abandoned1> | <successRate1> | <partiallyCorrect1> | <incorrect1> |
+      | <question2> | <shown2> | <answered2> | <skipped2> | <timeout2> | <abandoned2> | <successRate2> | <partiallyCorrect2> | <incorrect2> |
+      | <question3> | <shown3> | <answered3> | <skipped3> | <timeout3> | <abandoned3> | <successRate3> | <partiallyCorrect3> | <incorrect3> |
+
+    Examples:
+      | quizName    | question1                          | shown1 | answered1 | skipped1 | timeout1 | abandoned1 | successRate1 | partiallyCorrect1 | incorrect1 | question2                     | shown2 | answered2 | skipped2 | timeout2 | abandoned2 | successRate2 | partiallyCorrect2 | incorrect2 | question3              | shown3 | answered3 | skipped3 | timeout3 | abandoned3 | successRate3 | partiallyCorrect3 | incorrect3 |
+      | First Quiz  | Which are planets in solar system? | 2      | 2         | 0        | 0        | 0          | 50%          | 1 (50%)           | 0 (0%)     | What is the capital of Italy? | 2      | 0         | 1        | 0        | 1          | 0%           | 0 (0%)            | 0 (0%)     | What color is the sky? | 2      | 0         | 0        | 1        | 1          | 0%           | 0 (0%)            | 0 (0%)     |
+      | Second Quiz | Which are planets in solar system? | 1      | 1         | 0        | 0        | 0          | 0%           | 0 (0%)            | 1 (100%)   | What is 2 + 2?                | 1      | 1         | 0        | 0        | 0          | 100%         | 0 (0%)            | 0 (0%)     |                        |        |           |          |          |            |              |                   |            |

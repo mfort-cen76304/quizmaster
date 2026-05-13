@@ -61,8 +61,12 @@ public class WorkspaceQuestionController {
 
         var items = questions.stream().map(q -> {
             var logs = allLogs.stream().filter(l -> l.getQuestionId().equals(q.getId())).toList();
-            int timesAsked = (int) logs.stream().filter(l -> "ANSWERED".equals(l.getEventType()) || "SKIPPED".equals(l.getEventType())).count();
-            int skipped = (int) logs.stream().filter(l -> "SKIPPED".equals(l.getEventType())).count();
+            int skipped = (int) logs.stream()
+                .filter(l -> "SKIPPED".equals(l.getEventType()) || "TIMEOUT".equals(l.getEventType()))
+                .count();
+            int timesAsked = (int) logs.stream()
+                .filter(l -> "ANSWERED".equals(l.getEventType()) || "SKIPPED".equals(l.getEventType()) || "TIMEOUT".equals(l.getEventType()))
+                .count();
             // Úspěšnost: podíl správných odpovědí (correct==true)
             long correct = logs.stream()
                 .filter(l -> "ANSWERED".equals(l.getEventType()) && isCorrectAnswer(l.getEventDetail()))
@@ -128,6 +132,21 @@ public class WorkspaceQuestionController {
 
         int deleted = questionRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);
         return deleted > 0 ? ResponseEntity.noContent().build() : ResponseEntity.notFound().build();
+    }
+
+    QuestionStats toQuestionStats(List<cz.scrumdojo.quizmaster.question.QuestionStatsLog> logs) {
+        int skipped = (int) logs.stream()
+            .filter(log -> "SKIPPED".equals(log.getEventType()) || "TIMEOUT".equals(log.getEventType()))
+            .count();
+        int timesAsked = (int) logs.stream()
+            .filter(log -> "ANSWERED".equals(log.getEventType()) || "SKIPPED".equals(log.getEventType()) || "TIMEOUT".equals(log.getEventType()))
+            .count();
+        long correct = logs.stream()
+            .filter(log -> "ANSWERED".equals(log.getEventType()) && isCorrectAnswer(log.getEventDetail()))
+            .count();
+        int successRate = timesAsked > 0 ? (int) Math.round(100.0 * correct / timesAsked) : 0;
+        int averageTime = 0; // not yet implemented — needs per-question start time logging
+        return new QuestionStats(timesAsked, successRate, averageTime, skipped);
     }
 
     private boolean isCorrectAnswer(String eventDetail) {

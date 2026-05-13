@@ -1,73 +1,199 @@
-import type { AttemptStatsRecord, QuizStatsResponse, SummaryStats } from '#fe/make/model/stats.ts'
+import type { AttemptStatsRecord, QuestionStatsRecord, QuizStatsResponse, SummaryStats } from '#fe/make/model/stats.ts'
 import type { Quiz } from '#fe/shared/model/quiz.ts'
 
 import { formatDuration } from './duration.ts'
-import { StatsTable } from './stats-table.tsx'
 import './quiz-stats-component.scss'
-
+import { StatsTable } from './stats-table.tsx'
 export interface QuizStatsProps {
     readonly quiz: Quiz
     readonly stats: QuizStatsResponse
 }
-
 const statusLabels: Record<string, string> = {
     FINISHED: 'Finished',
     IN_PROGRESS: 'In Progress',
     TIMEOUT: 'Timeout',
     ABANDONED: 'Abandoned',
 }
-
 const pct = (value: number, total: number): string => {
     const percentage = total > 0 ? Math.round((value / total) * 100) : 0
     return `${value} (${percentage}%)`
 }
-
-// Drop the trailing zero so whole point totals stay "2/2" while half points
-// render as "1.5/2". Matches what students see on the score page.
+const rate = (value: number, total: number): string => {
+    const percentage = total > 0 ? Math.round((value / total) * 100) : 0
+    return `${percentage}%`
+}
 const formatPoints = (earned: number): string => (Number.isInteger(earned) ? String(earned) : earned.toFixed(1))
-
-const summaryRow = (s: SummaryStats): string[] => [
-    String(s.started),
-    String(s.finished),
-    String(s.unfinished),
-    String(s.timeout),
+const summaryRow = (summary: SummaryStats): string[] => [
+    String(summary.started),
+    String(summary.finished),
+    String(summary.unfinished),
+    String(summary.timeout),
 ]
-
-const attemptRow = (a: AttemptStatsRecord): string[] => {
-    const earnedPoints = a.correctAnswers + 0.5 * a.partiallyCorrectAnswers
+const attemptRow = (attempt: AttemptStatsRecord): string[] => {
+    const earnedPoints = attempt.correctAnswers + 0.5 * attempt.partiallyCorrectAnswers
     return [
-        a.durationSeconds != null ? formatDuration(a.durationSeconds) : '',
-        `${formatPoints(earnedPoints)}/${a.totalQuestions}`,
-        pct(a.correctAnswers, a.totalQuestions),
-        pct(a.incorrectAnswers, a.totalQuestions),
-        String(a.score),
-        statusLabels[a.status] ?? a.status,
-        pct(a.partiallyCorrectAnswers, a.totalQuestions),
+        attempt.durationSeconds != null ? formatDuration(attempt.durationSeconds) : '',
+        `${formatPoints(earnedPoints)}/${attempt.totalQuestions}`,
+        pct(attempt.correctAnswers, attempt.totalQuestions),
+        pct(attempt.incorrectAnswers, attempt.totalQuestions),
+        String(attempt.score),
+        statusLabels[attempt.status] ?? attempt.status,
+        pct(attempt.partiallyCorrectAnswers, attempt.totalQuestions),
     ]
 }
-
-export const QuizStats = ({ quiz, stats }: QuizStatsProps) => (
-    <div className="quiz-stats">
-        <h2>Statistics for quiz: {quiz.title}</h2>
-        <StatsTable
-            testId="summary-stats-table"
-            caption="Summary"
-            columns={['Started', 'Finished', 'Unfinished', 'Timeout']}
-            rows={[summaryRow(stats.summary)]}
-        />
-        <StatsTable
-            testId="attempt-stats-table"
-            caption="Attempts"
-            columns={[
-                'Duration',
-                'Points',
-                'Correct Answers',
-                'Incorrect Answers',
-                'Score',
-                'Status',
-                'Partially Correct Answers',
-            ]}
-            rows={stats.attempts.map(attemptRow)}
-        />
-    </div>
-)
+const questionRow = (question: QuestionStatsRecord): string[] => [
+    question.question,
+    String(question.shown),
+    String(question.answered),
+    String(question.skipped),
+    String(question.timeout),
+    String(question.abandoned),
+    rate(question.correctAnswers, question.shown),
+    pct(question.partiallyCorrectAnswers, question.shown),
+    pct(question.incorrectAnswers, question.shown),
+]
+const averageDuration = (attempts: readonly AttemptStatsRecord[]): string => {
+    const durations = attempts.flatMap(attempt => (attempt.durationSeconds == null ? [] : [attempt.durationSeconds]))
+    if (durations.length === 0) {
+        return '—'
+    }
+    const totalSeconds = durations.reduce((sum, duration) => sum + duration, 0)
+    return formatDuration(Math.round(totalSeconds / durations.length))
+}
+const emptyQuestionStats = (question: string): QuestionStatsRecord => ({
+    question,
+    shown: 0,
+    answered: 0,
+    skipped: 0,
+    timeout: 0,
+    abandoned: 0,
+    correctAnswers: 0,
+    partiallyCorrectAnswers: 0,
+    incorrectAnswers: 0,
+})
+const resolveQuestionStats = (quiz: Quiz, stats: QuizStatsResponse): readonly QuestionStatsRecord[] => {
+    const backendQuestionStats = stats.questionStatistics ?? stats.questions ?? stats.questionStats ?? []
+    if (backendQuestionStats.length > 0) {
+        return backendQuestionStats
+    }
+    return quiz.questions.map(question => emptyQuestionStats(question.question))
+}
+export const QuizStats = ({ quiz, stats }: QuizStatsProps) => {
+    const questions = resolveQuestionStats(quiz, stats)
+    const completionRate = rate(stats.summary.finished, stats.summary.started)
+    const highlights = [
+        {
+            label: 'Started attempts',
+            value: String(stats.summary.started),
+            detail: `${stats.summary.finished} finished`,
+        },
+        {
+            label: 'Completion rate',
+            value: completionRate,
+            detail: `${stats.summary.unfinished} unfinished`,
+        },
+        {
+            label: 'Questions in quiz',
+            value: String(quiz.questions.length),
+            detail: `${questions.length} tracked in stats`,
+        },
+        {
+            label: 'Average duration',
+            value: averageDuration(stats.attempts),
+            detail: stats.attempts.length === 0 ? 'No attempts yet' : `Across ${stats.attempts.length} attempts`,
+        },
+    ]
+    return (
+        <div className="quiz-stats">
+            <section className="quiz-stats__hero">
+                <div>
+                    <div className="quiz-stats__eyebrow">Quiz analytics</div>
+                    <h2>Statistics for quiz: {quiz.title}</h2>
+                    <p>
+                        Clear overview of participation, completion, and how individual questions perform across all
+                        attempts.
+                    </p>
+                </div>
+                <dl className="quiz-stats__highlights">
+                    {highlights.map(highlight => (
+                        <div key={highlight.label} className="quiz-stats__highlight">
+                            <dt>{highlight.label}</dt>
+                            <dd>{highlight.value}</dd>
+                            <span>{highlight.detail}</span>
+                        </div>
+                    ))}
+                </dl>
+            </section>
+            <section className="quiz-stats__section">
+                <div className="quiz-stats__section-header">
+                    <div>
+                        <p className="quiz-stats__section-kicker">Overview</p>
+                        <h3>Attempt summary</h3>
+                    </div>
+                    <p>How many runs started, finished, timed out, or are still unfinished.</p>
+                </div>
+                <StatsTable
+                    testId="summary-stats-table"
+                    caption="Summary"
+                    columns={['Started', 'Finished', 'Unfinished', 'Timeout']}
+                    rows={[summaryRow(stats.summary)]}
+                />
+            </section>
+            <section className="quiz-stats__section">
+                <div className="quiz-stats__section-header">
+                    <div>
+                        <p className="quiz-stats__section-kicker">Attempts</p>
+                        <h3>Performance by run</h3>
+                    </div>
+                    <p>Duration, points, score, and status for each recorded attempt.</p>
+                </div>
+                <StatsTable
+                    testId="attempt-stats-table"
+                    caption="Attempts"
+                    columns={[
+                        'Duration',
+                        'Points',
+                        'Correct Answers',
+                        'Incorrect Answers',
+                        'Score',
+                        'Status',
+                        'Partially Correct Answers',
+                    ]}
+                    rows={stats.attempts.map(attemptRow)}
+                />
+                {stats.attempts.length === 0 && (
+                    <div className="quiz-stats__empty">
+                        No attempts yet. Once someone starts this quiz, detailed run statistics will appear here.
+                    </div>
+                )}
+            </section>
+            {questions.length > 0 && (
+                <section className="quiz-stats__section">
+                    <div className="quiz-stats__section-header">
+                        <div>
+                            <p className="quiz-stats__section-kicker">Questions</p>
+                            <h3>Question-level breakdown</h3>
+                        </div>
+                        <p>Shows visibility, completion, and answer accuracy for every question in the quiz.</p>
+                    </div>
+                    <StatsTable
+                        testId="question-stats-table"
+                        caption="Questions"
+                        columns={[
+                            'Question',
+                            'Shown',
+                            'Answered',
+                            'Skipped',
+                            'Timeout',
+                            'Abandoned',
+                            'Correct',
+                            'Partially Correct',
+                            'Incorrect',
+                        ]}
+                        rows={questions.map(questionRow)}
+                    />
+                </section>
+            )}
+        </div>
+    )
+}
