@@ -10,15 +10,18 @@ export interface RobinUndoBuffer {
 }
 
 export const useRobinUndoBuffer = (form: RobinFormBinding): RobinUndoBuffer => {
-    const [previousSnapshot, setPreviousSnapshot] = useState<QuestionFormStatePatch | null>(null)
+    const [stack, setStack] = useState<QuestionFormStatePatch[]>([])
 
     return {
-        hasPrevious: previousSnapshot !== null,
-        capture: () => setPreviousSnapshot(form.snapshot()),
+        hasPrevious: stack.length > 0,
+        capture: () => {
+            const snapshot = form.snapshot()
+            setStack(s => [...s, snapshot])
+        },
         restore: () => {
-            if (!previousSnapshot) return
-            form.applyPatch(previousSnapshot)
-            setPreviousSnapshot(null)
+            if (stack.length === 0) return
+            form.applyPatch(stack[stack.length - 1])
+            setStack(s => s.slice(0, -1))
         },
     }
 }

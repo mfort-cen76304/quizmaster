@@ -82,7 +82,14 @@ export const RobinSheet = ({
                     </Alert>
                 )}
                 {undo.hasPrevious && (
-                    <Button id="previous-version-button" className="secondary button" onClick={undo.restore}>
+                    <Button
+                        id="previous-version-button"
+                        className="secondary button"
+                        onClick={() => {
+                            undo.restore()
+                            onClose()
+                        }}
+                    >
                         Previous version
                     </Button>
                 )}
@@ -113,7 +120,14 @@ export const RobinSheet = ({
                     </Alert>
                 )}
                 {undo.hasPrevious && (
-                    <Button id="previous-version-button" className="secondary button" onClick={undo.restore}>
+                    <Button
+                        id="previous-version-button"
+                        className="secondary button"
+                        onClick={() => {
+                            undo.restore()
+                            onClose()
+                        }}
+                    >
                         Previous version
                     </Button>
                 )}

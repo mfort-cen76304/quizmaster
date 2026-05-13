@@ -188,30 +188,68 @@ Feature: Generate question using AI
     Then I see the previous generated version
 
 
-  @ai @slow @skip
-  Scenario: After I restore the previous version I can restore the next version
-    Given I restore the previous version
+  @ai @slow
+  Scenario: Previous version is available after generating multiple questions
+    Given I start creating a new question when I already have generated content
     When I open Robin AI
-    Then I can restore the next version
-
-
-  @ai @slow @skip
-  Scenario: After I restore the next version I see the next generated content
-    Given I restore the previous version
-    When I open Robin AI
-    And I restore the next version
-    Then I see the next generated version
-
-
-  @ai @slow @skip
-  Scenario: Afrer I restore the previous version I can restore the previous previous version
-    Given I restore the previous version
-    When I open Robin AI
+    And I ask AI:
+      | Generate a question about topic A |
+    And I open Robin AI
+    And I ask AI:
+      | Generate a question about topic B |
+    And I open Robin AI
     Then I can restore the previous version
 
 
-  @ai @slow @skip
-  Scenario: Afrer I restore the next version I can restore the next next version
-    Given I restore the next version
+  @ai @slow
+  Scenario: Can restore to previous generated version and see content
+    Given I start creating a new question when I already have generated content
     When I open Robin AI
-    Then I can restore the next version
+    And I ask AI:
+      | Generate a question about topic A |
+    And I open Robin AI
+    And I remember the current AI-generated question
+    And I ask AI:
+      | Generate a question about topic B |
+    And I open Robin AI
+    And I restore the previous version
+    Then I see the previous generated version
+
+
+  @ai @slow
+  Scenario: Can navigate backward through multiple generated versions
+    Given I start creating a new question
+    When I open Robin AI
+    And I ask AI:
+      | Generate a question about topic A |
+    And I open Robin AI
+    And I ask AI:
+      | Generate a question about topic B |
+    And I open Robin AI
+    And I ask AI:
+      | Generate a question about topic C |
+    And I open Robin AI
+    And I can restore the previous version
+    When I restore the previous version
+    And I open Robin AI
+    Then I can restore the previous version
+
+
+  @ai @slow
+  Scenario: Can restore to first generated version in history
+    Given I start creating a new question
+    When I open Robin AI
+    And I ask AI:
+      | Generate a question about topic A |
+    And I open Robin AI
+    And I remember the current AI-generated question
+    And I ask AI:
+      | Generate a question about topic B |
+    And I open Robin AI
+    And I ask AI:
+      | Generate a question about topic C |
+    And I open Robin AI
+    And I restore the previous version
+    And I open Robin AI
+    And I restore the previous version
+    Then I see the previous generated version

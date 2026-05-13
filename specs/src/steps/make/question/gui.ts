@@ -618,6 +618,10 @@ When('I generated a new question by AI', async function () {
     ])
 })
 
+When('I remember the current AI-generated question', async function () {
+    this.rememberedAiQuestion = await this.questionEditPage.questionValue()
+})
+
 When('I restore the previous version', async function () {
     await this.robinSheetPage.restorePreviousVersion()
 })
