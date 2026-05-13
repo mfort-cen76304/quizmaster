@@ -18,15 +18,20 @@ public class Cohort {
     private Integer id;
 
     @Column(nullable = false, unique = true, updatable = false)
-    private String guid;
+    private UUID guid;
 
     @Column(nullable = false, length = 30)
     private String name;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "quiz_id", nullable = false)
+    @ToString.Exclude
+    private Quiz quiz;
+
     @PrePersist
     private void onPrePersist() {
         if (this.guid == null) {
-            this.guid = UUID.randomUUID().toString();
+            this.guid = UUID.randomUUID();
         }
     }
 }

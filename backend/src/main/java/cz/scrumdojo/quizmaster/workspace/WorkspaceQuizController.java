@@ -9,7 +9,6 @@ import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizAttemptStartResponse;
-import cz.scrumdojo.quizmaster.quiz.CohortRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.quiz.QuizResponse;
@@ -36,7 +35,6 @@ public class WorkspaceQuizController {
 
     private final WorkspaceGuard workspaceGuard;
     private final QuizRepository quizRepository;
-    private final CohortRepository cohortRepository;
     private final QuestionRepository questionRepository;
     private final QuizService quizService;
     private final QuizStatsService quizStatsService;
@@ -46,7 +44,6 @@ public class WorkspaceQuizController {
     public WorkspaceQuizController(
             WorkspaceGuard workspaceGuard,
             QuizRepository quizRepository,
-            CohortRepository cohortRepository,
             QuestionRepository questionRepository,
             QuizService quizService,
             QuizStatsService quizStatsService,
@@ -54,7 +51,6 @@ public class WorkspaceQuizController {
             Clock clock) {
         this.workspaceGuard = workspaceGuard;
         this.quizRepository = quizRepository;
-        this.cohortRepository = cohortRepository;
         this.questionRepository = questionRepository;
         this.quizService = quizService;
         this.quizStatsService = quizStatsService;
@@ -118,10 +114,27 @@ public class WorkspaceQuizController {
         return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
                 validateQuestionsBelongToWorkspace(request.questionIds(), workspaceGuid);
-                cohortRepository.deleteByQuizId(existing.getId());
-                Quiz quiz = request.toEntity(workspaceGuid);
-                quiz.setId(existing.getId());
-                quizRepository.save(quiz);
+                Quiz incoming = request.toEntity(workspaceGuid);
+                existing.setTitle(incoming.getTitle());
+                existing.setDescription(incoming.getDescription());
+                existing.setStartAt(incoming.getStartAt());
+                existing.setEndAt(incoming.getEndAt());
+                existing.setQuestionIds(incoming.getQuestionIds());
+                existing.setMode(incoming.getMode());
+                existing.setDifficulty(incoming.getDifficulty());
+                existing.setPassScore(incoming.getPassScore());
+                existing.setTimeLimit(incoming.getTimeLimit());
+                existing.setRandomQuestionCount(incoming.getRandomQuestionCount());
+                existing.getCohorts().clear();
+                // Flush orphan deletes before inserting replacements so the
+                // unique (quiz_id, name) constraint doesn't trip when cohort
+                // names are reused across an edit.
+                quizRepository.saveAndFlush(existing);
+                incoming.getCohorts().forEach(cohort -> {
+                    cohort.setQuiz(existing);
+                    existing.getCohorts().add(cohort);
+                });
+                quizRepository.save(existing);
                 return ResponseEntity.ok(new IdResponse(existing.getId()));
             })
             .orElse(ResponseEntity.notFound().build());

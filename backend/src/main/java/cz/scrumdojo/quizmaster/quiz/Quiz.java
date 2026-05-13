@@ -50,7 +50,21 @@ public class Quiz {
     private Integer randomQuestionCount;
 
     @Builder.Default
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "quiz_id")
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Cohort> cohorts = new ArrayList<>();
+
+    public void setCohorts(List<Cohort> cohorts) {
+        this.cohorts = cohorts == null ? new ArrayList<>() : new ArrayList<>(cohorts);
+        syncCohortOwnership();
+    }
+
+    @PrePersist
+    @PreUpdate
+    private void syncCohortOwnership() {
+        if (cohorts == null) {
+            cohorts = new ArrayList<>();
+            return;
+        }
+        cohorts.forEach(cohort -> cohort.setQuiz(this));
+    }
 }
