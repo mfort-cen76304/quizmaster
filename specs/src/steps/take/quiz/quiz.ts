@@ -4,9 +4,17 @@ import { Given, When, Then } from '#steps/fixture.ts'
 import { expectQuestion } from '#steps/question/expects.ts'
 import { expectNavigationButtons } from '#steps/quiz/expects.ts'
 import { openQuiz, startQuiz } from '#steps/quiz/ops.ts'
+import { resolveQuizCohortGuid } from '#steps/shared/api.ts'
 
 Given('I open quiz {string}', async function (quizBookmark: string) {
     await openQuiz(this, quizBookmark)
+})
+
+Given('I open quiz {string} for cohort {string}', async function (quizBookmark: string, cohortName: string) {
+    const quizUrl = this.quizBookmarks[quizBookmark]
+    const cohortGuid = await resolveQuizCohortGuid(this, quizBookmark, cohortName)
+    await this.page.goto(`${quizUrl}/cohort/${cohortGuid}`)
+    this.activeQuizBookmark = quizBookmark
 })
 
 Given('I open quiz questions for {string}', async function (quizBookmark: string) {

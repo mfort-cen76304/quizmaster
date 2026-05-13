@@ -15,6 +15,11 @@ export interface QuizRequest {
     readonly cohortNames?: readonly string[]
 }
 
+export interface QuizCohort {
+    readonly guid: string
+    readonly name: string
+}
+
 export interface Quiz {
     readonly id: number
     readonly title: string
@@ -28,6 +33,7 @@ export interface Quiz {
     readonly timeLimit: number
     readonly randomQuestionCount?: number
     readonly cohortNames?: readonly string[]
+    readonly cohorts?: readonly QuizCohort[]
 }
 
 export interface QuizTake {

@@ -16,5 +16,6 @@ public record QuizResponse(
     int passScore,
     Integer timeLimit,
     Integer randomQuestionCount,
-    String[] cohortNames
+    String[] cohortNames,
+    QuizCohortResponse[] cohorts
 ) {}

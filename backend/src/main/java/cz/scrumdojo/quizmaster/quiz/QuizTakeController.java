@@ -25,11 +25,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 @RestController
@@ -42,6 +46,7 @@ public class QuizTakeController {
     private static final String VIEWED = "VIEWED";
     private final QuizService quizService;
     private final QuizRepository quizRepository;
+    private final CohortRepository cohortRepository;
     private final AttemptRepository attemptRepository;
     private final QuestionScoringService questionScoringService;
     private final AttemptScoreService attemptScoreService;
@@ -52,6 +57,7 @@ public class QuizTakeController {
     public QuizTakeController(
             QuizService quizService,
             QuizRepository quizRepository,
+            CohortRepository cohortRepository,
             AttemptRepository attemptRepository,
             QuestionScoringService questionScoringService,
             AttemptScoreService attemptScoreService,
@@ -61,6 +67,7 @@ public class QuizTakeController {
             ObjectMapper objectMapper) {
         this.quizService = quizService;
         this.quizRepository = quizRepository;
+        this.cohortRepository = cohortRepository;
         this.attemptRepository = attemptRepository;
         this.questionScoringService = questionScoringService;
         this.attemptScoreService = attemptScoreService;
@@ -76,21 +83,80 @@ public class QuizTakeController {
     @GetMapping("/{id}/leaderboard")
     public ResponseEntity<QuizLeaderboardResponse> getQuizLeaderboard(@PathVariable Integer id) {
         return quizRepository.findById(id)
-            .map(quiz -> ResponseEntity.ok(new QuizLeaderboardResponse(
-                List.of(
-                    new QuizLeaderboardCohortResponse(1, "Team Rocket", 92),
-                    new QuizLeaderboardCohortResponse(2, "Scrum Ninjas", 88),
-                    new QuizLeaderboardCohortResponse(3, "Retro Masters", 75)
-                ).toArray(QuizLeaderboardCohortResponse[]::new)
-            )))
+            .map(quiz -> ResponseEntity.ok(new QuizLeaderboardResponse(buildLeaderboard(quiz))))
             .orElse(ResponseEntity.notFound().build());
     }
+
+    private QuizLeaderboardCohortResponse[] buildLeaderboard(Quiz quiz) {
+        var scoresByCohort = new HashMap<Integer, List<Integer>>();
+        for (Attempt attempt : attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quiz.getId())) {
+            if (attempt.getFinishedAt() == null || attempt.getCohortId() == null) {
+                continue;
+            }
+            scoresByCohort
+                .computeIfAbsent(attempt.getCohortId(), ignored -> new ArrayList<>())
+                .add(calculateAttemptScore(quiz, attempt));
+        }
+
+        var rankedCohorts = quiz.getCohorts().stream()
+            .map(cohort -> new CohortLeaderboardRow(
+                cohort.getName(),
+                averageScore(scoresByCohort.get(cohort.getId()))
+            ))
+            .sorted(Comparator.comparingInt(CohortLeaderboardRow::score).reversed()
+                .thenComparing(CohortLeaderboardRow::name))
+            .toList();
+
+        QuizLeaderboardCohortResponse[] response = new QuizLeaderboardCohortResponse[rankedCohorts.size()];
+        for (int index = 0; index < rankedCohorts.size(); index++) {
+            var cohort = rankedCohorts.get(index);
+            response[index] = new QuizLeaderboardCohortResponse(index + 1, cohort.name(), cohort.score());
+        }
+        return response;
+    }
+
+    private int calculateAttemptScore(Quiz quiz, Attempt attempt) {
+        int totalQuestions = attempt.getQuestionIds() != null && attempt.getQuestionIds().length > 0
+            ? attempt.getQuestionIds().length
+            : totalQuestionsForQuiz(quiz);
+        if (totalQuestions <= 0) {
+            return 0;
+        }
+
+        int correctAnswers = attempt.getCorrectAnswers() != null ? attempt.getCorrectAnswers() : 0;
+        int partiallyCorrectAnswers = attempt.getPartiallyCorrectAnswers() != null
+            ? attempt.getPartiallyCorrectAnswers()
+            : 0;
+        float earnedPoints = correctAnswers + 0.5f * partiallyCorrectAnswers;
+        return Math.round(earnedPoints / totalQuestions * 100);
+    }
+
+    private int totalQuestionsForQuiz(Quiz quiz) {
+        int total = quiz.getQuestionIds() == null ? 0 : quiz.getQuestionIds().length;
+        Integer randomCount = quiz.getRandomQuestionCount();
+        return (randomCount != null && randomCount > 0) ? Math.min(randomCount, total) : total;
+    }
+
+    private int averageScore(List<Integer> scores) {
+        if (scores == null || scores.isEmpty()) {
+            return 0;
+        }
+        int total = scores.stream().mapToInt(Integer::intValue).sum();
+        return Math.round((float) total / scores.size());
+    }
+
+    private record CohortLeaderboardRow(String name, int score) {}
     @PostMapping("/{id}/attempts")
     public ResponseEntity<?> createAttempt(
             @PathVariable Integer id,
             @RequestBody(required = false) QuizAttemptStartRequest request) {
         return quizRepository.findById(id)
             .map(quiz -> {
+                var cohortId = resolveCohortId(id, request);
+                if (cohortId.isEmpty() && request != null && request.cohortGuid() != null && !request.cohortGuid().isBlank()) {
+                    return ResponseEntity.badRequest()
+                        .body(Map.of("message", "Cohort does not belong to this quiz."));
+                }
                 var now = LocalDateTime.now(clock);
                 if (!QuizAvailability.isAvailable(quiz, now)) {
                     return ResponseEntity.status(HttpStatus.FORBIDDEN)
@@ -102,6 +168,7 @@ public class QuizTakeController {
                     .toArray();
                 Attempt attempt = Attempt.builder()
                     .quizId(id)
+                    .cohortId(cohortId.orElse(null))
                     .questionIds(selectedQuestionIds)
                     .startedAt(now)
                     .correctAnswers(0)
@@ -125,6 +192,19 @@ public class QuizTakeController {
                 return ResponseEntity.ok(new QuizAttemptStartResponse(persisted.getId(), questions));
             })
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    private Optional<Integer> resolveCohortId(Integer quizId, QuizAttemptStartRequest request) {
+        if (request == null || request.cohortGuid() == null || request.cohortGuid().isBlank()) {
+            return Optional.empty();
+        }
+
+        try {
+            UUID cohortGuid = UUID.fromString(request.cohortGuid());
+            return cohortRepository.findByGuidAndQuizId(cohortGuid, quizId).map(Cohort::getId);
+        } catch (IllegalArgumentException ignored) {
+            return Optional.empty();
+        }
     }
     @PostMapping("/{id}/attempts/{attemptId}/timeout")
     public ResponseEntity<Void> recordTimeout(

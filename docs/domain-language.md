@@ -47,7 +47,8 @@ answers are **correct**, and two kinds of feedback:
 
 A **Quiz** is a curated set of [questions](#question) from one
 [workspace](#workspace), configured for [takers](#roles) to work through. It
-carries a title, an optional description, and a question list.
+carries a title, an optional description, a question list, and optional
+**cohorts** used to group takers under the same quiz.
 
 Two settings shape *how* takers experience the quiz:
 
@@ -80,8 +81,8 @@ available to takers.
 An **Attempt** records one [taker](#roles)'s run through a [quiz](#quiz). It
 captures which quiz and which questions were drawn (important under random
 selection, because two attempts on the same quiz can see different question
-subsets), an optional cohort id for future team-based grouping, when it started,
-and when it finished or timed out.
+subsets), an optional selected cohort from that quiz, when it started, and when
+it finished or timed out.
 
 The score is broken down three ways: fully **correct** answers, **partially
 correct** answers (a multiple-choice question where the learner picked some

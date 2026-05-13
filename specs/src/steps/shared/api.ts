@@ -9,7 +9,14 @@ import { parseTimeLimitToSeconds } from '#shared/parsers/time-limit.ts'
 import type { Difficulty, QuestionType, QuizMode } from '#shared/types/enums.ts'
 import type { IdResponse } from '#shared/types/id-response.ts'
 import type { QuestionRequest } from '#shared/types/question.ts'
-import type { Quiz, QuizRequest } from '#shared/types/quiz.ts'
+import type {
+    Quiz,
+    QuizAttemptStartRequest,
+    QuizAttemptStartResponse,
+    QuizEvaluationRequest,
+    QuizRequest,
+    QuizSubmittedAnswer,
+} from '#shared/types/quiz.ts'
 import type { WorkspaceCreateResponse, WorkspaceRequest } from '#shared/types/workspace.ts'
 import type { QuestionSpec, QuizSpec } from '#steps/shared/specs.ts'
 import type { QuizmasterWorld } from '#steps/world'
@@ -137,6 +144,19 @@ const resolveQuizId = (world: QuizmasterWorld, quizName: string): string => {
     return id
 }
 
+export const resolveQuizCohortGuid = async (
+    world: QuizmasterWorld,
+    quizName: string,
+    cohortName: string,
+): Promise<string> => {
+    const quiz = await fetchWorkspaceQuizViaRest(world, quizName)
+    const cohort = quiz.cohorts?.find(item => item.name === cohortName)
+    if (!cohort) {
+        throw new Error(`No cohort named "${cohortName}" on quiz "${quizName}"`)
+    }
+    return cohort.guid
+}
+
 export const fetchWorkspaceQuizViaRest = async (world: QuizmasterWorld, quizName: string): Promise<Quiz> => {
     const id = resolveQuizId(world, quizName)
     const url = `/api/workspaces/${world.workspaceGuid}/quizzes/${id}`
@@ -171,5 +191,52 @@ export const addCohortToQuizViaRest = async (
     const response = await world.page.request.put(url, { data: body })
     if (!response.ok()) {
         throw new Error(`PUT ${url} failed: ${response.status()} ${await response.text()}`)
+    }
+}
+
+export const createFinishedCohortAttemptViaRest = async (
+    world: QuizmasterWorld,
+    quizName: string,
+    cohortName: string,
+    correctAnswers: number,
+): Promise<void> => {
+    const quizId = resolveQuizId(world, quizName)
+    const cohortGuid = await resolveQuizCohortGuid(world, quizName, cohortName)
+    const startResponse = await world.page.request.post(`/api/quiz/${quizId}/attempts`, {
+        data: { cohortGuid } satisfies QuizAttemptStartRequest,
+    })
+    if (!startResponse.ok()) {
+        throw new Error(
+            `POST /api/quiz/${quizId}/attempts failed: ${startResponse.status()} ${await startResponse.text()}`,
+        )
+    }
+
+    const started = (await startResponse.json()) as QuizAttemptStartResponse
+    const answers: QuizSubmittedAnswer[] = started.questions.map((question, index) => {
+        if (question.questionType !== 'single') {
+            throw new Error(`Only single-choice seeded attempts are supported, got ${question.questionType}`)
+        }
+        return {
+            questionId: question.id,
+            type: 'choice',
+            selectedIdxs: index < correctAnswers ? [0] : [1],
+        }
+    })
+
+    const evaluateBody: QuizEvaluationRequest = {
+        questionIds: started.questions.map(question => question.id),
+        answers,
+    }
+    const evaluateResponse = await world.page.request.post(
+        `/api/quiz/${quizId}/attempts/${started.attemptId}/evaluate`,
+        {
+            data: evaluateBody,
+        },
+    )
+    if (!evaluateResponse.ok()) {
+        throw new Error(
+            `POST /api/quiz/${quizId}/attempts/${started.attemptId}/evaluate failed: ` +
+                `${evaluateResponse.status()} ${await evaluateResponse.text()}`,
+        )
     }
 }

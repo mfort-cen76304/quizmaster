@@ -47,6 +47,9 @@ public class QuizService {
         String[] cohortNames = quiz.getCohorts() == null
             ? new String[0]
             : quiz.getCohorts().stream().map(Cohort::getName).toArray(String[]::new);
+        QuizCohortResponse[] cohorts = quiz.getCohorts() == null
+            ? new QuizCohortResponse[0]
+            : quiz.getCohorts().stream().map(QuizCohortResponse::from).toArray(QuizCohortResponse[]::new);
 
         return new QuizResponse(
             quiz.getId(),
@@ -60,7 +63,8 @@ public class QuizService {
             quiz.getPassScore(),
             quiz.getTimeLimit(),
             quiz.getRandomQuestionCount(),
-            cohortNames
+            cohortNames,
+            cohorts
         );
     }
 

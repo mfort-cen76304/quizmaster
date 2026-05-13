@@ -15,8 +15,6 @@ interface QuizWelcomePageProps {
     readonly isDryRun: boolean
 }
 
-const shouldShowMockedLeaderboard = import.meta.env.DEV || FEATURE_FLAG_ENABLED
-
 export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
     const navigate = useNavigate()
     const params = useParams()
@@ -27,9 +25,7 @@ export const QuizWelcomePage = ({ isDryRun }: QuizWelcomePageProps) => {
     const [isStarting, setIsStarting] = useState(false)
 
     useApi(params.id, fetchQuiz, setQuiz)
-    useApi(shouldShowMockedLeaderboard ? params.id : undefined, fetchQuizLeaderboard, response =>
-        setLeaderboard(response.cohorts),
-    )
+    useApi(params.id, fetchQuizLeaderboard, response => setLeaderboard(response.cohorts))
 
     const canStart = quiz ? !isStarting && (isDryRun || isQuizAvailable(quiz)) : false
 

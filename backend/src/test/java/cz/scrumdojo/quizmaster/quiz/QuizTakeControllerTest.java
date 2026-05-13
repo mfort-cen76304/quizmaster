@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
@@ -88,22 +89,56 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void getQuizLeaderboardReturnsMockedCohortsWrappedInResponse() throws Exception {
+    public void getQuizLeaderboardReturnsRankedCohortScoresFromFinishedAttempts() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
-        Question q1 = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(q1)
+        Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
+        Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
+        Question q3 = fixtures.save(fixtures.questionIn(workspace).question("Q3"));
+        Question q4 = fixtures.save(fixtures.questionIn(workspace).question("Q4"));
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3, q4)
             .workspaceGuid(workspace.getGuid())
             .randomQuestionCount(null)
+            .cohorts(List.of(
+                Cohort.builder().name("Team Rocket").build(),
+                Cohort.builder().name("Scrum Ninjas").build(),
+                Cohort.builder().name("Retro Masters").build()
+            ))
             .build());
+
+        fixtures.save(fixtures.attempt(quiz)
+            .cohortId(quiz.getCohorts().get(0).getId())
+            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
+            .correctAnswers(4)
+            .partiallyCorrectAnswers(0)
+            .incorrectAnswers(0));
+        fixtures.save(fixtures.attempt(quiz)
+            .cohortId(quiz.getCohorts().get(1).getId())
+            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
+            .correctAnswers(3)
+            .partiallyCorrectAnswers(0)
+            .incorrectAnswers(1));
+        fixtures.save(fixtures.attempt(quiz)
+            .cohortId(quiz.getCohorts().get(2).getId())
+            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
+            .correctAnswers(2)
+            .partiallyCorrectAnswers(1)
+            .incorrectAnswers(1));
+        fixtures.save(fixtures.attempt(quiz)
+            .cohortId(quiz.getCohorts().get(0).getId())
+            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
+            .correctAnswers(0)
+            .partiallyCorrectAnswers(0)
+            .incorrectAnswers(4)
+            .isDryRun(true));
 
         mockMvc.perform(get("/api/quiz/{id}/leaderboard", quiz.getId()))
             .andExpect(status().isOk())
             .andExpect(content().json("""
                 {
                     "cohorts": [
-                        {"rank": 1, "cohort": "Team Rocket", "score": 92},
-                        {"rank": 2, "cohort": "Scrum Ninjas", "score": 88},
-                        {"rank": 3, "cohort": "Retro Masters", "score": 75}
+                        {"rank": 1, "cohort": "Team Rocket", "score": 100},
+                        {"rank": 2, "cohort": "Scrum Ninjas", "score": 75},
+                        {"rank": 3, "cohort": "Retro Masters", "score": 63}
                     ]
                 }
                 """));
@@ -148,22 +183,27 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void createAttemptAcceptsOptionalCohortGuidAndIgnoresItForNow() throws Exception {
+    public void createAttemptPersistsResolvedCohortIdForMatchingCohortGuid() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
         Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2)
             .workspaceGuid(workspace.getGuid())
+            .cohorts(List.of(
+                Cohort.builder().name("Alpha").build(),
+                Cohort.builder().name("Beta").build()
+            ))
             .randomQuestionCount(null)
             .build());
+        String cohortGuid = quiz.getCohorts().getFirst().getGuid().toString();
 
         var result = mockMvc.perform(post("/api/quiz/{id}/attempts", quiz.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                        "cohortGuid": "f5d8d75d-21b9-47c3-b1d7-d6b0da5a6f72"
+                        "cohortGuid": "%s"
                     }
-                    """))
+                    """.formatted(cohortGuid)))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.attemptId").isNumber())
             .andReturn();
@@ -171,7 +211,37 @@ public class QuizTakeControllerTest {
         Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
         var attempt = attemptRepository.findById(attemptId).orElseThrow();
 
-        assertThat(attempt.getCohortId()).isNull();
+        assertThat(attempt.getCohortId()).isEqualTo(quiz.getCohorts().getFirst().getId());
+    }
+
+    @Test
+    public void createAttemptRejectsCohortGuidThatBelongsToDifferentQuiz() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
+        Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
+        Quiz requestedQuiz = fixtures.save(fixtures.quiz(q1)
+            .workspaceGuid(workspace.getGuid())
+            .cohorts(List.of(Cohort.builder().name("Requested").build()))
+            .randomQuestionCount(null)
+            .build());
+        Quiz otherQuiz = fixtures.save(fixtures.quiz(q2)
+            .workspaceGuid(workspace.getGuid())
+            .cohorts(List.of(Cohort.builder().name("Foreign").build()))
+            .randomQuestionCount(null)
+            .build());
+        long attemptsBefore = attemptRepository.count();
+
+        mockMvc.perform(post("/api/quiz/{id}/attempts", requestedQuiz.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "cohortGuid": "%s"
+                    }
+                    """.formatted(otherQuiz.getCohorts().getFirst().getGuid())))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Cohort does not belong to this quiz."));
+
+        assertThat(attemptRepository.count()).isEqualTo(attemptsBefore);
     }
 
     @Test
