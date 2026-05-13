@@ -2,6 +2,14 @@ import { expect, type Page } from '@playwright/test'
 
 import type { QuizMode, Difficulty } from '#steps/shared/specs.ts'
 
+// Submit fires POST (create) or PUT (update) against the workspace quizzes route.
+const SUBMIT_URL = /\/api\/workspaces\/[^/]+\/quizzes(\/\d+)?$/
+const SUBMIT_METHODS = new Set(['POST', 'PUT'])
+// Short window to detect whether a network request was triggered at all;
+// validation errors short-circuit submit without a request, so we don't want
+// to block tests in that case.
+const SUBMIT_WAIT_TIMEOUT_MS = 1000
+
 export class QuizCreatePage {
     constructor(private page: Page) {}
     timeLimitInput = () => this.page.locator('#time-limit')
@@ -19,7 +27,19 @@ export class QuizCreatePage {
     }
 
     private submitLocator = () => this.page.locator('button[type="submit"]')
-    submit = () => this.submitLocator().click()
+    submit = async () => {
+        const pendingSubmit = this.waitForSubmitRequest()
+        await this.submitLocator().click()
+        const request = await pendingSubmit
+        await request?.response()
+    }
+
+    private waitForSubmitRequest = () =>
+        this.page
+            .waitForRequest(req => SUBMIT_URL.test(req.url()) && SUBMIT_METHODS.has(req.method()), {
+                timeout: SUBMIT_WAIT_TIMEOUT_MS,
+            })
+            .catch(() => null)
 
     getQuizTitleValue = () => this.page.locator('#quiz-title').inputValue()
     getQuizDescriptionValue = () => this.page.locator('#quiz-description').inputValue()
