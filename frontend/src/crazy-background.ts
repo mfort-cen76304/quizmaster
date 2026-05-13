@@ -709,6 +709,14 @@ function drawSatan(ctx: CanvasRenderingContext2D, satan: Satan, scale = 1, opaci
 
 // ─── bootstrap ───────────────────────────────────────────────────────────────
 
+let _stop: (() => void) | null = null
+let _resume: (() => void) | null = null
+
+window.__crazyBg = {
+    stop: () => _stop?.(),
+    resume: () => (_resume ? _resume() : start()),
+}
+
 if (!window.__noCrazyBackground) {
     start()
 }
@@ -718,6 +726,23 @@ function start() {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
+
+    let active = true
+    let rafId: number | null = null
+
+    _stop = () => {
+        active = false
+        if (rafId !== null) {
+            cancelAnimationFrame(rafId)
+            rafId = null
+        }
+    }
+
+    _resume = () => {
+        if (active) return
+        active = true
+        rafId = requestAnimationFrame(tick)
+    }
 
     let w = 0
     let h = 0
@@ -1028,8 +1053,8 @@ function start() {
             glow: 'rgba(255, 255, 255, 0.36)',
         })
 
-        requestAnimationFrame(tick)
+        if (active) rafId = requestAnimationFrame(tick)
     }
 
-    requestAnimationFrame(tick)
+    rafId = requestAnimationFrame(tick)
 }

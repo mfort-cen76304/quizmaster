@@ -19,4 +19,5 @@ declare module '*.css' {}
 interface Window {
     /** Set by E2E test harness to skip the decorative canvas background. */
     __noCrazyBackground?: boolean
+    __crazyBg?: { stop: () => void; resume: () => void }
 }
