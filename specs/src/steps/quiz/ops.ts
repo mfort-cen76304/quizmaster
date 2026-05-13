@@ -1,6 +1,6 @@
 import type { Response as PlaywrightResponse } from '@playwright/test'
 
-import { advanceServerClock } from '#steps/clock.ts'
+import { advanceServerClock, initServerClock } from '#steps/clock.ts'
 import type { QuizmasterWorld } from '#steps/world'
 
 export const openQuiz = async (world: QuizmasterWorld, quizBookmark: string) => {
@@ -15,12 +15,24 @@ export const ensureFakeClockInstalled = async (world: QuizmasterWorld) => {
     }
 }
 
+const isStartAttemptQuestionResponse = (response: PlaywrightResponse) => {
+    const url = new URL(response.url())
+    return (
+        response.request().method() === 'POST' &&
+        /\/api\/quiz\/\d+\/attempts\/\d+\/questions\/\d+\/start$/.test(url.pathname) &&
+        response.status() < 400
+    )
+}
+
 export const startQuiz = async (world: QuizmasterWorld, quizBookmark: string) => {
     await ensureFakeClockInstalled(world)
     await openQuiz(world, quizBookmark)
     const browserNow = await world.page.evaluate(() => Date.now())
     await world.page.clock.pauseAt(browserNow + 60_000)
+    await initServerClock(world)
+    const startQuestionResponse = world.page.waitForResponse(isStartAttemptQuestionResponse)
     await world.quizWelcomePage.start()
+    await startQuestionResponse
     world.activeQuizBookmark = quizBookmark
     world.lastAnsweredTitle = undefined
 }

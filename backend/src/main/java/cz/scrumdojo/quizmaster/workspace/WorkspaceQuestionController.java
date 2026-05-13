@@ -76,13 +76,15 @@ public class WorkspaceQuestionController {
                 .count();
             int successRate = timesAsked > 0 ? (int) Math.round(100.0 * correct / timesAsked) : 0;
             // Average time: diff between STARTED and ANSWERED for the same attempt
+            var answeredLogs = logs.stream().filter(l -> "ANSWERED".equals(l.getEventType())).toList();
+            var startedLogs = logs.stream().filter(l -> "STARTED".equals(l.getEventType())).toList();
             int averageTime = (int) Math.round(
-                logs.stream()
-                    .filter(l -> "ANSWERED".equals(l.getEventType()))
+                answeredLogs.stream()
                     .flatMapToLong(answered ->
-                        logs.stream()
-                            .filter(s -> "STARTED".equals(s.getEventType())
-                                    && Objects.equals(s.getAttemptId(), answered.getAttemptId()))
+                        startedLogs.stream()
+                            .filter(s -> Objects.equals(s.getAttemptId(), answered.getAttemptId())
+                                    && Objects.equals(s.getQuestionId(), answered.getQuestionId())
+                                    && s.getCreatedAt().isBefore(answered.getCreatedAt()))
                             .max(Comparator.comparing(s -> s.getCreatedAt()))
                             .stream()
                             .mapToLong(started -> Duration.between(started.getCreatedAt(), answered.getCreatedAt()).getSeconds())
