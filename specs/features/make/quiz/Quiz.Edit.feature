@@ -48,11 +48,13 @@ Feature: Edit Quiz in Workspace
     Then quiz "Math Quiz" does not contain cohort "Girls"
 
 
-  Scenario Outline: Cohort name length limit
-    When I create a new cohort "<name>" for quiz "Math Quiz"
-    Then quiz "Math Quiz" <result> cohort "<name>"
+  Scenario: Accept cohort name at the 30-character limit
+    When I create a new cohort "30 chars: 12345678901234567890" for quiz "Math Quiz"
+    And I submit the quiz
+    Then quiz "Math Quiz" contains cohort "30 chars: 12345678901234567890"
 
-    Examples:
-      | name                             | result           | error                |
-      | 30 chars: 123456789012345678901  | contains         |                      |
-      | 31 chars: 1234567890123456789012 | does not contain | cohort-name-too-long |
+
+  Scenario: Reject cohort name longer than 30 characters
+    When I create a new cohort "31 chars: 123456789012345678901" for quiz "Math Quiz"
+    Then quiz "Math Quiz" does not contain cohort "31 chars: 123456789012345678901"
+    And I see error "cohort-name-too-long" in quiz form
