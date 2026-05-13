@@ -37,22 +37,10 @@ export const QuestionItem = ({ question, index, onDeleteQuestion }: Props) => {
                 </div>
                 {question.stats && (
                     <div className="question-stats-row">
-                        <span className="question-stat">
-                            <span className="question-stat__label">Asked</span>
-                            <span className="question-stat__value">Asked: {question.stats.timesAsked}×</span>
-                        </span>
-                        <span className="question-stat">
-                            <span className="question-stat__label">Success</span>
-                            <span className="question-stat__value">Success: {question.stats.successRate}%</span>
-                        </span>
-                        <span className="question-stat">
-                            <span className="question-stat__label">Avg time</span>
-                            <span className="question-stat__value">Avg time: {question.stats.averageTime}s</span>
-                        </span>
-                        <span className="question-stat">
-                            <span className="question-stat__label">Skipped</span>
-                            <span className="question-stat__value">Skipped: {question.stats.skipped}×</span>
-                        </span>
+                        <span className="question-stat">Asked: {question.stats.timesAsked}×</span>
+                        <span className="question-stat">Success: {question.stats.successRate}%</span>
+                        <span className="question-stat">Avg time: {question.stats.averageTime}s</span>
+                        <span className="question-stat">Skipped: {question.stats.skipped}×</span>
                     </div>
                 )}
             </div>
