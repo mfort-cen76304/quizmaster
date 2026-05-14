@@ -31,6 +31,7 @@ public class AttemptQuestionScoreRepositoryTest {
         scoreRepository.save(AttemptQuestionScore.builder()
             .attemptId(attempt.getId())
             .questionId(question.getId())
+            .position(0)
             .status(AnswerStatus.CORRECT)
             .answeredAt(LocalDateTime.now())
             .build());
@@ -48,13 +49,13 @@ public class AttemptQuestionScoreRepositoryTest {
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
         scoreRepository.save(AttemptQuestionScore.builder()
-            .attemptId(attempt.getId()).questionId(q1.getId())
+            .attemptId(attempt.getId()).questionId(q1.getId()).position(0)
             .status(AnswerStatus.CORRECT).answeredAt(LocalDateTime.now()).build());
         scoreRepository.save(AttemptQuestionScore.builder()
-            .attemptId(attempt.getId()).questionId(q2.getId())
+            .attemptId(attempt.getId()).questionId(q2.getId()).position(1)
             .status(AnswerStatus.PARTIAL).answeredAt(LocalDateTime.now()).build());
 
-        var rows = scoreRepository.findByAttemptId(attempt.getId());
+        var rows = scoreRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(2);
     }
 
@@ -65,11 +66,11 @@ public class AttemptQuestionScoreRepositoryTest {
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
         scoreRepository.save(AttemptQuestionScore.builder()
-            .attemptId(attempt.getId()).questionId(question.getId())
+            .attemptId(attempt.getId()).questionId(question.getId()).position(0)
             .status(AnswerStatus.CORRECT).answeredAt(LocalDateTime.now()).build());
 
         assertThatThrownBy(() -> scoreRepository.saveAndFlush(AttemptQuestionScore.builder()
-                .attemptId(attempt.getId()).questionId(question.getId())
+                .attemptId(attempt.getId()).questionId(question.getId()).position(0)
                 .status(AnswerStatus.INCORRECT).answeredAt(LocalDateTime.now()).build()))
             .isInstanceOf(DataIntegrityViolationException.class);
     }

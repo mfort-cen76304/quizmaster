@@ -81,13 +81,13 @@ public class QuizTakeController {
         var attemptIds = finishedCohortAttempts.stream().map(Attempt::getId).toList();
         var scoresByAttemptId = attemptIds.isEmpty()
             ? Map.<Integer, List<AttemptQuestionScore>>of()
-            : attemptQuestionScoreRepository.findByAttemptIdIn(attemptIds).stream()
+            : attemptQuestionScoreRepository.findByAttemptIdInOrderByPosition(attemptIds).stream()
                 .collect(Collectors.groupingBy(AttemptQuestionScore::getAttemptId));
         var scoresByCohort = new HashMap<Integer, List<Integer>>();
         for (Attempt attempt : finishedCohortAttempts) {
             scoresByCohort
                 .computeIfAbsent(attempt.getCohortId(), ignored -> new ArrayList<>())
-                .add(calculateAttemptScore(quiz, attempt, scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
+                .add(calculateAttemptScore(quiz, scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
         }
 
         var rankedCohorts = quiz.getCohorts().stream()
@@ -107,10 +107,8 @@ public class QuizTakeController {
         return response;
     }
 
-    private int calculateAttemptScore(Quiz quiz, Attempt attempt, List<AttemptQuestionScore> scores) {
-        int totalQuestions = attempt.getQuestionIds() != null && attempt.getQuestionIds().length > 0
-            ? attempt.getQuestionIds().length
-            : totalQuestionsForQuiz(quiz);
+    private int calculateAttemptScore(Quiz quiz, List<AttemptQuestionScore> scores) {
+        int totalQuestions = scores.isEmpty() ? totalQuestionsForQuiz(quiz) : scores.size();
         if (totalQuestions <= 0) {
             return 0;
         }
@@ -159,7 +157,6 @@ public class QuizTakeController {
                 Attempt attempt = Attempt.builder()
                     .quizId(id)
                     .cohortId(cohortId.orElse(null))
-                    .questionIds(selectedQuestionIds)
                     .startedAt(now)
                     .build();
                 Attempt persisted = attemptRepository.save(attempt);
@@ -208,7 +205,8 @@ public class QuizTakeController {
         if (attempt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseHelper.okOrNotFound(quizService.getTakeQuizForAttempt(id, attempt.get().getQuestionIds()));
+        int[] questionIds = orderedQuestionIds(attemptId);
+        return ResponseHelper.okOrNotFound(quizService.getTakeQuizForAttempt(id, questionIds));
     }
     @PostMapping("/{id}/attempts/{attemptId}/evaluate")
     public ResponseEntity<QuizEvaluationResponse> evaluateQuiz(
@@ -224,8 +222,8 @@ public class QuizTakeController {
         if (updatedAttempt.getFinishedAt() != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        var expectedQuestionIds = updatedAttempt.getQuestionIds();
-        if (expectedQuestionIds == null || request.questionIds() == null || !Arrays.equals(expectedQuestionIds, request.questionIds())) {
+        var expectedQuestionIds = orderedQuestionIds(attemptId);
+        if (expectedQuestionIds.length == 0 || request.questionIds() == null || !Arrays.equals(expectedQuestionIds, request.questionIds())) {
             return ResponseEntity.badRequest().build();
         }
         var questionsById = quizService.loadQuestions(expectedQuestionIds).stream()
@@ -270,7 +268,7 @@ public class QuizTakeController {
         if (attempt.get().getFinishedAt() != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        if (!containsQuestion(attempt.get().getQuestionIds(), questionId)) {
+        if (attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId).isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
         var question = quizService.loadQuestions(new int[]{questionId}).stream().findFirst();
@@ -290,7 +288,9 @@ public class QuizTakeController {
         return attemptRepository.findById(attemptId)
             .filter(existing -> Objects.equals(existing.getQuizId(), quizId));
     }
-    private boolean containsQuestion(int[] questionIds, Integer questionId) {
-        return questionIds != null && Arrays.stream(questionIds).anyMatch(expectedId -> Objects.equals(expectedId, questionId));
+    private int[] orderedQuestionIds(Integer attemptId) {
+        return attemptQuestionScoreRepository.findByAttemptIdOrderByPosition(attemptId).stream()
+            .mapToInt(AttemptQuestionScore::getQuestionId)
+            .toArray();
     }
 }

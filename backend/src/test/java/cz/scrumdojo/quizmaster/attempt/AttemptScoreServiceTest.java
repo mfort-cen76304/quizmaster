@@ -27,12 +27,12 @@ public class AttemptScoreServiceTest {
     public void recordExamScoreOverwritesPriorOutcome() {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question));
-        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
+        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
         service.recordExamScore(attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
         service.recordExamScore(attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
 
-        var rows = scoreRepository.findByAttemptId(attempt.getId());
+        var rows = scoreRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(1);
         assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.CORRECT);
     }
@@ -41,12 +41,12 @@ public class AttemptScoreServiceTest {
     public void recordLearnScorePreservesFirstOutcome() {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question));
-        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
+        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
         service.recordLearnScore(attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
         service.recordLearnScore(attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
 
-        var rows = scoreRepository.findByAttemptId(attempt.getId());
+        var rows = scoreRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(1);
         assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.INCORRECT);
     }

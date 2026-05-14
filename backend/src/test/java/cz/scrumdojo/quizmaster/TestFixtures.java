@@ -2,6 +2,7 @@ package cz.scrumdojo.quizmaster;
 
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
+import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
@@ -31,6 +32,9 @@ public class TestFixtures {
 
     @Autowired
     private AttemptRepository attemptRepository;
+
+    @Autowired
+    private AttemptScoreService attemptScoreService;
 
     public Question.QuestionBuilder question() {
         return Question.builder()
@@ -203,6 +207,13 @@ public class TestFixtures {
 
     public Attempt save(Attempt.AttemptBuilder builder) {
         return attemptRepository.save(builder.build());
+    }
+
+    public Attempt save(Attempt.AttemptBuilder builder, Question... drawn) {
+        Attempt attempt = attemptRepository.save(builder.build());
+        int[] ids = Arrays.stream(drawn).mapToInt(Question::getId).toArray();
+        attemptScoreService.seedUnansweredPlaceholders(attempt.getId(), ids);
+        return attempt;
     }
 
     public Attempt save(Attempt attempt) {

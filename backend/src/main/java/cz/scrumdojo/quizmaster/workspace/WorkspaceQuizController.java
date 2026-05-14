@@ -159,7 +159,6 @@ public class WorkspaceQuizController {
                     .toArray();
                 Attempt attempt = Attempt.builder()
                     .quizId(quiz.getId())
-                    .questionIds(selectedQuestionIds)
                     .startedAt(LocalDateTime.now(clock))
                     .isDryRun(true)
                     .build();

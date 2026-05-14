@@ -42,12 +42,14 @@ public class QuizTakeControllerTest {
     private AttemptQuestionScoreRepository attemptQuestionScoreRepository;
 
     private void saveScore(Attempt attempt, Question question, AnswerStatus status) {
-        attemptQuestionScoreRepository.save(AttemptQuestionScore.builder()
-            .attemptId(attempt.getId())
-            .questionId(question.getId())
-            .status(status)
-            .answeredAt(LocalDateTime.now())
-            .build());
+        var row = attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
+            .orElseGet(() -> AttemptQuestionScore.builder()
+                .attemptId(attempt.getId())
+                .questionId(question.getId())
+                .build());
+        row.setStatus(status);
+        row.setAnsweredAt(LocalDateTime.now());
+        attemptQuestionScoreRepository.save(row);
     }
 
     @Test
@@ -121,24 +123,21 @@ public class QuizTakeControllerTest {
             .build());
 
         Attempt teamRocketAttempt = fixtures.save(fixtures.attempt(quiz)
-            .cohortId(quiz.getCohorts().get(0).getId())
-            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()}));
+            .cohortId(quiz.getCohorts().get(0).getId()), q1, q2, q3, q4);
         saveScore(teamRocketAttempt, q1, AnswerStatus.CORRECT);
         saveScore(teamRocketAttempt, q2, AnswerStatus.CORRECT);
         saveScore(teamRocketAttempt, q3, AnswerStatus.CORRECT);
         saveScore(teamRocketAttempt, q4, AnswerStatus.CORRECT);
 
         Attempt scrumNinjasAttempt = fixtures.save(fixtures.attempt(quiz)
-            .cohortId(quiz.getCohorts().get(1).getId())
-            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()}));
+            .cohortId(quiz.getCohorts().get(1).getId()), q1, q2, q3, q4);
         saveScore(scrumNinjasAttempt, q1, AnswerStatus.CORRECT);
         saveScore(scrumNinjasAttempt, q2, AnswerStatus.CORRECT);
         saveScore(scrumNinjasAttempt, q3, AnswerStatus.CORRECT);
         saveScore(scrumNinjasAttempt, q4, AnswerStatus.INCORRECT);
 
         Attempt retroMastersAttempt = fixtures.save(fixtures.attempt(quiz)
-            .cohortId(quiz.getCohorts().get(2).getId())
-            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()}));
+            .cohortId(quiz.getCohorts().get(2).getId()), q1, q2, q3, q4);
         saveScore(retroMastersAttempt, q1, AnswerStatus.CORRECT);
         saveScore(retroMastersAttempt, q2, AnswerStatus.CORRECT);
         saveScore(retroMastersAttempt, q3, AnswerStatus.PARTIAL);
@@ -146,8 +145,7 @@ public class QuizTakeControllerTest {
 
         Attempt dryRunAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(0).getId())
-            .questionIds(new int[]{q1.getId(), q2.getId(), q3.getId(), q4.getId()})
-            .isDryRun(true));
+            .isDryRun(true), q1, q2, q3, q4);
         saveScore(dryRunAttempt, q1, AnswerStatus.INCORRECT);
         saveScore(dryRunAttempt, q2, AnswerStatus.INCORRECT);
         saveScore(dryRunAttempt, q3, AnswerStatus.INCORRECT);
@@ -194,14 +192,14 @@ public class QuizTakeControllerTest {
             .andReturn();
 
         Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
-        var attempt = attemptRepository.findById(attemptId).orElseThrow();
-        assertThat(attempt.getQuestionIds()).hasSize(2);
+        var drawn = attemptQuestionScoreRepository.findByAttemptIdOrderByPosition(attemptId);
+        assertThat(drawn).hasSize(2);
 
         mockMvc.perform(get("/api/quiz/{id}/attempts/{attemptId}", quiz.getId(), attemptId))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.questions.length()").value(2))
-            .andExpect(jsonPath("$.questions[0].id").value(attempt.getQuestionIds()[0]))
-            .andExpect(jsonPath("$.questions[1].id").value(attempt.getQuestionIds()[1]));
+            .andExpect(jsonPath("$.questions[0].id").value(drawn.get(0).getQuestionId()))
+            .andExpect(jsonPath("$.questions[1].id").value(drawn.get(1).getQuestionId()));
     }
 
     @Test
@@ -271,7 +269,7 @@ public class QuizTakeControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
-        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
         var before = LocalDateTime.now();
         mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/timeout", quiz.getId(), attempt.getId()))
@@ -288,7 +286,7 @@ public class QuizTakeControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
-        Attempt attempt = fixtures.save(fixtures.attempt(quiz).questionIds(new int[]{question.getId()}));
+        Attempt attempt = fixtures.save(fixtures.attempt(quiz), question);
 
         mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/timeout", quiz.getId(), attempt.getId()))
             .andExpect(status().isConflict());
@@ -302,7 +300,7 @@ public class QuizTakeControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
         Quiz otherQuiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
-        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
         mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/timeout", otherQuiz.getId(), attempt.getId()))
             .andExpect(status().isNotFound());
@@ -325,7 +323,7 @@ public class QuizTakeControllerTest {
             .explanations(new String[]{"Yes", "Yes", "No", "No"})
             .questionType("multiple"));
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
-        var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{q1.getId(), q2.getId()}));
+        var attempt = fixtures.save(fixtures.attemptInProgress(quiz), q1, q2);
 
         mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -353,7 +351,7 @@ public class QuizTakeControllerTest {
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Question q2 = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
-        var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{q1.getId()}));
+        var attempt = fixtures.save(fixtures.attemptInProgress(quiz), q1);
 
         mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -365,7 +363,8 @@ public class QuizTakeControllerTest {
                     """.formatted(q2.getId())))
             .andExpect(status().isBadRequest());
 
-        assertThat(attemptRepository.findById(attempt.getId()).orElseThrow().getQuestionIds())
+        assertThat(attemptQuestionScoreRepository.findByAttemptIdOrderByPosition(attempt.getId()))
+            .extracting(AttemptQuestionScore::getQuestionId)
             .containsExactly(q1.getId());
     }
 
@@ -374,8 +373,7 @@ public class QuizTakeControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
-        var attempt = fixtures.save(fixtures.attempt(quiz)
-            .questionIds(new int[]{question.getId()}));
+        var attempt = fixtures.save(fixtures.attempt(quiz), question);
 
         mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -399,7 +397,7 @@ public class QuizTakeControllerTest {
             .mode(QuizMode.LEARN)
             .randomQuestionCount(null)
             .build());
-        var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+        var attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
         mockMvc.perform(post(
                     "/api/quiz/{id}/attempts/{attemptId}/questions/{questionId}/submit",
@@ -426,7 +424,7 @@ public class QuizTakeControllerTest {
             .mode(QuizMode.EXAM)
             .randomQuestionCount(null)
             .build());
-        var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+        var attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
         mockMvc.perform(post(
                     "/api/quiz/{id}/attempts/{attemptId}/questions/{questionId}/submit",
@@ -456,7 +454,7 @@ public class QuizTakeControllerTest {
             .mode(QuizMode.EXAM)
             .randomQuestionCount(null)
             .build());
-        var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+        var attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
         mockMvc.perform(post(
                     "/api/quiz/{id}/attempts/{attemptId}/questions/{questionId}/submit",
@@ -493,7 +491,7 @@ public class QuizTakeControllerTest {
             .mode(QuizMode.LEARN)
             .randomQuestionCount(null)
             .build());
-        var attempt = fixtures.save(fixtures.attemptInProgress(quiz).questionIds(new int[]{question.getId()}));
+        var attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
         mockMvc.perform(post(
                     "/api/quiz/{id}/attempts/{attemptId}/questions/{questionId}/submit",

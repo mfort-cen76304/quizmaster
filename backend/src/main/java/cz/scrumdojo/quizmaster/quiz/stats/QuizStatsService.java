@@ -13,13 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 @Service
 public class QuizStatsService {
     private final QuizRepository quizRepository;
@@ -43,38 +40,32 @@ public class QuizStatsService {
             List<Integer> attemptIds = attempts.stream().map(Attempt::getId).toList();
             List<AttemptQuestionScore> allScores = attemptIds.isEmpty()
                     ? List.of()
-                    : attemptQuestionScoreRepository.findByAttemptIdIn(attemptIds);
+                    : attemptQuestionScoreRepository.findByAttemptIdInOrderByPosition(attemptIds);
             Map<Integer, List<AttemptQuestionScore>> scoresByAttemptId = allScores.stream()
                     .collect(Collectors.groupingBy(AttemptQuestionScore::getAttemptId));
             List<AttemptStatsRecord> attemptRecords = attempts.stream()
-                    .map(attempt -> toAttemptRecord(
-                            quiz,
-                            getTotalQuestions(quiz, attempt),
-                            attempt,
-                            scoresByAttemptId.getOrDefault(attempt.getId(), List.of())))
+                    .map(attempt -> {
+                        var attemptScores = scoresByAttemptId.getOrDefault(attempt.getId(), List.of());
+                        return toAttemptRecord(quiz, totalQuestions(quiz, attemptScores), attempt, attemptScores);
+                    })
                     .toList();
             SummaryStats summary = computeSummary(attemptRecords);
-            List<QuestionStatsRecord> questionRecords = buildQuestionRecords(quiz, attempts, allScores);
+            List<QuestionStatsRecord> questionRecords = buildQuestionRecords(quiz, allScores);
             return new QuizStatsResponse(summary, attemptRecords, questionRecords);
         });
     }
-    private List<QuestionStatsRecord> buildQuestionRecords(Quiz quiz, List<Attempt> attempts, List<AttemptQuestionScore> allScores) {
+    private List<QuestionStatsRecord> buildQuestionRecords(Quiz quiz, List<AttemptQuestionScore> allScores) {
         List<Question> questions = quizService.loadQuestions(quiz);
         if (questions.isEmpty()) {
             return List.of();
         }
-        Map<Integer, Long> drawCountsByQuestionId = attempts.stream()
-                .flatMap(attempt -> attempt.getQuestionIds() == null
-                        ? Stream.<Integer>empty()
-                        : Arrays.stream(attempt.getQuestionIds()).boxed())
-                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()));
         Map<Integer, List<AttemptQuestionScore>> scoresByQuestionId = allScores.stream()
                 .collect(Collectors.groupingBy(AttemptQuestionScore::getQuestionId));
         return questions.stream()
-                .map(question -> toQuestionRecord(
-                        question,
-                        drawCountsByQuestionId.getOrDefault(question.getId(), 0L).intValue(),
-                        scoresByQuestionId.getOrDefault(question.getId(), List.of())))
+                .map(question -> {
+                    var rows = scoresByQuestionId.getOrDefault(question.getId(), List.of());
+                    return toQuestionRecord(question, rows.size(), rows);
+                })
                 .toList();
     }
     private QuestionStatsRecord toQuestionRecord(
@@ -103,17 +94,14 @@ public class QuizStatsService {
                 .filter(s -> s.getStatus() == status)
                 .count();
     }
-    private int getTotalQuestions(Quiz quiz) {
+    private int totalQuestions(Quiz quiz, List<AttemptQuestionScore> attemptScores) {
+        if (!attemptScores.isEmpty()) {
+            return attemptScores.size();
+        }
         if (quiz.getRandomQuestionCount() != null && quiz.getRandomQuestionCount() > 0) {
             return quiz.getRandomQuestionCount();
         }
         return quiz.getQuestionIds() != null ? quiz.getQuestionIds().length : 0;
-    }
-    private int getTotalQuestions(Quiz quiz, Attempt attempt) {
-        if (attempt.getQuestionIds() != null && attempt.getQuestionIds().length > 0) {
-            return attempt.getQuestionIds().length;
-        }
-        return getTotalQuestions(quiz);
     }
     private AttemptStatsRecord toAttemptRecord(Quiz quiz, int totalQuestions, Attempt attempt, List<AttemptQuestionScore> scores) {
         LocalDateTime endTime = attempt.getTimedOutAt() != null

@@ -47,23 +47,15 @@ public class AttemptScoreService {
     }
 
     private void applyExamScore(Integer attemptId, Integer questionId, AnswerStatus status, LocalDateTime answeredAt) {
-        var row = scoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId)
-            .orElseGet(() -> AttemptQuestionScore.builder()
-                .attemptId(attemptId)
-                .questionId(questionId)
-                .build());
+        var row = scoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId).orElseThrow();
         row.setStatus(status);
         row.setAnsweredAt(answeredAt);
         scoreRepository.save(row);
     }
 
     private void applyLearnScore(Integer attemptId, Integer questionId, AnswerStatus status, LocalDateTime answeredAt) {
-        var existing = scoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId);
-        if (existing.isPresent() && existing.get().getStatus() != AnswerStatus.UNANSWERED) return;
-        var row = existing.orElseGet(() -> AttemptQuestionScore.builder()
-            .attemptId(attemptId)
-            .questionId(questionId)
-            .build());
+        var row = scoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId).orElseThrow();
+        if (row.getStatus() != AnswerStatus.UNANSWERED) return;
         row.setStatus(status);
         row.setAnsweredAt(answeredAt);
         scoreRepository.save(row);
