@@ -77,4 +77,12 @@ public class Quiz {
     public Optional<Cohort> findCohortByGuid(UUID guid) {
         return cohorts.stream().filter(c -> guid.equals(c.getGuid())).findFirst();
     }
+
+    public boolean hasQuestion(Integer questionId) {
+        if (questionIds == null || questionId == null) return false;
+        for (int id : questionIds) {
+            if (id == questionId) return true;
+        }
+        return false;
+    }
 }

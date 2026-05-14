@@ -21,7 +21,7 @@ public class QuizTakeController {
     private final QuizService quizService;
     private final QuizRepository quizRepository;
     private final AttemptRepository attemptRepository;
-    private final QuestionScoringService questionScoringService;
+    private final QuestionRepository questionRepository;
     private final AttemptService attemptService;
     private final QuizLeaderboardService quizLeaderboardService;
     private final Clock clock;
@@ -30,14 +30,14 @@ public class QuizTakeController {
             QuizService quizService,
             QuizRepository quizRepository,
             AttemptRepository attemptRepository,
-            QuestionScoringService questionScoringService,
+            QuestionRepository questionRepository,
             AttemptService attemptService,
             QuizLeaderboardService quizLeaderboardService,
             Clock clock) {
         this.quizService = quizService;
         this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository;
-        this.questionScoringService = questionScoringService;
+        this.questionRepository = questionRepository;
         this.attemptService = attemptService;
         this.quizLeaderboardService = quizLeaderboardService;
         this.clock = clock;
@@ -109,32 +109,23 @@ public class QuizTakeController {
     }
 
     @PostMapping("/{quizId}/attempts/{attemptId}/questions/{questionId}/submit")
-    public ResponseEntity<?> submitAttemptQuestion(
+    public ResponseEntity<QuestionEvaluationResponse> submitAttemptQuestion(
             @PathVariable Integer quizId,
             @PathVariable Integer attemptId,
             @PathVariable Integer questionId,
             @RequestBody QuestionAnswerRequest request) {
         var quiz = requireQuiz(quizId);
-        var attempt = requireAttemptNotFinished(quizId, attemptId);
-        var question = quizService.loadQuestions(new int[] { questionId }).stream().findFirst();
-        if (question.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        var status = attemptService.submitAnswer(quiz, attempt, question.get(), request, now());
-        if (status.isEmpty()) {
-            return ResponseEntity.badRequest().build();
-        }
-        if (quiz.getMode() == QuizMode.EXAM) {
-            return ResponseEntity.ok(
-                    new QuestionEvaluationResponse(status.get() == AnswerStatus.CORRECT, status.get().points(), null));
-        }
-        return ResponseEntity.ok(questionScoringService.evaluate(question.get(), request));
+        requireAttemptNotFinished(quizId, attemptId);
+        var question = requireQuestionInQuiz(quiz, questionId);
+        var attemptQuestion = requireAttemptQuestion(attemptId, questionId);
+        var status = attemptService.submitAnswer(quiz, attemptQuestion, question, request, now());
+        var feedback = quiz.getMode() == QuizMode.LEARN ? QuestionResponse.feedbackFrom(question) : null;
+        return ResponseEntity.ok(new QuestionEvaluationResponse(status == AnswerStatus.CORRECT, status.points(), feedback));
     }
 
     private Quiz requireQuiz(Integer quizId) {
         return quizRepository.findById(quizId).orElseThrow(
-            () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found with id: " + quizId)
-        );
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found with id: " + quizId));
     }
 
     private Quiz requireAvailableQuiz(Integer quizId) {
@@ -146,14 +137,30 @@ public class QuizTakeController {
         return quiz;
     }
 
+    private Question requireQuestionInQuiz(Quiz quiz, Integer questionId) {
+        if (!quiz.hasQuestion(questionId))
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Question " + questionId + " is not part of quiz " + quiz.getId());
+        return questionRepository.findById(questionId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found with id: " + questionId));
+    }
+
+    private AttemptQuestion requireAttemptQuestion(Integer attemptId, Integer questionId) {
+        return attemptService.findAttemptQuestion(attemptId, questionId).orElseThrow(
+                () -> new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                        "Question " + questionId + " is not part of attempt " + attemptId));
+    }
+
     private Attempt requireAttemptNotFinished(Integer quizId, Integer attemptId) {
         var attempt = attemptRepository.findByIdAndQuizId(attemptId, quizId);
 
         if (attempt.isEmpty())
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Attempt not found with id: " + attemptId + " for quiz id: " + quizId);
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND,
+                    "Attempt not found with id: " + attemptId + " for quiz id: " + quizId);
 
         if (attempt.get().isFinished())
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Attempt with id " + attemptId + " is already finished.");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,
+                    "Attempt with id " + attemptId + " is already finished.");
 
         return attempt.get();
     }

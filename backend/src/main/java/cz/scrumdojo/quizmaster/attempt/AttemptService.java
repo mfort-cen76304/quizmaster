@@ -47,13 +47,17 @@ public class AttemptService {
         return new AttemptStart(persisted, drawnQuestions);
     }
 
+    public Optional<AttemptQuestion> findAttemptQuestion(Integer attemptId, Integer questionId) {
+        return attemptQuestionRepository.findByAttemptIdAndQuestionId(attemptId, questionId);
+    }
+
     @Transactional
-    public Optional<AnswerStatus> submitAnswer(Quiz quiz, Attempt attempt, Question question, QuestionAnswerRequest request, LocalDateTime now) {
-        return attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).map(attemptQuestion -> {
-            AnswerStatus status = questionScoringService.score(question, request);
-            attemptQuestion.recordOutcome(quiz.getMode(), status, now);
-            return status;
-        });
+    public AnswerStatus submitAnswer(Quiz quiz, AttemptQuestion attemptQuestion, Question question,
+                                     QuestionAnswerRequest request, LocalDateTime now) {
+        AnswerStatus status = questionScoringService.score(question, request);
+        attemptQuestion.recordOutcome(quiz.getMode(), status, now);
+        attemptQuestionRepository.save(attemptQuestion);
+        return status;
     }
 
     @Transactional

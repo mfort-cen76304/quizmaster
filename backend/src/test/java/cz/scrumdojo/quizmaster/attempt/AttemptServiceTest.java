@@ -83,9 +83,10 @@ public class AttemptServiceTest {
         LocalDateTime now = LocalDateTime.of(2026, 5, 14, 10, 30);
         QuestionAnswerRequest correctAnswer = new QuestionAnswerRequest(null, "choice", new int[]{1}, null);
 
-        var status = service.submitAnswer(quiz, attempt, question, correctAnswer, now);
+        AttemptQuestion attemptQuestion = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        AnswerStatus status = service.submitAnswer(quiz, attemptQuestion, question, correctAnswer, now);
 
-        assertThat(status).contains(AnswerStatus.CORRECT);
+        assertThat(status).isEqualTo(AnswerStatus.CORRECT);
         var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
         assertThat(row.getStatus()).isEqualTo(AnswerStatus.CORRECT);
         assertThat(row.getAnsweredAt()).isEqualTo(now);
@@ -98,25 +99,13 @@ public class AttemptServiceTest {
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
         QuestionAnswerRequest wrongAnswer = new QuestionAnswerRequest(null, "choice", new int[]{0}, null);
         QuestionAnswerRequest correctAnswer = new QuestionAnswerRequest(null, "choice", new int[]{1}, null);
+        AttemptQuestion attemptQuestion = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
 
-        service.submitAnswer(quiz, attempt, question, wrongAnswer, LocalDateTime.now());
-        service.submitAnswer(quiz, attempt, question, correctAnswer, LocalDateTime.now());
+        service.submitAnswer(quiz, attemptQuestion, question, wrongAnswer, LocalDateTime.now());
+        service.submitAnswer(quiz, attemptQuestion, question, correctAnswer, LocalDateTime.now());
 
         var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
         assertThat(row.getStatus()).isEqualTo(AnswerStatus.INCORRECT);
-    }
-
-    @Test
-    public void submitAnswerForUndrawnQuestionReturnsEmpty() {
-        Question drawn = fixtures.save(fixtures.question());
-        Question undrawn = fixtures.save(fixtures.question());
-        Quiz quiz = fixtures.save(fixtures.quiz(drawn));
-        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), drawn);
-        QuestionAnswerRequest answer = new QuestionAnswerRequest(null, "choice", new int[]{1}, null);
-
-        var result = service.submitAnswer(quiz, attempt, undrawn, answer, LocalDateTime.now());
-
-        assertThat(result).isEmpty();
     }
 
     @Test
