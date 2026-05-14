@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -32,7 +33,7 @@ public class AttemptQuestion {
     @Column(name = "answered_at")
     private LocalDateTime answeredAt;
 
-    public void score(QuizMode mode, AnswerStatus newStatus, LocalDateTime when) {
+    public void recordOutcome(QuizMode mode, AnswerStatus newStatus, LocalDateTime when) {
         if (mode == QuizMode.LEARN && status != AnswerStatus.UNANSWERED) return;
         status = newStatus;
         answeredAt = when;
@@ -45,5 +46,17 @@ public class AttemptQuestion {
             .status(AnswerStatus.UNANSWERED)
             .position(position)
             .build();
+    }
+
+    public static double totalPoints(List<AttemptQuestion> rows) {
+        return rows.stream()
+            .map(AttemptQuestion::getStatus)
+            .mapToDouble(AnswerStatus::points)
+            .sum();
+    }
+
+    public static int percentageScore(List<AttemptQuestion> rows) {
+        if (rows.isEmpty()) return 0;
+        return (int) Math.round(totalPoints(rows) / rows.size() * 100);
     }
 }

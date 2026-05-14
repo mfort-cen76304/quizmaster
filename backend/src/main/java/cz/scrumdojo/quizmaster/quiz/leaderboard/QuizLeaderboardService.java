@@ -52,7 +52,7 @@ public class QuizLeaderboardService {
         for (Attempt attempt : finishedCohortAttempts) {
             scoresByCohort
                 .computeIfAbsent(attempt.getCohortId(), ignored -> new ArrayList<>())
-                .add(Attempt.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
+                .add(AttemptQuestion.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
         }
 
         var rankedCohorts = quiz.getCohorts().stream()

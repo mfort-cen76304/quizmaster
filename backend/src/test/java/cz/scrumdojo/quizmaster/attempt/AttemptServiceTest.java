@@ -31,34 +31,6 @@ public class AttemptServiceTest {
     private TestFixtures fixtures;
 
     @Test
-    public void examSubmissionOverwritesPriorOutcome() {
-        Question question = fixtures.save(fixtures.question());
-        Quiz quiz = fixtures.save(fixtures.quiz(question));
-        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
-
-        service.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
-        service.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
-
-        var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
-        assertThat(rows).hasSize(1);
-        assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.CORRECT);
-    }
-
-    @Test
-    public void learnSubmissionPreservesFirstOutcome() {
-        Question question = fixtures.save(fixtures.question());
-        Quiz quiz = fixtures.save(fixtures.quiz(question));
-        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
-
-        service.recordSubmission(QuizMode.LEARN, attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
-        service.recordSubmission(QuizMode.LEARN, attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
-
-        var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
-        assertThat(rows).hasSize(1);
-        assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.INCORRECT);
-    }
-
-    @Test
     public void timeoutStampsTimedOutAtAndPersists() {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question));

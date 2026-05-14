@@ -5,7 +5,6 @@ import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
-import cz.scrumdojo.quizmaster.attempt.AttemptService;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
@@ -38,9 +37,6 @@ public class TestFixtures {
 
     @Autowired
     private AttemptQuestionRepository attemptQuestionRepository;
-
-    @Autowired
-    private AttemptService attemptService;
 
     public Question.QuestionBuilder question() {
         return Question.builder()
@@ -225,11 +221,15 @@ public class TestFixtures {
     }
 
     public void score(Attempt attempt, Question question, AnswerStatus status) {
-        attemptService.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), status, LocalDateTime.now());
+        score(attempt, question, status, LocalDateTime.now());
     }
 
     public void score(Attempt attempt, Question question, AnswerStatus status, LocalDateTime answeredAt) {
-        attemptService.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), status, answeredAt);
+        AttemptQuestion row = attemptQuestionRepository
+            .findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
+            .orElseThrow();
+        row.recordOutcome(QuizMode.EXAM, status, answeredAt);
+        attemptQuestionRepository.save(row);
     }
 
     public Attempt save(Attempt attempt) {

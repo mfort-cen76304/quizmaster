@@ -103,7 +103,7 @@ public class QuizStatsService {
                 incorrectAnswers,
                 partiallyCorrectAnswers,
                 totalQuestions,
-                Attempt.percentageScore(scores),
+                AttemptQuestion.percentageScore(scores),
                 attempt.status()
         );
     }

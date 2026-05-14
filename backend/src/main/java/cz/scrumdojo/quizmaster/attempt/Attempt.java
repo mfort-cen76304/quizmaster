@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -64,17 +63,5 @@ public class Attempt {
         if (endTime == null) return null;
         int seconds = (int) Duration.between(startedAt, endTime).getSeconds();
         return (timedOutAt != null && timeLimitCap != null) ? Math.min(seconds, timeLimitCap) : seconds;
-    }
-
-    public static double totalPoints(List<AttemptQuestion> scores) {
-        return scores.stream()
-            .map(AttemptQuestion::getStatus)
-            .mapToDouble(AnswerStatus::points)
-            .sum();
-    }
-
-    public static int percentageScore(List<AttemptQuestion> scores) {
-        if (scores.isEmpty()) return 0;
-        return (int) Math.round(totalPoints(scores) / scores.size() * 100);
     }
 }
