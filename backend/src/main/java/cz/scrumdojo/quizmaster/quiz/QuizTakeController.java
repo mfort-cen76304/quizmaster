@@ -1,8 +1,8 @@
 package cz.scrumdojo.quizmaster.quiz;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
@@ -42,7 +42,7 @@ public class QuizTakeController {
     private final AttemptRepository attemptRepository;
     private final QuestionScoringService questionScoringService;
     private final AttemptScoreService attemptScoreService;
-    private final AttemptQuestionScoreRepository attemptQuestionScoreRepository;
+    private final AttemptQuestionRepository attemptQuestionRepository;
     private final Clock clock;
     public QuizTakeController(
             QuizService quizService,
@@ -51,7 +51,7 @@ public class QuizTakeController {
             AttemptRepository attemptRepository,
             QuestionScoringService questionScoringService,
             AttemptScoreService attemptScoreService,
-            AttemptQuestionScoreRepository attemptQuestionScoreRepository,
+            AttemptQuestionRepository attemptQuestionRepository,
             Clock clock) {
         this.quizService = quizService;
         this.quizRepository = quizRepository;
@@ -59,7 +59,7 @@ public class QuizTakeController {
         this.attemptRepository = attemptRepository;
         this.questionScoringService = questionScoringService;
         this.attemptScoreService = attemptScoreService;
-        this.attemptQuestionScoreRepository = attemptQuestionScoreRepository;
+        this.attemptQuestionRepository = attemptQuestionRepository;
         this.clock = clock;
     }
     @GetMapping("/{id}")
@@ -80,9 +80,9 @@ public class QuizTakeController {
             .toList();
         var attemptIds = finishedCohortAttempts.stream().map(Attempt::getId).toList();
         var scoresByAttemptId = attemptIds.isEmpty()
-            ? Map.<Integer, List<AttemptQuestionScore>>of()
-            : attemptQuestionScoreRepository.findByAttemptIdInOrderByPosition(attemptIds).stream()
-                .collect(Collectors.groupingBy(AttemptQuestionScore::getAttemptId));
+            ? Map.<Integer, List<AttemptQuestion>>of()
+            : attemptQuestionRepository.findByAttemptIdInOrderByPosition(attemptIds).stream()
+                .collect(Collectors.groupingBy(AttemptQuestion::getAttemptId));
         var scoresByCohort = new HashMap<Integer, List<Integer>>();
         for (Attempt attempt : finishedCohortAttempts) {
             scoresByCohort
@@ -107,7 +107,7 @@ public class QuizTakeController {
         return response;
     }
 
-    private int calculateAttemptScore(Quiz quiz, List<AttemptQuestionScore> scores) {
+    private int calculateAttemptScore(Quiz quiz, List<AttemptQuestion> scores) {
         int totalQuestions = scores.isEmpty() ? totalQuestionsForQuiz(quiz) : scores.size();
         if (totalQuestions <= 0) {
             return 0;
@@ -268,7 +268,7 @@ public class QuizTakeController {
         if (attempt.get().getFinishedAt() != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        if (attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId).isEmpty()) {
+        if (attemptQuestionRepository.findByAttemptIdAndQuestionId(attemptId, questionId).isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
         var question = quizService.loadQuestions(new int[]{questionId}).stream().findFirst();
@@ -289,8 +289,8 @@ public class QuizTakeController {
             .filter(existing -> Objects.equals(existing.getQuizId(), quizId));
     }
     private int[] orderedQuestionIds(Integer attemptId) {
-        return attemptQuestionScoreRepository.findByAttemptIdOrderByPosition(attemptId).stream()
-            .mapToInt(AttemptQuestionScore::getQuestionId)
+        return attemptQuestionRepository.findByAttemptIdOrderByPosition(attemptId).stream()
+            .mapToInt(AttemptQuestion::getQuestionId)
             .toArray();
     }
 }

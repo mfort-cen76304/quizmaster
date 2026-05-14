@@ -14,10 +14,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
-public class AttemptQuestionScoreRepositoryTest {
+public class AttemptQuestionRepositoryTest {
 
     @Autowired
-    private AttemptQuestionScoreRepository scoreRepository;
+    private AttemptQuestionRepository attemptQuestionRepository;
 
     @Autowired
     private TestFixtures fixtures;
@@ -28,7 +28,7 @@ public class AttemptQuestionScoreRepositoryTest {
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        scoreRepository.save(AttemptQuestionScore.builder()
+        attemptQuestionRepository.save(AttemptQuestion.builder()
             .attemptId(attempt.getId())
             .questionId(question.getId())
             .position(0)
@@ -36,7 +36,7 @@ public class AttemptQuestionScoreRepositoryTest {
             .answeredAt(LocalDateTime.now())
             .build());
 
-        var found = scoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId());
+        var found = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId());
         assertThat(found).isPresent();
         assertThat(found.get().getStatus()).isEqualTo(AnswerStatus.CORRECT);
     }
@@ -48,14 +48,14 @@ public class AttemptQuestionScoreRepositoryTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        scoreRepository.save(AttemptQuestionScore.builder()
+        attemptQuestionRepository.save(AttemptQuestion.builder()
             .attemptId(attempt.getId()).questionId(q1.getId()).position(0)
             .status(AnswerStatus.CORRECT).answeredAt(LocalDateTime.now()).build());
-        scoreRepository.save(AttemptQuestionScore.builder()
+        attemptQuestionRepository.save(AttemptQuestion.builder()
             .attemptId(attempt.getId()).questionId(q2.getId()).position(1)
             .status(AnswerStatus.PARTIAL).answeredAt(LocalDateTime.now()).build());
 
-        var rows = scoreRepository.findByAttemptIdOrderByPosition(attempt.getId());
+        var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(2);
     }
 
@@ -65,11 +65,11 @@ public class AttemptQuestionScoreRepositoryTest {
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        scoreRepository.save(AttemptQuestionScore.builder()
+        attemptQuestionRepository.save(AttemptQuestion.builder()
             .attemptId(attempt.getId()).questionId(question.getId()).position(0)
             .status(AnswerStatus.CORRECT).answeredAt(LocalDateTime.now()).build());
 
-        assertThatThrownBy(() -> scoreRepository.saveAndFlush(AttemptQuestionScore.builder()
+        assertThatThrownBy(() -> attemptQuestionRepository.saveAndFlush(AttemptQuestion.builder()
                 .attemptId(attempt.getId()).questionId(question.getId()).position(0)
                 .status(AnswerStatus.INCORRECT).answeredAt(LocalDateTime.now()).build()))
             .isInstanceOf(DataIntegrityViolationException.class);

@@ -9,16 +9,16 @@ import java.time.LocalDateTime;
 @Service
 public class AttemptScoreService {
 
-    private final AttemptQuestionScoreRepository scoreRepository;
+    private final AttemptQuestionRepository attemptQuestionRepository;
 
-    public AttemptScoreService(AttemptQuestionScoreRepository scoreRepository) {
-        this.scoreRepository = scoreRepository;
+    public AttemptScoreService(AttemptQuestionRepository attemptQuestionRepository) {
+        this.attemptQuestionRepository = attemptQuestionRepository;
     }
 
     @Transactional
     public void seedUnansweredPlaceholders(Integer attemptId, int[] questionIds) {
         for (int position = 0; position < questionIds.length; position++) {
-            scoreRepository.save(AttemptQuestionScore.builder()
+            attemptQuestionRepository.save(AttemptQuestion.builder()
                 .attemptId(attemptId)
                 .questionId(questionIds[position])
                 .status(AnswerStatus.UNANSWERED)
@@ -47,17 +47,17 @@ public class AttemptScoreService {
     }
 
     private void applyExamScore(Integer attemptId, Integer questionId, AnswerStatus status, LocalDateTime answeredAt) {
-        var row = scoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId).orElseThrow();
+        var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attemptId, questionId).orElseThrow();
         row.setStatus(status);
         row.setAnsweredAt(answeredAt);
-        scoreRepository.save(row);
+        attemptQuestionRepository.save(row);
     }
 
     private void applyLearnScore(Integer attemptId, Integer questionId, AnswerStatus status, LocalDateTime answeredAt) {
-        var row = scoreRepository.findByAttemptIdAndQuestionId(attemptId, questionId).orElseThrow();
+        var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attemptId, questionId).orElseThrow();
         if (row.getStatus() != AnswerStatus.UNANSWERED) return;
         row.setStatus(status);
         row.setAnsweredAt(answeredAt);
-        scoreRepository.save(row);
+        attemptQuestionRepository.save(row);
     }
 }

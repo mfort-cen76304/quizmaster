@@ -18,7 +18,7 @@ public class AttemptScoreServiceTest {
     private AttemptScoreService service;
 
     @Autowired
-    private AttemptQuestionScoreRepository scoreRepository;
+    private AttemptQuestionRepository attemptQuestionRepository;
 
     @Autowired
     private TestFixtures fixtures;
@@ -32,7 +32,7 @@ public class AttemptScoreServiceTest {
         service.recordExamScore(attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
         service.recordExamScore(attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
 
-        var rows = scoreRepository.findByAttemptIdOrderByPosition(attempt.getId());
+        var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(1);
         assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.CORRECT);
     }
@@ -46,7 +46,7 @@ public class AttemptScoreServiceTest {
         service.recordLearnScore(attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
         service.recordLearnScore(attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
 
-        var rows = scoreRepository.findByAttemptIdOrderByPosition(attempt.getId());
+        var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(1);
         assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.INCORRECT);
     }

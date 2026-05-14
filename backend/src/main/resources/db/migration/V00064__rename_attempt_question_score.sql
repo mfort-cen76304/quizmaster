@@ -1,0 +1,7 @@
+ALTER TABLE attempt_question_score RENAME TO attempt_question;
+
+ALTER INDEX idx_attempt_question_score__attempt RENAME TO idx_attempt_question__attempt;
+ALTER INDEX idx_attempt_question_score__attempt_position RENAME TO idx_attempt_question__attempt_position;
+
+ALTER TABLE attempt_question
+    RENAME CONSTRAINT attempt_question_score_status_check TO attempt_question_status_check;

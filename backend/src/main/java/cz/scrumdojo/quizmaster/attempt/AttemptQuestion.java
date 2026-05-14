@@ -15,10 +15,10 @@ import java.time.LocalDateTime;
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 @Table(
-    name = "attempt_question_score",
+    name = "attempt_question",
     uniqueConstraints = @UniqueConstraint(columnNames = {"attempt_id", "question_id"})
 )
-public class AttemptQuestionScore {
+public class AttemptQuestion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

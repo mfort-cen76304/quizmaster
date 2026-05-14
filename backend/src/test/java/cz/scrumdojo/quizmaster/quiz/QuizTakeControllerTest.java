@@ -3,8 +3,8 @@ package cz.scrumdojo.quizmaster.quiz;
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
@@ -39,7 +39,7 @@ public class QuizTakeControllerTest {
     private AttemptRepository attemptRepository;
 
     @Autowired
-    private AttemptQuestionScoreRepository attemptQuestionScoreRepository;
+    private AttemptQuestionRepository attemptQuestionRepository;
 
     @Test
     public void getQuizReturnsMetadataWithoutLeakingQuestions() throws Exception {
@@ -181,7 +181,7 @@ public class QuizTakeControllerTest {
             .andReturn();
 
         Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
-        var drawn = attemptQuestionScoreRepository.findByAttemptIdOrderByPosition(attemptId);
+        var drawn = attemptQuestionRepository.findByAttemptIdOrderByPosition(attemptId);
         assertThat(drawn).hasSize(2);
 
         mockMvc.perform(get("/api/quiz/{id}/attempts/{attemptId}", quiz.getId(), attemptId))
@@ -352,8 +352,8 @@ public class QuizTakeControllerTest {
                     """.formatted(q2.getId())))
             .andExpect(status().isBadRequest());
 
-        assertThat(attemptQuestionScoreRepository.findByAttemptIdOrderByPosition(attempt.getId()))
-            .extracting(AttemptQuestionScore::getQuestionId)
+        assertThat(attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId()))
+            .extracting(AttemptQuestion::getQuestionId)
             .containsExactly(q1.getId());
     }
 
@@ -430,7 +430,7 @@ public class QuizTakeControllerTest {
                 """))
             .andExpect(jsonPath("$.question").doesNotExist());
 
-        var score = attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        var score = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
         assertThat(score.getStatus()).isEqualTo(AnswerStatus.CORRECT);
     }
 
@@ -467,7 +467,7 @@ public class QuizTakeControllerTest {
                     """))
             .andExpect(status().isOk());
 
-        var score = attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        var score = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
         assertThat(score.getStatus()).isEqualTo(AnswerStatus.CORRECT);
     }
 
@@ -504,7 +504,7 @@ public class QuizTakeControllerTest {
                     """))
             .andExpect(status().isOk());
 
-        var score = attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        var score = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
         assertThat(score.getStatus()).isEqualTo(AnswerStatus.INCORRECT);
     }
 }

@@ -1,8 +1,8 @@
 package cz.scrumdojo.quizmaster.quiz.stats;
 import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScore;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestionScoreRepository;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptStatus;
 import cz.scrumdojo.quizmaster.question.Question;
@@ -21,16 +21,16 @@ import java.util.stream.Collectors;
 public class QuizStatsService {
     private final QuizRepository quizRepository;
     private final AttemptRepository attemptRepository;
-    private final AttemptQuestionScoreRepository attemptQuestionScoreRepository;
+    private final AttemptQuestionRepository attemptQuestionRepository;
     private final QuizService quizService;
     public QuizStatsService(
             QuizRepository quizRepository,
             AttemptRepository attemptRepository,
-            AttemptQuestionScoreRepository attemptQuestionScoreRepository,
+            AttemptQuestionRepository attemptQuestionRepository,
             QuizService quizService) {
         this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository;
-        this.attemptQuestionScoreRepository = attemptQuestionScoreRepository;
+        this.attemptQuestionRepository = attemptQuestionRepository;
         this.quizService = quizService;
     }
     @Transactional(readOnly = true)
@@ -38,11 +38,11 @@ public class QuizStatsService {
         return quizRepository.findByIdAndWorkspaceGuid(quizId, workspaceGuid).map(quiz -> {
             List<Attempt> attempts = attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quizId);
             List<Integer> attemptIds = attempts.stream().map(Attempt::getId).toList();
-            List<AttemptQuestionScore> allScores = attemptIds.isEmpty()
+            List<AttemptQuestion> allScores = attemptIds.isEmpty()
                     ? List.of()
-                    : attemptQuestionScoreRepository.findByAttemptIdInOrderByPosition(attemptIds);
-            Map<Integer, List<AttemptQuestionScore>> scoresByAttemptId = allScores.stream()
-                    .collect(Collectors.groupingBy(AttemptQuestionScore::getAttemptId));
+                    : attemptQuestionRepository.findByAttemptIdInOrderByPosition(attemptIds);
+            Map<Integer, List<AttemptQuestion>> scoresByAttemptId = allScores.stream()
+                    .collect(Collectors.groupingBy(AttemptQuestion::getAttemptId));
             List<AttemptStatsRecord> attemptRecords = attempts.stream()
                     .map(attempt -> {
                         var attemptScores = scoresByAttemptId.getOrDefault(attempt.getId(), List.of());
@@ -54,13 +54,13 @@ public class QuizStatsService {
             return new QuizStatsResponse(summary, attemptRecords, questionRecords);
         });
     }
-    private List<QuestionStatsRecord> buildQuestionRecords(Quiz quiz, List<AttemptQuestionScore> allScores) {
+    private List<QuestionStatsRecord> buildQuestionRecords(Quiz quiz, List<AttemptQuestion> allScores) {
         List<Question> questions = quizService.loadQuestions(quiz);
         if (questions.isEmpty()) {
             return List.of();
         }
-        Map<Integer, List<AttemptQuestionScore>> scoresByQuestionId = allScores.stream()
-                .collect(Collectors.groupingBy(AttemptQuestionScore::getQuestionId));
+        Map<Integer, List<AttemptQuestion>> scoresByQuestionId = allScores.stream()
+                .collect(Collectors.groupingBy(AttemptQuestion::getQuestionId));
         return questions.stream()
                 .map(question -> {
                     var rows = scoresByQuestionId.getOrDefault(question.getId(), List.of());
@@ -71,8 +71,8 @@ public class QuizStatsService {
     private QuestionStatsRecord toQuestionRecord(
             Question question,
             int drawCount,
-            List<AttemptQuestionScore> scores) {
-        List<AttemptQuestionScore> answeredScores = scores.stream()
+            List<AttemptQuestion> scores) {
+        List<AttemptQuestion> answeredScores = scores.stream()
                 .filter(s -> s.getStatus() != AnswerStatus.UNANSWERED)
                 .toList();
         int answered = answeredScores.size();
@@ -89,12 +89,12 @@ public class QuizStatsService {
                 unanswered
         );
     }
-    private int countByStatus(List<AttemptQuestionScore> scores, AnswerStatus status) {
+    private int countByStatus(List<AttemptQuestion> scores, AnswerStatus status) {
         return (int) scores.stream()
                 .filter(s -> s.getStatus() == status)
                 .count();
     }
-    private int totalQuestions(Quiz quiz, List<AttemptQuestionScore> attemptScores) {
+    private int totalQuestions(Quiz quiz, List<AttemptQuestion> attemptScores) {
         if (!attemptScores.isEmpty()) {
             return attemptScores.size();
         }
@@ -103,7 +103,7 @@ public class QuizStatsService {
         }
         return quiz.getQuestionIds() != null ? quiz.getQuestionIds().length : 0;
     }
-    private AttemptStatsRecord toAttemptRecord(Quiz quiz, int totalQuestions, Attempt attempt, List<AttemptQuestionScore> scores) {
+    private AttemptStatsRecord toAttemptRecord(Quiz quiz, int totalQuestions, Attempt attempt, List<AttemptQuestion> scores) {
         LocalDateTime endTime = attempt.getTimedOutAt() != null
                 ? attempt.getTimedOutAt()
                 : attempt.getFinishedAt();
