@@ -1,31 +1,19 @@
 package cz.scrumdojo.quizmaster.quiz;
-import cz.scrumdojo.quizmaster.attempt.Attempt;
-import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
-import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
-import cz.scrumdojo.quizmaster.attempt.AttemptService;
+
+import cz.scrumdojo.quizmaster.attempt.*;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
-import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
-import cz.scrumdojo.quizmaster.question.QuestionEvaluationResponse;
-import cz.scrumdojo.quizmaster.question.QuestionResponse;
-import cz.scrumdojo.quizmaster.question.QuestionScoringService;
+import cz.scrumdojo.quizmaster.question.*;
 import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardResponse;
 import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
+import org.springframework.web.bind.annotation.*;
+
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
+
 @RestController
 @RequestMapping("/api/quiz")
 public class QuizTakeController {
@@ -37,6 +25,7 @@ public class QuizTakeController {
     private final AttemptQuestionRepository attemptQuestionRepository;
     private final QuizLeaderboardService quizLeaderboardService;
     private final Clock clock;
+
     public QuizTakeController(
             QuizService quizService,
             QuizRepository quizRepository,
@@ -55,15 +44,17 @@ public class QuizTakeController {
         this.quizLeaderboardService = quizLeaderboardService;
         this.clock = clock;
     }
+
     @GetMapping("/{id}")
     public ResponseEntity<QuizMetadataResponse> getQuiz(@PathVariable Integer id) {
         return ResponseHelper.okOrNotFound(quizService.getTakeQuiz(id));
     }
+
     @GetMapping("/{id}/leaderboard")
     public ResponseEntity<QuizLeaderboardResponse> getQuizLeaderboard(@PathVariable Integer id) {
         return quizLeaderboardService.getLeaderboard(id)
-            .map(ResponseEntity::ok)
-            .orElse(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}/attempts")
@@ -78,15 +69,15 @@ public class QuizTakeController {
         var now = LocalDateTime.now(clock);
         if (!QuizAvailability.isAvailable(quiz, now)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                .body(Map.of("message", "Quiz is not currently available."));
+                    .body(Map.of("message", "Quiz is not currently available."));
         }
         var cohort = resolveCohort(quiz, request);
         if (cohortRequested(request) && cohort.isEmpty()) {
             return ResponseEntity.badRequest()
-                .body(Map.of("message", "Cohort does not belong to this quiz."));
+                    .body(Map.of("message", "Cohort does not belong to this quiz."));
         }
         return ResponseEntity.ok(QuizAttemptStartResponse.from(
-            attemptService.start(quiz, cohort.orElse(null), false, now)));
+                attemptService.start(quiz, cohort.orElse(null), false, now)));
     }
 
     private Optional<Cohort> resolveCohort(Quiz quiz, QuizAttemptStartRequest request) {
@@ -103,6 +94,7 @@ public class QuizTakeController {
     private boolean cohortRequested(QuizAttemptStartRequest request) {
         return request != null && request.cohortGuid() != null && !request.cohortGuid().isBlank();
     }
+
     @PostMapping("/{id}/attempts/{attemptId}/timeout")
     public ResponseEntity<Void> recordTimeout(
             @PathVariable Integer id,
@@ -117,6 +109,7 @@ public class QuizTakeController {
         attemptService.timeout(attempt.get(), LocalDateTime.now(clock));
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/{id}/attempts/{attemptId}")
     public ResponseEntity<QuizTakeResponse> getAttemptQuiz(
             @PathVariable Integer id,
@@ -128,6 +121,7 @@ public class QuizTakeController {
         int[] questionIds = orderedQuestionIds(attemptId);
         return ResponseHelper.okOrNotFound(quizService.getTakeQuizForAttempt(id, questionIds));
     }
+
     @PostMapping("/{id}/attempts/{attemptId}/evaluate")
     public ResponseEntity<QuizEvaluationResponse> evaluateQuiz(
             @PathVariable Integer id,
@@ -141,14 +135,14 @@ public class QuizTakeController {
         }
         var evaluation = attemptService.evaluate(attempt.get(), LocalDateTime.now(clock));
         var feedbackQuestions = quizService.loadQuestions(evaluation.questionIds()).stream()
-            .map(QuestionResponse::feedbackFrom)
-            .toArray(QuestionResponse[]::new);
+                .map(QuestionResponse::feedbackFrom)
+                .toArray(QuestionResponse[]::new);
         return ResponseEntity.ok(new QuizEvaluationResponse(
-            evaluation.totalPoints(),
-            evaluation.totalQuestions(),
-            feedbackQuestions
-        ));
+                evaluation.totalPoints(),
+                evaluation.totalQuestions(),
+                feedbackQuestions));
     }
+
     @PostMapping("/{id}/attempts/{attemptId}/questions/{questionId}/submit")
     public ResponseEntity<?> submitAttemptQuestion(
             @PathVariable Integer id,
@@ -163,26 +157,30 @@ public class QuizTakeController {
         if (attempt.get().isFinished()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        var question = quizService.loadQuestions(new int[]{questionId}).stream().findFirst();
+        var question = quizService.loadQuestions(new int[] { questionId }).stream().findFirst();
         if (question.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var status = attemptService.submitAnswer(quiz.get(), attempt.get(), question.get(), request, LocalDateTime.now(clock));
+        var status = attemptService.submitAnswer(quiz.get(), attempt.get(), question.get(), request,
+                LocalDateTime.now(clock));
         if (status.isEmpty()) {
             return ResponseEntity.badRequest().build();
         }
         if (quiz.get().getMode() == QuizMode.EXAM) {
-            return ResponseEntity.ok(new QuestionEvaluationResponse(status.get() == AnswerStatus.CORRECT, status.get().points(), null));
+            return ResponseEntity.ok(
+                    new QuestionEvaluationResponse(status.get() == AnswerStatus.CORRECT, status.get().points(), null));
         }
         return ResponseEntity.ok(questionScoringService.evaluate(question.get(), request));
     }
+
     private Optional<Attempt> findActiveAttempt(Integer quizId, Integer attemptId) {
         return attemptRepository.findById(attemptId)
-            .filter(existing -> Objects.equals(existing.getQuizId(), quizId));
+                .filter(existing -> Objects.equals(existing.getQuizId(), quizId));
     }
+
     private int[] orderedQuestionIds(Integer attemptId) {
         return attemptQuestionRepository.findByAttemptIdOrderByPosition(attemptId).stream()
-            .mapToInt(AttemptQuestion::getQuestionId)
-            .toArray();
+                .mapToInt(AttemptQuestion::getQuestionId)
+                .toArray();
     }
 }
