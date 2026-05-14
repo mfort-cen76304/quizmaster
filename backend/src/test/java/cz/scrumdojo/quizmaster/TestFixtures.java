@@ -211,10 +211,8 @@ public class TestFixtures {
     }
 
     public Attempt save(Attempt.AttemptBuilder builder, Question... drawn) {
-        Attempt attempt = attemptRepository.save(builder.build());
         int[] ids = Arrays.stream(drawn).mapToInt(Question::getId).toArray();
-        attemptScoreService.seedUnansweredPlaceholders(attempt.getId(), ids);
-        return attempt;
+        return attemptScoreService.startAttempt(builder.build(), ids);
     }
 
     public void score(Attempt attempt, Question question, AnswerStatus status) {

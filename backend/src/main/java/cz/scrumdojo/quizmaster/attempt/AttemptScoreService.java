@@ -9,22 +9,27 @@ import java.time.LocalDateTime;
 @Service
 public class AttemptScoreService {
 
+    private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
 
-    public AttemptScoreService(AttemptQuestionRepository attemptQuestionRepository) {
+    public AttemptScoreService(AttemptRepository attemptRepository,
+                               AttemptQuestionRepository attemptQuestionRepository) {
+        this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
     }
 
     @Transactional
-    public void seedUnansweredPlaceholders(Integer attemptId, int[] questionIds) {
-        for (int position = 0; position < questionIds.length; position++) {
+    public Attempt startAttempt(Attempt attempt, int[] drawnQuestionIds) {
+        Attempt persisted = attemptRepository.save(attempt);
+        for (int position = 0; position < drawnQuestionIds.length; position++) {
             attemptQuestionRepository.save(AttemptQuestion.builder()
-                .attemptId(attemptId)
-                .questionId(questionIds[position])
+                .attemptId(persisted.getId())
+                .questionId(drawnQuestionIds[position])
                 .status(AnswerStatus.UNANSWERED)
                 .position(position)
                 .build());
         }
+        return persisted;
     }
 
     @Transactional

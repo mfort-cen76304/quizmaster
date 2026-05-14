@@ -154,13 +154,13 @@ public class QuizTakeController {
                 var selectedQuestionIds = selectedQuestions.stream()
                     .mapToInt(Question::getId)
                     .toArray();
-                Attempt attempt = Attempt.builder()
-                    .quizId(id)
-                    .cohortId(cohortId.orElse(null))
-                    .startedAt(now)
-                    .build();
-                Attempt persisted = attemptRepository.save(attempt);
-                attemptScoreService.seedUnansweredPlaceholders(persisted.getId(), selectedQuestionIds);
+                Attempt persisted = attemptScoreService.startAttempt(
+                    Attempt.builder()
+                        .quizId(id)
+                        .cohortId(cohortId.orElse(null))
+                        .startedAt(now)
+                        .build(),
+                    selectedQuestionIds);
                 QuestionTakeResponse[] questions = selectedQuestions.stream()
                     .map(QuestionTakeResponse::from)
                     .toArray(QuestionTakeResponse[]::new);

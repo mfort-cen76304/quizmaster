@@ -1,7 +1,6 @@
 package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.attempt.Attempt;
-import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
@@ -39,7 +38,6 @@ public class WorkspaceQuizController {
     private final QuestionRepository questionRepository;
     private final QuizService quizService;
     private final QuizStatsService quizStatsService;
-    private final AttemptRepository attemptRepository;
     private final AttemptScoreService attemptScoreService;
     private final Clock clock;
 
@@ -49,7 +47,6 @@ public class WorkspaceQuizController {
             QuestionRepository questionRepository,
             QuizService quizService,
             QuizStatsService quizStatsService,
-            AttemptRepository attemptRepository,
             AttemptScoreService attemptScoreService,
             Clock clock) {
         this.workspaceGuard = workspaceGuard;
@@ -57,7 +54,6 @@ public class WorkspaceQuizController {
         this.questionRepository = questionRepository;
         this.quizService = quizService;
         this.quizStatsService = quizStatsService;
-        this.attemptRepository = attemptRepository;
         this.attemptScoreService = attemptScoreService;
         this.clock = clock;
     }
@@ -157,13 +153,13 @@ public class WorkspaceQuizController {
                 int[] selectedQuestionIds = selectedQuestions.stream()
                     .mapToInt(Question::getId)
                     .toArray();
-                Attempt attempt = Attempt.builder()
-                    .quizId(quiz.getId())
-                    .startedAt(LocalDateTime.now(clock))
-                    .isDryRun(true)
-                    .build();
-                Attempt persisted = attemptRepository.save(attempt);
-                attemptScoreService.seedUnansweredPlaceholders(persisted.getId(), selectedQuestionIds);
+                Attempt persisted = attemptScoreService.startAttempt(
+                    Attempt.builder()
+                        .quizId(quiz.getId())
+                        .startedAt(LocalDateTime.now(clock))
+                        .isDryRun(true)
+                        .build(),
+                    selectedQuestionIds);
 
                 QuestionTakeResponse[] questions = selectedQuestions.stream()
                     .map(QuestionTakeResponse::from)
