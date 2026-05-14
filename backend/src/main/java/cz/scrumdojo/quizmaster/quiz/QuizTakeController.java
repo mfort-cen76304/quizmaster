@@ -4,7 +4,7 @@ import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
-import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
+import cz.scrumdojo.quizmaster.attempt.AttemptService;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
@@ -36,7 +36,7 @@ public class QuizTakeController {
     private final CohortRepository cohortRepository;
     private final AttemptRepository attemptRepository;
     private final QuestionScoringService questionScoringService;
-    private final AttemptScoreService attemptScoreService;
+    private final AttemptService attemptService;
     private final AttemptQuestionRepository attemptQuestionRepository;
     private final QuizLeaderboardService quizLeaderboardService;
     private final Clock clock;
@@ -46,7 +46,7 @@ public class QuizTakeController {
             CohortRepository cohortRepository,
             AttemptRepository attemptRepository,
             QuestionScoringService questionScoringService,
-            AttemptScoreService attemptScoreService,
+            AttemptService attemptService,
             AttemptQuestionRepository attemptQuestionRepository,
             QuizLeaderboardService quizLeaderboardService,
             Clock clock) {
@@ -55,7 +55,7 @@ public class QuizTakeController {
         this.cohortRepository = cohortRepository;
         this.attemptRepository = attemptRepository;
         this.questionScoringService = questionScoringService;
-        this.attemptScoreService = attemptScoreService;
+        this.attemptService = attemptService;
         this.attemptQuestionRepository = attemptQuestionRepository;
         this.quizLeaderboardService = quizLeaderboardService;
         this.clock = clock;
@@ -91,7 +91,7 @@ public class QuizTakeController {
                 var selectedQuestionIds = selectedQuestions.stream()
                     .mapToInt(Question::getId)
                     .toArray();
-                Attempt persisted = attemptScoreService.startAttempt(
+                Attempt persisted = attemptService.startAttempt(
                     Attempt.builder()
                         .quizId(id)
                         .cohortId(cohortId.orElse(null))
@@ -193,7 +193,7 @@ public class QuizTakeController {
         }
         var answeredAt = LocalDateTime.now(clock);
         AnswerStatus status = questionScoringService.score(question.get(), request);
-        attemptScoreService.recordSubmission(
+        attemptService.recordSubmission(
             quiz.get().getMode(), attemptId, questionId, status, answeredAt);
         if (quiz.get().getMode() == QuizMode.EXAM) {
             return ResponseEntity.ok(new QuestionEvaluationResponse(status == AnswerStatus.CORRECT, status.points(), null));

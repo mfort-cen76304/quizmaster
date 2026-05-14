@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
-public class AttemptScoreServiceTest {
+public class AttemptServiceTest {
 
     @Autowired
-    private AttemptScoreService service;
+    private AttemptService service;
 
     @Autowired
     private AttemptQuestionRepository attemptQuestionRepository;

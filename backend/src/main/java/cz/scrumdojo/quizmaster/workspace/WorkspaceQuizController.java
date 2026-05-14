@@ -1,7 +1,7 @@
 package cz.scrumdojo.quizmaster.workspace;
 
 import cz.scrumdojo.quizmaster.attempt.Attempt;
-import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
+import cz.scrumdojo.quizmaster.attempt.AttemptService;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.Question;
@@ -38,7 +38,7 @@ public class WorkspaceQuizController {
     private final QuestionRepository questionRepository;
     private final QuizService quizService;
     private final QuizStatsService quizStatsService;
-    private final AttemptScoreService attemptScoreService;
+    private final AttemptService attemptService;
     private final Clock clock;
 
     public WorkspaceQuizController(
@@ -47,14 +47,14 @@ public class WorkspaceQuizController {
             QuestionRepository questionRepository,
             QuizService quizService,
             QuizStatsService quizStatsService,
-            AttemptScoreService attemptScoreService,
+            AttemptService attemptService,
             Clock clock) {
         this.workspaceGuard = workspaceGuard;
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.quizService = quizService;
         this.quizStatsService = quizStatsService;
-        this.attemptScoreService = attemptScoreService;
+        this.attemptService = attemptService;
         this.clock = clock;
     }
 
@@ -153,7 +153,7 @@ public class WorkspaceQuizController {
                 int[] selectedQuestionIds = selectedQuestions.stream()
                     .mapToInt(Question::getId)
                     .toArray();
-                Attempt persisted = attemptScoreService.startAttempt(
+                Attempt persisted = attemptService.startAttempt(
                     Attempt.builder()
                         .quizId(quiz.getId())
                         .startedAt(LocalDateTime.now(clock))

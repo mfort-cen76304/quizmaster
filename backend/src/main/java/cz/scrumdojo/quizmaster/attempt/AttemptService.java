@@ -7,13 +7,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 @Service
-public class AttemptScoreService {
+public class AttemptService {
 
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
 
-    public AttemptScoreService(AttemptRepository attemptRepository,
-                               AttemptQuestionRepository attemptQuestionRepository) {
+    public AttemptService(AttemptRepository attemptRepository,
+                          AttemptQuestionRepository attemptQuestionRepository) {
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
     }

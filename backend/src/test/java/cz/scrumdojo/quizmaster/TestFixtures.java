@@ -3,7 +3,7 @@ package cz.scrumdojo.quizmaster;
 import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
-import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
+import cz.scrumdojo.quizmaster.attempt.AttemptService;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionRequest;
@@ -35,7 +35,7 @@ public class TestFixtures {
     private AttemptRepository attemptRepository;
 
     @Autowired
-    private AttemptScoreService attemptScoreService;
+    private AttemptService attemptService;
 
     public Question.QuestionBuilder question() {
         return Question.builder()
@@ -212,15 +212,15 @@ public class TestFixtures {
 
     public Attempt save(Attempt.AttemptBuilder builder, Question... drawn) {
         int[] ids = Arrays.stream(drawn).mapToInt(Question::getId).toArray();
-        return attemptScoreService.startAttempt(builder.build(), ids);
+        return attemptService.startAttempt(builder.build(), ids);
     }
 
     public void score(Attempt attempt, Question question, AnswerStatus status) {
-        attemptScoreService.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), status, LocalDateTime.now());
+        attemptService.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), status, LocalDateTime.now());
     }
 
     public void score(Attempt attempt, Question question, AnswerStatus status, LocalDateTime answeredAt) {
-        attemptScoreService.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), status, answeredAt);
+        attemptService.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), status, answeredAt);
     }
 
     public Attempt save(Attempt attempt) {
