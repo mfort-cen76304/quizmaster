@@ -39,6 +39,15 @@ public class AttemptService {
     }
 
     @Transactional
+    public AttemptEvaluation evaluate(Attempt attempt, LocalDateTime now) {
+        var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
+        int[] questionIds = rows.stream().mapToInt(AttemptQuestion::getQuestionId).toArray();
+        attempt.markFinished(now);
+        attemptRepository.save(attempt);
+        return new AttemptEvaluation(Attempt.totalPoints(rows), rows.size(), questionIds);
+    }
+
+    @Transactional
     public void timeout(Attempt attempt, LocalDateTime now) {
         attempt.markTimedOut(now);
         attemptRepository.save(attempt);

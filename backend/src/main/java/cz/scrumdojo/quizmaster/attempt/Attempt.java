@@ -7,7 +7,6 @@ import lombok.*;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -52,6 +51,10 @@ public class Attempt {
         return timedOutAt != null;
     }
 
+    public void markFinished(LocalDateTime when) {
+        this.finishedAt = when;
+    }
+
     public void markTimedOut(LocalDateTime when) {
         this.timedOutAt = when;
     }
@@ -63,13 +66,15 @@ public class Attempt {
         return (timedOutAt != null && timeLimitCap != null) ? Math.min(seconds, timeLimitCap) : seconds;
     }
 
-    public static double totalPoints(Stream<AnswerStatus> statuses) {
-        return statuses.mapToDouble(AnswerStatus::points).sum();
+    public static double totalPoints(List<AttemptQuestion> scores) {
+        return scores.stream()
+            .map(AttemptQuestion::getStatus)
+            .mapToDouble(AnswerStatus::points)
+            .sum();
     }
 
     public static int percentageScore(List<AttemptQuestion> scores) {
         if (scores.isEmpty()) return 0;
-        double earned = totalPoints(scores.stream().map(AttemptQuestion::getStatus));
-        return (int) Math.round(earned / scores.size() * 100);
+        return (int) Math.round(totalPoints(scores) / scores.size() * 100);
     }
 }

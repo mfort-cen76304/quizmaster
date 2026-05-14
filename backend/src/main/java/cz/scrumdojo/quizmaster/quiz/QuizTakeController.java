@@ -151,20 +151,16 @@ public class QuizTakeController {
         if (attempt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var updatedAttempt = attempt.get();
-        if (updatedAttempt.getFinishedAt() != null) {
+        if (attempt.get().isFinished()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        var scores = attemptQuestionRepository.findByAttemptIdOrderByPosition(attemptId);
-        var feedbackQuestions = quizService.loadQuestions(
-                scores.stream().mapToInt(AttemptQuestion::getQuestionId).toArray()).stream()
+        var evaluation = attemptService.evaluate(attempt.get(), LocalDateTime.now(clock));
+        var feedbackQuestions = quizService.loadQuestions(evaluation.questionIds()).stream()
             .map(QuestionResponse::feedbackFrom)
             .toArray(QuestionResponse[]::new);
-        updatedAttempt.setFinishedAt(LocalDateTime.now(clock));
-        attemptRepository.save(updatedAttempt);
         return ResponseEntity.ok(new QuizEvaluationResponse(
-            Attempt.totalPoints(scores.stream().map(AttemptQuestion::getStatus)),
-            scores.size(),
+            evaluation.totalPoints(),
+            evaluation.totalQuestions(),
             feedbackQuestions
         ));
     }
