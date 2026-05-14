@@ -11,8 +11,6 @@ import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -44,10 +42,7 @@ public class QuizStatsService {
             Map<Integer, List<AttemptQuestion>> scoresByAttemptId = allScores.stream()
                     .collect(Collectors.groupingBy(AttemptQuestion::getAttemptId));
             List<AttemptStatsRecord> attemptRecords = attempts.stream()
-                    .map(attempt -> {
-                        var attemptScores = scoresByAttemptId.getOrDefault(attempt.getId(), List.of());
-                        return toAttemptRecord(quiz, totalQuestions(quiz, attemptScores), attempt, attemptScores);
-                    })
+                    .map(attempt -> toAttemptRecord(quiz, attempt, scoresByAttemptId.getOrDefault(attempt.getId(), List.of())))
                     .toList();
             SummaryStats summary = computeSummary(attemptRecords);
             List<QuestionStatsRecord> questionRecords = buildQuestionRecords(quiz, allScores);
@@ -94,50 +89,23 @@ public class QuizStatsService {
                 .filter(s -> s.getStatus() == status)
                 .count();
     }
-    private int totalQuestions(Quiz quiz, List<AttemptQuestion> attemptScores) {
-        if (!attemptScores.isEmpty()) {
-            return attemptScores.size();
-        }
-        if (quiz.getRandomQuestionCount() != null && quiz.getRandomQuestionCount() > 0) {
-            return quiz.getRandomQuestionCount();
-        }
-        return quiz.getQuestionIds() != null ? quiz.getQuestionIds().length : 0;
-    }
-    private AttemptStatsRecord toAttemptRecord(Quiz quiz, int totalQuestions, Attempt attempt, List<AttemptQuestion> scores) {
-        LocalDateTime endTime = attempt.getTimedOutAt() != null
-                ? attempt.getTimedOutAt()
-                : attempt.getFinishedAt();
-        Integer durationSeconds = endTime != null
-                ? (int) Duration.between(attempt.getStartedAt(), endTime).getSeconds()
-                : null;
-        if (durationSeconds != null && attempt.getTimedOutAt() != null && quiz.getTimeLimit() != null) {
-            durationSeconds = Math.min(durationSeconds, quiz.getTimeLimit());
-        }
+    private AttemptStatsRecord toAttemptRecord(Quiz quiz, Attempt attempt, List<AttemptQuestion> scores) {
+        int totalQuestions = scores.size();
         int correctAnswers = countByStatus(scores, AnswerStatus.CORRECT);
         int partiallyCorrectAnswers = countByStatus(scores, AnswerStatus.PARTIAL);
         int incorrectAnswers = attempt.getFinishedAt() != null
                 ? totalQuestions - correctAnswers - partiallyCorrectAnswers
                 : countByStatus(scores, AnswerStatus.INCORRECT);
-        int score = Attempt.percentageScore(scores);
-        AttemptStatus status = deriveStatus(attempt);
         return new AttemptStatsRecord(
                 attempt.getId(),
-                durationSeconds,
+                attempt.durationSeconds(quiz.getTimeLimit()),
                 correctAnswers,
                 incorrectAnswers,
                 partiallyCorrectAnswers,
                 totalQuestions,
-                score,
-                status
+                Attempt.percentageScore(scores),
+                attempt.status()
         );
-    }
-    private AttemptStatus deriveStatus(Attempt attempt) {
-        boolean evaluated = attempt.getFinishedAt() != null;
-        boolean timedOut = attempt.getTimedOutAt() != null;
-        if (evaluated && !timedOut) return AttemptStatus.FINISHED;
-        if (evaluated && timedOut) return AttemptStatus.TIMEOUT;
-        if (!evaluated && timedOut) return AttemptStatus.ABANDONED;
-        return AttemptStatus.IN_PROGRESS;
     }
     private SummaryStats computeSummary(List<AttemptStatsRecord> records) {
         int started = records.size();
