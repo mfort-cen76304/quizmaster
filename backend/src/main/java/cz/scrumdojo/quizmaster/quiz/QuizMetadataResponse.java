@@ -14,4 +14,20 @@ public record QuizMetadataResponse(
     Integer timeLimit,
     Integer randomQuestionCount,
     int questionCount
-) {}
+) {
+    public static QuizMetadataResponse from(Quiz quiz) {
+        return new QuizMetadataResponse(
+            quiz.getId(),
+            quiz.getTitle(),
+            quiz.getDescription(),
+            quiz.getStartAt(),
+            quiz.getEndAt(),
+            quiz.getMode(),
+            quiz.getDifficulty(),
+            quiz.getPassScore(),
+            quiz.getTimeLimit(),
+            quiz.getRandomQuestionCount(),
+            quiz.drawnQuestionCount()
+        );
+    }
+}

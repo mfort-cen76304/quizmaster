@@ -31,7 +31,7 @@ public class QuizService {
     }
 
     public Optional<QuizMetadataResponse> getTakeQuiz(Integer id) {
-        return quizRepository.findById(id).map(QuizService::toQuizMetadataResponse);
+        return quizRepository.findById(id).map(QuizMetadataResponse::from);
     }
 
     public Optional<QuizTakeResponse> getTakeQuizForAttempt(Integer quizId, int[] questionIds) {
@@ -65,26 +65,6 @@ public class QuizService {
             quiz.getRandomQuestionCount(),
             cohortNames,
             cohorts
-        );
-    }
-
-    private static QuizMetadataResponse toQuizMetadataResponse(Quiz quiz) {
-        int total = quiz.getQuestionIds() == null ? 0 : quiz.getQuestionIds().length;
-        Integer randomCount = quiz.getRandomQuestionCount();
-        int questionCount = (randomCount != null && randomCount > 0) ? Math.min(randomCount, total) : total;
-
-        return new QuizMetadataResponse(
-            quiz.getId(),
-            quiz.getTitle(),
-            quiz.getDescription(),
-            quiz.getStartAt(),
-            quiz.getEndAt(),
-            quiz.getMode(),
-            quiz.getDifficulty(),
-            quiz.getPassScore(),
-            quiz.getTimeLimit(),
-            quiz.getRandomQuestionCount(),
-            questionCount
         );
     }
 

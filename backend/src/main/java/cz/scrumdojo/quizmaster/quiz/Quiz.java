@@ -67,4 +67,9 @@ public class Quiz {
         }
         cohorts.forEach(cohort -> cohort.setQuiz(this));
     }
+
+    public int drawnQuestionCount() {
+        int total = questionIds == null ? 0 : questionIds.length;
+        return (randomQuestionCount != null && randomQuestionCount > 0) ? Math.min(randomQuestionCount, total) : total;
+    }
 }
