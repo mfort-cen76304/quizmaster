@@ -37,4 +37,10 @@ public class AttemptService {
         var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attemptId, questionId).orElseThrow();
         row.score(mode, status, answeredAt);
     }
+
+    @Transactional
+    public void timeout(Attempt attempt, LocalDateTime now) {
+        attempt.markTimedOut(now);
+        attemptRepository.save(attempt);
+    }
 }

@@ -38,12 +38,22 @@ public class Attempt {
     private Boolean isDryRun = false;
 
     public AttemptStatus status() {
-        boolean evaluated = finishedAt != null;
-        boolean timedOut = timedOutAt != null;
-        if (evaluated && !timedOut) return AttemptStatus.FINISHED;
-        if (evaluated && timedOut) return AttemptStatus.TIMEOUT;
-        if (!evaluated && timedOut) return AttemptStatus.ABANDONED;
+        if (isFinished() && !isTimedOut()) return AttemptStatus.FINISHED;
+        if (isFinished() && isTimedOut()) return AttemptStatus.TIMEOUT;
+        if (!isFinished() && isTimedOut()) return AttemptStatus.ABANDONED;
         return AttemptStatus.IN_PROGRESS;
+    }
+
+    public boolean isFinished() {
+        return finishedAt != null;
+    }
+
+    public boolean isTimedOut() {
+        return timedOutAt != null;
+    }
+
+    public void markTimedOut(LocalDateTime when) {
+        this.timedOutAt = when;
     }
 
     public Integer durationSeconds(Integer timeLimitCap) {

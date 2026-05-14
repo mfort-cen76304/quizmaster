@@ -126,12 +126,10 @@ public class QuizTakeController {
         if (attempt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var existing = attempt.get();
-        if (existing.getFinishedAt() != null) {
+        if (attempt.get().isFinished()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        existing.setTimedOutAt(LocalDateTime.now(clock));
-        attemptRepository.save(existing);
+        attemptService.timeout(attempt.get(), LocalDateTime.now(clock));
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/{id}/attempts/{attemptId}")

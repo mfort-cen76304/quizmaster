@@ -19,6 +19,9 @@ public class AttemptServiceTest {
     private AttemptService service;
 
     @Autowired
+    private AttemptRepository attemptRepository;
+
+    @Autowired
     private AttemptQuestionRepository attemptQuestionRepository;
 
     @Autowired
@@ -50,5 +53,19 @@ public class AttemptServiceTest {
         var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(1);
         assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.INCORRECT);
+    }
+
+    @Test
+    public void timeoutStampsTimedOutAtAndPersists() {
+        Question question = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(question));
+        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
+        LocalDateTime now = LocalDateTime.of(2026, 5, 14, 10, 30);
+
+        service.timeout(attempt, now);
+
+        Attempt reloaded = attemptRepository.findById(attempt.getId()).orElseThrow();
+        assertThat(reloaded.getTimedOutAt()).isEqualTo(now);
+        assertThat(reloaded.getFinishedAt()).isNull();
     }
 }
