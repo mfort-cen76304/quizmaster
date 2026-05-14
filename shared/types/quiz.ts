@@ -1,5 +1,5 @@
 import type { Difficulty, QuizMode } from './enums.ts'
-import type { Question, QuestionTake } from './question.ts'
+import type { Question, QuestionEvaluation, QuestionTake } from './question.ts'
 
 export interface QuizRequest {
     readonly title: string
@@ -81,7 +81,7 @@ export type QuizSubmittedAnswer =
 export interface QuizEvaluationResponse {
     readonly score: number
     readonly totalQuestions: number
-    readonly questions?: readonly Question[]
+    readonly questions?: readonly QuestionEvaluation[]
 }
 
 export interface QuizAttemptStartResponse {

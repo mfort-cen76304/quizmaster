@@ -52,9 +52,16 @@ export const QuizScorePage = ({ quiz, quizAnswers, result }: QuizScorePageProps)
             {result.questions && (
                 <>
                     <h2>Answer overview</h2>
-                    {result.questions.map((question, idx) => (
-                        <QuestionSummary key={question.id} question={question} answer={quizAnswers.finalAnswers[idx]} />
-                    ))}
+                    {result.questions.map((evaluation, idx) =>
+                        evaluation.question ? (
+                            <QuestionSummary
+                                key={evaluation.question.id}
+                                question={evaluation.question}
+                                status={evaluation.status}
+                                answer={quizAnswers.finalAnswers[idx]}
+                            />
+                        ) : null,
+                    )}
                 </>
             )}
         </div>

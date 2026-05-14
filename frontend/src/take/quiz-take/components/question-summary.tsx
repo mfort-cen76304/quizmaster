@@ -1,14 +1,15 @@
 import './question-summary.scss'
-import type { Question, QuestionAnswer } from '#fe/take/model/question.ts'
+import type { AnswerStatus, Question, QuestionAnswer } from '#fe/take/model/question.ts'
 import { Answer, QuestionExplanation } from '#fe/take/question-take'
 import { NumericalResult } from '#fe/take/question-take/components/numerical-result.tsx'
 
 interface QuestionSummaryProps {
     readonly question: Question
+    readonly status: AnswerStatus
     readonly answer?: QuestionAnswer
 }
 
-export const QuestionSummary = ({ question, answer }: QuestionSummaryProps) => {
+export const QuestionSummary = ({ question, status, answer }: QuestionSummaryProps) => {
     const isMultipleChoice = question.correctAnswers.length > 1
     const selectedIdxs = answer?.type === 'choice' ? answer.selectedIdxs : undefined
     const isNumerical = question.questionType === 'numerical'
@@ -27,7 +28,7 @@ export const QuestionSummary = ({ question, answer }: QuestionSummaryProps) => {
                 <strong id={`question-name-${question.id}`}>{question.question}</strong>
             </legend>
             {isNumerical ? (
-                <NumericalResult question={question} userInput={numericalUserInput} />
+                <NumericalResult question={question} userInput={numericalUserInput} status={status} />
             ) : (
                 <ul id={`question-answers-${question.id}`} className="answers">
                     {question.answers.map((answer, idx) => (

@@ -13,31 +13,24 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/quiz")
 public class QuizTakeController {
     private final QuizService quizService;
-    private final QuizRepository quizRepository;
-    private final AttemptRepository attemptRepository;
-    private final QuestionRepository questionRepository;
     private final AttemptService attemptService;
     private final QuizLeaderboardService quizLeaderboardService;
     private final Clock clock;
 
     public QuizTakeController(
             QuizService quizService,
-            QuizRepository quizRepository,
-            AttemptRepository attemptRepository,
-            QuestionRepository questionRepository,
             AttemptService attemptService,
             QuizLeaderboardService quizLeaderboardService,
             Clock clock) {
         this.quizService = quizService;
-        this.quizRepository = quizRepository;
-        this.attemptRepository = attemptRepository;
-        this.questionRepository = questionRepository;
         this.attemptService = attemptService;
         this.quizLeaderboardService = quizLeaderboardService;
         this.clock = clock;
@@ -45,7 +38,7 @@ public class QuizTakeController {
 
     @GetMapping("/{id}")
     public ResponseEntity<QuizMetadataResponse> getQuiz(@PathVariable Integer id) {
-        return ResponseHelper.okOrNotFound(quizRepository.findById(id).map(QuizMetadataResponse::from));
+        return ResponseHelper.okOrNotFound(quizService.findById(id).map(QuizMetadataResponse::from));
     }
 
     @GetMapping("/{id}/leaderboard")
@@ -89,7 +82,7 @@ public class QuizTakeController {
             @PathVariable Integer attemptId) {
 
         var attempt = requireAttemptNotFinished(quizId, attemptId);
-        attemptService.timeout(attempt, LocalDateTime.now(clock));
+        attemptService.timeout(attempt, now());
         return ResponseEntity.noContent().build();
     }
 
@@ -98,14 +91,10 @@ public class QuizTakeController {
             @PathVariable Integer quizId,
             @PathVariable Integer attemptId) {
         var attempt = requireAttemptNotFinished(quizId, attemptId);
-        var evaluation = attemptService.evaluate(attempt, LocalDateTime.now(clock));
-        var feedbackQuestions = quizService.loadQuestions(evaluation.questionIds()).stream()
-                .map(QuestionResponse::feedbackFrom)
-                .toArray(QuestionResponse[]::new);
-        return ResponseEntity.ok(new QuizEvaluationResponse(
-                evaluation.totalPoints(),
-                evaluation.totalQuestions(),
-                feedbackQuestions));
+        attemptService.finish(attempt, now());
+        var rows = attemptService.answeredQuestions(attempt.getId());
+        return ResponseEntity.ok(QuizEvaluationResponse.from(rows,
+                quizService.loadQuestions(AttemptQuestion.questionIdsOf(rows))));
     }
 
     @PostMapping("/{quizId}/attempts/{attemptId}/questions/{questionId}/submit")
@@ -124,7 +113,7 @@ public class QuizTakeController {
     }
 
     private Quiz requireQuiz(Integer quizId) {
-        return quizRepository.findById(quizId).orElseThrow(
+        return quizService.findById(quizId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Quiz not found with id: " + quizId));
     }
 
@@ -141,7 +130,7 @@ public class QuizTakeController {
         if (!quiz.hasQuestion(questionId))
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,
                     "Question " + questionId + " is not part of quiz " + quiz.getId());
-        return questionRepository.findById(questionId).orElseThrow(
+        return quizService.findQuestion(questionId).orElseThrow(
                 () -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Question not found with id: " + questionId));
     }
 
@@ -152,7 +141,7 @@ public class QuizTakeController {
     }
 
     private Attempt requireAttemptNotFinished(Integer quizId, Integer attemptId) {
-        var attempt = attemptRepository.findByIdAndQuizId(attemptId, quizId);
+        var attempt = attemptService.findAttempt(quizId, attemptId);
 
         if (attempt.isEmpty())
             throw new ResponseStatusException(HttpStatus.NOT_FOUND,

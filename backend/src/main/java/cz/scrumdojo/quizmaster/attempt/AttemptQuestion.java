@@ -48,6 +48,10 @@ public class AttemptQuestion {
             .build();
     }
 
+    public static int[] questionIdsOf(List<AttemptQuestion> rows) {
+        return rows.stream().mapToInt(AttemptQuestion::getQuestionId).toArray();
+    }
+
     public static double totalPoints(List<AttemptQuestion> rows) {
         return rows.stream()
             .map(AttemptQuestion::getStatus)

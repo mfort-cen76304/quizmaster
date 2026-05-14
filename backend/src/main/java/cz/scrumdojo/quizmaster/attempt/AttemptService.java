@@ -47,8 +47,16 @@ public class AttemptService {
         return new AttemptStart(persisted, drawnQuestions);
     }
 
+    public Optional<Attempt> findAttempt(Integer quizId, Integer attemptId) {
+        return attemptRepository.findByIdAndQuizId(attemptId, quizId);
+    }
+
     public Optional<AttemptQuestion> findAttemptQuestion(Integer attemptId, Integer questionId) {
         return attemptQuestionRepository.findByAttemptIdAndQuestionId(attemptId, questionId);
+    }
+
+    public List<AttemptQuestion> answeredQuestions(Integer attemptId) {
+        return attemptQuestionRepository.findByAttemptIdOrderByPosition(attemptId);
     }
 
     @Transactional
@@ -61,12 +69,9 @@ public class AttemptService {
     }
 
     @Transactional
-    public AttemptEvaluation evaluate(Attempt attempt, LocalDateTime now) {
-        var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
-        int[] questionIds = rows.stream().mapToInt(AttemptQuestion::getQuestionId).toArray();
+    public void finish(Attempt attempt, LocalDateTime now) {
         attempt.markFinished(now);
         attemptRepository.save(attempt);
-        return new AttemptEvaluation(AttemptQuestion.totalPoints(rows), rows.size(), questionIds);
     }
 
     @Transactional

@@ -20,6 +20,14 @@ public class QuizService {
         this.quizRepository = quizRepository;
     }
 
+    public Optional<Quiz> findById(Integer id) {
+        return quizRepository.findById(id);
+    }
+
+    public Optional<Question> findQuestion(Integer questionId) {
+        return questionRepository.findById(questionId);
+    }
+
     public Optional<QuizResponse> getQuiz(Integer id) {
         return quizRepository.findById(id).map(quiz -> toQuizResponse(quiz, loadQuestions(quiz)));
     }

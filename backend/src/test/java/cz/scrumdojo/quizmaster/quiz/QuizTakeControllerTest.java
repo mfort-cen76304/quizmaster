@@ -308,9 +308,11 @@ public class QuizTakeControllerTest {
             .andExpect(jsonPath("$.score").value(1.5))
             .andExpect(jsonPath("$.totalQuestions").value(2))
             .andExpect(jsonPath("$.questions.length()").value(2))
-            .andExpect(jsonPath("$.questions[0].correctAnswers[0]").value(1))
-            .andExpect(jsonPath("$.questions[1].correctAnswers.length()").value(2))
-            .andExpect(jsonPath("$.questions[0].workspaceGuid").doesNotExist());
+            .andExpect(jsonPath("$.questions[0].status").value("CORRECT"))
+            .andExpect(jsonPath("$.questions[1].status").value("PARTIAL"))
+            .andExpect(jsonPath("$.questions[0].question.correctAnswers[0]").value(1))
+            .andExpect(jsonPath("$.questions[1].question.correctAnswers.length()").value(2))
+            .andExpect(jsonPath("$.questions[0].question.workspaceGuid").doesNotExist());
     }
 
     @Test

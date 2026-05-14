@@ -1,20 +1,20 @@
 import './numerical-result.scss'
-import { type Question, evaluateAnswer, numericalAnswer } from '#fe/take/model/question.ts'
+import { type AnswerStatus, type Question, numericalAnswer } from '#fe/take/model/question.ts'
 
 interface NumericalResultProps {
     readonly question: Question
     readonly userInput: string
+    readonly status: AnswerStatus
 }
 
-export const NumericalResult = ({ question, userInput }: NumericalResultProps) => {
+export const NumericalResult = ({ question, userInput, status }: NumericalResultProps) => {
     const correctAnswer = question.answers[0]
     const answer = numericalAnswer(userInput)
     if (!answer || answer.type !== 'numerical') return null
 
     const userValue = answer.value
     const correctValue = Number.parseFloat(correctAnswer)
-    const result = evaluateAnswer(question, answer)
-    const isCorrect = result.status === 'CORRECT'
+    const isCorrect = status === 'CORRECT'
     const isExact = userValue === correctValue
 
     if (isCorrect && isExact) {

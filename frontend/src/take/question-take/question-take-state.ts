@@ -7,9 +7,7 @@ import {
     type QuestionAnswer,
     type QuestionEvaluation,
     type QuestionTake,
-    type QuestionResult,
     choiceAnswer,
-    evaluateAnswer,
     numericalAnswer,
 } from '#fe/take/model/question.ts'
 
@@ -62,9 +60,7 @@ export const useQuestionTakeState = (question: Question | QuestionTake): Questio
         : choiceAnswer(selectedAnswerIdxs)
 
     const hasAnswer = currentAnswer !== undefined
-    const localResult: QuestionResult | undefined =
-        'correctAnswers' in question && currentAnswer ? evaluateAnswer(question, currentAnswer) : undefined
-    const result: QuestionResult | undefined = remoteEvaluation ?? localResult
+    const result: QuestionEvaluation | undefined = remoteEvaluation
 
     const showFeedback = (idx: number) =>
         submitted && showFeedbackOnSubmit && (isMultipleChoice || selectedAnswerIdxs[0] === idx)
@@ -84,14 +80,13 @@ export const useQuestionTakeState = (question: Question | QuestionTake): Questio
         try {
             const evaluation = await onSubmitted?.(currentAnswer)
             if (evaluation) setRemoteEvaluation(evaluation)
-            const nextResult = evaluation ?? localResult
             // HACK: Numerical answers also poke selectedAnswerIdxs so the parent's
             // onAnswerSelected effect signals "has selection" via [0]/[1]. To be
             // removed once the parent stops piggybacking on AnswerIdxs for the
             // has-selection signal. Covered by the upcoming Quiz.Mode.feature
             // "Learn mode - Numerical question" scenario.
             const finalIdxs = isNumerical
-                ? nextResult && nextResult.status !== 'CORRECT'
+                ? evaluation && evaluation.status !== 'CORRECT'
                     ? [1]
                     : [0]
                 : selectedAnswerIdxs
@@ -100,7 +95,7 @@ export const useQuestionTakeState = (question: Question | QuestionTake): Questio
         } finally {
             setSubmitting(false)
         }
-    }, [isNumerical, localResult, currentAnswer, selectedAnswerIdxs, onSubmitted, submitting])
+    }, [isNumerical, currentAnswer, selectedAnswerIdxs, onSubmitted, submitting])
 
     const selectAndSubmit = React.useCallback(
         async (idx: number) => {

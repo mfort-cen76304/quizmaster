@@ -45,7 +45,7 @@ public class AttemptServiceTest {
     }
 
     @Test
-    public void evaluateMarksAttemptFinishedAndReturnsScore() {
+    public void finishMarksAttemptFinished() {
         Question q1 = fixtures.save(fixtures.question());
         Question q2 = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2));
@@ -54,25 +54,33 @@ public class AttemptServiceTest {
         fixtures.score(attempt, q2, AnswerStatus.PARTIAL);
         LocalDateTime now = LocalDateTime.of(2026, 5, 14, 10, 30);
 
-        AttemptEvaluation evaluation = service.evaluate(attempt, now);
+        service.finish(attempt, now);
 
-        assertThat(evaluation.totalPoints()).isEqualTo(1.5);
-        assertThat(evaluation.totalQuestions()).isEqualTo(2);
-        assertThat(evaluation.questionIds()).containsExactly(q1.getId(), q2.getId());
         Attempt reloaded = attemptRepository.findById(attempt.getId()).orElseThrow();
         assertThat(reloaded.getFinishedAt()).isEqualTo(now);
     }
 
     @Test
-    public void evaluateAttemptWithoutDrawnQuestionsReturnsZero() {
+    public void answeredQuestionsReturnsRowsInPositionOrder() {
+        Question q1 = fixtures.save(fixtures.question());
+        Question q2 = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2));
+        Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), q1, q2);
+        fixtures.score(attempt, q1, AnswerStatus.CORRECT);
+        fixtures.score(attempt, q2, AnswerStatus.PARTIAL);
+
+        var rows = service.answeredQuestions(attempt.getId());
+
+        assertThat(rows).extracting(AttemptQuestion::getQuestionId).containsExactly(q1.getId(), q2.getId());
+        assertThat(AttemptQuestion.totalPoints(rows)).isEqualTo(1.5);
+    }
+
+    @Test
+    public void answeredQuestionsForAttemptWithoutDrawnQuestionsIsEmpty() {
         Quiz quiz = fixtures.save(fixtures.quiz());
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        AttemptEvaluation evaluation = service.evaluate(attempt, LocalDateTime.now());
-
-        assertThat(evaluation.totalPoints()).isEqualTo(0.0);
-        assertThat(evaluation.totalQuestions()).isEqualTo(0);
-        assertThat(evaluation.questionIds()).isEmpty();
+        assertThat(service.answeredQuestions(attempt.getId())).isEmpty();
     }
 
     @Test
