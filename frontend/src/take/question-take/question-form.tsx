@@ -66,7 +66,9 @@ export const QuestionForm = ({ question }: QuestionFormProps) => {
                 )}
 
                 {!state.submitted && !state.submitting && <SubmitButton disabled={!state.hasAnswer} />}
-                {state.showResultFeedback && <QuestionFeedback score={state.score} explanation={questionExplanation} />}
+                {state.showResultFeedback && (
+                    <QuestionFeedback status={state.status} score={state.score} explanation={questionExplanation} />
+                )}
             </div>
         </Form>
     )

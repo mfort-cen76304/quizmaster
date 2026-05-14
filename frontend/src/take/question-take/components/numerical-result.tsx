@@ -14,9 +14,10 @@ export const NumericalResult = ({ question, userInput }: NumericalResultProps) =
     const userValue = answer.value
     const correctValue = Number.parseFloat(correctAnswer)
     const result = evaluateAnswer(question, answer)
+    const isCorrect = result.status === 'CORRECT'
     const isExact = userValue === correctValue
 
-    if (result.correct && isExact) {
+    if (isCorrect && isExact) {
         return (
             <div className="numerical-result">
                 <div className="numerical-bar correct" data-testid="correct-bar">
@@ -26,17 +27,17 @@ export const NumericalResult = ({ question, userInput }: NumericalResultProps) =
         )
     }
 
-    const userBarClass = result.correct ? 'within-tolerance' : 'incorrect'
+    const userBarClass = isCorrect ? 'within-tolerance' : 'incorrect'
 
     return (
         <div className="numerical-result">
             <div className="numerical-bar correct" data-testid="correct-bar">
                 <span className="bar-label correct-label">Correct answer:</span> {correctAnswer}
-                {!result.correct && <span className="bar-note"> (missed)</span>}
+                {!isCorrect && <span className="bar-note"> (missed)</span>}
             </div>
             <div className={`numerical-bar ${userBarClass}`} data-testid="user-bar">
                 <span className="bar-label">Your answer:</span> {userValue}
-                {result.correct && <span className="bar-note"> (within tolerance)</span>}
+                {isCorrect && <span className="bar-note"> (within tolerance)</span>}
             </div>
         </div>
     )

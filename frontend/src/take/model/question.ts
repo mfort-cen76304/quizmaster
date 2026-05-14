@@ -1,7 +1,13 @@
-import type { Question } from '#fe/shared/model/question.ts'
+import type { AnswerStatus, Question } from '#fe/shared/model/question.ts'
 
 export type { AnswerIdxs, QuestionType } from '#fe/shared/model/question.ts'
-export type { Question, QuestionDraft, QuestionEvaluation, QuestionTake } from '#fe/shared/model/question.ts'
+export type {
+    AnswerStatus,
+    Question,
+    QuestionDraft,
+    QuestionEvaluation,
+    QuestionTake,
+} from '#fe/shared/model/question.ts'
 export { countDecimalDigits } from '#fe/shared/model/question.ts'
 
 export type QuestionAnswer =
@@ -9,7 +15,7 @@ export type QuestionAnswer =
     | { readonly type: 'numerical'; readonly value: number }
 
 export interface QuestionResult {
-    readonly correct: boolean
+    readonly status: AnswerStatus
     readonly score: number
 }
 
@@ -44,7 +50,7 @@ const scoreNumerical = (userValue: number, correctAnswer: string, tolerance: num
     // Question data is trusted: correctAnswer is guaranteed parseable upstream.
     const correct = Number.parseFloat(correctAnswer)
     const inTolerance = Math.abs(userValue - correct) <= tolerance + FLOAT_EPSILON
-    return { correct: inTolerance, score: inTolerance ? 1 : 0 }
+    return inTolerance ? { status: 'CORRECT', score: 1 } : { status: 'INCORRECT', score: 0 }
 }
 
 interface ChoiceErrors {
@@ -63,7 +69,7 @@ const choiceErrors = (selected: readonly number[], correct: readonly number[]): 
 
 const scoreChoice = (selected: readonly number[], correct: readonly number[]): QuestionResult => {
     const { missedCorrect, selectedIncorrect } = choiceErrors(selected, correct)
-    if (missedCorrect === 0 && selectedIncorrect === 0) return { correct: true, score: 1 }
-    if (missedCorrect + selectedIncorrect === 1) return { correct: false, score: 0.5 }
-    return { correct: false, score: 0 }
+    if (missedCorrect === 0 && selectedIncorrect === 0) return { status: 'CORRECT', score: 1 }
+    if (missedCorrect + selectedIncorrect === 1) return { status: 'PARTIAL', score: 0.5 }
+    return { status: 'INCORRECT', score: 0 }
 }

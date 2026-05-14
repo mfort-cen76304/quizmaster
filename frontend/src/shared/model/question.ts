@@ -1,5 +1,5 @@
 export type { AnswerIdxs, QuestionType } from '#shared/types/enums.ts'
-export type { Question, QuestionDraft, QuestionEvaluation, QuestionTake } from '#shared/types/question.ts'
+export type { AnswerStatus, Question, QuestionDraft, QuestionEvaluation, QuestionTake } from '#shared/types/question.ts'
 
 export const countDecimalDigits = (answer: string): number => {
     const dotIndex = answer.indexOf('.')

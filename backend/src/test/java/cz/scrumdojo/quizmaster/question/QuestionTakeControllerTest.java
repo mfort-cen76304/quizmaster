@@ -74,7 +74,7 @@ public class QuestionTakeControllerTest {
                     """))
             .andExpect(status().isOk())
             .andExpect(content().json("""
-                {"correct": true, "score": 1.0}
+                {"status": "CORRECT", "score": 1.0}
                 """))
             .andExpect(jsonPath("$.correctAnswers").doesNotExist())
             .andExpect(jsonPath("$.question.correctAnswers[0]").value(1))
@@ -93,7 +93,7 @@ public class QuestionTakeControllerTest {
                     """))
             .andExpect(status().isOk())
             .andExpect(content().json("""
-                {"correct": false, "score": 0.5}
+                {"status": "PARTIAL", "score": 0.5}
                 """));
     }
 

@@ -40,8 +40,10 @@ export interface QuestionTake {
     readonly requiredDecimalDigits: number
 }
 
+export type AnswerStatus = 'UNANSWERED' | 'CORRECT' | 'PARTIAL' | 'INCORRECT'
+
 export interface QuestionEvaluation {
-    readonly correct: boolean
+    readonly status: AnswerStatus
     readonly score: number
     readonly question?: Question
 }

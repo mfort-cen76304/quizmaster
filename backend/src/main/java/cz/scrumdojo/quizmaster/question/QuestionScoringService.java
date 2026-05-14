@@ -11,8 +11,7 @@ public class QuestionScoringService {
     private static final double FLOAT_EPSILON = 1e-9;
 
     public QuestionEvaluationResponse evaluate(Question question, QuestionAnswerRequest answer) {
-        AnswerStatus status = score(question, answer);
-        return new QuestionEvaluationResponse(status == AnswerStatus.CORRECT, status.points(), QuestionResponse.feedbackFrom(question));
+        return QuestionEvaluationResponse.from(score(question, answer), QuestionResponse.feedbackFrom(question));
     }
 
     public AnswerStatus score(Question question, QuestionAnswerRequest answer) {

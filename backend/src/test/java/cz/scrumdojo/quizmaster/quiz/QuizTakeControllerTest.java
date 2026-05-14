@@ -346,7 +346,7 @@ public class QuizTakeControllerTest {
                     """))
             .andExpect(status().isOk())
             .andExpect(content().json("""
-                {"correct": true, "score": 1.0}
+                {"status": "CORRECT", "score": 1.0}
                 """))
             .andExpect(jsonPath("$.correctAnswers").doesNotExist());
     }
@@ -373,7 +373,7 @@ public class QuizTakeControllerTest {
                     """))
             .andExpect(status().isOk())
             .andExpect(content().json("""
-                {"correct": true, "score": 1.0}
+                {"status": "CORRECT", "score": 1.0}
                 """))
             .andExpect(jsonPath("$.question").doesNotExist());
 

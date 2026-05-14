@@ -1,19 +1,19 @@
 import './correctness.scss'
+import type { AnswerStatus } from '#fe/take/model/question.ts'
 
 interface CorrectnessProps {
-    readonly score: number
+    readonly status: AnswerStatus
 }
 
-export const Correctness = (props: CorrectnessProps) => {
-    let label: string
-    let className: string
-    if (props.score > 0 && props.score < 1) {
-        label = 'Partially correct!'
-        className = 'partial-correct'
-    } else {
-        label = props.score === 1 ? 'Correct!' : 'Incorrect!'
-        className = props.score === 1 ? 'correct' : 'incorrect'
-    }
+const LABELS: Record<AnswerStatus, { label: string; className: string }> = {
+    CORRECT: { label: 'Correct!', className: 'correct' },
+    PARTIAL: { label: 'Partially correct!', className: 'partial-correct' },
+    INCORRECT: { label: 'Incorrect!', className: 'incorrect' },
+    UNANSWERED: { label: 'Incorrect!', className: 'incorrect' },
+}
+
+export const Correctness = ({ status }: CorrectnessProps) => {
+    const { label, className } = LABELS[status]
     return <span className={`feedback ${className}`}>{label}</span>
 }
 

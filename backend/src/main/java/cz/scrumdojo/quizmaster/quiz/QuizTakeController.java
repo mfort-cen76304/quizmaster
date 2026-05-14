@@ -120,7 +120,7 @@ public class QuizTakeController {
         var attemptQuestion = requireAttemptQuestion(attemptId, questionId);
         var status = attemptService.submitAnswer(quiz, attemptQuestion, question, request, now());
         var feedback = quiz.getMode() == QuizMode.LEARN ? QuestionResponse.feedbackFrom(question) : null;
-        return ResponseEntity.ok(new QuestionEvaluationResponse(status == AnswerStatus.CORRECT, status.points(), feedback));
+        return ResponseEntity.ok(QuestionEvaluationResponse.from(status, feedback));
     }
 
     private Quiz requireQuiz(Integer quizId) {

@@ -2,6 +2,7 @@ import React from 'react'
 
 import {
     type AnswerIdxs,
+    type AnswerStatus,
     type Question,
     type QuestionAnswer,
     type QuestionEvaluation,
@@ -24,6 +25,7 @@ export interface QuestionTakeState {
     readonly submitted: boolean
     readonly submitting: boolean
     readonly hasAnswer: boolean
+    readonly status: AnswerStatus
     readonly score: number
     readonly showResultFeedback: boolean
     readonly feedbackQuestion: Question | undefined
@@ -88,7 +90,11 @@ export const useQuestionTakeState = (question: Question | QuestionTake): Questio
             // removed once the parent stops piggybacking on AnswerIdxs for the
             // has-selection signal. Covered by the upcoming Quiz.Mode.feature
             // "Learn mode - Numerical question" scenario.
-            const finalIdxs = isNumerical ? (nextResult?.correct === false ? [1] : [0]) : selectedAnswerIdxs
+            const finalIdxs = isNumerical
+                ? nextResult && nextResult.status !== 'CORRECT'
+                    ? [1]
+                    : [0]
+                : selectedAnswerIdxs
             setSelectedAnswerIdxs(finalIdxs)
             setSubmitted(true)
         } finally {
@@ -144,6 +150,7 @@ export const useQuestionTakeState = (question: Question | QuestionTake): Questio
         submitted,
         submitting,
         hasAnswer,
+        status: result?.status ?? 'UNANSWERED',
         score: result?.score ?? 0,
         showResultFeedback,
         feedbackQuestion: remoteEvaluation?.question ?? authoringQuestion,
