@@ -12,6 +12,8 @@ import cz.scrumdojo.quizmaster.question.QuestionEvaluationResponse;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.question.QuestionScoringService;
 import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
+import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardResponse;
+import cz.scrumdojo.quizmaster.quiz.leaderboard.QuizLeaderboardService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,15 +24,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import java.time.Clock;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/quiz")
 public class QuizTakeController {
@@ -41,6 +38,7 @@ public class QuizTakeController {
     private final QuestionScoringService questionScoringService;
     private final AttemptScoreService attemptScoreService;
     private final AttemptQuestionRepository attemptQuestionRepository;
+    private final QuizLeaderboardService quizLeaderboardService;
     private final Clock clock;
     public QuizTakeController(
             QuizService quizService,
@@ -50,6 +48,7 @@ public class QuizTakeController {
             QuestionScoringService questionScoringService,
             AttemptScoreService attemptScoreService,
             AttemptQuestionRepository attemptQuestionRepository,
+            QuizLeaderboardService quizLeaderboardService,
             Clock clock) {
         this.quizService = quizService;
         this.quizRepository = quizRepository;
@@ -58,6 +57,7 @@ public class QuizTakeController {
         this.questionScoringService = questionScoringService;
         this.attemptScoreService = attemptScoreService;
         this.attemptQuestionRepository = attemptQuestionRepository;
+        this.quizLeaderboardService = quizLeaderboardService;
         this.clock = clock;
     }
     @GetMapping("/{id}")
@@ -66,54 +66,11 @@ public class QuizTakeController {
     }
     @GetMapping("/{id}/leaderboard")
     public ResponseEntity<QuizLeaderboardResponse> getQuizLeaderboard(@PathVariable Integer id) {
-        return quizRepository.findById(id)
-            .map(quiz -> ResponseEntity.ok(new QuizLeaderboardResponse(buildLeaderboard(quiz))))
+        return quizLeaderboardService.getLeaderboard(id)
+            .map(ResponseEntity::ok)
             .orElse(ResponseEntity.notFound().build());
     }
 
-    private QuizLeaderboardCohortResponse[] buildLeaderboard(Quiz quiz) {
-        var attempts = attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quiz.getId());
-        var finishedCohortAttempts = attempts.stream()
-            .filter(a -> a.getFinishedAt() != null && a.getCohortId() != null)
-            .toList();
-        var attemptIds = finishedCohortAttempts.stream().map(Attempt::getId).toList();
-        var scoresByAttemptId = attemptIds.isEmpty()
-            ? Map.<Integer, List<AttemptQuestion>>of()
-            : attemptQuestionRepository.findByAttemptIdInOrderByPosition(attemptIds).stream()
-                .collect(Collectors.groupingBy(AttemptQuestion::getAttemptId));
-        var scoresByCohort = new HashMap<Integer, List<Integer>>();
-        for (Attempt attempt : finishedCohortAttempts) {
-            scoresByCohort
-                .computeIfAbsent(attempt.getCohortId(), ignored -> new ArrayList<>())
-                .add(Attempt.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
-        }
-
-        var rankedCohorts = quiz.getCohorts().stream()
-            .map(cohort -> new CohortLeaderboardRow(
-                cohort.getName(),
-                averageScore(scoresByCohort.get(cohort.getId()))
-            ))
-            .sorted(Comparator.comparingInt(CohortLeaderboardRow::score).reversed()
-                .thenComparing(CohortLeaderboardRow::name))
-            .toList();
-
-        QuizLeaderboardCohortResponse[] response = new QuizLeaderboardCohortResponse[rankedCohorts.size()];
-        for (int index = 0; index < rankedCohorts.size(); index++) {
-            var cohort = rankedCohorts.get(index);
-            response[index] = new QuizLeaderboardCohortResponse(index + 1, cohort.name(), cohort.score());
-        }
-        return response;
-    }
-
-    private int averageScore(List<Integer> scores) {
-        if (scores == null || scores.isEmpty()) {
-            return 0;
-        }
-        int total = scores.stream().mapToInt(Integer::intValue).sum();
-        return Math.round((float) total / scores.size());
-    }
-
-    private record CohortLeaderboardRow(String name, int score) {}
     @PostMapping("/{id}/attempts")
     public ResponseEntity<?> createAttempt(
             @PathVariable Integer id,
