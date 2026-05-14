@@ -6,12 +6,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Builder
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 public class Attempt {
