@@ -8,13 +8,10 @@ import cz.scrumdojo.quizmaster.quiz.QuizMode;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 public class AttemptServiceTest {
@@ -112,9 +109,9 @@ public class AttemptServiceTest {
         LocalDateTime now = LocalDateTime.of(2026, 5, 14, 10, 30);
         QuestionAnswerRequest correctAnswer = new QuestionAnswerRequest(null, "choice", new int[]{1}, null);
 
-        AnswerStatus status = service.submitAnswer(quiz, attempt, question, correctAnswer, now);
+        var status = service.submitAnswer(quiz, attempt, question, correctAnswer, now);
 
-        assertThat(status).isEqualTo(AnswerStatus.CORRECT);
+        assertThat(status).contains(AnswerStatus.CORRECT);
         var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
         assertThat(row.getStatus()).isEqualTo(AnswerStatus.CORRECT);
         assertThat(row.getAnsweredAt()).isEqualTo(now);
@@ -136,16 +133,15 @@ public class AttemptServiceTest {
     }
 
     @Test
-    public void submitAnswerForUndrawnQuestionThrowsBadRequest() {
+    public void submitAnswerForUndrawnQuestionReturnsEmpty() {
         Question drawn = fixtures.save(fixtures.question());
         Question undrawn = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(drawn));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), drawn);
         QuestionAnswerRequest answer = new QuestionAnswerRequest(null, "choice", new int[]{1}, null);
 
-        assertThatThrownBy(() -> service.submitAnswer(quiz, attempt, undrawn, answer, LocalDateTime.now()))
-            .isInstanceOf(ResponseStatusException.class)
-            .extracting(e -> ((ResponseStatusException) e).getStatusCode())
-            .isEqualTo(HttpStatus.BAD_REQUEST);
+        var result = service.submitAnswer(quiz, attempt, undrawn, answer, LocalDateTime.now());
+
+        assertThat(result).isEmpty();
     }
 }

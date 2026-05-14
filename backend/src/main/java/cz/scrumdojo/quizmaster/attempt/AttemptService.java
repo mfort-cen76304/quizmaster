@@ -5,12 +5,11 @@ import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
 import cz.scrumdojo.quizmaster.question.QuestionScoringService;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizMode;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
 public class AttemptService {
@@ -42,12 +41,12 @@ public class AttemptService {
     }
 
     @Transactional
-    public AnswerStatus submitAnswer(Quiz quiz, Attempt attempt, Question question, QuestionAnswerRequest request, LocalDateTime now) {
-        var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
-        AnswerStatus status = questionScoringService.score(question, request);
-        row.score(quiz.getMode(), status, now);
-        return status;
+    public Optional<AnswerStatus> submitAnswer(Quiz quiz, Attempt attempt, Question question, QuestionAnswerRequest request, LocalDateTime now) {
+        return attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).map(attemptQuestion -> {
+            AnswerStatus status = questionScoringService.score(question, request);
+            attemptQuestion.score(quiz.getMode(), status, now);
+            return status;
+        });
     }
 
     @Transactional

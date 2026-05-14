@@ -182,9 +182,12 @@ public class QuizTakeController {
         if (question.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        AnswerStatus status = attemptService.submitAnswer(quiz.get(), attempt.get(), question.get(), request, LocalDateTime.now(clock));
+        var status = attemptService.submitAnswer(quiz.get(), attempt.get(), question.get(), request, LocalDateTime.now(clock));
+        if (status.isEmpty()) {
+            return ResponseEntity.badRequest().build();
+        }
         if (quiz.get().getMode() == QuizMode.EXAM) {
-            return ResponseEntity.ok(new QuestionEvaluationResponse(status == AnswerStatus.CORRECT, status.points(), null));
+            return ResponseEntity.ok(new QuestionEvaluationResponse(status.get() == AnswerStatus.CORRECT, status.get().points(), null));
         }
         return ResponseEntity.ok(questionScoringService.evaluate(question.get(), request));
     }
