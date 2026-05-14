@@ -175,20 +175,14 @@ public class QuizTakeController {
         if (quiz.isEmpty() || attempt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        if (attempt.get().getFinishedAt() != null) {
+        if (attempt.get().isFinished()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        }
-        if (attemptQuestionRepository.findByAttemptIdAndQuestionId(attemptId, questionId).isEmpty()) {
-            return ResponseEntity.badRequest().build();
         }
         var question = quizService.loadQuestions(new int[]{questionId}).stream().findFirst();
         if (question.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        var answeredAt = LocalDateTime.now(clock);
-        AnswerStatus status = questionScoringService.score(question.get(), request);
-        attemptService.recordSubmission(
-            quiz.get().getMode(), attemptId, questionId, status, answeredAt);
+        AnswerStatus status = attemptService.submitAnswer(quiz.get(), attempt.get(), question.get(), request, LocalDateTime.now(clock));
         if (quiz.get().getMode() == QuizMode.EXAM) {
             return ResponseEntity.ok(new QuestionEvaluationResponse(status == AnswerStatus.CORRECT, status.points(), null));
         }

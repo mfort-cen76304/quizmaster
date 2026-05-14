@@ -1,8 +1,14 @@
 package cz.scrumdojo.quizmaster.attempt;
 
+import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
+import cz.scrumdojo.quizmaster.question.QuestionScoringService;
+import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizMode;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 
@@ -11,11 +17,14 @@ public class AttemptService {
 
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
+    private final QuestionScoringService questionScoringService;
 
     public AttemptService(AttemptRepository attemptRepository,
-                          AttemptQuestionRepository attemptQuestionRepository) {
+                          AttemptQuestionRepository attemptQuestionRepository,
+                          QuestionScoringService questionScoringService) {
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
+        this.questionScoringService = questionScoringService;
     }
 
     @Transactional
@@ -30,6 +39,15 @@ public class AttemptService {
                 .build());
         }
         return persisted;
+    }
+
+    @Transactional
+    public AnswerStatus submitAnswer(Quiz quiz, Attempt attempt, Question question, QuestionAnswerRequest request, LocalDateTime now) {
+        var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST));
+        AnswerStatus status = questionScoringService.score(question, request);
+        row.score(quiz.getMode(), status, now);
+        return status;
     }
 
     @Transactional
