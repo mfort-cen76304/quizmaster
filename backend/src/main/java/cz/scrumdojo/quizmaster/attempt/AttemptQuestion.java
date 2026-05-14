@@ -9,10 +9,6 @@ import java.time.LocalDateTime;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
-@Table(
-    name = "attempt_question",
-    uniqueConstraints = @UniqueConstraint(columnNames = {"attempt_id", "question_id"})
-)
 public class AttemptQuestion {
 
     @Id
