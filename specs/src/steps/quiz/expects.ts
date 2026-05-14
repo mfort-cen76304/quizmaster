@@ -26,21 +26,6 @@ export const expectQuizResult = async (
     await page.expectPassScore(expectedPassScore)
 }
 
-export const expectOriginalResult = async (
-    page: QuizScorePage,
-    expectedCorrectAnswers: number,
-    expectedPercentage: number,
-    expectedTextResult: string,
-) => {
-    await page.expectFirstCorrectAnswers(expectedCorrectAnswers)
-    await page.expectFirstPercentageResult(expectedPercentage)
-    await page.expectFirstTextResult(expectedTextResult)
-}
-
-export const expectOriginalResultNotVisible = async (page: QuizScorePage) => {
-    await page.expectFirstResultNotVisible()
-}
-
 export const expectAllOptionsForQuestion = async (
     page: QuizScorePage,
     question: string,

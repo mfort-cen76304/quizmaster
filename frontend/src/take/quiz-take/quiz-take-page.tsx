@@ -56,13 +56,7 @@ export const QuizTakePage = ({ isDryRun }: QuizTakePageProps) => {
 
         if (!answers || quizRunId === null) return
 
-        const response = await evaluateQuiz(quiz.id, quizRunId, {
-            questionIds: quiz.questions.map(question => question.id),
-            answers: quiz.questions.flatMap((question, index) => {
-                const answer = answers.finalAnswers[index]
-                return answer ? [{ ...answer, questionId: question.id }] : []
-            }),
-        })
+        const response = await evaluateQuiz(quiz.id, quizRunId)
         setScoredQuiz(response)
     }
 

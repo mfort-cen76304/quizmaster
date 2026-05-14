@@ -58,12 +58,10 @@ Feature: Evaluate quiz score
       | 105     | 1.02 |
 
 
-  @skip
-  Scenario: Quiz score in learning mode
-    - In learning mode, quiz taker can retake questions
-    - Score page shows two separate results:
-      - score for the first answers of each question, and,
-      - score for the corrected answers.
+  Scenario: Quiz score in learning mode reflects first answers
+    In learning mode, quiz takers can retake questions, but only the first answer
+    counts towards the score. The quiz taker sees a single result, matching what
+    the trainer sees in the quiz statistics.
 
     Given workspace "Learn Score" with questions
       | bookmark | question  | answers  |
@@ -80,5 +78,4 @@ Feature: Evaluate quiz score
     * I evaluate the quiz
     Then I see the quiz result
       | Correct Answers | Score | Result | Pass Score |
-      | 2 / 2           | 100   | passed | 100        |
-    And I see the original result 1, 50%, failed
+      | 1 / 2           | 50    | failed | 100        |

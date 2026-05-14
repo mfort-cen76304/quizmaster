@@ -3,7 +3,6 @@ export type {
     Quiz,
     QuizAttemptStartRequest,
     QuizAttemptStartResponse,
-    QuizEvaluationRequest,
     QuizEvaluationResponse,
     QuizLeaderboardCohort,
     QuizLeaderboardResponse,

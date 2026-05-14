@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -31,7 +30,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/quiz")
@@ -193,42 +191,25 @@ public class QuizTakeController {
     @PostMapping("/{id}/attempts/{attemptId}/evaluate")
     public ResponseEntity<QuizEvaluationResponse> evaluateQuiz(
             @PathVariable Integer id,
-            @PathVariable Integer attemptId,
-            @RequestBody QuizEvaluationRequest request) {
-        var quiz = quizRepository.findById(id);
+            @PathVariable Integer attemptId) {
         var attempt = findActiveAttempt(id, attemptId);
-        if (quiz.isEmpty() || attempt.isEmpty()) {
+        if (attempt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         var updatedAttempt = attempt.get();
         if (updatedAttempt.getFinishedAt() != null) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
-        var expectedQuestionIds = orderedQuestionIds(attemptId);
-        if (expectedQuestionIds.length == 0 || request.questionIds() == null || !Arrays.equals(expectedQuestionIds, request.questionIds())) {
-            return ResponseEntity.badRequest().build();
-        }
-        var questionsById = quizService.loadQuestions(expectedQuestionIds).stream()
-            .collect(Collectors.toMap(Question::getId, Function.identity()));
-        if (Arrays.stream(expectedQuestionIds).anyMatch(qid -> !questionsById.containsKey(qid))) {
-            return ResponseEntity.notFound().build();
-        }
-        var answerByQuestionId = request.answers() == null
-            ? Map.<Integer, QuestionAnswerRequest>of()
-            : Arrays.stream(request.answers())
-                .filter(answer -> answer.questionId() != null)
-                .collect(Collectors.toMap(QuestionAnswerRequest::questionId, Function.identity(), (left, right) -> right));
-        double score = Attempt.totalPoints(Arrays.stream(expectedQuestionIds)
-            .mapToObj(qid -> questionScoringService.score(questionsById.get(qid), answerByQuestionId.get(qid))));
-        updatedAttempt.setFinishedAt(LocalDateTime.now(clock));
-        var feedbackQuestions = Arrays.stream(expectedQuestionIds)
-            .mapToObj(questionsById::get)
+        var scores = attemptQuestionRepository.findByAttemptIdOrderByPosition(attemptId);
+        var feedbackQuestions = quizService.loadQuestions(
+                scores.stream().mapToInt(AttemptQuestion::getQuestionId).toArray()).stream()
             .map(QuestionResponse::feedbackFrom)
             .toArray(QuestionResponse[]::new);
+        updatedAttempt.setFinishedAt(LocalDateTime.now(clock));
         attemptRepository.save(updatedAttempt);
         return ResponseEntity.ok(new QuizEvaluationResponse(
-            score,
-            expectedQuestionIds.length,
+            Attempt.totalPoints(scores.stream().map(AttemptQuestion::getStatus)),
+            scores.size(),
             feedbackQuestions
         ));
     }

@@ -3,7 +3,6 @@ package cz.scrumdojo.quizmaster.quiz;
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
-import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.question.Question;
@@ -302,7 +301,7 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void evaluateQuizScoresPersistedAttemptQuestionsOnly() throws Exception {
+    public void evaluateQuizScoresFromPersistedAttemptQuestions() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace));
         Question q2 = fixtures.save(fixtures.questionIn(workspace)
@@ -313,18 +312,10 @@ public class QuizTakeControllerTest {
             .questionType("multiple"));
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         var attempt = fixtures.save(fixtures.attemptInProgress(quiz), q1, q2);
+        fixtures.score(attempt, q1, AnswerStatus.CORRECT);
+        fixtures.score(attempt, q2, AnswerStatus.PARTIAL);
 
-        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "questionIds": [%d, %d],
-                        "answers": [
-                            {"questionId": %d, "type": "choice", "selectedIdxs": [1]},
-                            {"questionId": %d, "type": "choice", "selectedIdxs": [0]}
-                        ]
-                    }
-                    """.formatted(q1.getId(), q2.getId(), q1.getId(), q2.getId())))
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.score").value(1.5))
             .andExpect(jsonPath("$.totalQuestions").value(2))
@@ -335,45 +326,13 @@ public class QuizTakeControllerTest {
     }
 
     @Test
-    public void evaluateQuizRejectsQuestionIdsOutsidePersistedAttempt() throws Exception {
-        Workspace workspace = fixtures.save(fixtures.workspace());
-        Question q1 = fixtures.save(fixtures.questionIn(workspace));
-        Question q2 = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
-        var attempt = fixtures.save(fixtures.attemptInProgress(quiz), q1);
-
-        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "questionIds": [%d],
-                        "answers": []
-                    }
-                    """.formatted(q2.getId())))
-            .andExpect(status().isBadRequest());
-
-        assertThat(attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId()))
-            .extracting(AttemptQuestion::getQuestionId)
-            .containsExactly(q1.getId());
-    }
-
-    @Test
     public void evaluateQuizRejectsFinishedAttempt() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
         var attempt = fixtures.save(fixtures.attempt(quiz), question);
 
-        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "questionIds": [%d],
-                        "answers": [
-                            {"questionId": %d, "type": "choice", "selectedIdxs": [0]}
-                        ]
-                    }
-                    """.formatted(question.getId(), question.getId())))
+        mockMvc.perform(post("/api/quiz/{id}/attempts/{attemptId}/evaluate", quiz.getId(), attempt.getId()))
             .andExpect(status().isConflict());
     }
 

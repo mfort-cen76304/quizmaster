@@ -8,20 +8,14 @@ export class QuizScorePage {
 
     private correctAnswerLocator = () => this.page.locator('#correct-answers')
 
-    private firstCorrectAnswerLocator = () => this.page.locator('#first-correct-answers')
-
     private totalQuestionsLocator = () => this.page.locator('#total-questions')
     totalQuestions = () => this.totalQuestionsLocator().textContent().then(Number)
 
     private percentageResultLocator = () => this.page.locator('#percentage-result')
 
-    private firstPercentageResultLocator = () => this.page.locator('#first-percentage-result')
-
     private passScoreLocator = () => this.page.locator('#pass-score')
 
     private textResultLocator = () => this.page.locator('#text-result')
-
-    private firstTextResultLocator = () => this.page.locator('#first-text-result')
 
     private questionsLocator = () => this.page.locator('fieldset[id^="question-"]')
     questions = async () => {
@@ -103,12 +97,4 @@ export class QuizScorePage {
     expectPercentageResult = (n: number) => expect(this.percentageResultLocator()).toHaveText(String(n))
     expectTextResult = (text: string) => expect(this.textResultLocator()).toHaveText(text)
     expectPassScore = (n: number) => expect(this.passScoreLocator()).toHaveText(String(n))
-    expectFirstCorrectAnswers = (n: number) => expect(this.firstCorrectAnswerLocator()).toHaveText(String(n))
-    expectFirstPercentageResult = (n: number) => expect(this.firstPercentageResultLocator()).toHaveText(String(n))
-    expectFirstTextResult = (text: string) => expect(this.firstTextResultLocator()).toHaveText(text)
-    expectFirstResultNotVisible = () =>
-        expect(this.firstCorrectAnswerLocator())
-            .not.toBeVisible()
-            .then(() => expect(this.firstPercentageResultLocator()).not.toBeVisible())
-            .then(() => expect(this.firstTextResultLocator()).not.toBeVisible())
 }

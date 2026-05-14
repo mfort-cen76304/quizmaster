@@ -13,7 +13,6 @@ import type {
     Quiz,
     QuizAttemptStartRequest,
     QuizAttemptStartResponse,
-    QuizEvaluationRequest,
     QuizRequest,
     QuizSubmittedAnswer,
 } from '#shared/types/quiz.ts'
@@ -236,16 +235,7 @@ export const createFinishedCohortAttemptViaRest = async (
         }
     }
 
-    const evaluateBody: QuizEvaluationRequest = {
-        questionIds: started.questions.map(question => question.id),
-        answers,
-    }
-    const evaluateResponse = await world.page.request.post(
-        `/api/quiz/${quizId}/attempts/${started.attemptId}/evaluate`,
-        {
-            data: evaluateBody,
-        },
-    )
+    const evaluateResponse = await world.page.request.post(`/api/quiz/${quizId}/attempts/${started.attemptId}/evaluate`)
     if (!evaluateResponse.ok()) {
         throw new Error(
             `POST /api/quiz/${quizId}/attempts/${started.attemptId}/evaluate failed: ` +
