@@ -3,6 +3,7 @@ package cz.scrumdojo.quizmaster.attempt;
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
+import cz.scrumdojo.quizmaster.quiz.QuizMode;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,13 +25,13 @@ public class AttemptScoreServiceTest {
     private TestFixtures fixtures;
 
     @Test
-    public void recordExamScoreOverwritesPriorOutcome() {
+    public void examSubmissionOverwritesPriorOutcome() {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
-        service.recordExamScore(attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
-        service.recordExamScore(attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
+        service.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
+        service.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
 
         var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(1);
@@ -38,13 +39,13 @@ public class AttemptScoreServiceTest {
     }
 
     @Test
-    public void recordLearnScorePreservesFirstOutcome() {
+    public void learnSubmissionPreservesFirstOutcome() {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
 
-        service.recordLearnScore(attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
-        service.recordLearnScore(attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
+        service.recordSubmission(QuizMode.LEARN, attempt.getId(), question.getId(), AnswerStatus.INCORRECT, LocalDateTime.now());
+        service.recordSubmission(QuizMode.LEARN, attempt.getId(), question.getId(), AnswerStatus.CORRECT, LocalDateTime.now());
 
         var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(1);

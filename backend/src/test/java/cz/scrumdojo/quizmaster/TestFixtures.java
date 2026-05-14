@@ -216,11 +216,11 @@ public class TestFixtures {
     }
 
     public void score(Attempt attempt, Question question, AnswerStatus status) {
-        attemptScoreService.recordExamScore(attempt.getId(), question.getId(), status, LocalDateTime.now());
+        attemptScoreService.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), status, LocalDateTime.now());
     }
 
     public void score(Attempt attempt, Question question, AnswerStatus status, LocalDateTime answeredAt) {
-        attemptScoreService.recordExamScore(attempt.getId(), question.getId(), status, answeredAt);
+        attemptScoreService.recordSubmission(QuizMode.EXAM, attempt.getId(), question.getId(), status, answeredAt);
     }
 
     public Attempt save(Attempt attempt) {

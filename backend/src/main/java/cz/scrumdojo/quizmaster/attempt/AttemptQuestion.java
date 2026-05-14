@@ -1,6 +1,7 @@
 package cz.scrumdojo.quizmaster.attempt;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import cz.scrumdojo.quizmaster.quiz.QuizMode;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,4 +31,10 @@ public class AttemptQuestion {
 
     @Column(name = "answered_at")
     private LocalDateTime answeredAt;
+
+    public void score(QuizMode mode, AnswerStatus newStatus, LocalDateTime when) {
+        if (mode == QuizMode.LEARN && status != AnswerStatus.UNANSWERED) return;
+        status = newStatus;
+        answeredAt = when;
+    }
 }
