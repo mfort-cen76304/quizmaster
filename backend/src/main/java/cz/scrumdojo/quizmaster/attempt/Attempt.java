@@ -5,6 +5,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -33,4 +35,14 @@ public class Attempt {
     @Builder.Default
     @Column(name = "is_dry_run", nullable = false)
     private Boolean isDryRun = false;
+
+    public static double totalPoints(Stream<AnswerStatus> statuses) {
+        return statuses.mapToDouble(AnswerStatus::points).sum();
+    }
+
+    public static int percentageScore(List<AttemptQuestion> scores) {
+        if (scores.isEmpty()) return 0;
+        double earned = totalPoints(scores.stream().map(AttemptQuestion::getStatus));
+        return (int) Math.round(earned / scores.size() * 100);
+    }
 }

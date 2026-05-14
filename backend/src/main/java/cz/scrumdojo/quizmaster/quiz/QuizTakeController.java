@@ -87,7 +87,7 @@ public class QuizTakeController {
         for (Attempt attempt : finishedCohortAttempts) {
             scoresByCohort
                 .computeIfAbsent(attempt.getCohortId(), ignored -> new ArrayList<>())
-                .add(calculateAttemptScore(quiz, scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
+                .add(Attempt.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
         }
 
         var rankedCohorts = quiz.getCohorts().stream()
@@ -105,24 +105,6 @@ public class QuizTakeController {
             response[index] = new QuizLeaderboardCohortResponse(index + 1, cohort.name(), cohort.score());
         }
         return response;
-    }
-
-    private int calculateAttemptScore(Quiz quiz, List<AttemptQuestion> scores) {
-        int totalQuestions = scores.isEmpty() ? totalQuestionsForQuiz(quiz) : scores.size();
-        if (totalQuestions <= 0) {
-            return 0;
-        }
-
-        int correctAnswers = (int) scores.stream().filter(s -> s.getStatus() == AnswerStatus.CORRECT).count();
-        int partiallyCorrectAnswers = (int) scores.stream().filter(s -> s.getStatus() == AnswerStatus.PARTIAL).count();
-        float earnedPoints = correctAnswers + 0.5f * partiallyCorrectAnswers;
-        return Math.round(earnedPoints / totalQuestions * 100);
-    }
-
-    private int totalQuestionsForQuiz(Quiz quiz) {
-        int total = quiz.getQuestionIds() == null ? 0 : quiz.getQuestionIds().length;
-        Integer randomCount = quiz.getRandomQuestionCount();
-        return (randomCount != null && randomCount > 0) ? Math.min(randomCount, total) : total;
     }
 
     private int averageScore(List<Integer> scores) {
@@ -228,20 +210,16 @@ public class QuizTakeController {
         }
         var questionsById = quizService.loadQuestions(expectedQuestionIds).stream()
             .collect(Collectors.toMap(Question::getId, Function.identity()));
+        if (Arrays.stream(expectedQuestionIds).anyMatch(qid -> !questionsById.containsKey(qid))) {
+            return ResponseEntity.notFound().build();
+        }
         var answerByQuestionId = request.answers() == null
             ? Map.<Integer, QuestionAnswerRequest>of()
             : Arrays.stream(request.answers())
                 .filter(answer -> answer.questionId() != null)
                 .collect(Collectors.toMap(QuestionAnswerRequest::questionId, Function.identity(), (left, right) -> right));
-        double score = 0;
-        for (Integer questionId : expectedQuestionIds) {
-            var question = questionsById.get(questionId);
-            if (question == null) {
-                return ResponseEntity.notFound().build();
-            }
-            QuestionAnswerRequest answer = answerByQuestionId.get(questionId);
-            score += questionScoringService.score(question, answer).points();
-        }
+        double score = Attempt.totalPoints(Arrays.stream(expectedQuestionIds)
+            .mapToObj(qid -> questionScoringService.score(questionsById.get(qid), answerByQuestionId.get(qid))));
         updatedAttempt.setFinishedAt(LocalDateTime.now(clock));
         var feedbackQuestions = Arrays.stream(expectedQuestionIds)
             .mapToObj(questionsById::get)

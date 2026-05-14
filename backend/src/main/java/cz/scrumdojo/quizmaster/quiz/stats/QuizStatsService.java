@@ -118,10 +118,7 @@ public class QuizStatsService {
         int incorrectAnswers = attempt.getFinishedAt() != null
                 ? totalQuestions - correctAnswers - partiallyCorrectAnswers
                 : countByStatus(scores, AnswerStatus.INCORRECT);
-        float earnedPoints = correctAnswers + 0.5f * partiallyCorrectAnswers;
-        int score = totalQuestions > 0
-                ? Math.round(earnedPoints / totalQuestions * 100)
-                : 0;
+        int score = Attempt.percentageScore(scores);
         AttemptStatus status = deriveStatus(attempt);
         return new AttemptStatsRecord(
                 attempt.getId(),
