@@ -3,7 +3,6 @@ package cz.scrumdojo.quizmaster.quiz;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
-import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -28,15 +27,6 @@ public class QuizService {
     public Optional<QuizResponse> getWorkspaceQuiz(String workspaceGuid, Integer id) {
         return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(quiz -> toQuizResponse(quiz, loadQuestions(quiz)));
-    }
-
-    public Optional<QuizMetadataResponse> getTakeQuiz(Integer id) {
-        return quizRepository.findById(id).map(QuizMetadataResponse::from);
-    }
-
-    public Optional<QuizTakeResponse> getTakeQuizForAttempt(Integer quizId, int[] questionIds) {
-        return quizRepository.findById(quizId)
-            .map(quiz -> toQuizTakeResponse(quiz, loadQuestions(questionIds)));
     }
 
     private QuizResponse toQuizResponse(Quiz quiz, List<Question> questions) {
@@ -96,25 +86,5 @@ public class QuizService {
             .map(questionsById::get)
             .filter(Objects::nonNull)
             .toList();
-    }
-
-    private QuizTakeResponse toQuizTakeResponse(Quiz quiz, List<Question> questions) {
-        QuestionTakeResponse[] questionResponses = questions.stream()
-            .map(QuestionTakeResponse::from)
-            .toArray(QuestionTakeResponse[]::new);
-
-        return new QuizTakeResponse(
-            quiz.getId(),
-            quiz.getTitle(),
-            quiz.getDescription(),
-            quiz.getStartAt(),
-            quiz.getEndAt(),
-            questionResponses,
-            quiz.getMode(),
-            quiz.getDifficulty(),
-            quiz.getPassScore(),
-            quiz.getTimeLimit(),
-            quiz.getRandomQuestionCount()
-        );
     }
 }

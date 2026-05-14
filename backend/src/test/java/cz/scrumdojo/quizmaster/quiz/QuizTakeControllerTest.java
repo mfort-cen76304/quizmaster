@@ -19,8 +19,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -156,38 +154,6 @@ public class QuizTakeControllerTest {
     public void getQuizLeaderboardNotFound() throws Exception {
         mockMvc.perform(get("/api/quiz/{id}/leaderboard", -1))
             .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void createAttemptReturnsAttemptIdAndFrozenQuestions() throws Exception {
-        Workspace workspace = fixtures.save(fixtures.workspace());
-        Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
-        Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
-        Question q3 = fixtures.save(fixtures.questionIn(workspace).question("Q3"));
-        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3)
-            .workspaceGuid(workspace.getGuid())
-            .randomQuestionCount(2)
-            .build());
-
-        var result = mockMvc.perform(post("/api/quiz/{id}/attempts", quiz.getId()))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.attemptId").isNumber())
-            .andExpect(jsonPath("$.questions.length()").value(2))
-            .andExpect(jsonPath("$.questions[0].id").isNumber())
-            .andExpect(content().string(not(containsString("correctAnswers"))))
-            .andExpect(content().string(not(containsString("explanations"))))
-            .andExpect(content().string(not(containsString("workspaceGuid"))))
-            .andReturn();
-
-        Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
-        var drawn = attemptQuestionRepository.findByAttemptIdOrderByPosition(attemptId);
-        assertThat(drawn).hasSize(2);
-
-        mockMvc.perform(get("/api/quiz/{id}/attempts/{attemptId}", quiz.getId(), attemptId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.questions.length()").value(2))
-            .andExpect(jsonPath("$.questions[0].id").value(drawn.get(0).getQuestionId()))
-            .andExpect(jsonPath("$.questions[1].id").value(drawn.get(1).getQuestionId()));
     }
 
     @Test

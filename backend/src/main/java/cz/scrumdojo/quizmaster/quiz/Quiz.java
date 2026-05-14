@@ -12,12 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-@Builder
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@ToString
+@Getter @Setter @AllArgsConstructor @NoArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 public class Quiz {
@@ -29,6 +24,10 @@ public class Quiz {
     private String description;
     private LocalDateTime startAt;
     private LocalDateTime endAt;
+
+    public boolean isAvailable(LocalDateTime now) {
+        return (startAt == null || !now.isBefore(startAt)) && (endAt == null || !now.isAfter(endAt));
+    }
 
     @Column(name = "questions", columnDefinition = "int[]")
     @JdbcTypeCode(SqlTypes.ARRAY)
