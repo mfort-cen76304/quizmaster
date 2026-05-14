@@ -1,5 +1,6 @@
 package cz.scrumdojo.quizmaster;
 
+import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptScoreService;
@@ -214,6 +215,14 @@ public class TestFixtures {
         int[] ids = Arrays.stream(drawn).mapToInt(Question::getId).toArray();
         attemptScoreService.seedUnansweredPlaceholders(attempt.getId(), ids);
         return attempt;
+    }
+
+    public void score(Attempt attempt, Question question, AnswerStatus status) {
+        attemptScoreService.recordExamScore(attempt.getId(), question.getId(), status, LocalDateTime.now());
+    }
+
+    public void score(Attempt attempt, Question question, AnswerStatus status, LocalDateTime answeredAt) {
+        attemptScoreService.recordExamScore(attempt.getId(), question.getId(), status, answeredAt);
     }
 
     public Attempt save(Attempt attempt) {

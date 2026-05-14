@@ -41,17 +41,6 @@ public class QuizTakeControllerTest {
     @Autowired
     private AttemptQuestionScoreRepository attemptQuestionScoreRepository;
 
-    private void saveScore(Attempt attempt, Question question, AnswerStatus status) {
-        var row = attemptQuestionScoreRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
-            .orElseGet(() -> AttemptQuestionScore.builder()
-                .attemptId(attempt.getId())
-                .questionId(question.getId())
-                .build());
-        row.setStatus(status);
-        row.setAnsweredAt(LocalDateTime.now());
-        attemptQuestionScoreRepository.save(row);
-    }
-
     @Test
     public void getQuizReturnsMetadataWithoutLeakingQuestions() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
@@ -124,32 +113,32 @@ public class QuizTakeControllerTest {
 
         Attempt teamRocketAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(0).getId()), q1, q2, q3, q4);
-        saveScore(teamRocketAttempt, q1, AnswerStatus.CORRECT);
-        saveScore(teamRocketAttempt, q2, AnswerStatus.CORRECT);
-        saveScore(teamRocketAttempt, q3, AnswerStatus.CORRECT);
-        saveScore(teamRocketAttempt, q4, AnswerStatus.CORRECT);
+        fixtures.score(teamRocketAttempt, q1, AnswerStatus.CORRECT);
+        fixtures.score(teamRocketAttempt, q2, AnswerStatus.CORRECT);
+        fixtures.score(teamRocketAttempt, q3, AnswerStatus.CORRECT);
+        fixtures.score(teamRocketAttempt, q4, AnswerStatus.CORRECT);
 
         Attempt scrumNinjasAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(1).getId()), q1, q2, q3, q4);
-        saveScore(scrumNinjasAttempt, q1, AnswerStatus.CORRECT);
-        saveScore(scrumNinjasAttempt, q2, AnswerStatus.CORRECT);
-        saveScore(scrumNinjasAttempt, q3, AnswerStatus.CORRECT);
-        saveScore(scrumNinjasAttempt, q4, AnswerStatus.INCORRECT);
+        fixtures.score(scrumNinjasAttempt, q1, AnswerStatus.CORRECT);
+        fixtures.score(scrumNinjasAttempt, q2, AnswerStatus.CORRECT);
+        fixtures.score(scrumNinjasAttempt, q3, AnswerStatus.CORRECT);
+        fixtures.score(scrumNinjasAttempt, q4, AnswerStatus.INCORRECT);
 
         Attempt retroMastersAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(2).getId()), q1, q2, q3, q4);
-        saveScore(retroMastersAttempt, q1, AnswerStatus.CORRECT);
-        saveScore(retroMastersAttempt, q2, AnswerStatus.CORRECT);
-        saveScore(retroMastersAttempt, q3, AnswerStatus.PARTIAL);
-        saveScore(retroMastersAttempt, q4, AnswerStatus.INCORRECT);
+        fixtures.score(retroMastersAttempt, q1, AnswerStatus.CORRECT);
+        fixtures.score(retroMastersAttempt, q2, AnswerStatus.CORRECT);
+        fixtures.score(retroMastersAttempt, q3, AnswerStatus.PARTIAL);
+        fixtures.score(retroMastersAttempt, q4, AnswerStatus.INCORRECT);
 
         Attempt dryRunAttempt = fixtures.save(fixtures.attempt(quiz)
             .cohortId(quiz.getCohorts().get(0).getId())
             .isDryRun(true), q1, q2, q3, q4);
-        saveScore(dryRunAttempt, q1, AnswerStatus.INCORRECT);
-        saveScore(dryRunAttempt, q2, AnswerStatus.INCORRECT);
-        saveScore(dryRunAttempt, q3, AnswerStatus.INCORRECT);
-        saveScore(dryRunAttempt, q4, AnswerStatus.INCORRECT);
+        fixtures.score(dryRunAttempt, q1, AnswerStatus.INCORRECT);
+        fixtures.score(dryRunAttempt, q2, AnswerStatus.INCORRECT);
+        fixtures.score(dryRunAttempt, q3, AnswerStatus.INCORRECT);
+        fixtures.score(dryRunAttempt, q4, AnswerStatus.INCORRECT);
 
         mockMvc.perform(get("/api/quiz/{id}/leaderboard", quiz.getId()))
             .andExpect(status().isOk())
