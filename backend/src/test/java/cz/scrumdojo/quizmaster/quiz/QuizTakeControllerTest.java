@@ -253,6 +253,28 @@ public class QuizTakeControllerTest {
     }
 
     @Test
+    public void createAttemptWithMalformedCohortGuidReturns400() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question)
+            .workspaceGuid(workspace.getGuid())
+            .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+            .randomQuestionCount(null)
+            .build());
+        long attemptsBefore = attemptRepository.count();
+
+        mockMvc.perform(post("/api/quiz/{id}/attempts", quiz.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"cohortGuid": "not-a-uuid"}
+                    """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.message").value("Cohort does not belong to this quiz."));
+
+        assertThat(attemptRepository.count()).isEqualTo(attemptsBefore);
+    }
+
+    @Test
     public void recordTimeoutStampsServerSideTimestamp() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));

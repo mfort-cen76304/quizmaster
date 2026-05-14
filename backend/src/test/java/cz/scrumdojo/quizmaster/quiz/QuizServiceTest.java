@@ -46,19 +46,19 @@ public class QuizServiceTest {
     }
 
     @Test
-    public void selectQuestionsWithRandomCountReturnsExactCount() {
+    public void drawQuestionsWithRandomCountReturnsExactCount() {
         Question q1 = fixtures.save(fixtures.question());
         Question q2 = fixtures.save(fixtures.question());
         Question q3 = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3).randomQuestionCount(2).build());
 
-        List<Question> selected = quizService.selectQuestions(quiz);
+        List<Question> selected = quizService.drawQuestions(quiz);
 
         assertEquals(2, selected.size());
     }
 
     @Test
-    public void selectQuestionsWithRandomCountReturnsSubsetOfPool() {
+    public void drawQuestionsWithRandomCountReturnsSubsetOfPool() {
         Question q1 = fixtures.save(fixtures.question());
         Question q2 = fixtures.save(fixtures.question());
         Question q3 = fixtures.save(fixtures.question());
@@ -66,7 +66,7 @@ public class QuizServiceTest {
 
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3).randomQuestionCount(2).build());
 
-        Set<Integer> selectedIds = quizService.selectQuestions(quiz).stream()
+        Set<Integer> selectedIds = quizService.drawQuestions(quiz).stream()
             .map(Question::getId)
             .collect(Collectors.toSet());
         assertTrue(poolIds.containsAll(selectedIds));

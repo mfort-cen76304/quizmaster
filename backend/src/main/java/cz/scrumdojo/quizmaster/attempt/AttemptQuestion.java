@@ -37,4 +37,13 @@ public class AttemptQuestion {
         status = newStatus;
         answeredAt = when;
     }
+
+    public static AttemptQuestion drawn(Integer attemptId, Integer questionId, int position) {
+        return AttemptQuestion.builder()
+            .attemptId(attemptId)
+            .questionId(questionId)
+            .status(AnswerStatus.UNANSWERED)
+            .position(position)
+            .build();
+    }
 }

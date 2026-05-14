@@ -68,7 +68,7 @@ public class QuizService {
         );
     }
 
-    public List<Question> selectQuestions(Quiz quiz) {
+    public List<Question> drawQuestions(Quiz quiz) {
         List<Question> questions = new ArrayList<>(loadQuestions(quiz));
 
         Integer randomCount = quiz.getRandomQuestionCount();

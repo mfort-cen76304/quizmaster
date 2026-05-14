@@ -2,6 +2,8 @@ package cz.scrumdojo.quizmaster;
 
 import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
+import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptService;
 import cz.scrumdojo.quizmaster.question.Question;
@@ -33,6 +35,9 @@ public class TestFixtures {
 
     @Autowired
     private AttemptRepository attemptRepository;
+
+    @Autowired
+    private AttemptQuestionRepository attemptQuestionRepository;
 
     @Autowired
     private AttemptService attemptService;
@@ -211,8 +216,12 @@ public class TestFixtures {
     }
 
     public Attempt save(Attempt.AttemptBuilder builder, Question... drawn) {
-        int[] ids = Arrays.stream(drawn).mapToInt(Question::getId).toArray();
-        return attemptService.startAttempt(builder.build(), ids);
+        Attempt persisted = attemptRepository.save(builder.build());
+        for (int position = 0; position < drawn.length; position++) {
+            attemptQuestionRepository.save(
+                AttemptQuestion.drawn(persisted.getId(), drawn[position].getId(), position));
+        }
+        return persisted;
     }
 
     public void score(Attempt attempt, Question question, AnswerStatus status) {

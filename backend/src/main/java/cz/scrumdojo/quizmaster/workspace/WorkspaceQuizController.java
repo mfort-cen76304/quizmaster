@@ -1,12 +1,9 @@
 package cz.scrumdojo.quizmaster.workspace;
 
-import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptService;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
-import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
-import cz.scrumdojo.quizmaster.question.QuestionTakeResponse;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizAttemptStartResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
@@ -140,7 +137,6 @@ public class WorkspaceQuizController {
             .orElse(ResponseEntity.notFound().build());
     }
 
-    @Transactional
     @PostMapping("/{id}/dry-runs")
     public ResponseEntity<QuizAttemptStartResponse> createDryRun(
             @PathVariable String workspaceGuid,
@@ -148,24 +144,8 @@ public class WorkspaceQuizController {
         workspaceGuard.requireExists(workspaceGuid);
 
         return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
-            .map(quiz -> {
-                List<Question> selectedQuestions = quizService.selectQuestions(quiz);
-                int[] selectedQuestionIds = selectedQuestions.stream()
-                    .mapToInt(Question::getId)
-                    .toArray();
-                Attempt persisted = attemptService.startAttempt(
-                    Attempt.builder()
-                        .quizId(quiz.getId())
-                        .startedAt(LocalDateTime.now(clock))
-                        .isDryRun(true)
-                        .build(),
-                    selectedQuestionIds);
-
-                QuestionTakeResponse[] questions = selectedQuestions.stream()
-                    .map(QuestionTakeResponse::from)
-                    .toArray(QuestionTakeResponse[]::new);
-                return ResponseEntity.ok(new QuizAttemptStartResponse(persisted.getId(), questions));
-            })
+            .map(quiz -> ResponseEntity.ok(QuizAttemptStartResponse.from(
+                attemptService.start(quiz, null, true, LocalDateTime.now(clock)))))
             .orElse(ResponseEntity.notFound().build());
     }
 

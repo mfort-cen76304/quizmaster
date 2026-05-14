@@ -3,12 +3,15 @@ package cz.scrumdojo.quizmaster.attempt;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
 import cz.scrumdojo.quizmaster.question.QuestionScoringService;
+import cz.scrumdojo.quizmaster.quiz.Cohort;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizMode;
+import cz.scrumdojo.quizmaster.quiz.QuizService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -17,27 +20,32 @@ public class AttemptService {
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
     private final QuestionScoringService questionScoringService;
+    private final QuizService quizService;
 
     public AttemptService(AttemptRepository attemptRepository,
                           AttemptQuestionRepository attemptQuestionRepository,
-                          QuestionScoringService questionScoringService) {
+                          QuestionScoringService questionScoringService,
+                          QuizService quizService) {
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
         this.questionScoringService = questionScoringService;
+        this.quizService = quizService;
     }
 
     @Transactional
-    public Attempt startAttempt(Attempt attempt, int[] drawnQuestionIds) {
-        Attempt persisted = attemptRepository.save(attempt);
-        for (int position = 0; position < drawnQuestionIds.length; position++) {
-            attemptQuestionRepository.save(AttemptQuestion.builder()
-                .attemptId(persisted.getId())
-                .questionId(drawnQuestionIds[position])
-                .status(AnswerStatus.UNANSWERED)
-                .position(position)
-                .build());
+    public AttemptStart start(Quiz quiz, Cohort cohort, boolean isDryRun, LocalDateTime now) {
+        Attempt persisted = attemptRepository.save(Attempt.builder()
+            .quizId(quiz.getId())
+            .cohortId(cohort == null ? null : cohort.getId())
+            .startedAt(now)
+            .isDryRun(isDryRun)
+            .build());
+        List<Question> drawnQuestions = quizService.drawQuestions(quiz);
+        for (int position = 0; position < drawnQuestions.size(); position++) {
+            attemptQuestionRepository.save(
+                AttemptQuestion.drawn(persisted.getId(), drawnQuestions.get(position).getId(), position));
         }
-        return persisted;
+        return new AttemptStart(persisted, drawnQuestions);
     }
 
     @Transactional

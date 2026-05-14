@@ -9,6 +9,8 @@ import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Builder
 @Getter
@@ -71,5 +73,9 @@ public class Quiz {
     public int drawnQuestionCount() {
         int total = questionIds == null ? 0 : questionIds.length;
         return (randomQuestionCount != null && randomQuestionCount > 0) ? Math.min(randomQuestionCount, total) : total;
+    }
+
+    public Optional<Cohort> findCohortByGuid(UUID guid) {
+        return cohorts.stream().filter(c -> guid.equals(c.getGuid())).findFirst();
     }
 }

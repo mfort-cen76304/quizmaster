@@ -3,6 +3,7 @@ package cz.scrumdojo.quizmaster.attempt;
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
+import cz.scrumdojo.quizmaster.quiz.Cohort;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizMode;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -143,5 +145,72 @@ public class AttemptServiceTest {
         var result = service.submitAnswer(quiz, attempt, undrawn, answer, LocalDateTime.now());
 
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    public void startDrawsQuestionsAndCreatesAttemptQuestionRowsInPositionOrder() {
+        Question q1 = fixtures.save(fixtures.question());
+        Question q2 = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2).randomQuestionCount(null));
+        LocalDateTime now = LocalDateTime.of(2026, 5, 14, 10, 0);
+
+        AttemptStart started = service.start(quiz, null, false, now);
+
+        assertThat(started.attempt().getStartedAt()).isEqualTo(now);
+        assertThat(started.drawnQuestions()).extracting(Question::getId).containsExactly(q1.getId(), q2.getId());
+        var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(started.attempt().getId());
+        assertThat(rows).hasSize(2);
+        assertThat(rows.get(0).getQuestionId()).isEqualTo(q1.getId());
+        assertThat(rows.get(0).getPosition()).isEqualTo(0);
+        assertThat(rows.get(0).getStatus()).isEqualTo(AnswerStatus.UNANSWERED);
+        assertThat(rows.get(1).getQuestionId()).isEqualTo(q2.getId());
+        assertThat(rows.get(1).getPosition()).isEqualTo(1);
+    }
+
+    @Test
+    public void startWithRandomQuestionCountLimitsDrawnQuestions() {
+        Question q1 = fixtures.save(fixtures.question());
+        Question q2 = fixtures.save(fixtures.question());
+        Question q3 = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3).randomQuestionCount(2));
+
+        AttemptStart started = service.start(quiz, null, false, LocalDateTime.now());
+
+        assertThat(started.drawnQuestions()).hasSize(2);
+        assertThat(attemptQuestionRepository.findByAttemptIdOrderByPosition(started.attempt().getId())).hasSize(2);
+    }
+
+    @Test
+    public void startWithCohortPersistsCohortId() {
+        Question question = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(question)
+            .randomQuestionCount(null)
+            .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+            .build());
+        Cohort cohort = quiz.getCohorts().getFirst();
+
+        AttemptStart started = service.start(quiz, cohort, false, LocalDateTime.now());
+
+        assertThat(started.attempt().getCohortId()).isEqualTo(cohort.getId());
+    }
+
+    @Test
+    public void startWithoutCohortLeavesCohortIdNull() {
+        Question question = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(question).randomQuestionCount(null));
+
+        AttemptStart started = service.start(quiz, null, false, LocalDateTime.now());
+
+        assertThat(started.attempt().getCohortId()).isNull();
+    }
+
+    @Test
+    public void startWithIsDryRunFlagsAttempt() {
+        Question question = fixtures.save(fixtures.question());
+        Quiz quiz = fixtures.save(fixtures.quiz(question).randomQuestionCount(null));
+
+        AttemptStart started = service.start(quiz, null, true, LocalDateTime.now());
+
+        assertThat(started.attempt().getIsDryRun()).isTrue();
     }
 }
