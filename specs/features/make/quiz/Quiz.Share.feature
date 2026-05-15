@@ -18,20 +18,18 @@ Feature: Share Quiz
     Then I see the "Cohort Quiz" welcome page
 
 
-  @skip
-  Scenario: List multiple cohorts in order of creation
+  Scenario: List multiple cohorts in alphabetical order
     When I navigate to share quiz "Cohort Quiz"
     * I create a new cohort "Girlz"
     * I create a new cohort "Boyz"
     * I create a new cohort "Mixed"
-    Then I see cohorts in order
+    Then I see cohorts in alphabetical order
       | Boyz  |
       | Girlz |
       | Mixed |
     And I see a unique quiz take link for each cohort
 
 
-  @skip
   Scenario: Reject blank cohort name
     When I navigate to share quiz "Cohort Quiz"
     * I create a new cohort ""
@@ -39,13 +37,12 @@ Feature: Share Quiz
     And I see error "empty-cohort-name" on the share screen
 
 
-  @skip
   Scenario: Reject duplicate cohort name
     Given I navigate to share quiz "Cohort Quiz"
     * I create a new cohort "Ladies"
-    * I see cohorts in order
+    * I see cohorts in alphabetical order
       | Ladies |
     When I create a new cohort "Ladies"
-    Then I see cohorts in order
+    Then I see cohorts in alphabetical order
       | Ladies |
     And I see error "duplicate-cohort-name" on the share screen

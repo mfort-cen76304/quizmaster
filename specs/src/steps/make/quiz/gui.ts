@@ -156,7 +156,11 @@ When('I navigate to edit quiz {string}', async function (quizName: string) {
 // ── Cohorts ──────────────────────────────────────────
 
 When('I create a new cohort {string}', async function (cohortName: string) {
-    await this.quizCreatePage.addCohort(cohortName)
+    if (await this.quizSharePage.isVisible()) {
+        await this.quizSharePage.addCohort(cohortName)
+    } else {
+        await this.quizCreatePage.addCohort(cohortName)
+    }
 })
 
 When('I create a new cohort {string} for quiz {string}', async function (cohortName: string, quizName: string) {

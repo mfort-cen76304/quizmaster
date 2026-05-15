@@ -87,7 +87,10 @@ export class WorkspacePage {
 
     takeQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Take' }).click()
     editQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Edit' }).click()
-    shareQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Share' }).click()
+    shareQuiz = async (quiz: string) => {
+        await this.quizLocator(quiz).getByRole('link', { name: 'Share' }).click()
+        await this.page.locator('#share-page').waitFor({ state: 'visible' })
+    }
     statsQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Statistics' }).click()
     dryRunQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Dry run' }).click()
 

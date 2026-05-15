@@ -1,6 +1,6 @@
 import { fetchJson, postJson, putJson, callDelete } from '#fe/shared/api/helpers.ts'
 import type { IdResponse } from '#shared/types/id-response.ts'
-import type { Quiz, QuizRequest } from '#shared/types/quiz.ts'
+import type { Quiz, QuizCohort, QuizRequest } from '#shared/types/quiz.ts'
 
 export type { QuizRequest } from '#shared/types/quiz.ts'
 
@@ -18,3 +18,23 @@ export const putQuiz = async (quiz: QuizRequest, id: string, workspaceGuid: stri
 
 export const deleteQuiz = async (workspaceGuid: string, quizId: string) =>
     await callDelete(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}`)
+
+export type CohortCreateError = 'empty-cohort-name' | 'duplicate-cohort-name'
+export type CohortCreateResult = { ok: true; cohort: QuizCohort } | { ok: false; error: CohortCreateError }
+
+export const createCohort = async (
+    workspaceGuid: string,
+    quizId: number | string,
+    name: string,
+): Promise<CohortCreateResult> => {
+    const response = await fetch(`/api/workspaces/${workspaceGuid}/quizzes/${quizId}/cohorts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+    })
+    if (response.ok) {
+        return { ok: true, cohort: (await response.json()) as QuizCohort }
+    }
+    const body = (await response.json()) as { error: CohortCreateError }
+    return { ok: false, error: body.error }
+}
