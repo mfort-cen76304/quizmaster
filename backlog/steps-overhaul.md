@@ -1,5 +1,31 @@
 # Steps Overhaul — Refactor Plan
 
+## Status (2026-05-15)
+
+Partial progress already landed:
+
+- `specs/src/steps/make/{workspace,question,quiz}/` and `specs/src/steps/take/` exist — file-layout Option A is being adopted incrementally.
+- `specs/src/steps/shared/{specs.ts,parsers.ts,api.ts}` exist — the shared
+  spec types, the canonical answer/row parser, and REST helpers are in place.
+- Question builder and bulk paths appear migrated; the "Auto Workspace"
+  fallback has been cleaned up (no remaining reference in `specs/src/steps/`).
+
+Still to do, mapped to the original plan:
+
+- **Steps 2–4** — verify Q5 numerical and Q4 standalone-`Given questions`
+  migrations are complete in practice (audit, then either close or finish).
+- **Step 5** — confirm `Given a question` / `Given a quiz` article-drop is
+  done across all features.
+- **Step 7** — capability-parity matrix audit and smoke scenario per path.
+- **Step 8** — `expectActive()` pilot on the question side.
+- **Step 9** — `QuizSpec` + `createQuiz`; quiz builder migration; quiz GUI
+  relocation.
+- **Step 10** — workspace single-point + delete-empty-legacy-files sweep.
+
+The numbered sections below are the original plan, kept as the source of
+truth for design decisions; treat them as the spec, this status block as
+the cursor.
+
 ## Context
 
 The BDD step layer for creating workspaces, questions, and quizzes has accreted multiple parallel paths over time:

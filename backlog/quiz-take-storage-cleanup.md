@@ -2,7 +2,7 @@
 
 ## Why
 
-The take pipeline still leans on `frontend/src/pages/take/quiz-take/quiz-session.ts`
+The take pipeline still leans on `frontend/src/take/quiz-take/quiz-session.ts`
 to survive page reloads:
 
 - `quizRunId:<quizId>` — the active attempt id, written when the welcome

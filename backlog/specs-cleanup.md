@@ -105,16 +105,15 @@
 
 #### Remaining
 
-5. **Merge Quiz.ScorePage.feature scenarios** — Combine the 4 scenarios into one or two that share Background setup and make multiple assertions. *Plan: Add Background with the shared setup, reduce to 1-2 scenarios asserting question visibility, options, explanation, and user selection together.*
+5. **Delete `Question.Create.Image.feature`** — Its two scenarios are already covered by `Question.Create.Image.Validation.feature`. *Plan: Delete the file, verify scenarios still pass.*
 
-6. **Delete `Question.Create.Image.feature`** — Its two scenarios are already covered by `Question.Create.Image.Validation.feature`. *Plan: Delete the file, verify scenarios still pass.*
+6. **Clean up the `@skip`'d scenario in `Question.Take.Numerical.feature`** — `Question.Take.Numerical.feature:34` carries `@skip` on *Note with number of decimal digits* (`I retake with submit button states`). Either implement the missing step and unskip, or delete the scenario as out of scope. The earlier "sdss" typo has already been fixed.
 
-7. ~~**Merge tag-hiding scenarios**~~ — Reviewed: `Question.Take.SeeTag.feature` and `Question.Create.Tag.feature` are complementary, not duplicative. SeeTag tests tag hiding from the taker perspective; Create.Tag tests the creation form and badge display. No action needed.
+7. **Rename UI-language scenario names** — Replace "Submit button is visible as active when answer is checked" / "Submit button is visible as inactive when no answer is checked" (`Quiz.Navigation.feature:54,61`) with domain-oriented names like "Answer can be submitted only when selection is made". The "Test backButton" scenarios are already gone.
 
-8. **Clean up `Question.Take.Numerical.feature`** — Delete the `@skip` duplicate scenario and fix the "sdss" typo in the first scenario name. *Plan: Remove the skipped scenario, rename "Numerical question with decimal answer sdss" to "Numerical question with decimal answer".*
+#### Done since the original review
 
-9. **Rename UI-language scenario names** — Replace "Test backButton" with domain-oriented names like "Navigate back to workspace from question creation form". Replace "Submit button is visible as active/inactive" with "Answer can be submitted only when selection is made". *Plan: Rename scenario titles across the 3 back-button locations and the 2 submit-button scenarios in Quiz.Navigation.*
-
-10. ~~**Rewrite Timer scenarios to reduce duplication**~~ — Done. Timer scenarios now use a Scenario Outline parameterized by time limit.
-
-11. ~~**Fix time-limit-related specs fragility**~~ — Done. Clock manipulation (`I finish the quiz in N seconds`, `N seconds pass`) replaced real-time waits. No `@skip` scenarios remain in Quiz.Stats.feature.
+- `Quiz.ScorePage.feature` no longer exists.
+- `Question.Take.SeeTag.feature` and `Question.Create.Tag.feature` were reviewed and confirmed complementary, not duplicative.
+- Timer scenarios consolidated into a Scenario Outline parameterised by time limit.
+- Time-limit specs use clock manipulation (`I finish the quiz in N seconds`, `N seconds pass`); no `@skip` scenarios remain in `Quiz.Stats.feature`.

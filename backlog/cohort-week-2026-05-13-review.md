@@ -2,6 +2,19 @@
 
 **Scope:** ~113 files, +2730 LOC. Concentrated on three streams: (1) **Cohorts** — entity, migration V00057/V00058, request/response DTOs, frontend cohorts section, cohort welcome URL; (2) **Per-question stats** — `question_stats_log` table (V00054), event logging in `QuizTakeController`, workspace-page stats; (3) **Cohort leaderboard** — `/api/quiz/{id}/leaderboard`, leaderboard panel on welcome page.
 
+## Resolved since the review (2026-05-15 audit)
+
+- `Quiz.cohorts` switched from `EAGER` to `LAZY`.
+- `cohortNames` field removed from `QuizResponse`/`QuizRequest`; only `cohorts` remains (commits `0b200329`, `250980e7`).
+- The duplicate `toQuestionStats` is gone — `question_stats_log` was dropped in V00059 and the per-question stats now flow through `quiz/stats/QuizStatsService`. The associated `submitAttemptQuestion` swallowed-exception and hand-built `event_detail JSONB` strings disappeared with the table.
+- `QuizTakeController` shrank from 432 → 172 LOC. Leaderboard ranking moved to `quiz/leaderboard/QuizLeaderboardService`; stats moved to `quiz/stats/QuizStatsService`.
+- Magic event-type strings (`"ABANDONED"`, `"VIEWED"`, `"ANSWERED"`, `"SKIPPED"`, `"TIMEOUT"`) are no longer scattered across the question/quiz code (the `question_event_type` table that backed them is gone).
+- `CLAUDE.md` REST surface now lists `/api/quiz/{id}/leaderboard`.
+
+## Still open
+
+The items kept below are the ones that, as of 2026-05-15, are still unaddressed: `GlobalExceptionHandler` deletion, the leaderboard rounding mismatch, the cohort-edit identity problem (`QuizRequest` shape), the cohort-name length constant duplication, the Czech comments/migration descriptions, the `QuestionEventType` enum (still worth doing if the table comes back), the `QuizAttemptStartResponse` cohort echo gap, the `WorkspaceQuestionStatsCalculationTest` `null`-collaborator anti-pattern (if the test still exists), and the various test-coverage gaps around cohort edits, malformed cohort GUIDs, and mixed-state leaderboards. Read the original items below with that filter.
+
 ## Good Patterns
 
 - **Cohort entity carries a public `guid` separate from the internal `id`** (`Cohort.java:21,33-35`) — same pattern as Workspace. Good: the URL-facing identifier doesn't leak DB rows.

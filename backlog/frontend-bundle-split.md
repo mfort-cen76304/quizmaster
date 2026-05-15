@@ -23,9 +23,11 @@ with a quiz link and must never leak correct answers (see
 ### 1. Routes already cleanly split, code does not
 
 `app.tsx` already separates `/quiz/:id*` and `/question/:id` (take) from
-`/workspace/...` (make). But every page imports from the same module graph — the take
-pages pull `#pages/components` which pulls authoring forms; `#api/stats.ts` is shared
-with `#api/question.ts` etc.
+`/workspace/...` (make). The source tree splits along the same line —
+`frontend/src/make/` and `frontend/src/take/` — and `frontend/src/shared/`
+already exists as a third root. The remaining problem is module-graph
+discipline: nothing prevents a take page from importing a make module, and
+shared API helpers aren't split by side.
 
 ### 2. `crazy-background.tsx` is on the critical path
 
@@ -35,7 +37,7 @@ taking — it's chrome.
 ### 3. Shared component library is fine; shared *pages* are not
 
 `Form`, `TextArea`, `Button`, `QuestionTypeRadioSet` are reusable primitives — keep
-shared. But `frontend/src/pages/make/...` and `frontend/src/pages/take/...` should be
+shared. But `frontend/src/make/...` and `frontend/src/take/...` should be
 separate import roots, with no `take/` file ever importing from `make/` (and vice-versa).
 
 A spot check on the recent renames found that `take/quiz-take/quiz-play.tsx` does **not**
@@ -48,16 +50,19 @@ it physical at the bundle level; Stage 3 is the optional separate-build escalati
 
 **Stage 1 — Enforce the boundary.**
 
-- Extract a `pages/shared/` layer that contains primitives and types both halves need
-  (most of `pages/components/` already qualifies; audit `#api/helpers.ts` similarly).
-- Add an oxlint / TypeScript boundary rule: nothing under `pages/take/**` may import from
-  `pages/make/**`, and vice-versa. Both can import from `pages/shared/**` and `#api/**`.
+- `frontend/src/shared/` already exists; audit it for content that really
+  belongs to one side, and pull anything mistakenly cross-cutting back to
+  the right side. Audit `#api/*` and `#shared/*` aliases for the same.
+- Add an oxlint / TypeScript boundary rule: nothing under `src/take/**` may
+  import from `src/make/**`, and vice-versa. Both can import from
+  `src/shared/**`.
 - Audit the take side specifically — confirm it doesn't pull authoring code.
 
 **Stage 2 — Lazy-load and code-split.**
 
 - Convert the make-side route subtree to `React.lazy` — `app.tsx` only loads
-  `make/workspace/*` etc. when the user navigates to a `/workspace/...` route.
+  `src/make/workspace/*` etc. when the user navigates to a `/workspace/...`
+  route.
 - Same for `crazy-background.tsx` — `React.lazy` + `<Suspense fallback={null}>`. It's
   decoration; latency is irrelevant.
 - Vite chunking inherits naturally from the dynamic imports; verify with
@@ -78,13 +83,12 @@ Default plan: do Stage 1 + 2; revisit Stage 3 after measuring.
 ## Files in scope
 
 - `frontend/src/app.tsx` — route declarations to lazy.
-- `frontend/src/pages/components/**` → likely move to `frontend/src/pages/shared/**` or
-  rename the alias.
-- `frontend/src/crazy-background.tsx` → `frontend/src/decoration/crazy-background.tsx`,
-  lazy-loaded.
-- `frontend/oxlint.json` (or equivalent) — boundary rule.
-- `frontend/src/api/*.ts` — split into `api/take/*` and `api/make/*` so the take bundle
-  doesn't pull workspace-key helpers.
+- `frontend/src/shared/**` — already exists; audit content for misplacement.
+- `frontend/src/crazy-background.tsx` (or wherever it now lives) —
+  lazy-loaded under a `shared/decoration/` or sidelined path.
+- `.oxlintrc.json` (root) — boundary rule.
+- `frontend/src/make/api/*.ts` and `frontend/src/take/api/*.ts` already
+  split; verify nothing reaches across.
 
 ## Notes
 
