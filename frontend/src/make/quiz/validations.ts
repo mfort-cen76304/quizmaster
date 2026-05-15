@@ -5,8 +5,6 @@ export const errorMessage = {
     'score-above-max': 'Pass score cannot exceed 100%.',
     'few-questions': 'At least two questions must be selected.',
     'too-many-randomized-questions': 'Final question count cannot exceed the number of selected questions.',
-    'cohort-name-too-long': 'Cohort name cannot exceed 30 characters.',
-    'duplicate-cohort-name': 'A cohort with this name already exists.',
 }
 
 type ErrorCode = keyof typeof errorMessage

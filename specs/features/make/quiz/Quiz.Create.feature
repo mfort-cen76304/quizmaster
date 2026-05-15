@@ -127,19 +127,3 @@ Feature: Create Quiz from Workspace
       | 2026-04-14T10:00 | 2026-04-14T23:00 |
       | 2026-04-14T10:00 |                  |
       |                  | 2026-04-14T23:00 |
-
-
-  @skip
-  Scenario: Create a New Quiz with a Cohort
-    Given workspace "Testquizdates" with questions
-      | question  | answers  |
-      | 2 + 2 = ? | 4 (*), 5 |
-      | 3 * 3 = ? | 9 (*), 6 |
-    When I start creating a new quiz
-    * I enter quiz name "Math Quiz"
-    * I select question "2 + 2 = ?"
-    * I select question "3 * 3 = ?"
-    * I create a new cohort "Girls" to quiz "Math Quiz"
-    * I submit the quiz
-    Then I see the quiz "Math Quiz" in the workspace
-    And quiz "Math Quiz" contains cohort "Girls"

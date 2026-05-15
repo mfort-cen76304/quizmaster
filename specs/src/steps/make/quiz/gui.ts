@@ -3,7 +3,6 @@ import { expect } from '@playwright/test'
 
 import { Then, When } from '#steps/fixture.ts'
 import { expectQuizFormErrors } from '#steps/quiz/expects.ts'
-import { fetchWorkspaceQuizViaRest } from '#steps/shared/api.ts'
 import type { QuizMode } from '#steps/shared/specs.ts'
 
 When('I start creating a new quiz', async function () {
@@ -156,34 +155,5 @@ When('I navigate to edit quiz {string}', async function (quizName: string) {
 // ── Cohorts ──────────────────────────────────────────
 
 When('I create a new cohort {string}', async function (cohortName: string) {
-    if (await this.quizSharePage.isVisible()) {
-        await this.quizSharePage.addCohort(cohortName)
-    } else {
-        await this.quizCreatePage.addCohort(cohortName)
-    }
-})
-
-When('I create a new cohort {string} for quiz {string}', async function (cohortName: string, quizName: string) {
-    await this.workspacePage.goto(this.workspaceGuid)
-    await this.workspacePage.editQuiz(quizName)
-    await this.quizCreatePage.addCohort(cohortName)
-})
-
-When('I cancel editing by navigating back to workspace', async function () {
-    await this.quizCreatePage.clickBack()
-})
-
-Then('quiz {string} contains cohort {string}', async function (quizName: string, cohortName: string) {
-    const quiz = await fetchWorkspaceQuizViaRest(this, quizName)
-    expect(quiz.cohortNames ?? []).toContain(cohortName)
-})
-
-Then('quiz {string} does not contain cohort {string}', async function (quizName: string, cohortName: string) {
-    const quiz = await fetchWorkspaceQuizViaRest(this, quizName)
-    expect(quiz.cohortNames ?? []).not.toContain(cohortName)
-})
-
-Then('quiz {string} has {int} cohort(s)', async function (quizName: string, count: number) {
-    const quiz = await fetchWorkspaceQuizViaRest(this, quizName)
-    expect(quiz.cohortNames ?? []).toHaveLength(count)
+    await this.quizSharePage.addCohort(cohortName)
 })

@@ -129,15 +129,17 @@ public class WorkspaceQuizController {
                 existing.setPassScore(incoming.getPassScore());
                 existing.setTimeLimit(incoming.getTimeLimit());
                 existing.setRandomQuestionCount(incoming.getRandomQuestionCount());
-                existing.getCohorts().clear();
-                // Flush orphan deletes before inserting replacements so the
-                // unique (quiz_id, name) constraint doesn't trip when cohort
-                // names are reused across an edit.
-                quizRepository.saveAndFlush(existing);
-                incoming.getCohorts().forEach(cohort -> {
-                    cohort.setQuiz(existing);
-                    existing.getCohorts().add(cohort);
-                });
+                if (request.cohortNames() != null) {
+                    existing.getCohorts().clear();
+                    // Flush orphan deletes before inserting replacements so the
+                    // unique (quiz_id, name) constraint doesn't trip when cohort
+                    // names are reused across an edit.
+                    quizRepository.saveAndFlush(existing);
+                    incoming.getCohorts().forEach(cohort -> {
+                        cohort.setQuiz(existing);
+                        existing.getCohorts().add(cohort);
+                    });
+                }
                 quizRepository.save(existing);
                 return ResponseEntity.ok(new IdResponse(existing.getId()));
             })

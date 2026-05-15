@@ -210,6 +210,33 @@ public class WorkspaceQuizControllerTest {
     }
 
     @Test
+    public void updateQuizPreservesCohortsWhenCohortNamesAbsent() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question)
+            .workspaceGuid(workspace.getGuid())
+            .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+            .build());
+
+        mockMvc.perform(put("/api/workspaces/{wid}/quizzes/{id}", workspace.getGuid(), quiz.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {
+                        "title": "%s",
+                        "description": "%s",
+                        "questionIds": [%d],
+                        "mode": "learn",
+                        "passScore": 80
+                    }
+                    """.formatted(quiz.getTitle(), quiz.getDescription(), question.getId())))
+            .andExpect(status().isOk());
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
+            .extracting(cohort -> cohort.getName())
+            .containsExactly("Alpha");
+    }
+
+    @Test
     public void createCohortMissingQuizReturns404() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 
