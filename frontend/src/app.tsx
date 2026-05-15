@@ -7,6 +7,7 @@ import { WorkspaceCreatePage } from '#fe/make/create-workspace/workspace-create-
 import { HomePage } from '#fe/make/home.tsx'
 import { QuizStatsPage } from '#fe/make/quiz-stats/quiz-stats-page.tsx'
 import { QuizEditPage } from '#fe/make/quiz/quiz-edit-page.tsx'
+import { QuizSharePage } from '#fe/make/quiz/share/quiz-share-page.tsx'
 import { WorkspacePage } from '#fe/make/workspace/workspace.tsx'
 import { QuestionTakePage } from '#fe/take/question-take'
 import { QuizTakePage } from '#fe/take/quiz-take/quiz-take-page.tsx'
@@ -87,6 +88,7 @@ export const App = () => {
                     <Route path={ROUTES.workspaceQuizNew} element={<QuizEditPage />} />
                     <Route path={ROUTES.workspaceQuizEdit} element={<QuizEditPage />} />
                     <Route path={ROUTES.workspaceQuizStats} element={<QuizStatsPage />} />
+                    <Route path={ROUTES.workspaceQuizShare} element={<QuizSharePage />} />
                     <Route path={ROUTES.workspaceQuizDryRun} element={<QuizWelcomePage isDryRun={true} />} />
                     <Route path={ROUTES.workspaceQuizDryRunTake} element={<QuizTakePage isDryRun={true} />} />
 
