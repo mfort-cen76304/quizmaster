@@ -4,6 +4,7 @@ import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.quiz.CohortRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import org.junit.jupiter.api.Test;
@@ -35,6 +36,9 @@ public class WorkspaceQuizControllerTest {
 
     @Autowired
     private QuizRepository quizRepository;
+
+    @Autowired
+    private CohortRepository cohortRepository;
 
     @Test
     public void getWorkspaceQuizzesNotFound() throws Exception {
@@ -129,7 +133,8 @@ public class WorkspaceQuizControllerTest {
             .andExpect(jsonPath("$.cohortNames[1]").value("Beta"));
 
         Quiz savedQuiz = latestQuiz();
-        assertThat(savedQuiz.getCohorts()).extracting(cohort -> cohort.getName())
+        assertThat(cohortRepository.findByQuizIdOrderByName(savedQuiz.getId()))
+            .extracting(cohort -> cohort.getName())
             .containsExactly("Alpha", "Beta");
     }
 

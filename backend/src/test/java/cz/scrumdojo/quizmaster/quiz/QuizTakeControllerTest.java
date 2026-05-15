@@ -157,6 +157,39 @@ public class QuizTakeControllerTest {
     }
 
     @Test
+    public void getQuizLeaderboardOrdersTiedCohortsAlphabetically() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
+        Quiz quiz = fixtures.save(fixtures.quiz(q1)
+            .workspaceGuid(workspace.getGuid())
+            .randomQuestionCount(null)
+            .cohorts(List.of(
+                Cohort.builder().name("Charlie").build(),
+                Cohort.builder().name("Alpha").build(),
+                Cohort.builder().name("Bravo").build()
+            ))
+            .build());
+
+        for (int i = 0; i < 3; i++) {
+            Attempt attempt = fixtures.save(fixtures.attempt(quiz)
+                .cohortGuid(quiz.getCohorts().get(i).getGuid()), q1);
+            fixtures.score(attempt, q1, AnswerStatus.CORRECT);
+        }
+
+        mockMvc.perform(get("/api/quiz/{id}/leaderboard", quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(content().json("""
+                {
+                    "cohorts": [
+                        {"rank": 1, "cohort": "Alpha", "score": 100},
+                        {"rank": 2, "cohort": "Bravo", "score": 100},
+                        {"rank": 3, "cohort": "Charlie", "score": 100}
+                    ]
+                }
+                """));
+    }
+
+    @Test
     public void createAttemptPersistsResolvedCohortIdForMatchingCohortGuid() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));

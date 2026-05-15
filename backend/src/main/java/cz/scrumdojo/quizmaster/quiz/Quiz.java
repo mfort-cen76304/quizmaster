@@ -9,7 +9,6 @@ import org.hibernate.type.SqlTypes;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -50,7 +49,7 @@ public class Quiz {
     private Integer randomQuestionCount;
 
     @Builder.Default
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Cohort> cohorts = new ArrayList<>();
 
     public void setCohorts(List<Cohort> cohorts) {
@@ -71,10 +70,6 @@ public class Quiz {
     public int drawnQuestionCount() {
         int total = questionIds == null ? 0 : questionIds.length;
         return (randomQuestionCount != null && randomQuestionCount > 0) ? Math.min(randomQuestionCount, total) : total;
-    }
-
-    public Optional<Cohort> findCohortByGuid(String guid) {
-        return cohorts.stream().filter(c -> guid.equals(c.getGuid())).findFirst();
     }
 
     public boolean hasQuestion(Integer questionId) {

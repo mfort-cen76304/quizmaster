@@ -4,6 +4,7 @@ import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestion;
 import cz.scrumdojo.quizmaster.attempt.AttemptQuestionRepository;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
+import cz.scrumdojo.quizmaster.quiz.CohortRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import org.springframework.stereotype.Service;
@@ -23,14 +24,17 @@ public class QuizLeaderboardService {
     private final QuizRepository quizRepository;
     private final AttemptRepository attemptRepository;
     private final AttemptQuestionRepository attemptQuestionRepository;
+    private final CohortRepository cohortRepository;
 
     public QuizLeaderboardService(
             QuizRepository quizRepository,
             AttemptRepository attemptRepository,
-            AttemptQuestionRepository attemptQuestionRepository) {
+            AttemptQuestionRepository attemptQuestionRepository,
+            CohortRepository cohortRepository) {
         this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
+        this.cohortRepository = cohortRepository;
     }
 
     @Transactional(readOnly = true)
@@ -55,7 +59,7 @@ public class QuizLeaderboardService {
                 .add(AttemptQuestion.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
         }
 
-        var rankedCohorts = quiz.getCohorts().stream()
+        var rankedCohorts = cohortRepository.findByQuizIdOrderByName(quiz.getId()).stream()
             .map(cohort -> new CohortLeaderboardRow(
                 cohort.getName(),
                 averageScore(scoresByCohort.get(cohort.getGuid()))

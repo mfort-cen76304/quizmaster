@@ -22,16 +22,19 @@ public class QuizTakeController {
     private final QuizService quizService;
     private final AttemptService attemptService;
     private final QuizLeaderboardService quizLeaderboardService;
+    private final CohortRepository cohortRepository;
     private final Clock clock;
 
     public QuizTakeController(
             QuizService quizService,
             AttemptService attemptService,
             QuizLeaderboardService quizLeaderboardService,
+            CohortRepository cohortRepository,
             Clock clock) {
         this.quizService = quizService;
         this.attemptService = attemptService;
         this.quizLeaderboardService = quizLeaderboardService;
+        this.cohortRepository = cohortRepository;
         this.clock = clock;
     }
 
@@ -64,7 +67,7 @@ public class QuizTakeController {
         if (!cohortRequested(request)) {
             return Optional.empty();
         }
-        return quiz.findCohortByGuid(request.cohortGuid());
+        return cohortRepository.findByGuidAndQuizId(request.cohortGuid(), quiz.getId());
     }
 
     private boolean cohortRequested(QuizAttemptStartRequest request) {

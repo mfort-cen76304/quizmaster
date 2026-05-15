@@ -14,10 +14,12 @@ public class QuizService {
 
     private final QuestionRepository questionRepository;
     private final QuizRepository quizRepository;
+    private final CohortRepository cohortRepository;
 
-    public QuizService(QuestionRepository questionRepository, QuizRepository quizRepository) {
+    public QuizService(QuestionRepository questionRepository, QuizRepository quizRepository, CohortRepository cohortRepository) {
         this.questionRepository = questionRepository;
         this.quizRepository = quizRepository;
+        this.cohortRepository = cohortRepository;
     }
 
     public Optional<Quiz> findById(Integer id) {
@@ -42,12 +44,11 @@ public class QuizService {
             .map(QuestionResponse::from)
             .toArray(QuestionResponse[]::new);
 
-        String[] cohortNames = quiz.getCohorts() == null
-            ? new String[0]
-            : quiz.getCohorts().stream().map(Cohort::getName).toArray(String[]::new);
-        QuizCohortResponse[] cohorts = quiz.getCohorts() == null
-            ? new QuizCohortResponse[0]
-            : quiz.getCohorts().stream().map(QuizCohortResponse::from).toArray(QuizCohortResponse[]::new);
+        List<Cohort> cohortList = cohortRepository.findByQuizIdOrderByName(quiz.getId());
+        String[] cohortNames = cohortList.stream().map(Cohort::getName).toArray(String[]::new);
+        QuizCohortResponse[] cohorts = cohortList.stream()
+            .map(QuizCohortResponse::from)
+            .toArray(QuizCohortResponse[]::new);
 
         return new QuizResponse(
             quiz.getId(),
