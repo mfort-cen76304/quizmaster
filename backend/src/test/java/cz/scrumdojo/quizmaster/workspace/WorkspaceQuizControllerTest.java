@@ -4,6 +4,7 @@ import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.question.Question;
+import cz.scrumdojo.quizmaster.quiz.Cohort;
 import cz.scrumdojo.quizmaster.quiz.CohortRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -136,6 +138,87 @@ public class WorkspaceQuizControllerTest {
         assertThat(cohortRepository.findByQuizIdOrderByName(savedQuiz.getId()))
             .extracting(cohort -> cohort.getName())
             .containsExactly("Alpha", "Beta");
+    }
+
+    @Test
+    public void createCohortPersistsAndReturnsGuid() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
+
+        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"name": "Alpha"}
+                    """))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.guid").isString())
+            .andExpect(jsonPath("$.name").value("Alpha"));
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
+            .extracting(cohort -> cohort.getName())
+            .containsExactly("Alpha");
+    }
+
+    @Test
+    public void createCohortRejectsBlankName() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
+
+        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"name": "   "}
+                    """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("empty-cohort-name"));
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId())).isEmpty();
+    }
+
+    @Test
+    public void createCohortRejectsDuplicateName() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+        Question question = fixtures.save(fixtures.questionIn(workspace));
+        Quiz quiz = fixtures.save(fixtures.quiz(question)
+            .workspaceGuid(workspace.getGuid())
+            .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+            .build());
+
+        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"name": "Alpha"}
+                    """))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.error").value("duplicate-cohort-name"));
+
+        assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
+            .extracting(cohort -> cohort.getName())
+            .containsExactly("Alpha");
+    }
+
+    @Test
+    public void createCohortMissingWorkspaceReturns404() throws Exception {
+        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", "non-existent-guid", -1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"name": "Alpha"}
+                    """))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void createCohortMissingQuizReturns404() throws Exception {
+        Workspace workspace = fixtures.save(fixtures.workspace());
+
+        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), -1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"name": "Alpha"}
+                    """))
+            .andExpect(status().isNotFound());
     }
 
     @Test

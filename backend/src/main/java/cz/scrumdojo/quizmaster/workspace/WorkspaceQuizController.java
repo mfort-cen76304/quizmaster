@@ -4,8 +4,11 @@ import cz.scrumdojo.quizmaster.attempt.AttemptService;
 import cz.scrumdojo.quizmaster.common.IdResponse;
 import cz.scrumdojo.quizmaster.common.ResponseHelper;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
+import cz.scrumdojo.quizmaster.quiz.Cohort;
+import cz.scrumdojo.quizmaster.quiz.CohortRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizAttemptStartResponse;
+import cz.scrumdojo.quizmaster.quiz.QuizCohortResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.quiz.QuizResponse;
@@ -23,6 +26,7 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -36,6 +40,7 @@ public class WorkspaceQuizController {
     private final QuizService quizService;
     private final QuizStatsService quizStatsService;
     private final AttemptService attemptService;
+    private final CohortRepository cohortRepository;
     private final Clock clock;
 
     public WorkspaceQuizController(
@@ -45,6 +50,7 @@ public class WorkspaceQuizController {
             QuizService quizService,
             QuizStatsService quizStatsService,
             AttemptService attemptService,
+            CohortRepository cohortRepository,
             Clock clock) {
         this.workspaceGuard = workspaceGuard;
         this.quizRepository = quizRepository;
@@ -52,6 +58,7 @@ public class WorkspaceQuizController {
         this.quizService = quizService;
         this.quizStatsService = quizStatsService;
         this.attemptService = attemptService;
+        this.cohortRepository = cohortRepository;
         this.clock = clock;
     }
 
@@ -135,6 +142,31 @@ public class WorkspaceQuizController {
                 return ResponseEntity.ok(new IdResponse(existing.getId()));
             })
             .orElse(ResponseEntity.notFound().build());
+    }
+
+    @Transactional
+    @PostMapping("/{id}/cohorts")
+    public ResponseEntity<?> createCohort(
+            @PathVariable String workspaceGuid,
+            @PathVariable Integer id,
+            @RequestBody CohortCreateRequest request) {
+        workspaceGuard.requireExists(workspaceGuid);
+
+        Quiz quiz = quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        String name = request == null ? null : request.name();
+        if (name == null || name.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "empty-cohort-name"));
+        }
+        boolean duplicate = cohortRepository.findByQuizIdOrderByName(quiz.getId()).stream()
+            .anyMatch(c -> c.getName().equals(name));
+        if (duplicate) {
+            return ResponseEntity.badRequest().body(Map.of("error", "duplicate-cohort-name"));
+        }
+
+        Cohort saved = cohortRepository.save(Cohort.builder().name(name).quiz(quiz).build());
+        return ResponseEntity.ok(QuizCohortResponse.from(saved));
     }
 
     @PostMapping("/{id}/dry-runs")
