@@ -150,7 +150,7 @@ public class AttemptServiceTest {
     }
 
     @Test
-    public void startWithCohortPersistsCohortId() {
+    public void startWithCohortPersistsCohortGuid() {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question)
             .randomQuestionCount(null)
@@ -160,17 +160,17 @@ public class AttemptServiceTest {
 
         AttemptStart started = service.start(quiz, cohort, false, LocalDateTime.now());
 
-        assertThat(started.attempt().getCohortId()).isEqualTo(cohort.getId());
+        assertThat(started.attempt().getCohortGuid()).isEqualTo(cohort.getGuid());
     }
 
     @Test
-    public void startWithoutCohortLeavesCohortIdNull() {
+    public void startWithoutCohortLeavesCohortGuidNull() {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question).randomQuestionCount(null));
 
         AttemptStart started = service.start(quiz, null, false, LocalDateTime.now());
 
-        assertThat(started.attempt().getCohortId()).isNull();
+        assertThat(started.attempt().getCohortGuid()).isNull();
     }
 
     @Test

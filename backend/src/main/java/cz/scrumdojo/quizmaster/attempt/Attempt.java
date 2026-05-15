@@ -19,8 +19,8 @@ public class Attempt {
     @Column(name = "quiz_id", nullable = false)
     private Integer quizId;
 
-    @Column(name = "cohort_id")
-    private Integer cohortId;
+    @Column(name = "cohort_guid")
+    private String cohortGuid;
 
     @Column(name = "started_at", nullable = false)
     private LocalDateTime startedAt;

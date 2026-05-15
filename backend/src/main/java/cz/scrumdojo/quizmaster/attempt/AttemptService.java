@@ -35,7 +35,7 @@ public class AttemptService {
     public AttemptStart start(Quiz quiz, Cohort cohort, boolean isDryRun, LocalDateTime now) {
         Attempt persisted = attemptRepository.save(Attempt.builder()
             .quizId(quiz.getId())
-            .cohortId(cohort == null ? null : cohort.getId())
+            .cohortGuid(cohort == null ? null : cohort.getGuid())
             .startedAt(now)
             .isDryRun(isDryRun)
             .build());

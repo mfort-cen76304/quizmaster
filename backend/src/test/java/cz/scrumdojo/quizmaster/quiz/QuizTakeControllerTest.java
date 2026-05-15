@@ -109,28 +109,28 @@ public class QuizTakeControllerTest {
             .build());
 
         Attempt teamRocketAttempt = fixtures.save(fixtures.attempt(quiz)
-            .cohortId(quiz.getCohorts().get(0).getId()), q1, q2, q3, q4);
+            .cohortGuid(quiz.getCohorts().get(0).getGuid()), q1, q2, q3, q4);
         fixtures.score(teamRocketAttempt, q1, AnswerStatus.CORRECT);
         fixtures.score(teamRocketAttempt, q2, AnswerStatus.CORRECT);
         fixtures.score(teamRocketAttempt, q3, AnswerStatus.CORRECT);
         fixtures.score(teamRocketAttempt, q4, AnswerStatus.CORRECT);
 
         Attempt scrumNinjasAttempt = fixtures.save(fixtures.attempt(quiz)
-            .cohortId(quiz.getCohorts().get(1).getId()), q1, q2, q3, q4);
+            .cohortGuid(quiz.getCohorts().get(1).getGuid()), q1, q2, q3, q4);
         fixtures.score(scrumNinjasAttempt, q1, AnswerStatus.CORRECT);
         fixtures.score(scrumNinjasAttempt, q2, AnswerStatus.CORRECT);
         fixtures.score(scrumNinjasAttempt, q3, AnswerStatus.CORRECT);
         fixtures.score(scrumNinjasAttempt, q4, AnswerStatus.INCORRECT);
 
         Attempt retroMastersAttempt = fixtures.save(fixtures.attempt(quiz)
-            .cohortId(quiz.getCohorts().get(2).getId()), q1, q2, q3, q4);
+            .cohortGuid(quiz.getCohorts().get(2).getGuid()), q1, q2, q3, q4);
         fixtures.score(retroMastersAttempt, q1, AnswerStatus.CORRECT);
         fixtures.score(retroMastersAttempt, q2, AnswerStatus.CORRECT);
         fixtures.score(retroMastersAttempt, q3, AnswerStatus.PARTIAL);
         fixtures.score(retroMastersAttempt, q4, AnswerStatus.INCORRECT);
 
         Attempt dryRunAttempt = fixtures.save(fixtures.attempt(quiz)
-            .cohortId(quiz.getCohorts().get(0).getId())
+            .cohortGuid(quiz.getCohorts().get(0).getGuid())
             .isDryRun(true), q1, q2, q3, q4);
         fixtures.score(dryRunAttempt, q1, AnswerStatus.INCORRECT);
         fixtures.score(dryRunAttempt, q2, AnswerStatus.INCORRECT);
@@ -169,7 +169,7 @@ public class QuizTakeControllerTest {
             ))
             .randomQuestionCount(null)
             .build());
-        String cohortGuid = quiz.getCohorts().getFirst().getGuid().toString();
+        String cohortGuid = quiz.getCohorts().getFirst().getGuid();
 
         var result = mockMvc.perform(post("/api/quiz/{id}/attempts", quiz.getId())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -185,7 +185,7 @@ public class QuizTakeControllerTest {
         Integer attemptId = JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
         var attempt = attemptRepository.findById(attemptId).orElseThrow();
 
-        assertThat(attempt.getCohortId()).isEqualTo(quiz.getCohorts().getFirst().getId());
+        assertThat(attempt.getCohortGuid()).isEqualTo(quiz.getCohorts().getFirst().getGuid());
     }
 
     @Test

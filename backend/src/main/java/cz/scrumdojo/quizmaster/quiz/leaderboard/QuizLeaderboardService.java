@@ -41,24 +41,24 @@ public class QuizLeaderboardService {
 
     private QuizLeaderboardCohortResponse[] rankCohorts(Quiz quiz) {
         var finishedCohortAttempts = attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quiz.getId()).stream()
-            .filter(a -> a.getFinishedAt() != null && a.getCohortId() != null)
+            .filter(a -> a.getFinishedAt() != null && a.getCohortGuid() != null)
             .toList();
         var attemptIds = finishedCohortAttempts.stream().map(Attempt::getId).toList();
         var scoresByAttemptId = attemptIds.isEmpty()
             ? Map.<Integer, List<AttemptQuestion>>of()
             : attemptQuestionRepository.findByAttemptIdInOrderByPosition(attemptIds).stream()
                 .collect(Collectors.groupingBy(AttemptQuestion::getAttemptId));
-        var scoresByCohort = new HashMap<Integer, List<Integer>>();
+        var scoresByCohort = new HashMap<String, List<Integer>>();
         for (Attempt attempt : finishedCohortAttempts) {
             scoresByCohort
-                .computeIfAbsent(attempt.getCohortId(), ignored -> new ArrayList<>())
+                .computeIfAbsent(attempt.getCohortGuid(), ignored -> new ArrayList<>())
                 .add(AttemptQuestion.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
         }
 
         var rankedCohorts = quiz.getCohorts().stream()
             .map(cohort -> new CohortLeaderboardRow(
                 cohort.getName(),
-                averageScore(scoresByCohort.get(cohort.getId()))
+                averageScore(scoresByCohort.get(cohort.getGuid()))
             ))
             .sorted(Comparator.comparingInt(CohortLeaderboardRow::score).reversed()
                 .thenComparing(CohortLeaderboardRow::name))
