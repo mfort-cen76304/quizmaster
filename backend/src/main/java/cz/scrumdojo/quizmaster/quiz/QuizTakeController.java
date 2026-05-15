@@ -15,7 +15,6 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/quiz")
@@ -65,11 +64,7 @@ public class QuizTakeController {
         if (!cohortRequested(request)) {
             return Optional.empty();
         }
-        try {
-            return quiz.findCohortByGuid(UUID.fromString(request.cohortGuid()));
-        } catch (IllegalArgumentException ignored) {
-            return Optional.empty();
-        }
+        return quiz.findCohortByGuid(request.cohortGuid());
     }
 
     private boolean cohortRequested(QuizAttemptStartRequest request) {

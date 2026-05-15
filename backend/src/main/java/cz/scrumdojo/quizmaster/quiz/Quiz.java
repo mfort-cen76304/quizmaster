@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Getter @Setter @AllArgsConstructor @NoArgsConstructor @Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -74,7 +73,7 @@ public class Quiz {
         return (randomQuestionCount != null && randomQuestionCount > 0) ? Math.min(randomQuestionCount, total) : total;
     }
 
-    public Optional<Cohort> findCohortByGuid(UUID guid) {
+    public Optional<Cohort> findCohortByGuid(String guid) {
         return cohorts.stream().filter(c -> guid.equals(c.getGuid())).findFirst();
     }
 

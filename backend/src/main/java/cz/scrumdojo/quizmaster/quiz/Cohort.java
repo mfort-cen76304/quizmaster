@@ -18,9 +18,9 @@ public class Cohort {
     private Integer id;
 
     @Column(nullable = false, unique = true, updatable = false)
-    private UUID guid;
+    private String guid;
 
-    @Column(nullable = false, length = 30)
+    @Column(nullable = false)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -31,7 +31,7 @@ public class Cohort {
     @PrePersist
     private void onPrePersist() {
         if (this.guid == null) {
-            this.guid = UUID.randomUUID();
+            this.guid = UUID.randomUUID().toString();
         }
     }
 }

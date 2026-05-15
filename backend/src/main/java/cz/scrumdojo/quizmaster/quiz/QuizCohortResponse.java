@@ -1,9 +1,7 @@
 package cz.scrumdojo.quizmaster.quiz;
 
-import java.util.UUID;
-
 public record QuizCohortResponse(
-    UUID guid,
+    String guid,
     String name
 ) {
     public static QuizCohortResponse from(Cohort cohort) {
