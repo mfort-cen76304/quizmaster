@@ -1,10 +1,9 @@
 package cz.scrumdojo.quizmaster.attempt;
 
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 public class AttemptTest {
 
@@ -41,10 +40,7 @@ public class AttemptTest {
 
     @Test
     public void statusIsAbandonedWhenTimedOutButNotEvaluated() {
-        Attempt attempt = Attempt.builder()
-            .startedAt(START)
-            .timedOutAt(START.plusMinutes(5))
-            .build();
+        Attempt attempt = Attempt.builder().startedAt(START).timedOutAt(START.plusMinutes(5)).build();
 
         assertThat(attempt.status()).isEqualTo(AttemptStatus.ABANDONED);
     }
@@ -59,10 +55,7 @@ public class AttemptTest {
 
     @Test
     public void durationSecondsCountsFromStartToFinishWhenNotTimedOut() {
-        Attempt attempt = Attempt.builder()
-            .startedAt(START)
-            .finishedAt(START.plusSeconds(90))
-            .build();
+        Attempt attempt = Attempt.builder().startedAt(START).finishedAt(START.plusSeconds(90)).build();
 
         assertThat(attempt.durationSeconds(300)).isEqualTo(90);
     }
@@ -80,10 +73,7 @@ public class AttemptTest {
 
     @Test
     public void durationSecondsIsRawElapsedWhenTimedOutWithoutCap() {
-        Attempt attempt = Attempt.builder()
-            .startedAt(START)
-            .timedOutAt(START.plusSeconds(500))
-            .build();
+        Attempt attempt = Attempt.builder().startedAt(START).timedOutAt(START.plusSeconds(500)).build();
 
         assertThat(attempt.durationSeconds(null)).isEqualTo(500);
     }

@@ -1,19 +1,18 @@
 package cz.scrumdojo.quizmaster.attempt;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionAnswerRequest;
 import cz.scrumdojo.quizmaster.quiz.Cohort;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizMode;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 public class AttemptServiceTest {
@@ -89,13 +88,17 @@ public class AttemptServiceTest {
         Quiz quiz = fixtures.save(fixtures.quiz(question).mode(QuizMode.EXAM));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
         LocalDateTime now = LocalDateTime.of(2026, 5, 14, 10, 30);
-        QuestionAnswerRequest correctAnswer = new QuestionAnswerRequest(null, "choice", new int[]{1}, null);
+        QuestionAnswerRequest correctAnswer = new QuestionAnswerRequest(null, "choice", new int[] { 1 }, null);
 
-        AttemptQuestion attemptQuestion = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        AttemptQuestion attemptQuestion = attemptQuestionRepository
+            .findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
+            .orElseThrow();
         AnswerStatus status = service.submitAnswer(quiz, attemptQuestion, question, correctAnswer, now);
 
         assertThat(status).isEqualTo(AnswerStatus.CORRECT);
-        var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        var row = attemptQuestionRepository
+            .findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
+            .orElseThrow();
         assertThat(row.getStatus()).isEqualTo(AnswerStatus.CORRECT);
         assertThat(row.getAnsweredAt()).isEqualTo(now);
     }
@@ -105,14 +108,18 @@ public class AttemptServiceTest {
         Question question = fixtures.save(fixtures.question());
         Quiz quiz = fixtures.save(fixtures.quiz(question).mode(QuizMode.LEARN));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz), question);
-        QuestionAnswerRequest wrongAnswer = new QuestionAnswerRequest(null, "choice", new int[]{0}, null);
-        QuestionAnswerRequest correctAnswer = new QuestionAnswerRequest(null, "choice", new int[]{1}, null);
-        AttemptQuestion attemptQuestion = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        QuestionAnswerRequest wrongAnswer = new QuestionAnswerRequest(null, "choice", new int[] { 0 }, null);
+        QuestionAnswerRequest correctAnswer = new QuestionAnswerRequest(null, "choice", new int[] { 1 }, null);
+        AttemptQuestion attemptQuestion = attemptQuestionRepository
+            .findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
+            .orElseThrow();
 
         service.submitAnswer(quiz, attemptQuestion, question, wrongAnswer, LocalDateTime.now());
         service.submitAnswer(quiz, attemptQuestion, question, correctAnswer, LocalDateTime.now());
 
-        var row = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId()).orElseThrow();
+        var row = attemptQuestionRepository
+            .findByAttemptIdAndQuestionId(attempt.getId(), question.getId())
+            .orElseThrow();
         assertThat(row.getStatus()).isEqualTo(AnswerStatus.INCORRECT);
     }
 
@@ -152,10 +159,13 @@ public class AttemptServiceTest {
     @Test
     public void startWithCohortPersistsCohortGuid() {
         Question question = fixtures.save(fixtures.question());
-        Quiz quiz = fixtures.save(fixtures.quiz(question)
-            .randomQuestionCount(null)
-            .cohorts(List.of(Cohort.builder().name("Alpha").build()))
-            .build());
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .randomQuestionCount(null)
+                .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+                .build()
+        );
         Cohort cohort = quiz.getCohorts().getFirst();
 
         AttemptStart started = service.start(quiz, cohort, false, LocalDateTime.now());

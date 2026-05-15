@@ -2,11 +2,10 @@ package cz.scrumdojo.quizmaster.aiassistant;
 
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceRepository;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,23 +25,29 @@ public class AiAssistantController {
 
     @PostMapping
     public ResponseEntity<QuestionResponse> generate(
-            @PathVariable String workspaceGuid,
-            @RequestBody AiAssistantRequest request) {
+        @PathVariable String workspaceGuid,
+        @RequestBody AiAssistantRequest request
+    ) {
         requireWorkspaceExists(workspaceGuid);
-        return ResponseEntity.ok(aiAssistantService.generateQuestion(
-            request.question(),
-            request.questionType(),
-            workspaceGuid,
-            request.excludedQuestionId()
-        ));
+        return ResponseEntity.ok(
+            aiAssistantService.generateQuestion(
+                request.question(),
+                request.questionType(),
+                workspaceGuid,
+                request.excludedQuestionId()
+            )
+        );
     }
 
     @PostMapping("/batch")
     public ResponseEntity<QuestionResponse[]> generateBatch(
-            @PathVariable String workspaceGuid,
-            @RequestBody AiAssistantRequest request) {
+        @PathVariable String workspaceGuid,
+        @RequestBody AiAssistantRequest request
+    ) {
         requireWorkspaceExists(workspaceGuid);
-        return ResponseEntity.ok(aiAssistantService.generateQuestions(request.question(), request.questionType(), workspaceGuid));
+        return ResponseEntity.ok(
+            aiAssistantService.generateQuestions(request.question(), request.questionType(), workspaceGuid)
+        );
     }
 
     private void requireWorkspaceExists(String workspaceGuid) {

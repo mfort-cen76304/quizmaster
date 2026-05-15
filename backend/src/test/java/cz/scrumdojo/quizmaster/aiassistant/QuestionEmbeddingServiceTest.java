@@ -1,20 +1,18 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
-
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest
 class QuestionEmbeddingServiceTest {
@@ -39,16 +37,15 @@ class QuestionEmbeddingServiceTest {
     void attachesEmbeddingMetadataBeforeSave() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        Question question = fixtures.question()
-            .question("Which country is the largest producer of coffee?")
-            .build();
+        Question question = fixtures.question().question("Which country is the largest producer of coffee?").build();
 
         questionEmbeddingService.embedForSave(question);
 
         assertThat(question.getEmbedding()).isNotEmpty();
         assertThat(question.getEmbeddingModel()).isEqualTo(embeddingModel);
-        assertThat(question.getEmbeddingTextHash())
-            .isEqualTo(QuestionEmbeddingText.hash("Which country is the largest producer of coffee?"));
+        assertThat(question.getEmbeddingTextHash()).isEqualTo(
+            QuestionEmbeddingText.hash("Which country is the largest producer of coffee?")
+        );
         assertThat(questionEmbeddingService.hasUsableEmbedding(question)).isTrue();
     }
 

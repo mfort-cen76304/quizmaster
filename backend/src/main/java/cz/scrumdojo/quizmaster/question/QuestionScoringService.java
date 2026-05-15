@@ -1,13 +1,13 @@
 package cz.scrumdojo.quizmaster.question;
 
 import cz.scrumdojo.quizmaster.attempt.AnswerStatus;
-import org.springframework.stereotype.Service;
-
 import java.util.Arrays;
 import java.util.HashSet;
+import org.springframework.stereotype.Service;
 
 @Service
 public class QuestionScoringService {
+
     private static final double FLOAT_EPSILON = 1e-9;
 
     public QuestionEvaluationResponse evaluate(Question question, QuestionAnswerRequest answer) {
@@ -21,12 +21,19 @@ public class QuestionScoringService {
     }
 
     private AnswerStatus scoreNumerical(Question question, QuestionAnswerRequest answer) {
-        if (answer == null || answer.value() == null || question.getAnswers() == null || question.getAnswers().length == 0) {
+        if (
+            answer == null ||
+            answer.value() == null ||
+            question.getAnswers() == null ||
+            question.getAnswers().length == 0
+        ) {
             return AnswerStatus.INCORRECT;
         }
         double correct = Double.parseDouble(question.getAnswers()[0]);
         double tolerance = question.getTolerance() != null ? question.getTolerance() : 0;
-        return Math.abs(answer.value() - correct) <= tolerance + FLOAT_EPSILON ? AnswerStatus.CORRECT : AnswerStatus.INCORRECT;
+        return Math.abs(answer.value() - correct) <= tolerance + FLOAT_EPSILON
+            ? AnswerStatus.CORRECT
+            : AnswerStatus.INCORRECT;
     }
 
     private AnswerStatus scoreChoice(Question question, QuestionAnswerRequest answer) {

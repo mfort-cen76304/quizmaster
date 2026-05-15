@@ -3,12 +3,15 @@ package cz.scrumdojo.quizmaster.attempt;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import cz.scrumdojo.quizmaster.quiz.QuizMode;
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import lombok.*;
 
-@Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Entity
 public class AttemptQuestion {
@@ -53,14 +56,11 @@ public class AttemptQuestion {
     }
 
     public static double totalPoints(List<AttemptQuestion> rows) {
-        return rows.stream()
-            .map(AttemptQuestion::getStatus)
-            .mapToDouble(AnswerStatus::points)
-            .sum();
+        return rows.stream().map(AttemptQuestion::getStatus).mapToDouble(AnswerStatus::points).sum();
     }
 
     public static int percentageScore(List<AttemptQuestion> rows) {
         if (rows.isEmpty()) return 0;
-        return (int) Math.round(totalPoints(rows) / rows.size() * 100);
+        return (int) Math.round((totalPoints(rows) / rows.size()) * 100);
     }
 }

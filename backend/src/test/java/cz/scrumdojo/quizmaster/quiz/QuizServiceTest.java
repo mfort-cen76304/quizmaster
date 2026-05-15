@@ -1,17 +1,16 @@
 package cz.scrumdojo.quizmaster.quiz;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 public class QuizServiceTest {
@@ -66,7 +65,9 @@ public class QuizServiceTest {
 
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3).randomQuestionCount(2).build());
 
-        Set<Integer> selectedIds = quizService.drawQuestions(quiz).stream()
+        Set<Integer> selectedIds = quizService
+            .drawQuestions(quiz)
+            .stream()
             .map(Question::getId)
             .collect(Collectors.toSet());
         assertTrue(poolIds.containsAll(selectedIds));
@@ -82,7 +83,9 @@ public class QuizServiceTest {
     @Test
     public void quizWithMissingQuestionSkipsIt() {
         Question q1 = fixtures.save(fixtures.question());
-        Quiz quiz = fixtures.save(fixtures.quiz(q1).questionIds(new int[]{q1.getId(), -999}).randomQuestionCount(null).build());
+        Quiz quiz = fixtures.save(
+            fixtures.quiz(q1).questionIds(new int[] { q1.getId(), -999 }).randomQuestionCount(null).build()
+        );
 
         QuizResponse response = quizService.getQuiz(quiz.getId()).orElseThrow();
 

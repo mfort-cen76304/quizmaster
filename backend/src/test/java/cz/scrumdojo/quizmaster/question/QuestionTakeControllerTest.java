@@ -1,5 +1,10 @@
 package cz.scrumdojo.quizmaster.question;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 import org.junit.jupiter.api.Test;
@@ -8,11 +13,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.not;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -29,16 +29,21 @@ public class QuestionTakeControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
 
-        mockMvc.perform(get("/api/question/{id}", question.getId()))
+        mockMvc
+            .perform(get("/api/question/{id}", question.getId()))
             .andExpect(status().isOk())
-            .andExpect(content().json("""
-                {
-                    "question": "What is the capital of Italy?",
-                    "answers": ["Naples", "Rome", "Florence", "Palermo"],
-                    "correctAnswerCount": 1,
-                    "isEasy": false
-                }
-                """))
+            .andExpect(
+                content().json(
+                    """
+                    {
+                        "question": "What is the capital of Italy?",
+                        "answers": ["Naples", "Rome", "Florence", "Palermo"],
+                        "correctAnswerCount": 1,
+                        "isEasy": false
+                    }
+                    """
+                )
+            )
             .andExpect(jsonPath("$.correctAnswers").doesNotExist())
             .andExpect(jsonPath("$.explanations").doesNotExist())
             .andExpect(jsonPath("$.questionExplanation").doesNotExist())
@@ -48,14 +53,18 @@ public class QuestionTakeControllerTest {
 
     @Test
     public void getNumericalQuestionDoesNotExposeCorrectAnswerOrTolerance() throws Exception {
-        Question question = fixtures.save(fixtures.question()
-            .question("What is pi rounded to two decimals?")
-            .answers(new String[]{"3.14"})
-            .correctAnswers(new int[]{0})
-            .questionType("numerical")
-            .tolerance(0.01));
+        Question question = fixtures.save(
+            fixtures
+                .question()
+                .question("What is pi rounded to two decimals?")
+                .answers(new String[] { "3.14" })
+                .correctAnswers(new int[] { 0 })
+                .questionType("numerical")
+                .tolerance(0.01)
+        );
 
-        mockMvc.perform(get("/api/question/{id}", question.getId()))
+        mockMvc
+            .perform(get("/api/question/{id}", question.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.answers").isEmpty())
             .andExpect(content().string(not(containsString("3.14"))))
@@ -67,15 +76,24 @@ public class QuestionTakeControllerTest {
     public void submitQuestionReturnsEvaluationOnly() throws Exception {
         Question question = fixtures.save(fixtures.question());
 
-        mockMvc.perform(post("/api/question/{id}/submit", question.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"type": "choice", "selectedIdxs": [1]}
-                    """))
+        mockMvc
+            .perform(
+                post("/api/question/{id}/submit", question.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"type": "choice", "selectedIdxs": [1]}
+                        """
+                    )
+            )
             .andExpect(status().isOk())
-            .andExpect(content().json("""
-                {"status": "CORRECT", "score": 1.0}
-                """))
+            .andExpect(
+                content().json(
+                    """
+                    {"status": "CORRECT", "score": 1.0}
+                    """
+                )
+            )
             .andExpect(jsonPath("$.correctAnswers").doesNotExist())
             .andExpect(jsonPath("$.question.correctAnswers[0]").value(1))
             .andExpect(jsonPath("$.question.explanations").isArray())
@@ -86,15 +104,24 @@ public class QuestionTakeControllerTest {
     public void submitQuestionDeduplicatesSelectedAnswers() throws Exception {
         Question question = fixtures.save(fixtures.multipleChoiceQuestion());
 
-        mockMvc.perform(post("/api/question/{id}/submit", question.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"type": "choice", "selectedIdxs": [0, 0]}
-                    """))
+        mockMvc
+            .perform(
+                post("/api/question/{id}/submit", question.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"type": "choice", "selectedIdxs": [0, 0]}
+                        """
+                    )
+            )
             .andExpect(status().isOk())
-            .andExpect(content().json("""
-                {"status": "PARTIAL", "score": 0.5}
-                """));
+            .andExpect(
+                content().json(
+                    """
+                    {"status": "PARTIAL", "score": 0.5}
+                    """
+                )
+            );
     }
 
     @Test
@@ -103,17 +130,21 @@ public class QuestionTakeControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace));
         fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
 
-        mockMvc.perform(post("/api/question/{id}/submit", question.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"type": "choice", "selectedIdxs": [1]}
-                    """))
+        mockMvc
+            .perform(
+                post("/api/question/{id}/submit", question.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"type": "choice", "selectedIdxs": [1]}
+                        """
+                    )
+            )
             .andExpect(status().isForbidden());
     }
 
     @Test
     public void nonExistingQuestionReturnsNotFound() throws Exception {
-        mockMvc.perform(get("/api/question/{id}", -1))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/question/{id}", -1)).andExpect(status().isNotFound());
     }
 }

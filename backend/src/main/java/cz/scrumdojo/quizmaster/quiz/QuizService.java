@@ -3,11 +3,10 @@ package cz.scrumdojo.quizmaster.quiz;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
-import org.springframework.stereotype.Service;
-
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
 
 @Service
 public class QuizService {
@@ -16,7 +15,11 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final CohortRepository cohortRepository;
 
-    public QuizService(QuestionRepository questionRepository, QuizRepository quizRepository, CohortRepository cohortRepository) {
+    public QuizService(
+        QuestionRepository questionRepository,
+        QuizRepository quizRepository,
+        CohortRepository cohortRepository
+    ) {
         this.questionRepository = questionRepository;
         this.quizRepository = quizRepository;
         this.cohortRepository = cohortRepository;
@@ -35,16 +38,20 @@ public class QuizService {
     }
 
     public Optional<QuizResponse> getWorkspaceQuiz(String workspaceGuid, Integer id) {
-        return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
+        return quizRepository
+            .findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(quiz -> toQuizResponse(quiz, loadQuestions(quiz)));
     }
 
     private QuizResponse toQuizResponse(Quiz quiz, List<Question> questions) {
-        QuestionResponse[] questionResponses = questions.stream()
+        QuestionResponse[] questionResponses = questions
+            .stream()
             .map(QuestionResponse::from)
             .toArray(QuestionResponse[]::new);
 
-        QuizCohortResponse[] cohorts = cohortRepository.findByQuizIdOrderByName(quiz.getId()).stream()
+        QuizCohortResponse[] cohorts = cohortRepository
+            .findByQuizIdOrderByName(quiz.getId())
+            .stream()
             .map(QuizCohortResponse::from)
             .toArray(QuizCohortResponse[]::new);
 
@@ -86,11 +93,10 @@ public class QuizService {
         }
 
         List<Integer> ids = Arrays.stream(questionIds).boxed().toList();
-        Map<Integer, Question> questionsById = questionRepository.findAllById(ids).stream()
+        Map<Integer, Question> questionsById = questionRepository
+            .findAllById(ids)
+            .stream()
             .collect(Collectors.toMap(Question::getId, Function.identity()));
-        return ids.stream()
-            .map(questionsById::get)
-            .filter(Objects::nonNull)
-            .toList();
+        return ids.stream().map(questionsById::get).filter(Objects::nonNull).toList();
     }
 }

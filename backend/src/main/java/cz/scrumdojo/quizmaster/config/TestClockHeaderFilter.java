@@ -6,11 +6,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.time.Instant;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 /**
  * Reads X-Test-Clock-At from each inbound request and stows the parsed Instant
@@ -29,7 +28,7 @@ public class TestClockHeaderFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
-            throws IOException, ServletException {
+        throws IOException, ServletException {
         var header = ((HttpServletRequest) req).getHeader(HEADER);
         if (header != null && !header.isBlank()) {
             try {

@@ -6,12 +6,11 @@ import cz.scrumdojo.quizmaster.question.QuestionScoringService;
 import cz.scrumdojo.quizmaster.quiz.Cohort;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizService;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AttemptService {
@@ -21,10 +20,12 @@ public class AttemptService {
     private final QuestionScoringService questionScoringService;
     private final QuizService quizService;
 
-    public AttemptService(AttemptRepository attemptRepository,
-                          AttemptQuestionRepository attemptQuestionRepository,
-                          QuestionScoringService questionScoringService,
-                          QuizService quizService) {
+    public AttemptService(
+        AttemptRepository attemptRepository,
+        AttemptQuestionRepository attemptQuestionRepository,
+        QuestionScoringService questionScoringService,
+        QuizService quizService
+    ) {
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
         this.questionScoringService = questionScoringService;
@@ -33,16 +34,19 @@ public class AttemptService {
 
     @Transactional
     public AttemptStart start(Quiz quiz, Cohort cohort, boolean isDryRun, LocalDateTime now) {
-        Attempt persisted = attemptRepository.save(Attempt.builder()
-            .quizId(quiz.getId())
-            .cohortGuid(cohort == null ? null : cohort.getGuid())
-            .startedAt(now)
-            .isDryRun(isDryRun)
-            .build());
+        Attempt persisted = attemptRepository.save(
+            Attempt.builder()
+                .quizId(quiz.getId())
+                .cohortGuid(cohort == null ? null : cohort.getGuid())
+                .startedAt(now)
+                .isDryRun(isDryRun)
+                .build()
+        );
         List<Question> drawnQuestions = quizService.drawQuestions(quiz);
         for (int position = 0; position < drawnQuestions.size(); position++) {
             attemptQuestionRepository.save(
-                AttemptQuestion.drawn(persisted.getId(), drawnQuestions.get(position).getId(), position));
+                AttemptQuestion.drawn(persisted.getId(), drawnQuestions.get(position).getId(), position)
+            );
         }
         return new AttemptStart(persisted, drawnQuestions);
     }
@@ -60,8 +64,13 @@ public class AttemptService {
     }
 
     @Transactional
-    public AnswerStatus submitAnswer(Quiz quiz, AttemptQuestion attemptQuestion, Question question,
-                                     QuestionAnswerRequest request, LocalDateTime now) {
+    public AnswerStatus submitAnswer(
+        Quiz quiz,
+        AttemptQuestion attemptQuestion,
+        Question question,
+        QuestionAnswerRequest request,
+        LocalDateTime now
+    ) {
         AnswerStatus status = questionScoringService.score(question, request);
         attemptQuestion.recordOutcome(quiz.getMode(), status, now);
         attemptQuestionRepository.save(attemptQuestion);

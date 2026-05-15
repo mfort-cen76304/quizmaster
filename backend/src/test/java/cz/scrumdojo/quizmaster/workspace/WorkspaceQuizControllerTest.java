@@ -1,5 +1,9 @@
 package cz.scrumdojo.quizmaster.workspace;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.attempt.Attempt;
 import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
@@ -8,20 +12,15 @@ import cz.scrumdojo.quizmaster.quiz.Cohort;
 import cz.scrumdojo.quizmaster.quiz.CohortRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
+import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,8 +43,7 @@ public class WorkspaceQuizControllerTest {
 
     @Test
     public void getWorkspaceQuizzesNotFound() throws Exception {
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", "non-existent-guid"))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", "non-existent-guid")).andExpect(status().isNotFound());
     }
 
     @Test
@@ -55,14 +53,19 @@ public class WorkspaceQuizControllerTest {
         Quiz quiz2 = fixtures.save(fixtures.quizIn(workspace));
         fixtures.save(fixtures.quiz()); // Quiz without workspace
 
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes", workspace.getGuid()))
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/quizzes", workspace.getGuid()))
             .andExpect(status().isOk())
-            .andExpect(content().json("""
-                [
-                    {"id": %d, "title": "Test Quiz"},
-                    {"id": %d, "title": "Test Quiz"}
-                ]
-                """.formatted(quiz1.getId(), quiz2.getId())));
+            .andExpect(
+                content().json(
+                    """
+                    [
+                        {"id": %d, "title": "Test Quiz"},
+                        {"id": %d, "title": "Test Quiz"}
+                    ]
+                    """.formatted(quiz1.getId(), quiz2.getId())
+                )
+            );
     }
 
     @Test
@@ -70,32 +73,41 @@ public class WorkspaceQuizControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
 
-        var result = mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "New Quiz",
-                        "description": "A quiz",
-                        "startAt": "2026-04-14T10:00",
-                        "endAt": "2026-04-14T23:00",
-                        "questionIds": [%d],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "randomQuestionCount": 1
-                    }
-                    """.formatted(question.getId())))
+        var result = mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "New Quiz",
+                            "description": "A quiz",
+                            "startAt": "2026-04-14T10:00",
+                            "endAt": "2026-04-14T23:00",
+                            "questionIds": [%d],
+                            "mode": "learn",
+                            "passScore": 80,
+                            "randomQuestionCount": 1
+                        }
+                        """.formatted(question.getId())
+                    )
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").isNumber())
             .andReturn();
 
-        Integer quizId = com.jayway.jsonpath.JsonPath
-            .read(result.getResponse().getContentAsString(), "$.id");
+        Integer quizId = com.jayway.jsonpath.JsonPath.read(result.getResponse().getContentAsString(), "$.id");
 
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quizId))
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quizId))
             .andExpect(status().isOk())
-            .andExpect(content().json("""
-                {"id": %d}
-                """.formatted(quizId)))
+            .andExpect(
+                content().json(
+                    """
+                    {"id": %d}
+                    """.formatted(quizId)
+                )
+            )
             .andExpect(jsonPath("$.questions.length()").value(1));
 
         Quiz savedQuiz = latestQuiz();
@@ -109,11 +121,16 @@ public class WorkspaceQuizControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
 
-        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"name": "Alpha"}
-                    """))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "Alpha"}
+                        """
+                    )
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.guid").isString())
             .andExpect(jsonPath("$.name").value("Alpha"));
@@ -129,11 +146,16 @@ public class WorkspaceQuizControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
 
-        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"name": "   "}
-                    """))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "   "}
+                        """
+                    )
+            )
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error").value("empty-cohort-name"));
 
@@ -144,16 +166,24 @@ public class WorkspaceQuizControllerTest {
     public void createCohortRejectsDuplicateName() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(question)
-            .workspaceGuid(workspace.getGuid())
-            .cohorts(List.of(Cohort.builder().name("Alpha").build()))
-            .build());
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+                .build()
+        );
 
-        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"name": "Alpha"}
-                    """))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), quiz.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "Alpha"}
+                        """
+                    )
+            )
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.error").value("duplicate-cohort-name"));
 
@@ -164,11 +194,16 @@ public class WorkspaceQuizControllerTest {
 
     @Test
     public void createCohortMissingWorkspaceReturns404() throws Exception {
-        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", "non-existent-guid", -1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"name": "Alpha"}
-                    """))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{wid}/quizzes/{id}/cohorts", "non-existent-guid", -1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "Alpha"}
+                        """
+                    )
+            )
             .andExpect(status().isNotFound());
     }
 
@@ -176,22 +211,30 @@ public class WorkspaceQuizControllerTest {
     public void updateQuizPreservesCohortsWhenCohortNamesAbsent() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(question)
-            .workspaceGuid(workspace.getGuid())
-            .cohorts(List.of(Cohort.builder().name("Alpha").build()))
-            .build());
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .cohorts(List.of(Cohort.builder().name("Alpha").build()))
+                .build()
+        );
 
-        mockMvc.perform(put("/api/workspaces/{wid}/quizzes/{id}", workspace.getGuid(), quiz.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "%s",
-                        "description": "%s",
-                        "questionIds": [%d],
-                        "mode": "learn",
-                        "passScore": 80
-                    }
-                    """.formatted(quiz.getTitle(), quiz.getDescription(), question.getId())))
+        mockMvc
+            .perform(
+                put("/api/workspaces/{wid}/quizzes/{id}", workspace.getGuid(), quiz.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "%s",
+                            "description": "%s",
+                            "questionIds": [%d],
+                            "mode": "learn",
+                            "passScore": 80
+                        }
+                        """.formatted(quiz.getTitle(), quiz.getDescription(), question.getId())
+                    )
+            )
             .andExpect(status().isOk());
 
         assertThat(cohortRepository.findByQuizIdOrderByName(quiz.getId()))
@@ -203,11 +246,16 @@ public class WorkspaceQuizControllerTest {
     public void createCohortMissingQuizReturns404() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), -1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {"name": "Alpha"}
-                    """))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{wid}/quizzes/{id}/cohorts", workspace.getGuid(), -1)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {"name": "Alpha"}
+                        """
+                    )
+            )
             .andExpect(status().isNotFound());
     }
 
@@ -218,7 +266,8 @@ public class WorkspaceQuizControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace1));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace1.getGuid()).build());
 
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace2.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace2.getGuid(), quiz.getId()))
             .andExpect(status().isNotFound());
     }
 
@@ -228,12 +277,12 @@ public class WorkspaceQuizControllerTest {
         Question q1 = fixtures.save(fixtures.questionIn(workspace).question("Q1"));
         Question q2 = fixtures.save(fixtures.questionIn(workspace).question("Q2"));
         Question q3 = fixtures.save(fixtures.questionIn(workspace).question("Q3"));
-        Quiz quiz = fixtures.save(fixtures.quiz(q1, q2, q3)
-            .workspaceGuid(workspace.getGuid())
-            .randomQuestionCount(2)
-            .build());
+        Quiz quiz = fixtures.save(
+            fixtures.quiz(q1, q2, q3).workspaceGuid(workspace.getGuid()).randomQuestionCount(2).build()
+        );
 
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.questions.length()").value(3))
             .andExpect(jsonPath("$.questions[0].correctAnswers").exists());
@@ -244,19 +293,24 @@ public class WorkspaceQuizControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "New Quiz",
-                        "description": "A quiz",
-                        "startAt": "2026-04-14T10:00",
-                        "questionIds": [%d],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "randomQuestionCount": 1
-                    }
-                    """.formatted(question.getId())))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "New Quiz",
+                            "description": "A quiz",
+                            "startAt": "2026-04-14T10:00",
+                            "questionIds": [%d],
+                            "mode": "learn",
+                            "passScore": 80,
+                            "randomQuestionCount": 1
+                        }
+                        """.formatted(question.getId())
+                    )
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").isNumber());
 
@@ -270,19 +324,24 @@ public class WorkspaceQuizControllerTest {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "New Quiz",
-                        "description": "A quiz",
-                        "endAt": "2026-04-14T23:00",
-                        "questionIds": [%d],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "randomQuestionCount": 1
-                    }
-                    """.formatted(question.getId())))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "New Quiz",
+                            "description": "A quiz",
+                            "endAt": "2026-04-14T23:00",
+                            "questionIds": [%d],
+                            "mode": "learn",
+                            "passScore": 80,
+                            "randomQuestionCount": 1
+                        }
+                        """.formatted(question.getId())
+                    )
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").isNumber());
 
@@ -297,34 +356,48 @@ public class WorkspaceQuizControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
 
-        mockMvc.perform(put("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
+        mockMvc
+            .perform(
+                put("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "Updated Quiz",
+                            "description": "Updated description",
+                            "startAt": "2026-04-15T08:30",
+                            "endAt": "2026-04-15T18:00",
+                            "questionIds": [%d],
+                            "mode": "exam",
+                            "passScore": 90,
+                            "randomQuestionCount": 1
+                        }
+                        """.formatted(question.getId())
+                    )
+            )
+            .andExpect(status().isOk())
+            .andExpect(
+                content().json(
+                    """
+                    {"id": %d}
+                    """.formatted(quiz.getId())
+                )
+            );
+
+        mockMvc
+            .perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
+            .andExpect(status().isOk())
+            .andExpect(
+                content().json(
+                    """
                     {
                         "title": "Updated Quiz",
-                        "description": "Updated description",
-                        "startAt": "2026-04-15T08:30",
-                        "endAt": "2026-04-15T18:00",
-                        "questionIds": [%d],
-                        "mode": "exam",
-                        "passScore": 90,
-                        "randomQuestionCount": 1
+                        "startAt": "2026-04-15T08:30:00",
+                        "endAt": "2026-04-15T18:00:00"
                     }
-                    """.formatted(question.getId())))
-            .andExpect(status().isOk())
-            .andExpect(content().json("""
-                {"id": %d}
-                """.formatted(quiz.getId())));
-
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
-            .andExpect(status().isOk())
-            .andExpect(content().json("""
-                {
-                    "title": "Updated Quiz",
-                    "startAt": "2026-04-15T08:30:00",
-                    "endAt": "2026-04-15T18:00:00"
-                }
-                """));
+                    """
+                )
+            );
     }
 
     @Test
@@ -334,18 +407,23 @@ public class WorkspaceQuizControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace1));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace1.getGuid()).build());
 
-        mockMvc.perform(put("/api/workspaces/{guid}/quizzes/{id}", workspace2.getGuid(), quiz.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "Updated Quiz",
-                        "description": "Updated",
-                        "questionIds": [%d],
-                        "mode": "exam",
-                        "passScore": 90,
-                        "randomQuestionCount": 1
-                    }
-                    """.formatted(question.getId())))
+        mockMvc
+            .perform(
+                put("/api/workspaces/{guid}/quizzes/{id}", workspace2.getGuid(), quiz.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "Updated Quiz",
+                            "description": "Updated",
+                            "questionIds": [%d],
+                            "mode": "exam",
+                            "passScore": 90,
+                            "randomQuestionCount": 1
+                        }
+                        """.formatted(question.getId())
+                    )
+            )
             .andExpect(status().isNotFound());
     }
 
@@ -353,18 +431,23 @@ public class WorkspaceQuizControllerTest {
     public void createQuizBlankTitleReturnsBadRequest() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "  ",
-                        "description": "A quiz",
-                        "questionIds": [],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "randomQuestionCount": 0
-                    }
-                    """))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "  ",
+                            "description": "A quiz",
+                            "questionIds": [],
+                            "mode": "learn",
+                            "passScore": 80,
+                            "randomQuestionCount": 0
+                        }
+                        """
+                    )
+            )
             .andExpect(status().isBadRequest());
     }
 
@@ -374,18 +457,23 @@ public class WorkspaceQuizControllerTest {
         Workspace otherWorkspace = fixtures.save(fixtures.workspace());
         Question foreignQuestion = fixtures.save(fixtures.questionIn(otherWorkspace));
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "Foreign question",
-                        "description": "Should fail",
-                        "questionIds": [%d],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "randomQuestionCount": 1
-                    }
-                    """.formatted(foreignQuestion.getId())))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "Foreign question",
+                            "description": "Should fail",
+                            "questionIds": [%d],
+                            "mode": "learn",
+                            "passScore": 80,
+                            "randomQuestionCount": 1
+                        }
+                        """.formatted(foreignQuestion.getId())
+                    )
+            )
             .andExpect(status().isBadRequest());
     }
 
@@ -397,18 +485,23 @@ public class WorkspaceQuizControllerTest {
         Question foreignQuestion = fixtures.save(fixtures.questionIn(otherWorkspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
 
-        mockMvc.perform(put("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "Foreign question update",
-                        "description": "Should fail",
-                        "questionIds": [%d],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "randomQuestionCount": 1
-                    }
-                    """.formatted(foreignQuestion.getId())))
+        mockMvc
+            .perform(
+                put("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "Foreign question update",
+                            "description": "Should fail",
+                            "questionIds": [%d],
+                            "mode": "learn",
+                            "passScore": 80,
+                            "randomQuestionCount": 1
+                        }
+                        """.formatted(foreignQuestion.getId())
+                    )
+            )
             .andExpect(status().isBadRequest());
     }
 
@@ -418,19 +511,24 @@ public class WorkspaceQuizControllerTest {
         Workspace bodyWorkspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "Body workspace mismatch",
-                        "description": "Path workspace wins",
-                        "questionIds": [%d],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "workspaceGuid": "%s",
-                        "randomQuestionCount": 1
-                    }
-                    """.formatted(question.getId(), bodyWorkspace.getGuid())))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "Body workspace mismatch",
+                            "description": "Path workspace wins",
+                            "questionIds": [%d],
+                            "mode": "learn",
+                            "passScore": 80,
+                            "workspaceGuid": "%s",
+                            "randomQuestionCount": 1
+                        }
+                        """.formatted(question.getId(), bodyWorkspace.getGuid())
+                    )
+            )
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.id").isNumber());
 
@@ -439,18 +537,23 @@ public class WorkspaceQuizControllerTest {
 
     @Test
     public void createQuizInNonExistentWorkspaceReturns404() throws Exception {
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes", "non-existent-guid")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "Quiz",
-                        "description": "A quiz",
-                        "questionIds": [],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "randomQuestionCount": 0
-                    }
-                    """))
+        mockMvc
+            .perform(
+                post("/api/workspaces/{guid}/quizzes", "non-existent-guid")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        """
+                        {
+                            "title": "Quiz",
+                            "description": "A quiz",
+                            "questionIds": [],
+                            "mode": "learn",
+                            "passScore": 80,
+                            "randomQuestionCount": 0
+                        }
+                        """
+                    )
+            )
             .andExpect(status().isNotFound());
     }
 
@@ -460,11 +563,11 @@ public class WorkspaceQuizControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
 
-        mockMvc.perform(delete("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(delete("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
             .andExpect(status().isNoContent());
 
-        mockMvc.perform(get("/api/quiz/{id}", quiz.getId()))
-            .andExpect(status().isNotFound());
+        mockMvc.perform(get("/api/quiz/{id}", quiz.getId())).andExpect(status().isNotFound());
     }
 
     @Test
@@ -474,7 +577,8 @@ public class WorkspaceQuizControllerTest {
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).build());
         Attempt attempt = fixtures.save(fixtures.attempt(quiz));
 
-        mockMvc.perform(delete("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(delete("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quiz.getId()))
             .andExpect(status().isNoContent());
 
         assertThat(attemptRepository.findById(attempt.getId())).isEmpty();
@@ -487,7 +591,8 @@ public class WorkspaceQuizControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace1));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace1.getGuid()).build());
 
-        mockMvc.perform(delete("/api/workspaces/{guid}/quizzes/{id}", workspace2.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(delete("/api/workspaces/{guid}/quizzes/{id}", workspace2.getGuid(), quiz.getId()))
             .andExpect(status().isNotFound());
     }
 
@@ -495,16 +600,18 @@ public class WorkspaceQuizControllerTest {
     public void createDryRunPersistsFlaggedAttempt() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
+        Quiz quiz = fixtures.save(
+            fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build()
+        );
 
-        var result = mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
+        var result = mockMvc
+            .perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.attemptId").isNumber())
             .andExpect(jsonPath("$.questions.length()").value(1))
             .andReturn();
 
-        Integer attemptId = com.jayway.jsonpath.JsonPath
-            .read(result.getResponse().getContentAsString(), "$.attemptId");
+        Integer attemptId = com.jayway.jsonpath.JsonPath.read(result.getResponse().getContentAsString(), "$.attemptId");
         Attempt persisted = attemptRepository.findById(attemptId).orElseThrow();
         assertThat(persisted.getIsDryRun()).isTrue();
         assertThat(persisted.getQuizId()).isEqualTo(quiz.getId());
@@ -514,14 +621,18 @@ public class WorkspaceQuizControllerTest {
     public void createDryRunBypassesPreAvailabilityWindow() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(question)
-            .workspaceGuid(workspace.getGuid())
-            .randomQuestionCount(null)
-            .startAt(LocalDateTime.now().plusDays(1))
-            .endAt(LocalDateTime.now().plusDays(2))
-            .build());
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .randomQuestionCount(null)
+                .startAt(LocalDateTime.now().plusDays(1))
+                .endAt(LocalDateTime.now().plusDays(2))
+                .build()
+        );
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
             .andExpect(status().isOk());
     }
 
@@ -529,14 +640,18 @@ public class WorkspaceQuizControllerTest {
     public void createDryRunBypassesPostAvailabilityWindow() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(question)
-            .workspaceGuid(workspace.getGuid())
-            .randomQuestionCount(null)
-            .startAt(LocalDateTime.now().minusDays(2))
-            .endAt(LocalDateTime.now().minusDays(1))
-            .build());
+        Quiz quiz = fixtures.save(
+            fixtures
+                .quiz(question)
+                .workspaceGuid(workspace.getGuid())
+                .randomQuestionCount(null)
+                .startAt(LocalDateTime.now().minusDays(2))
+                .endAt(LocalDateTime.now().minusDays(1))
+                .build()
+        );
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
             .andExpect(status().isOk());
     }
 
@@ -544,9 +659,12 @@ public class WorkspaceQuizControllerTest {
     public void createDryRunResponseDoesNotLeakAuthoringFields() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));
-        Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build());
+        Quiz quiz = fixtures.save(
+            fixtures.quiz(question).workspaceGuid(workspace.getGuid()).randomQuestionCount(null).build()
+        );
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace.getGuid(), quiz.getId()))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$.questions[0].correctAnswers").doesNotExist())
             .andExpect(jsonPath("$.questions[0].explanations").doesNotExist());
@@ -559,19 +677,19 @@ public class WorkspaceQuizControllerTest {
         Question question = fixtures.save(fixtures.questionIn(workspace1));
         Quiz quiz = fixtures.save(fixtures.quiz(question).workspaceGuid(workspace1.getGuid()).build());
 
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace2.getGuid(), quiz.getId()))
+        mockMvc
+            .perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", workspace2.getGuid(), quiz.getId()))
             .andExpect(status().isNotFound());
     }
 
     @Test
     public void createDryRunInNonExistentWorkspaceReturns404() throws Exception {
-        mockMvc.perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", "non-existent-guid", -1))
+        mockMvc
+            .perform(post("/api/workspaces/{guid}/quizzes/{id}/dry-runs", "non-existent-guid", -1))
             .andExpect(status().isNotFound());
     }
 
     private Quiz latestQuiz() {
-        return quizRepository.findAll().stream()
-            .max(Comparator.comparing(Quiz::getId))
-            .orElseThrow();
+        return quizRepository.findAll().stream().max(Comparator.comparing(Quiz::getId)).orElseThrow();
     }
 }

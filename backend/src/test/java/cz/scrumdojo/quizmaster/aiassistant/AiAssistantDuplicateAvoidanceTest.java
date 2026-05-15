@@ -1,22 +1,20 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
-
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest
 @Tag("ai")
@@ -59,11 +57,7 @@ class AiAssistantDuplicateAvoidanceTest {
     void generateQuestionWithoutWorkspaceGuidStillGeneratesQuestion() throws Exception {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        QuestionResponse response = generateQuestion(
-            "Generate a question about coffee",
-            "single",
-            null
-        );
+        QuestionResponse response = generateQuestion("Generate a question about coffee", "single", null);
 
         assertGeneralChoiceResponse(response);
     }
@@ -74,11 +68,7 @@ class AiAssistantDuplicateAvoidanceTest {
 
         Workspace workspace = fixtures.save(fixtures.workspace());
 
-        QuestionResponse response = generateQuestion(
-            "Generate a question about coffee",
-            "single",
-            workspace.getGuid()
-        );
+        QuestionResponse response = generateQuestion("Generate a question about coffee", "single", workspace.getGuid());
 
         assertGeneralChoiceResponse(response);
     }
@@ -91,7 +81,8 @@ class AiAssistantDuplicateAvoidanceTest {
         return workspace;
     }
 
-    private QuestionResponse generateQuestion(String prompt, String questionType, String workspaceGuid) throws Exception {
+    private QuestionResponse generateQuestion(String prompt, String questionType, String workspaceGuid)
+        throws Exception {
         Method generate = AiAssistantService.class.getMethod(
             "generateQuestion",
             String.class,
@@ -117,11 +108,6 @@ class AiAssistantDuplicateAvoidanceTest {
     }
 
     private static String normalize(String value) {
-        return value
-            .trim()
-            .toLowerCase()
-            .replaceAll("[^\\p{L}\\p{N}]+", " ")
-            .replaceAll("\\s+", " ")
-            .trim();
+        return value.trim().toLowerCase().replaceAll("[^\\p{L}\\p{N}]+", " ").replaceAll("\\s+", " ").trim();
     }
 }

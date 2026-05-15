@@ -16,12 +16,6 @@ import cz.scrumdojo.quizmaster.quiz.QuizService;
 import cz.scrumdojo.quizmaster.quiz.stats.QuizStatsResponse;
 import cz.scrumdojo.quizmaster.quiz.stats.QuizStatsService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -29,6 +23,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api/workspaces/{workspaceGuid}/quizzes")
@@ -44,14 +43,15 @@ public class WorkspaceQuizController {
     private final Clock clock;
 
     public WorkspaceQuizController(
-            WorkspaceGuard workspaceGuard,
-            QuizRepository quizRepository,
-            QuestionRepository questionRepository,
-            QuizService quizService,
-            QuizStatsService quizStatsService,
-            AttemptService attemptService,
-            CohortRepository cohortRepository,
-            Clock clock) {
+        WorkspaceGuard workspaceGuard,
+        QuizRepository quizRepository,
+        QuestionRepository questionRepository,
+        QuizService quizService,
+        QuizStatsService quizStatsService,
+        AttemptService attemptService,
+        CohortRepository cohortRepository,
+        Clock clock
+    ) {
         this.workspaceGuard = workspaceGuard;
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
@@ -69,7 +69,8 @@ public class WorkspaceQuizController {
 
         List<Quiz> quizzes = quizRepository.findByWorkspaceGuid(workspaceGuid);
 
-        var items = quizzes.stream()
+        var items = quizzes
+            .stream()
             .map(quiz -> new QuizListItem(quiz.getId(), quiz.getTitle()))
             .toList();
 
@@ -77,9 +78,7 @@ public class WorkspaceQuizController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<QuizResponse> getQuiz(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id) {
+    public ResponseEntity<QuizResponse> getQuiz(@PathVariable String workspaceGuid, @PathVariable Integer id) {
         workspaceGuard.requireExists(workspaceGuid);
 
         return ResponseHelper.okOrNotFound(quizService.getWorkspaceQuiz(workspaceGuid, id));
@@ -87,8 +86,9 @@ public class WorkspaceQuizController {
 
     @GetMapping("/{id}/stats")
     public ResponseEntity<QuizStatsResponse> getQuizStats(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id) {
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
         return ResponseHelper.okOrNotFound(quizStatsService.getStats(workspaceGuid, id));
@@ -97,8 +97,9 @@ public class WorkspaceQuizController {
     @Transactional
     @PostMapping
     public ResponseEntity<IdResponse> createQuiz(
-            @PathVariable String workspaceGuid,
-            @Valid @RequestBody QuizRequest request) {
+        @PathVariable String workspaceGuid,
+        @Valid @RequestBody QuizRequest request
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
         validateQuestionsBelongToWorkspace(request.questionIds(), workspaceGuid);
@@ -110,12 +111,14 @@ public class WorkspaceQuizController {
     @Transactional
     @PutMapping("/{id}")
     public ResponseEntity<IdResponse> updateQuiz(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id,
-            @Valid @RequestBody QuizRequest request) {
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id,
+        @Valid @RequestBody QuizRequest request
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
-        return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
+        return quizRepository
+            .findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
                 validateQuestionsBelongToWorkspace(request.questionIds(), workspaceGuid);
                 Quiz incoming = request.toEntity(workspaceGuid);
@@ -138,19 +141,23 @@ public class WorkspaceQuizController {
     @Transactional
     @PostMapping("/{id}/cohorts")
     public ResponseEntity<?> createCohort(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id,
-            @RequestBody CohortCreateRequest request) {
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id,
+        @RequestBody CohortCreateRequest request
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
-        Quiz quiz = quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
+        Quiz quiz = quizRepository
+            .findByIdAndWorkspaceGuid(id, workspaceGuid)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         String name = request == null ? null : request.name();
         if (name == null || name.isBlank()) {
             return ResponseEntity.badRequest().body(Map.of("error", "empty-cohort-name"));
         }
-        boolean duplicate = cohortRepository.findByQuizIdOrderByName(quiz.getId()).stream()
+        boolean duplicate = cohortRepository
+            .findByQuizIdOrderByName(quiz.getId())
+            .stream()
             .anyMatch(c -> c.getName().equals(name));
         if (duplicate) {
             return ResponseEntity.badRequest().body(Map.of("error", "duplicate-cohort-name"));
@@ -162,21 +169,24 @@ public class WorkspaceQuizController {
 
     @PostMapping("/{id}/dry-runs")
     public ResponseEntity<QuizAttemptStartResponse> createDryRun(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id) {
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
-        return quizRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
-            .map(quiz -> ResponseEntity.ok(QuizAttemptStartResponse.from(
-                attemptService.start(quiz, null, true, LocalDateTime.now(clock)))))
+        return quizRepository
+            .findByIdAndWorkspaceGuid(id, workspaceGuid)
+            .map(quiz ->
+                ResponseEntity.ok(
+                    QuizAttemptStartResponse.from(attemptService.start(quiz, null, true, LocalDateTime.now(clock)))
+                )
+            )
             .orElse(ResponseEntity.notFound().build());
     }
 
     @Transactional
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteQuiz(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id) {
+    public ResponseEntity<Void> deleteQuiz(@PathVariable String workspaceGuid, @PathVariable Integer id) {
         workspaceGuard.requireExists(workspaceGuid);
 
         int deleted = quizRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);

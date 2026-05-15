@@ -1,7 +1,6 @@
 package cz.scrumdojo.quizmaster.quiz;
 
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
-
 import java.time.LocalDateTime;
 
 public record QuizResponse(

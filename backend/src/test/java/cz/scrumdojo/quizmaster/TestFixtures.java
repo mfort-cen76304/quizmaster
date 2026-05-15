@@ -15,14 +15,14 @@ import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import cz.scrumdojo.quizmaster.quiz.QuizRequest;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
 import cz.scrumdojo.quizmaster.workspace.WorkspaceRepository;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDateTime;
-import java.util.Arrays;
-
 @Component
 public class TestFixtures {
+
     @Autowired
     private QuestionRepository questionRepository;
 
@@ -41,9 +41,9 @@ public class TestFixtures {
     public Question.QuestionBuilder question() {
         return Question.builder()
             .question("What is the capital of Italy?")
-            .answers(new String[]{"Naples", "Rome", "Florence", "Palermo"})
-            .correctAnswers(new int[]{1})
-            .explanations(new String[]{"No", "Correct!", "No", "No"})
+            .answers(new String[] { "Naples", "Rome", "Florence", "Palermo" })
+            .correctAnswers(new int[] { 1 })
+            .explanations(new String[] { "No", "Correct!", "No", "No" })
             .isEasy(false)
             .questionType("single")
             .tags(new String[0]);
@@ -56,9 +56,9 @@ public class TestFixtures {
     public QuestionRequest questionRequest() {
         return new QuestionRequest(
             "What is the capital of Italy?",
-            new String[]{"Naples", "Rome", "Florence", "Palermo"},
-            new int[]{1},
-            new String[]{"No", "Correct!", "No", "No"},
+            new String[] { "Naples", "Rome", "Florence", "Palermo" },
+            new int[] { 1 },
+            new String[] { "No", "Correct!", "No", "No" },
             null,
             false,
             null,
@@ -71,9 +71,9 @@ public class TestFixtures {
     public QuestionRequest multipleChoiceQuestionRequest() {
         return new QuestionRequest(
             "Which are cities in Italy?",
-            new String[]{"Naples", "Rome", "Paris", "Berlin"},
-            new int[]{0, 1},
-            new String[]{"Yes!", "Yes!", "No, France", "No, Germany"},
+            new String[] { "Naples", "Rome", "Paris", "Berlin" },
+            new int[] { 0, 1 },
+            new String[] { "Yes!", "Yes!", "No, France", "No, Germany" },
             null,
             false,
             null,
@@ -86,9 +86,9 @@ public class TestFixtures {
     public QuestionRequest questionRequestWithImage(String imageUrl) {
         return new QuestionRequest(
             "What is the capital of Italy?",
-            new String[]{"Naples", "Rome", "Florence", "Palermo"},
-            new int[]{1},
-            new String[]{"No", "Correct!", "No", "No"},
+            new String[] { "Naples", "Rome", "Florence", "Palermo" },
+            new int[] { 1 },
+            new String[] { "No", "Correct!", "No", "No" },
             null,
             false,
             imageUrl,
@@ -99,9 +99,7 @@ public class TestFixtures {
     }
 
     public QuizRequest quizRequest(Question... questions) {
-        int[] questionIds = Arrays.stream(questions)
-            .mapToInt(Question::getId)
-            .toArray();
+        int[] questionIds = Arrays.stream(questions).mapToInt(Question::getId).toArray();
 
         return new QuizRequest(
             "Test Quiz",
@@ -120,9 +118,9 @@ public class TestFixtures {
     public Question.QuestionBuilder multipleChoiceQuestion() {
         return Question.builder()
             .question("Which are cities in Italy?")
-            .answers(new String[]{"Naples", "Rome", "Paris", "Berlin"})
-            .correctAnswers(new int[]{0, 1})
-            .explanations(new String[]{"Yes!", "Yes!", "No, France", "No, Germany"})
+            .answers(new String[] { "Naples", "Rome", "Paris", "Berlin" })
+            .correctAnswers(new int[] { 0, 1 })
+            .explanations(new String[] { "Yes!", "Yes!", "No, France", "No, Germany" })
             .isEasy(false)
             .questionType("multiple")
             .tags(new String[0]);
@@ -137,9 +135,7 @@ public class TestFixtures {
     }
 
     public Quiz.QuizBuilder quiz(Question... questions) {
-        int[] questionIds = Arrays.stream(questions)
-            .mapToInt(Question::getId)
-            .toArray();
+        int[] questionIds = Arrays.stream(questions).mapToInt(Question::getId).toArray();
 
         return Quiz.builder()
             .title("Test Quiz")
@@ -166,8 +162,7 @@ public class TestFixtures {
     }
 
     public Workspace.WorkspaceBuilder workspace() {
-        return Workspace.builder()
-            .title("Test Workspace");
+        return Workspace.builder().title("Test Workspace");
     }
 
     public Workspace save(Workspace.WorkspaceBuilder builder) {
@@ -186,9 +181,7 @@ public class TestFixtures {
     }
 
     public Attempt.AttemptBuilder attemptInProgress(Quiz quiz) {
-        return Attempt.builder()
-            .quizId(quiz.getId())
-            .startedAt(LocalDateTime.now());
+        return Attempt.builder().quizId(quiz.getId()).startedAt(LocalDateTime.now());
     }
 
     public Attempt.AttemptBuilder attemptTimedOut(Quiz quiz) {
@@ -213,8 +206,7 @@ public class TestFixtures {
     public Attempt save(Attempt.AttemptBuilder builder, Question... drawn) {
         Attempt persisted = attemptRepository.save(builder.build());
         for (int position = 0; position < drawn.length; position++) {
-            attemptQuestionRepository.save(
-                AttemptQuestion.drawn(persisted.getId(), drawn[position].getId(), position));
+            attemptQuestionRepository.save(AttemptQuestion.drawn(persisted.getId(), drawn[position].getId(), position));
         }
         return persisted;
     }

@@ -33,8 +33,9 @@ public record QuestionRequest(
     private String resolveQuestionType() {
         if (questionType != null) return questionType;
         if (correctAnswers != null && correctAnswers.length >= 2) return "multiple";
-        if (answers != null && answers.length == 1 && correctAnswers != null && correctAnswers.length == 1)
-            return "numerical";
+        if (
+            answers != null && answers.length == 1 && correctAnswers != null && correctAnswers.length == 1
+        ) return "numerical";
         return "single";
     }
 }

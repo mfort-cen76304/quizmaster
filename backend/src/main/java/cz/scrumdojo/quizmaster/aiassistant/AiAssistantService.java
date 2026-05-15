@@ -4,15 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -24,6 +16,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class AiAssistantService {
@@ -120,14 +117,24 @@ public class AiAssistantService {
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
             questionEmbeddingService.usableWorkspaceEmbeddings(workspaceGuid, null);
 
-        AssistantBatchResponse assistantResponse = generateBatchCandidate(prompt, resolvedType, existingEmbeddings, null);
+        AssistantBatchResponse assistantResponse = generateBatchCandidate(
+            prompt,
+            resolvedType,
+            existingEmbeddings,
+            null
+        );
         validateBatchResponses(assistantResponse.questions(), resolvedType);
         DuplicateMatch duplicate = findBatchDuplicate(assistantResponse.questions(), existingEmbeddings);
         if (duplicate == null) {
             return toDraftResponses(assistantResponse.questions(), resolvedType);
         }
 
-        AssistantBatchResponse retryResponse = generateBatchCandidate(prompt, resolvedType, existingEmbeddings, duplicate);
+        AssistantBatchResponse retryResponse = generateBatchCandidate(
+            prompt,
+            resolvedType,
+            existingEmbeddings,
+            duplicate
+        );
         validateBatchResponses(retryResponse.questions(), resolvedType);
         DuplicateMatch retryDuplicate = findBatchDuplicate(retryResponse.questions(), existingEmbeddings);
         if (retryDuplicate == null) {
@@ -148,12 +155,14 @@ public class AiAssistantService {
 
     private <T> T requestAssistant(String prompt, String systemPrompt, Class<T> responseType) {
         try {
-            String body = objectMapper.writeValueAsString(new ChatRequest(
-                model,
-                new Message[]{new Message("system", systemPrompt), new Message("user", prompt)},
-                new ResponseFormat("json_object"),
-                maxTokens
-            ));
+            String body = objectMapper.writeValueAsString(
+                new ChatRequest(
+                    model,
+                    new Message[] { new Message("system", systemPrompt), new Message("user", prompt) },
+                    new ResponseFormat("json_object"),
+                    maxTokens
+                )
+            );
 
             HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(OPENROUTER_URL))
@@ -185,8 +194,8 @@ public class AiAssistantService {
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
         DuplicateMatch retryFeedback
     ) {
-        String systemPrompt = chooseSystemPrompt(resolvedType)
-            + embeddingUniquenessRule(existingEmbeddings, retryFeedback);
+        String systemPrompt =
+            chooseSystemPrompt(resolvedType) + embeddingUniquenessRule(existingEmbeddings, retryFeedback);
         return requestAssistant(prompt, systemPrompt, AssistantResponse.class);
     }
 
@@ -196,8 +205,8 @@ public class AiAssistantService {
         List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings,
         DuplicateMatch retryFeedback
     ) {
-        String systemPrompt = chooseBatchSystemPrompt(resolvedType)
-            + embeddingUniquenessRule(existingEmbeddings, retryFeedback);
+        String systemPrompt =
+            chooseBatchSystemPrompt(resolvedType) + embeddingUniquenessRule(existingEmbeddings, retryFeedback);
         return requestAssistant(prompt, systemPrompt, AssistantBatchResponse.class);
     }
 
@@ -225,9 +234,7 @@ public class AiAssistantService {
             return null;
         }
 
-        List<String> questions = Arrays.stream(responses)
-            .map(AssistantResponse::question)
-            .toList();
+        List<String> questions = Arrays.stream(responses).map(AssistantResponse::question).toList();
 
         try {
             List<double[]> generatedEmbeddings = questionEmbeddingService.embedQuestionTexts(questions);
@@ -285,7 +292,8 @@ public class AiAssistantService {
         }
 
         StringBuilder rule = new StringBuilder();
-        rule.append("""
+        rule.append(
+            """
 
             Workspace uniqueness rule:
             This rule overrides any user request for an exact duplicate.
@@ -293,23 +301,27 @@ public class AiAssistantService {
             Similar means the generated question tests the same knowledge, fact, or calculation as an existing question.
             The same broad topic is allowed when the concrete question is different.
             If the user asks for an exact duplicate, keep only the broad topic and create a question about a different fact, concept, or calculation.
-            """);
+            """
+        );
         if (!existingEmbeddings.isEmpty()) {
             rule.append("Existing workspace questions:\n");
             appendQuestionList(
                 rule,
-                existingEmbeddings.stream()
-                    .map(QuestionEmbeddingService.UsableQuestionEmbedding::questionText)
-                    .toList()
+                existingEmbeddings.stream().map(QuestionEmbeddingService.UsableQuestionEmbedding::questionText).toList()
             );
         }
         if (retryFeedback != null) {
             rule.append("\nThe previous draft was too similar to another question.\n");
             rule.append("Previous draft: ").append(retryFeedback.generatedQuestion()).append("\n");
             rule.append("Matched question: ").append(retryFeedback.matchedQuestion()).append("\n");
-            rule.append("Similarity score: ").append(String.format(Locale.ROOT, "%.4f", retryFeedback.similarity())).append("\n");
+            rule
+                .append("Similarity score: ")
+                .append(String.format(Locale.ROOT, "%.4f", retryFeedback.similarity()))
+                .append("\n");
             rule.append("The next draft must not preserve the same wording, answer, fact, or calculation.\n");
-            rule.append("Generate a clearly different question on the same broad topic while still following the answer-count request.\n");
+            rule.append(
+                "Generate a clearly different question on the same broad topic while still following the answer-count request.\n"
+            );
         }
         return rule.toString();
     }
@@ -373,7 +385,10 @@ public class AiAssistantService {
 
     static void validateBatchResponses(AssistantResponse[] responses, String resolvedType) {
         if (responses == null || responses.length < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid batch response: need at least 1 question.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid batch response: need at least 1 question."
+            );
         }
         for (AssistantResponse response : responses) {
             validateForType(response, resolvedType);
@@ -382,61 +397,108 @@ public class AiAssistantService {
 
     static void validateResponse(AssistantResponse response) {
         if (response.question() == null || response.question().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: missing question.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: missing question."
+            );
         }
         if (response.answers() == null || response.answers().length < 2) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: need at least 2 answers.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: need at least 2 answers."
+            );
         }
         if (response.correctAnswers() == null || response.correctAnswers().length < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: need at least 1 correct answer.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: need at least 1 correct answer."
+            );
         }
         if (response.explanations() != null && response.explanations().length != response.answers().length) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: explanations length mismatch.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: explanations length mismatch."
+            );
         }
-        boolean allInBounds = Arrays.stream(response.correctAnswers())
-            .allMatch(i -> i >= 0 && i < response.answers().length);
+        boolean allInBounds = Arrays.stream(response.correctAnswers()).allMatch(
+            i -> i >= 0 && i < response.answers().length
+        );
         if (!allInBounds) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: correctAnswers index out of bounds.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: correctAnswers index out of bounds."
+            );
         }
     }
 
     static void validateSingleChoiceResponse(AssistantResponse response) {
         validateResponse(response);
         if (response.correctAnswers().length != 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: single-choice must have exactly 1 correct answer.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: single-choice must have exactly 1 correct answer."
+            );
         }
     }
 
     static void validateMultipleChoiceResponse(AssistantResponse response) {
         validateResponse(response);
         if (response.correctAnswers().length < 2) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: multiple-choice must have at least 2 correct answers.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: multiple-choice must have at least 2 correct answers."
+            );
         }
     }
 
     static void validateNumericalResponse(AssistantResponse response) {
         if (response.question() == null || response.question().isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: missing question.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: missing question."
+            );
         }
         if (response.answers() == null || response.answers().length != 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical must have exactly 1 answer.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: numerical must have exactly 1 answer."
+            );
         }
         if (response.answers()[0] == null || response.answers()[0].isBlank()) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical answer must not be empty.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: numerical answer must not be empty."
+            );
         }
         try {
             Double.parseDouble(response.answers()[0].trim());
         } catch (NumberFormatException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical answer must parse as a number.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: numerical answer must parse as a number."
+            );
         }
-        if (response.correctAnswers() == null || response.correctAnswers().length != 1 || response.correctAnswers()[0] != 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical correctAnswers must be [0].");
+        if (
+            response.correctAnswers() == null ||
+            response.correctAnswers().length != 1 ||
+            response.correctAnswers()[0] != 0
+        ) {
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: numerical correctAnswers must be [0]."
+            );
         }
         if (response.explanations() != null && response.explanations().length != 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: numerical explanations length must be 1.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: numerical explanations length must be 1."
+            );
         }
         if (response.tolerance() != null && response.tolerance() < 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: tolerance must be non-negative.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: tolerance must be non-negative."
+            );
         }
     }
 
@@ -445,14 +507,21 @@ public class AiAssistantService {
             return new String[response.answers().length];
         }
         if (response.explanations().length != response.answers().length) {
-            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, "AI assistant returned invalid response: explanations length mismatch.");
+            throw new ResponseStatusException(
+                HttpStatus.BAD_GATEWAY,
+                "AI assistant returned invalid response: explanations length mismatch."
+            );
         }
         return Arrays.stream(response.explanations())
             .map(e -> e == null ? "" : e)
             .toArray(String[]::new);
     }
 
-    private static QuestionResponse toDraftResponse(AssistantResponse assistantResponse, String[] explanations, String resolvedType) {
+    private static QuestionResponse toDraftResponse(
+        AssistantResponse assistantResponse,
+        String[] explanations,
+        String resolvedType
+    ) {
         return QuestionResponse.draft(
             assistantResponse.question(),
             assistantResponse.answers(),
@@ -464,7 +533,12 @@ public class AiAssistantService {
         );
     }
 
-    private record ChatRequest(String model, Message[] messages, @JsonProperty("response_format") ResponseFormat responseFormat, @JsonProperty("max_tokens") int maxTokens) {}
+    private record ChatRequest(
+        String model,
+        Message[] messages,
+        @JsonProperty("response_format") ResponseFormat responseFormat,
+        @JsonProperty("max_tokens") int maxTokens
+    ) {}
 
     private record ResponseFormat(String type) {}
 
@@ -476,10 +550,8 @@ public class AiAssistantService {
         String[] answers,
         int[] correctAnswers,
         String[] explanations,
-        @JsonProperty("tolerance")
-        Double tolerance,
-        @JsonProperty("questionExplanation")
-        String questionExplanation
+        @JsonProperty("tolerance") Double tolerance,
+        @JsonProperty("questionExplanation") String questionExplanation
     ) {}
 
     record AssistantBatchResponse(AssistantResponse[] questions) {}

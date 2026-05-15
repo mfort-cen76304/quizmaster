@@ -1,12 +1,11 @@
 package cz.scrumdojo.quizmaster.attempt;
 
-import cz.scrumdojo.quizmaster.quiz.QuizMode;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
 
+import cz.scrumdojo.quizmaster.quiz.QuizMode;
 import java.time.LocalDateTime;
 import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
 
 public class AttemptQuestionTest {
 

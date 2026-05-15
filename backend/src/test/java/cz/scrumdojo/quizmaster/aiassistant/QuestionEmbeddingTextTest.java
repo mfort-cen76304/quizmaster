@@ -1,15 +1,14 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
-import org.junit.jupiter.api.Test;
-
 import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
 
 class QuestionEmbeddingTextTest {
 
     @Test
     void normalizesWhitespaceWithoutLowercasing() {
-        assertThat(QuestionEmbeddingText.normalize("  What\tis\nScrum?  "))
-            .isEqualTo("What is Scrum?");
+        assertThat(QuestionEmbeddingText.normalize("  What\tis\nScrum?  ")).isEqualTo("What is Scrum?");
     }
 
     @Test

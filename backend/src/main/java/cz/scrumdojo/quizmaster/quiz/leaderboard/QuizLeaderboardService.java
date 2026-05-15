@@ -7,9 +7,6 @@ import cz.scrumdojo.quizmaster.attempt.AttemptRepository;
 import cz.scrumdojo.quizmaster.quiz.CohortRepository;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -17,6 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class QuizLeaderboardService {
@@ -27,10 +26,11 @@ public class QuizLeaderboardService {
     private final CohortRepository cohortRepository;
 
     public QuizLeaderboardService(
-            QuizRepository quizRepository,
-            AttemptRepository attemptRepository,
-            AttemptQuestionRepository attemptQuestionRepository,
-            CohortRepository cohortRepository) {
+        QuizRepository quizRepository,
+        AttemptRepository attemptRepository,
+        AttemptQuestionRepository attemptQuestionRepository,
+        CohortRepository cohortRepository
+    ) {
         this.quizRepository = quizRepository;
         this.attemptRepository = attemptRepository;
         this.attemptQuestionRepository = attemptQuestionRepository;
@@ -39,19 +39,22 @@ public class QuizLeaderboardService {
 
     @Transactional(readOnly = true)
     public Optional<QuizLeaderboardResponse> getLeaderboard(Integer quizId) {
-        return quizRepository.findById(quizId)
-            .map(quiz -> new QuizLeaderboardResponse(rankCohorts(quiz)));
+        return quizRepository.findById(quizId).map(quiz -> new QuizLeaderboardResponse(rankCohorts(quiz)));
     }
 
     private QuizLeaderboardCohortResponse[] rankCohorts(Quiz quiz) {
-        var finishedCohortAttempts = attemptRepository.findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quiz.getId()).stream()
+        var finishedCohortAttempts = attemptRepository
+            .findByQuizIdAndIsDryRunFalseOrderByStartedAtDesc(quiz.getId())
+            .stream()
             .filter(a -> a.getFinishedAt() != null && a.getCohortGuid() != null)
             .toList();
         var attemptIds = finishedCohortAttempts.stream().map(Attempt::getId).toList();
         var scoresByAttemptId = attemptIds.isEmpty()
             ? Map.<Integer, List<AttemptQuestion>>of()
-            : attemptQuestionRepository.findByAttemptIdInOrderByPosition(attemptIds).stream()
-                .collect(Collectors.groupingBy(AttemptQuestion::getAttemptId));
+            : attemptQuestionRepository
+                  .findByAttemptIdInOrderByPosition(attemptIds)
+                  .stream()
+                  .collect(Collectors.groupingBy(AttemptQuestion::getAttemptId));
         var scoresByCohort = new HashMap<String, List<Integer>>();
         for (Attempt attempt : finishedCohortAttempts) {
             scoresByCohort
@@ -59,13 +62,17 @@ public class QuizLeaderboardService {
                 .add(AttemptQuestion.percentageScore(scoresByAttemptId.getOrDefault(attempt.getId(), List.of())));
         }
 
-        var rankedCohorts = cohortRepository.findByQuizIdOrderByName(quiz.getId()).stream()
-            .map(cohort -> new CohortLeaderboardRow(
-                cohort.getName(),
-                averageScore(scoresByCohort.get(cohort.getGuid()))
-            ))
-            .sorted(Comparator.comparingInt(CohortLeaderboardRow::score).reversed()
-                .thenComparing(CohortLeaderboardRow::name))
+        var rankedCohorts = cohortRepository
+            .findByQuizIdOrderByName(quiz.getId())
+            .stream()
+            .map(cohort ->
+                new CohortLeaderboardRow(cohort.getName(), averageScore(scoresByCohort.get(cohort.getGuid())))
+            )
+            .sorted(
+                Comparator.comparingInt(CohortLeaderboardRow::score)
+                    .reversed()
+                    .thenComparing(CohortLeaderboardRow::name)
+            )
             .toList();
 
         QuizLeaderboardCohortResponse[] response = new QuizLeaderboardCohortResponse[rankedCohorts.size()];

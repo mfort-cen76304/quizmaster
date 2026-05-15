@@ -19,17 +19,35 @@ public record QuestionResponse(
 ) {
     public static QuestionResponse from(Question q) {
         return new QuestionResponse(
-            q.getId(), q.getQuestion(), q.getAnswers(), q.getExplanations(),
-            q.getQuestionExplanation(), q.getCorrectAnswers(), q.getWorkspaceGuid(),
-            q.isEasy(), q.getImageUrl(), q.getTolerance(), q.getQuestionType(), q.getTags()
+            q.getId(),
+            q.getQuestion(),
+            q.getAnswers(),
+            q.getExplanations(),
+            q.getQuestionExplanation(),
+            q.getCorrectAnswers(),
+            q.getWorkspaceGuid(),
+            q.isEasy(),
+            q.getImageUrl(),
+            q.getTolerance(),
+            q.getQuestionType(),
+            q.getTags()
         );
     }
 
     public static QuestionResponse feedbackFrom(Question q) {
         return new QuestionResponse(
-            q.getId(), q.getQuestion(), q.getAnswers(), q.getExplanations(),
-            q.getQuestionExplanation(), q.getCorrectAnswers(), null,
-            q.isEasy(), q.getImageUrl(), q.getTolerance(), q.getQuestionType(), q.getTags()
+            q.getId(),
+            q.getQuestion(),
+            q.getAnswers(),
+            q.getExplanations(),
+            q.getQuestionExplanation(),
+            q.getCorrectAnswers(),
+            null,
+            q.isEasy(),
+            q.getImageUrl(),
+            q.getTolerance(),
+            q.getQuestionType(),
+            q.getTags()
         );
     }
 
@@ -43,9 +61,18 @@ public record QuestionResponse(
         String questionType
     ) {
         return new QuestionResponse(
-            null, question, answers, explanations,
-            questionExplanation, correctAnswers, null,
-            false, null, tolerance, questionType, new String[0]
+            null,
+            question,
+            answers,
+            explanations,
+            questionExplanation,
+            correctAnswers,
+            null,
+            false,
+            null,
+            tolerance,
+            questionType,
+            new String[0]
         );
     }
 }

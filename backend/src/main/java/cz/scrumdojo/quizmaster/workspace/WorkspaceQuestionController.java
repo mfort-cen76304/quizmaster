@@ -9,13 +9,12 @@ import cz.scrumdojo.quizmaster.question.QuestionRequest;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.quiz.QuizRepository;
 import jakarta.validation.Valid;
+import java.util.List;
+import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Set;
 
 @Slf4j
 @RestController
@@ -47,7 +46,8 @@ public class WorkspaceQuestionController {
         List<Question> questions = questionRepository.findByWorkspaceGuid(workspaceGuid);
         Set<Integer> questionIdsInQuizzes = quizRepository.findQuestionIdsInQuizzesByWorkspaceGuid(workspaceGuid);
 
-        var items = questions.stream()
+        var items = questions
+            .stream()
             .map(q -> QuestionListItem.from(q, questionIdsInQuizzes.contains(q.getId())))
             .toList();
 
@@ -57,18 +57,22 @@ public class WorkspaceQuestionController {
     @Transactional(readOnly = true)
     @GetMapping("/{id}")
     public ResponseEntity<QuestionResponse> getWorkspaceQuestion(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id) {
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
-        return ResponseHelper.okOrNotFound(questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid).map(QuestionResponse::from));
+        return ResponseHelper.okOrNotFound(
+            questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid).map(QuestionResponse::from)
+        );
     }
 
     @Transactional
     @PostMapping
     public ResponseEntity<IdResponse> createWorkspaceQuestion(
-            @PathVariable String workspaceGuid,
-            @Valid @RequestBody QuestionRequest request) {
+        @PathVariable String workspaceGuid,
+        @Valid @RequestBody QuestionRequest request
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
         var question = request.toEntity(workspaceGuid);
@@ -80,12 +84,14 @@ public class WorkspaceQuestionController {
     @Transactional
     @PatchMapping("/{id}")
     public ResponseEntity<IdResponse> updateWorkspaceQuestion(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id,
-            @Valid @RequestBody QuestionRequest request) {
+        @PathVariable String workspaceGuid,
+        @PathVariable Integer id,
+        @Valid @RequestBody QuestionRequest request
+    ) {
         workspaceGuard.requireExists(workspaceGuid);
 
-        return questionRepository.findByIdAndWorkspaceGuid(id, workspaceGuid)
+        return questionRepository
+            .findByIdAndWorkspaceGuid(id, workspaceGuid)
             .map(existing -> {
                 var question = request.toEntity(workspaceGuid);
                 question.setId(existing.getId());
@@ -98,9 +104,7 @@ public class WorkspaceQuestionController {
 
     @Transactional
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWorkspaceQuestion(
-            @PathVariable String workspaceGuid,
-            @PathVariable Integer id) {
+    public ResponseEntity<Void> deleteWorkspaceQuestion(@PathVariable String workspaceGuid, @PathVariable Integer id) {
         workspaceGuard.requireExists(workspaceGuid);
 
         int deleted = questionRepository.deleteByIdAndWorkspaceGuid(id, workspaceGuid);

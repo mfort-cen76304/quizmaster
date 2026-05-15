@@ -1,15 +1,14 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest
 @Tag("ai")
@@ -41,10 +40,9 @@ class OpenRouterEmbeddingClientTest {
     void embedsBatchInputInOrder() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        List<double[]> embeddings = embeddingClient.embed(List.of(
-            "Which country is the largest producer of coffee?",
-            "What is the capital of France?"
-        ));
+        List<double[]> embeddings = embeddingClient.embed(
+            List.of("Which country is the largest producer of coffee?", "What is the capital of France?")
+        );
 
         assertThat(embeddings).hasSize(2);
         assertThat(embeddings.get(0)).isNotEmpty();
@@ -55,25 +53,29 @@ class OpenRouterEmbeddingClientTest {
     void exactSameTextIsAboveDuplicateThreshold() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        List<double[]> embeddings = embeddingClient.embed(List.of(
-            "Which country is the largest producer of coffee?",
-            "Which country is the largest producer of coffee?"
-        ));
+        List<double[]> embeddings = embeddingClient.embed(
+            List.of(
+                "Which country is the largest producer of coffee?",
+                "Which country is the largest producer of coffee?"
+            )
+        );
 
-        assertThat(EmbeddingSimilarity.cosine(embeddings.get(0), embeddings.get(1)))
-            .isGreaterThanOrEqualTo(similarityThreshold);
+        assertThat(EmbeddingSimilarity.cosine(embeddings.get(0), embeddings.get(1))).isGreaterThanOrEqualTo(
+            similarityThreshold
+        );
     }
 
     @Test
     void unrelatedQuestionIsBelowDuplicateThreshold() {
         assumeTrue(!apiToken.isBlank(), "ai.token not configured");
 
-        List<double[]> embeddings = embeddingClient.embed(List.of(
-            "Which country is the largest producer of coffee?",
-            "What is the Scrum Master's primary accountability?"
-        ));
+        List<double[]> embeddings = embeddingClient.embed(
+            List.of(
+                "Which country is the largest producer of coffee?",
+                "What is the Scrum Master's primary accountability?"
+            )
+        );
 
-        assertThat(EmbeddingSimilarity.cosine(embeddings.get(0), embeddings.get(1)))
-            .isLessThan(similarityThreshold);
+        assertThat(EmbeddingSimilarity.cosine(embeddings.get(0), embeddings.get(1))).isLessThan(similarityThreshold);
     }
 }

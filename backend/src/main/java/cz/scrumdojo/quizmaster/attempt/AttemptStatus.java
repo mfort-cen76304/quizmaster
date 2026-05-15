@@ -4,6 +4,5 @@ public enum AttemptStatus {
     FINISHED,
     IN_PROGRESS,
     TIMEOUT,
-    ABANDONED
+    ABANDONED,
 }
-

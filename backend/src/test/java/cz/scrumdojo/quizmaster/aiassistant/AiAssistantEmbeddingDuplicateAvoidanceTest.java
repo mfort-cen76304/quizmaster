@@ -1,21 +1,19 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
-
+import java.util.Arrays;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-
-import java.util.Arrays;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest
 @Tag("ai")
@@ -84,8 +82,11 @@ class AiAssistantEmbeddingDuplicateAvoidanceTest {
         );
 
         assertThat(responses).hasSizeGreaterThanOrEqualTo(1);
-        assertThat(Arrays.stream(responses).map(QuestionResponse::question).map(AiAssistantEmbeddingDuplicateAvoidanceTest::normalize))
-            .doesNotContain(normalize(EXISTING_QUESTION));
+        assertThat(
+            Arrays.stream(responses)
+                .map(QuestionResponse::question)
+                .map(AiAssistantEmbeddingDuplicateAvoidanceTest::normalize)
+        ).doesNotContain(normalize(EXISTING_QUESTION));
     }
 
     private Workspace workspaceWithEmbeddedQuestion(String questionText) {
@@ -105,11 +106,6 @@ class AiAssistantEmbeddingDuplicateAvoidanceTest {
     }
 
     private static String normalize(String value) {
-        return value
-            .trim()
-            .toLowerCase()
-            .replaceAll("[^\\p{L}\\p{N}]+", " ")
-            .replaceAll("\\s+", " ")
-            .trim();
+        return value.trim().toLowerCase().replaceAll("[^\\p{L}\\p{N}]+", " ").replaceAll("\\s+", " ").trim();
     }
 }

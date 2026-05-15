@@ -1,6 +1,11 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
-public record AiAssistantRequest(String question, String questionType, String workspaceGuid, Integer excludedQuestionId) {
+public record AiAssistantRequest(
+    String question,
+    String questionType,
+    String workspaceGuid,
+    Integer excludedQuestionId
+) {
     public AiAssistantRequest(String question, String questionType) {
         this(question, questionType, null, null);
     }

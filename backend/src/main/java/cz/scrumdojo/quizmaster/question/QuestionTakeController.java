@@ -15,9 +15,10 @@ public class QuestionTakeController {
     private final QuizRepository quizRepository;
 
     public QuestionTakeController(
-            QuestionRepository questionRepository,
-            QuestionScoringService questionScoringService,
-            QuizRepository quizRepository) {
+        QuestionRepository questionRepository,
+        QuestionScoringService questionScoringService,
+        QuizRepository quizRepository
+    ) {
         this.questionRepository = questionRepository;
         this.questionScoringService = questionScoringService;
         this.quizRepository = quizRepository;
@@ -30,14 +31,15 @@ public class QuestionTakeController {
 
     @PostMapping("/{id}/submit")
     public ResponseEntity<QuestionEvaluationResponse> submitQuestion(
-            @PathVariable Integer id,
-            @RequestBody QuestionAnswerRequest request) {
+        @PathVariable Integer id,
+        @RequestBody QuestionAnswerRequest request
+    ) {
         if (quizRepository.existsQuizWithQuestionId(id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         return ResponseHelper.okOrNotFound(
-            questionRepository.findById(id)
-                .map(question -> questionScoringService.evaluate(question, request)));
+            questionRepository.findById(id).map(question -> questionScoringService.evaluate(question, request))
+        );
     }
 }

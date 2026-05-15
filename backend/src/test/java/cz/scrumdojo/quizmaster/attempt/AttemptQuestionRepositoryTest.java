@@ -1,17 +1,16 @@
 package cz.scrumdojo.quizmaster.attempt;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.quiz.Quiz;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-
-import java.time.LocalDateTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 public class AttemptQuestionRepositoryTest {
@@ -28,13 +27,15 @@ public class AttemptQuestionRepositoryTest {
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        attemptQuestionRepository.save(AttemptQuestion.builder()
-            .attemptId(attempt.getId())
-            .questionId(question.getId())
-            .position(0)
-            .status(AnswerStatus.CORRECT)
-            .answeredAt(LocalDateTime.now())
-            .build());
+        attemptQuestionRepository.save(
+            AttemptQuestion.builder()
+                .attemptId(attempt.getId())
+                .questionId(question.getId())
+                .position(0)
+                .status(AnswerStatus.CORRECT)
+                .answeredAt(LocalDateTime.now())
+                .build()
+        );
 
         var found = attemptQuestionRepository.findByAttemptIdAndQuestionId(attempt.getId(), question.getId());
         assertThat(found).isPresent();
@@ -48,12 +49,24 @@ public class AttemptQuestionRepositoryTest {
         Quiz quiz = fixtures.save(fixtures.quiz(q1, q2));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        attemptQuestionRepository.save(AttemptQuestion.builder()
-            .attemptId(attempt.getId()).questionId(q1.getId()).position(0)
-            .status(AnswerStatus.CORRECT).answeredAt(LocalDateTime.now()).build());
-        attemptQuestionRepository.save(AttemptQuestion.builder()
-            .attemptId(attempt.getId()).questionId(q2.getId()).position(1)
-            .status(AnswerStatus.PARTIAL).answeredAt(LocalDateTime.now()).build());
+        attemptQuestionRepository.save(
+            AttemptQuestion.builder()
+                .attemptId(attempt.getId())
+                .questionId(q1.getId())
+                .position(0)
+                .status(AnswerStatus.CORRECT)
+                .answeredAt(LocalDateTime.now())
+                .build()
+        );
+        attemptQuestionRepository.save(
+            AttemptQuestion.builder()
+                .attemptId(attempt.getId())
+                .questionId(q2.getId())
+                .position(1)
+                .status(AnswerStatus.PARTIAL)
+                .answeredAt(LocalDateTime.now())
+                .build()
+        );
 
         var rows = attemptQuestionRepository.findByAttemptIdOrderByPosition(attempt.getId());
         assertThat(rows).hasSize(2);
@@ -65,13 +78,26 @@ public class AttemptQuestionRepositoryTest {
         Quiz quiz = fixtures.save(fixtures.quiz(question));
         Attempt attempt = fixtures.save(fixtures.attemptInProgress(quiz));
 
-        attemptQuestionRepository.save(AttemptQuestion.builder()
-            .attemptId(attempt.getId()).questionId(question.getId()).position(0)
-            .status(AnswerStatus.CORRECT).answeredAt(LocalDateTime.now()).build());
+        attemptQuestionRepository.save(
+            AttemptQuestion.builder()
+                .attemptId(attempt.getId())
+                .questionId(question.getId())
+                .position(0)
+                .status(AnswerStatus.CORRECT)
+                .answeredAt(LocalDateTime.now())
+                .build()
+        );
 
-        assertThatThrownBy(() -> attemptQuestionRepository.saveAndFlush(AttemptQuestion.builder()
-                .attemptId(attempt.getId()).questionId(question.getId()).position(0)
-                .status(AnswerStatus.INCORRECT).answeredAt(LocalDateTime.now()).build()))
-            .isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(() ->
+            attemptQuestionRepository.saveAndFlush(
+                AttemptQuestion.builder()
+                    .attemptId(attempt.getId())
+                    .questionId(question.getId())
+                    .position(0)
+                    .status(AnswerStatus.INCORRECT)
+                    .answeredAt(LocalDateTime.now())
+                    .build()
+            )
+        ).isInstanceOf(DataIntegrityViolationException.class);
     }
 }

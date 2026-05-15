@@ -2,12 +2,10 @@ package cz.scrumdojo.quizmaster.aiassistant;
 
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionRepository;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Objects;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 @Service
 public class QuestionEmbeddingService {
@@ -46,9 +44,7 @@ public class QuestionEmbeddingService {
         if (questionTexts == null || questionTexts.isEmpty()) {
             return List.of();
         }
-        List<String> normalizedTexts = questionTexts.stream()
-            .map(QuestionEmbeddingText::normalize)
-            .toList();
+        List<String> normalizedTexts = questionTexts.stream().map(QuestionEmbeddingText::normalize).toList();
         if (normalizedTexts.stream().anyMatch(String::isBlank)) {
             throw new IllegalArgumentException("Question text must not be blank for embedding.");
         }
@@ -70,14 +66,14 @@ public class QuestionEmbeddingService {
             return List.of();
         }
 
-        return questionRepository.findByWorkspaceGuid(workspaceGuid.strip()).stream()
+        return questionRepository
+            .findByWorkspaceGuid(workspaceGuid.strip())
+            .stream()
             .filter(question -> excludedQuestionId == null || !excludedQuestionId.equals(question.getId()))
             .filter(this::hasUsableEmbedding)
-            .map(question -> new UsableQuestionEmbedding(
-                question.getId(),
-                question.getQuestion(),
-                question.getEmbedding()
-            ))
+            .map(question ->
+                new UsableQuestionEmbedding(question.getId(), question.getQuestion(), question.getEmbedding())
+            )
             .toList();
     }
 

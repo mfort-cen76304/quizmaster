@@ -1,21 +1,19 @@
 package cz.scrumdojo.quizmaster.aiassistant;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
+
 import cz.scrumdojo.quizmaster.TestFixtures;
 import cz.scrumdojo.quizmaster.question.Question;
 import cz.scrumdojo.quizmaster.question.QuestionResponse;
 import cz.scrumdojo.quizmaster.workspace.Workspace;
-
+import java.util.List;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.server.ResponseStatusException;
-
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 @SpringBootTest
 public class AiAssistantServiceTest {
@@ -65,23 +63,26 @@ public class AiAssistantServiceTest {
     @Test
     void usableWorkspaceEmbeddingsCanExcludeQuestionBeingEdited() {
         Workspace workspace = fixtures.save(fixtures.workspace());
-        Question editedQuestion = fixtures.save(withUsableEmbedding(
-            fixtures.questionIn(workspace).question("What is 2 + 2?").build(),
-            new double[]{1.0, 0.0}
-        ));
-        fixtures.save(withUsableEmbedding(
-            fixtures.questionIn(workspace).question("What is 3 + 3?").build(),
-            new double[]{0.0, 1.0}
-        ));
-
-        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings = questionEmbeddingService.usableWorkspaceEmbeddings(
-            workspace.getGuid(),
-            editedQuestion.getId()
+        Question editedQuestion = fixtures.save(
+            withUsableEmbedding(
+                fixtures.questionIn(workspace).question("What is 2 + 2?").build(),
+                new double[] { 1.0, 0.0 }
+            )
+        );
+        fixtures.save(
+            withUsableEmbedding(
+                fixtures.questionIn(workspace).question("What is 3 + 3?").build(),
+                new double[] { 0.0, 1.0 }
+            )
         );
 
-        assertEquals(List.of("What is 3 + 3?"), existingEmbeddings.stream()
-            .map(QuestionEmbeddingService.UsableQuestionEmbedding::questionText)
-            .toList());
+        List<QuestionEmbeddingService.UsableQuestionEmbedding> existingEmbeddings =
+            questionEmbeddingService.usableWorkspaceEmbeddings(workspace.getGuid(), editedQuestion.getId());
+
+        assertEquals(
+            List.of("What is 3 + 3?"),
+            existingEmbeddings.stream().map(QuestionEmbeddingService.UsableQuestionEmbedding::questionText).toList()
+        );
     }
 
     @Tag("ai")
@@ -128,7 +129,7 @@ public class AiAssistantServiceTest {
         assertFalse(response.question().isBlank());
         assertEquals(1, response.answers().length, "Numerical must have exactly 1 answer");
         assertDoesNotThrow(() -> Double.parseDouble(response.answers()[0].trim()));
-        assertArrayEquals(new int[]{0}, response.correctAnswers());
+        assertArrayEquals(new int[] { 0 }, response.correctAnswers());
         assertEquals("numerical", response.questionType());
     }
 
@@ -164,70 +165,148 @@ public class AiAssistantServiceTest {
 
     @Test
     void validateResponse_valid() {
-        assertDoesNotThrow(() -> AiAssistantService.validateResponse(
-            new AiAssistantService.AssistantResponse("What is 2+2?", new String[]{"4", "5"}, new int[]{0}, new String[]{"", ""}, null, null)
-        ));
+        assertDoesNotThrow(() ->
+            AiAssistantService.validateResponse(
+                new AiAssistantService.AssistantResponse(
+                    "What is 2+2?",
+                    new String[] { "4", "5" },
+                    new int[] { 0 },
+                    new String[] { "", "" },
+                    null,
+                    null
+                )
+            )
+        );
     }
 
     @Test
     void validateResponse_emptyQuestion() {
-        assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateResponse(
-            new AiAssistantService.AssistantResponse("", new String[]{"4", "5"}, new int[]{0}, new String[]{"", ""}, null, null)
-        ));
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateResponse(
+                new AiAssistantService.AssistantResponse(
+                    "",
+                    new String[] { "4", "5" },
+                    new int[] { 0 },
+                    new String[] { "", "" },
+                    null,
+                    null
+                )
+            )
+        );
     }
 
     @Test
     void validateResponse_nullQuestion() {
-        assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateResponse(
-            new AiAssistantService.AssistantResponse(null, new String[]{"4", "5"}, new int[]{0}, new String[]{"", ""}, null, null)
-        ));
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateResponse(
+                new AiAssistantService.AssistantResponse(
+                    null,
+                    new String[] { "4", "5" },
+                    new int[] { 0 },
+                    new String[] { "", "" },
+                    null,
+                    null
+                )
+            )
+        );
     }
 
     @Test
     void validateResponse_tooFewAnswers() {
-        assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateResponse(
-            new AiAssistantService.AssistantResponse("Question?", new String[]{"only one"}, new int[]{0}, new String[]{""}, null, null)
-        ));
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "only one" },
+                    new int[] { 0 },
+                    new String[] { "" },
+                    null,
+                    null
+                )
+            )
+        );
     }
 
     @Test
     void validateResponse_noCorrectAnswers() {
-        assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateResponse(
-            new AiAssistantService.AssistantResponse("Question?", new String[]{"a", "b"}, new int[]{}, new String[]{"", ""}, null, null)
-        ));
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "a", "b" },
+                    new int[] {},
+                    new String[] { "", "" },
+                    null,
+                    null
+                )
+            )
+        );
     }
 
     @Test
     void validateResponse_indexOutOfBounds() {
-        assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateResponse(
-            new AiAssistantService.AssistantResponse("Question?", new String[]{"a", "b"}, new int[]{5}, new String[]{"", ""}, null, null)
-        ));
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "a", "b" },
+                    new int[] { 5 },
+                    new String[] { "", "" },
+                    null,
+                    null
+                )
+            )
+        );
     }
 
     @Test
     void validateResponse_negativeIndex() {
-        assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateResponse(
-            new AiAssistantService.AssistantResponse("Question?", new String[]{"a", "b"}, new int[]{-1}, new String[]{"", ""}, null, null)
-        ));
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateResponse(
+                new AiAssistantService.AssistantResponse(
+                    "Question?",
+                    new String[] { "a", "b" },
+                    new int[] { -1 },
+                    new String[] { "", "" },
+                    null,
+                    null
+                )
+            )
+        );
     }
 
     @Test
     void validateBatchResponses_valid() {
-        assertDoesNotThrow(() -> AiAssistantService.validateBatchResponses(
-            new AiAssistantService.AssistantResponse[]{
-                new AiAssistantService.AssistantResponse("Q1?", new String[]{"a", "b"}, new int[]{0}, new String[]{"", ""}, null, null),
-                new AiAssistantService.AssistantResponse("Q2?", new String[]{"c", "d"}, new int[]{1}, new String[]{"", ""}, null, null),
-            },
-            "single"
-        ));
+        assertDoesNotThrow(() ->
+            AiAssistantService.validateBatchResponses(
+                new AiAssistantService.AssistantResponse[] {
+                    new AiAssistantService.AssistantResponse(
+                        "Q1?",
+                        new String[] { "a", "b" },
+                        new int[] { 0 },
+                        new String[] { "", "" },
+                        null,
+                        null
+                    ),
+                    new AiAssistantService.AssistantResponse(
+                        "Q2?",
+                        new String[] { "c", "d" },
+                        new int[] { 1 },
+                        new String[] { "", "" },
+                        null,
+                        null
+                    ),
+                },
+                "single"
+            )
+        );
     }
 
     @Test
     void validateBatchResponses_requiresAtLeastTwoQuestions() {
-        assertThrows(ResponseStatusException.class, () -> AiAssistantService.validateBatchResponses(
-            new AiAssistantService.AssistantResponse[]{},
-            "single"
-        ));
+        assertThrows(ResponseStatusException.class, () ->
+            AiAssistantService.validateBatchResponses(new AiAssistantService.AssistantResponse[] {}, "single")
+        );
     }
 
     private static void assertGeneralChoiceResponse(QuestionResponse response) {
@@ -238,11 +317,18 @@ public class AiAssistantServiceTest {
         assertNotNull(response.correctAnswers());
         assertTrue(response.correctAnswers().length >= 1, "Expected at least 1 correct answer");
         assertNotNull(response.explanations());
-        assertEquals(response.answers().length, response.explanations().length, "Expected one explanation slot per answer");
+        assertEquals(
+            response.answers().length,
+            response.explanations().length,
+            "Expected one explanation slot per answer"
+        );
 
         for (int index : response.correctAnswers()) {
             assertTrue(index >= 0, "Expected non-negative correct answer indexes");
-            assertTrue(index < response.answers().length, "Expected correct answer indexes to stay within answers array bounds");
+            assertTrue(
+                index < response.answers().length,
+                "Expected correct answer indexes to stay within answers array bounds"
+            );
         }
     }
 
