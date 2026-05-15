@@ -46,7 +46,9 @@
         "code:mcp:format": "oxfmt mcp/src/ mcp/test/",
         "code:mcp": "pnpm code:mcp:tsc && pnpm code:mcp:lint && pnpm code:mcp:format",
 
-        "code": "pnpm code:fe && pnpm code:specs && pnpm code:mcp",
+        "code:be": "prettier --write 'backend/src/**/*.java'",
+
+        "code": "pnpm code:fe && pnpm code:specs && pnpm code:mcp && pnpm code:be",
 
         // Unit tests
         "test:mcp": "cd mcp && pnpm test",
@@ -83,7 +85,8 @@
         "code:ci:lint": "oxlint --deny-warnings frontend/src/ specs/src/ specs/test/ mcp/src/ mcp/test/",
         "code:ci:format": "oxfmt --check frontend/src/ specs/src/ specs/test/ mcp/src/ mcp/test/",
         "code:ci:gherkin": "cd specs && pnpm fmt --check features",
-        "code:ci": "pnpm code:ci:tsc && pnpm code:ci:lint && pnpm code:ci:format && pnpm code:ci:gherkin",
+        "code:ci:be": "prettier --check 'backend/src/**/*.java'",
+        "code:ci": "pnpm code:ci:tsc && pnpm code:ci:lint && pnpm code:ci:format && pnpm code:ci:gherkin && pnpm code:ci:be",
 
         "test:e2e:ci": "FEATURE_FLAG=true ./scripts/test-e2e.sh",
     },
@@ -91,5 +94,7 @@
         "concurrently": "9.1.2",
         "oxfmt": "0.43.0",
         "oxlint": "1.58.0",
+        "prettier": "3.8.3",
+        "prettier-plugin-java": "2.8.1",
     }
 }

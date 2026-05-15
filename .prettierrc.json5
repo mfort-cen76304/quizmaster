@@ -1,0 +1,15 @@
+{
+    // Prettier config for Java only. Frontend / specs / MCP use oxfmt, not Prettier.
+    // Backend Java is formatted via `pnpm code:be` (prettier --write) and
+    // checked in CI via `pnpm code:ci:be` (prettier --check).
+    plugins: ["prettier-plugin-java"],
+    overrides: [
+        {
+            files: "*.java",
+            options: {
+                tabWidth: 4,
+                printWidth: 120,
+            },
+        },
+    ],
+}

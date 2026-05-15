@@ -25,6 +25,11 @@
         "editor.formatOnSave": true,
         "editor.defaultFormatter": "oxc.oxc-vscode"
     },
+    "[java]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.foldingImportsByDefault": true
+    },
     "java.referencesCodeLens.enabled": true,
 
     "js/ts.preferences.quoteStyle": "single",

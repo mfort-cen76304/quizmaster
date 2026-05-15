@@ -10,7 +10,12 @@
 
 ## Backend
 
-- Java 21 with default industry standard formatting
+- Java 21 formatted by **Prettier** with the `prettier-plugin-java` plugin.
+  Run `pnpm code` (or `pnpm code:be`) to apply, `pnpm code:ci:be` to check.
+  Config in `.prettierrc.json5` at repo root: 4-space indent, 120-char width.
+  IntelliJ and VS Code both have official Prettier integrations.
+- **Error Prone** runs as part of `compileJava` and surfaces likely bugs as
+  warnings.
 - Spring Boot REST API controllers
 - JPA/Hibernate repositories
 - Service layer only where necessary (elaborate business logic)

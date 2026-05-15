@@ -62,7 +62,9 @@ All commands run from the **project root**.
 pnpm install:all                   # All dependencies + Playwright browsers
 
 # Code quality (run before committing)
-pnpm code                          # TypeScript + oxlint + oxfmt (frontend, specs, mcp)
+pnpm code                          # TypeScript + oxlint + oxfmt (frontend, specs, mcp) + Prettier Java (backend)
+pnpm code:be                       # Backend only: Prettier Java reformat
+                                   # Error Prone runs automatically as part of `compileJava` / `pnpm test:be`
 
 # Backend tests
 pnpm test:be                       # All backend tests

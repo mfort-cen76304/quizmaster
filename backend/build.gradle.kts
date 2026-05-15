@@ -1,5 +1,6 @@
 import java.io.BufferedReader
 
+import net.ltgt.gradle.errorprone.errorprone
 import org.gradle.process.ProcessForkOptions
 import org.springframework.boot.gradle.tasks.bundling.BootJar
 import org.springframework.boot.gradle.tasks.run.BootRun
@@ -10,6 +11,7 @@ plugins {
     id("org.springframework.boot") version "3.5.12"
     id("io.spring.dependency-management") version "1.1.7"
     id("co.uzzu.dotenv.gradle") version "4.0.0"
+    id("net.ltgt.errorprone") version "4.1.0"
 }
 
 jacoco {
@@ -51,6 +53,17 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    errorprone("com.google.errorprone:error_prone_core:2.36.0")
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    options.errorprone {
+        disableWarningsInGeneratedCode.set(true)
+        excludedPaths.set(".*/build/generated/.*")
+        // Start lenient; tighten as the team grows comfortable with the checks.
+        disable("MissingSummary", "UnusedVariable")
+    }
 }
 
 fun featureFlag(): Boolean {
