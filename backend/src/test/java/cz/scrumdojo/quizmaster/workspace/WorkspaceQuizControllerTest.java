@@ -104,43 +104,6 @@ public class WorkspaceQuizControllerTest {
     }
 
     @Test
-    public void createQuizInWorkspaceWithCohorts() throws Exception {
-        Workspace workspace = fixtures.save(fixtures.workspace());
-        Question question = fixtures.save(fixtures.questionIn(workspace));
-
-        var result = mockMvc.perform(post("/api/workspaces/{guid}/quizzes", workspace.getGuid())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("""
-                    {
-                        "title": "New Quiz",
-                        "description": "A quiz",
-                        "questionIds": [%d],
-                        "mode": "learn",
-                        "passScore": 80,
-                        "randomQuestionCount": 1,
-                        "cohortNames": ["Alpha", "Beta"]
-                    }
-                    """.formatted(question.getId())))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.id").isNumber())
-            .andReturn();
-
-        Integer quizId = com.jayway.jsonpath.JsonPath
-            .read(result.getResponse().getContentAsString(), "$.id");
-
-        mockMvc.perform(get("/api/workspaces/{guid}/quizzes/{id}", workspace.getGuid(), quizId))
-            .andExpect(status().isOk())
-            .andExpect(jsonPath("$.cohortNames.length()").value(2))
-            .andExpect(jsonPath("$.cohortNames[0]").value("Alpha"))
-            .andExpect(jsonPath("$.cohortNames[1]").value("Beta"));
-
-        Quiz savedQuiz = latestQuiz();
-        assertThat(cohortRepository.findByQuizIdOrderByName(savedQuiz.getId()))
-            .extracting(cohort -> cohort.getName())
-            .containsExactly("Alpha", "Beta");
-    }
-
-    @Test
     public void createCohortPersistsAndReturnsGuid() throws Exception {
         Workspace workspace = fixtures.save(fixtures.workspace());
         Question question = fixtures.save(fixtures.questionIn(workspace));

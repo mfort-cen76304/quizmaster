@@ -3,8 +3,6 @@ package cz.scrumdojo.quizmaster.quiz;
 import jakarta.validation.constraints.NotBlank;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 public record QuizRequest(
     @NotBlank String title,
@@ -16,17 +14,10 @@ public record QuizRequest(
     Difficulty difficulty,
     int passScore,
     Integer timeLimit,
-    Integer randomQuestionCount,
-    List<String> cohortNames
+    Integer randomQuestionCount
 ) {
     public Quiz toEntity(String workspaceGuid) {
-        List<Cohort> cohortEntities = new ArrayList<>();
-        if (cohortNames != null) {
-            for (String name : cohortNames) {
-                cohortEntities.add(Cohort.builder().name(name).build());
-            }
-        }
-        Quiz quiz = Quiz.builder()
+        return Quiz.builder()
             .title(title)
             .description(description)
             .startAt(startAt)
@@ -39,7 +30,5 @@ public record QuizRequest(
             .workspaceGuid(workspaceGuid)
             .randomQuestionCount(randomQuestionCount)
             .build();
-        quiz.setCohorts(cohortEntities);
-        return quiz;
     }
 }

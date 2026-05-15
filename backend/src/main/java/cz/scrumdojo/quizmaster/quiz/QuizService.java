@@ -44,9 +44,7 @@ public class QuizService {
             .map(QuestionResponse::from)
             .toArray(QuestionResponse[]::new);
 
-        List<Cohort> cohortList = cohortRepository.findByQuizIdOrderByName(quiz.getId());
-        String[] cohortNames = cohortList.stream().map(Cohort::getName).toArray(String[]::new);
-        QuizCohortResponse[] cohorts = cohortList.stream()
+        QuizCohortResponse[] cohorts = cohortRepository.findByQuizIdOrderByName(quiz.getId()).stream()
             .map(QuizCohortResponse::from)
             .toArray(QuizCohortResponse[]::new);
 
@@ -62,7 +60,6 @@ public class QuizService {
             quiz.getPassScore(),
             quiz.getTimeLimit(),
             quiz.getRandomQuestionCount(),
-            cohortNames,
             cohorts
         );
     }

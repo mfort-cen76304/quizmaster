@@ -12,7 +12,6 @@ export interface QuizRequest {
     readonly passScore: number
     readonly timeLimit: number
     readonly randomQuestionCount?: number
-    readonly cohortNames?: readonly string[]
 }
 
 export interface QuizCohort {
@@ -32,7 +31,6 @@ export interface Quiz {
     readonly passScore: number
     readonly timeLimit: number
     readonly randomQuestionCount?: number
-    readonly cohortNames?: readonly string[]
     readonly cohorts?: readonly QuizCohort[]
 }
 
