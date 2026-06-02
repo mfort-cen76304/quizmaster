@@ -17,7 +17,7 @@ Feature: Quiz scheduling
     When I open quiz "Quiz"
     Then I see the welcome page
     * I can start the quiz
-
+    * I see status message "Enjoy the quiz"
 
   Scenario: Quiz is unavailable before the scheduled period starts
     Given workspace "Welcome" with questions
@@ -34,6 +34,7 @@ Feature: Quiz scheduling
     When I open quiz "Quiz"
     Then I see the welcome page
     * I cannot start the quiz
+    * I see status message "It's too early"
 
 
   Scenario: Direct questions route redirects to welcome page before the scheduled period starts

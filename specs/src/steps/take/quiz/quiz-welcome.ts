@@ -36,6 +36,10 @@ Then('I can start the quiz', async function () {
     await this.quizWelcomePage.expectStartEnabled()
 })
 
+Then('I see status message {string}', async function (message: string) {
+    await this.quizWelcomePage.expectStatusMessage(message)
+})
+
 Then('I cannot start the quiz', async function () {
     await this.quizWelcomePage.expectStartDisabled()
 })

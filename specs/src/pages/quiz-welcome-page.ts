@@ -28,7 +28,9 @@ export class QuizWelcomePage {
     expectTimeLimit = (seconds: string) => expect(this.timeLimitLocator()).toContainText(seconds)
     expectStartEnabled = () => expect(this.startButton()).toBeEnabled()
     expectStartDisabled = () => expect(this.startButton()).toBeDisabled()
+    expectStatusMessage = (message: string) => expect(this.statusMessage()).toHaveText(message)
 
+    statusMessage = () => this.page.locator('p#statusMessage')
     startButton = () => this.page.locator('button#start')
     start = () => this.startButton().click()
 
