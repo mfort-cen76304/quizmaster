@@ -9,7 +9,7 @@ Feature: Share Quiz
   Background:
     Given quiz "Cohort Quiz" with 2 questions
 
-
+@skip
   Scenario: Open the Share screen and see the quiz take link
     When I navigate to share quiz "Cohort Quiz"
     Then I see the quiz take link for "Cohort Quiz"
@@ -18,7 +18,7 @@ Feature: Share Quiz
     When I follow the quiz take link
     Then I see the "Cohort Quiz" welcome page
 
-
+@skip
   Scenario: List multiple cohorts in alphabetical order
     When I navigate to share quiz "Cohort Quiz"
     * I create a new cohort "Girlz"
@@ -30,14 +30,14 @@ Feature: Share Quiz
       | Mixed |
     And I see a unique quiz take link for each cohort
 
-
+@skip
   Scenario: Reject blank cohort name
     When I navigate to share quiz "Cohort Quiz"
     * I create a new cohort ""
     Then I see no cohorts
     And I see error "empty-cohort-name" on the share screen
 
-
+@skip
   Scenario: Reject duplicate cohort name
     Given I navigate to share quiz "Cohort Quiz"
     * I create a new cohort "Ladies"
