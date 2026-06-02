@@ -104,7 +104,7 @@ export const QuizDetails = ({ quiz, questionCount, canStart, cohortLeaderboard, 
                 </section>
             )}
             <footer>
-                <p id="statusMessage">{canStart ? "Enjoy the quiz" : "It's too early"}</p>
+                <p id="statusMessage">{canStart ? 'Enjoy the quiz' : "It's too early"}</p>
                 <StartButton onClick={onStart} disabled={!canStart} />
             </footer>
         </TakeCard>
