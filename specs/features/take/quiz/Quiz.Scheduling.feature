@@ -19,6 +19,7 @@ Feature: Quiz scheduling
     * I can start the quiz
     * I see status message "Enjoy the quiz"
 
+
   Scenario: Quiz is unavailable before the scheduled period starts
     Given workspace "Welcome" with questions
       | bookmark | question  | answers  |
