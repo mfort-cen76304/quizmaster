@@ -26,7 +26,18 @@ export class WorkspacePage {
 
     clickTab = (name: string) => this.tabLocator(name).click()
 
-    // ── Workspace summary ────────────────────────────
+    // Content is gated by the active tab, so interactions activate the right
+    // section first. Clicking an already-active tab is a harmless no-op.
+    private showQuestions = () => this.tabLocator('Questions').click()
+    private showQuizzes = () => this.tabLocator('Quizzes').click()
+
+    // ── Section visibility (asserts the gating; does NOT switch tabs) ──
+
+    private sectionLocator = (name: string) => this.page.locator(`.workspace-section--${name.toLowerCase()}`)
+    expectSectionVisible = (name: string) => expect(this.sectionLocator(name)).toBeVisible()
+    expectSectionHidden = (name: string) => expect(this.sectionLocator(name)).toBeHidden()
+
+    // ── Workspace summary (header — not gated) ───────
 
     private workspaceSummaryStatLocator = (index: number) => this.page.locator('.workspace-header__stat').nth(index)
 
@@ -47,69 +58,125 @@ export class WorkspacePage {
         await expect(stat.locator('span')).toHaveText(count === 1 ? 'quiz' : 'quizzes')
     }
 
-    // ── Question list ────────────────────────────────
+    // ── Question list (gated → activate Questions tab first) ──
 
     private questionsLocator = () => this.page.locator('.question-item')
     private questionLocator = (question: string) => this.questionsLocator().filter({ hasText: question })
 
-    expectQuestionCount = (count: number) => expect(this.questionsLocator()).toHaveCount(count)
-    expectHasQuestions = () => expect(this.questionsLocator().first()).toBeVisible()
-    expectQuestionVisible = (question: string) => expect(this.questionLocator(question)).toBeVisible()
-    expectQuestionNotVisible = (question: string) => expect(this.questionLocator(question)).not.toBeVisible()
+    expectQuestionCount = async (count: number) => {
+        await this.showQuestions()
+        await expect(this.questionsLocator()).toHaveCount(count)
+    }
+    expectHasQuestions = async () => {
+        await this.showQuestions()
+        await expect(this.questionsLocator().first()).toBeVisible()
+    }
+    expectQuestionVisible = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionLocator(question)).toBeVisible()
+    }
+    expectQuestionNotVisible = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionLocator(question)).not.toBeVisible()
+    }
 
     // ── Question actions ─────────────────────────────
 
-    takeQuestion = (question: string) => this.questionLocator(question).getByRole('link', { name: 'Take' }).click()
-    editQuestion = (question: string) => this.questionLocator(question).getByRole('link', { name: 'Edit' }).click()
-    editFirstQuestion = () => this.questionsLocator().first().getByRole('link', { name: 'Edit' }).click()
+    takeQuestion = async (question: string) => {
+        await this.showQuestions()
+        await this.questionLocator(question).getByRole('link', { name: 'Take' }).click()
+    }
+    editQuestion = async (question: string) => {
+        await this.showQuestions()
+        await this.questionLocator(question).getByRole('link', { name: 'Edit' }).click()
+    }
+    editFirstQuestion = async () => {
+        await this.showQuestions()
+        await this.questionsLocator().first().getByRole('link', { name: 'Edit' }).click()
+    }
 
     private deleteButtonLocator = (question: string) =>
         this.questionLocator(question).getByRole('button', { name: 'Delete' })
     deleteQuestion = async (question: string) => {
+        await this.showQuestions()
         await this.deleteButtonLocator(question).click()
         await this.questionLocator(question).waitFor({ state: 'hidden' })
     }
-    expectDeleteButtonNotVisible = (question: string) => expect(this.deleteButtonLocator(question)).not.toBeVisible()
+    expectDeleteButtonNotVisible = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.deleteButtonLocator(question)).not.toBeVisible()
+    }
 
     // ── Question thumbnail ───────────────────────────
 
     private questionThumbnailLocator = (question: string) =>
         this.questionLocator(question).locator('img.question-thumbnail')
-    expectQuestionThumbnailVisible = (question: string) => expect(this.questionThumbnailLocator(question)).toBeVisible()
-    expectQuestionThumbnailNotVisible = (question: string) =>
-        expect(this.questionThumbnailLocator(question)).not.toBeVisible()
+    expectQuestionThumbnailVisible = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionThumbnailLocator(question)).toBeVisible()
+    }
+    expectQuestionThumbnailNotVisible = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionThumbnailLocator(question)).not.toBeVisible()
+    }
 
     // ── Question tag badge ───────────────────────────
 
     private questionTagBadgeLocator = (question: string) =>
         this.questionLocator(question).locator('.question-tag-badge')
-    expectQuestionTagBadge = (question: string, tag: string) =>
-        expect(this.questionTagBadgeLocator(question)).toHaveText(tag)
-    expectQuestionTagBadgeNotVisible = (question: string) =>
-        expect(this.questionTagBadgeLocator(question)).not.toBeVisible()
+    expectQuestionTagBadge = async (question: string, tag: string) => {
+        await this.showQuestions()
+        await expect(this.questionTagBadgeLocator(question)).toHaveText(tag)
+    }
+    expectQuestionTagBadgeNotVisible = async (question: string) => {
+        await this.showQuestions()
+        await expect(this.questionTagBadgeLocator(question)).not.toBeVisible()
+    }
 
     // ── Create new question / quiz ───────────────────
 
     createNewQuestion = () => this.page.locator('#create-question').click()
     createNewQuiz = () => this.page.locator('#create-quiz').click()
 
-    // ── Quiz list ────────────────────────────────────
+    // ── Quiz list (gated → activate Quizzes tab first) ──
 
     private quizLocator = (quiz: string) => this.page.locator('.quiz-item').filter({ hasText: quiz })
 
-    takeQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Take' }).click()
-    editQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Edit' }).click()
+    takeQuiz = async (quiz: string) => {
+        await this.showQuizzes()
+        await this.quizLocator(quiz).getByRole('link', { name: 'Take' }).click()
+    }
+    editQuiz = async (quiz: string) => {
+        await this.showQuizzes()
+        await this.quizLocator(quiz).getByRole('link', { name: 'Edit' }).click()
+    }
     shareQuiz = async (quiz: string) => {
+        await this.showQuizzes()
         await this.quizLocator(quiz).getByRole('link', { name: 'Share' }).click()
         await this.page.locator('#share-page').waitFor({ state: 'visible' })
     }
-    statsQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Statistics' }).click()
-    dryRunQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('link', { name: 'Dry run' }).click()
+    statsQuiz = async (quiz: string) => {
+        await this.showQuizzes()
+        await this.quizLocator(quiz).getByRole('link', { name: 'Statistics' }).click()
+    }
+    dryRunQuiz = async (quiz: string) => {
+        await this.showQuizzes()
+        await this.quizLocator(quiz).getByRole('link', { name: 'Dry run' }).click()
+    }
 
-    deleteQuiz = (quiz: string) => this.quizLocator(quiz).getByRole('button', { name: 'Delete' }).click()
+    deleteQuiz = async (quiz: string) => {
+        await this.showQuizzes()
+        await this.quizLocator(quiz).getByRole('button', { name: 'Delete' }).click()
+    }
     confirmDeletion = () => this.page.getByRole('dialog').getByRole('button', { name: 'Confirm' }).click()
     cancelDeletion = () => this.page.getByRole('dialog').getByRole('button', { name: 'Cancel' }).click()
 
-    expectQuizVisible = (quiz: string) => expect(this.quizLocator(quiz)).toBeVisible()
-    expectQuizNotVisible = (quiz: string) => expect(this.quizLocator(quiz)).not.toBeVisible()
+    expectQuizVisible = async (quiz: string) => {
+        await this.showQuizzes()
+        await expect(this.quizLocator(quiz)).toBeVisible()
+    }
+    expectQuizNotVisible = async (quiz: string) => {
+        await this.showQuizzes()
+        await expect(this.quizLocator(quiz)).not.toBeVisible()
+    }
 }

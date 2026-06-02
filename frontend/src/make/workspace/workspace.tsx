@@ -96,44 +96,57 @@ export function WorkspacePage() {
                 </button>
             </div>
 
-            <ItemList title="My Questions">
-                {hasQuestions ? (
-                    questions.map((q, index) => (
-                        <QuestionItem
-                            key={q.id || index}
-                            question={q}
-                            index={index}
-                            onDeleteQuestion={() => onDeleteQuestion(q.id)}
-                        />
-                    ))
-                ) : (
-                    <div className="workspace-empty-state workspace-empty-state--questions">
-                        <h3>Create your first question</h3>
-                        <p>Every quiz starts with a solid question bank. AI will help you to prepare perfect drafts!</p>
-                    </div>
-                )}
-            </ItemList>
+            {activeTab === 'questions' && (
+                <section className="workspace-section workspace-section--questions">
+                    <ItemList title="My Questions">
+                        {hasQuestions ? (
+                            questions.map((q, index) => (
+                                <QuestionItem
+                                    key={q.id || index}
+                                    question={q}
+                                    index={index}
+                                    onDeleteQuestion={() => onDeleteQuestion(q.id)}
+                                />
+                            ))
+                        ) : (
+                            <div className="workspace-empty-state workspace-empty-state--questions">
+                                <h3>Create your first question</h3>
+                                <p>
+                                    Every quiz starts with a solid question bank. AI will help you to prepare perfect
+                                    drafts!
+                                </p>
+                            </div>
+                        )}
+                    </ItemList>
+                </section>
+            )}
 
-            <ItemList title="My Quizzes">
-                {hasQuizzes ? (
-                    quizzes.map(quiz => (
-                        <QuizItem
-                            key={quiz.id}
-                            quiz={quiz}
-                            onDeleteClick={q => setQuizToDelete({ id: q, title: quiz.title })}
-                        />
-                    ))
-                ) : (
-                    <div className="workspace-empty-state workspace-empty-state--quizzes">
-                        <h3>{hasAtLeastTwoQuestions ? 'Turn questions into a quiz' : 'Quizzes will appear here'}</h3>
-                        <p>
-                            {hasAtLeastTwoQuestions
-                                ? 'You already have enough questions to work with. Group them into a quiz!'
-                                : 'Once you have at least 2 questions in place, you can package them into quizzes!'}
-                        </p>
-                    </div>
-                )}
-            </ItemList>
+            {activeTab === 'quizzes' && (
+                <section className="workspace-section workspace-section--quizzes">
+                    <ItemList title="My Quizzes">
+                        {hasQuizzes ? (
+                            quizzes.map(quiz => (
+                                <QuizItem
+                                    key={quiz.id}
+                                    quiz={quiz}
+                                    onDeleteClick={q => setQuizToDelete({ id: q, title: quiz.title })}
+                                />
+                            ))
+                        ) : (
+                            <div className="workspace-empty-state workspace-empty-state--quizzes">
+                                <h3>
+                                    {hasAtLeastTwoQuestions ? 'Turn questions into a quiz' : 'Quizzes will appear here'}
+                                </h3>
+                                <p>
+                                    {hasAtLeastTwoQuestions
+                                        ? 'You already have enough questions to work with. Group them into a quiz!'
+                                        : 'Once you have at least 2 questions in place, you can package them into quizzes!'}
+                                </p>
+                            </div>
+                        )}
+                    </ItemList>
+                </section>
+            )}
             {quizToDelete && (
                 <dialog open>
                     <p>Delete quiz &quot;{quizToDelete.title}&quot;?</p>

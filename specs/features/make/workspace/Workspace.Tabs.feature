@@ -21,3 +21,11 @@ Feature: Workspace tabs
     And I click the "Questions" tab
     Then the "Questions" tab is open
     And the "Quizzes" tab is closed
+
+
+  Scenario: Quizzes tab shows only the quizzes section
+    Given workspace "Workspace"
+    When I open the workspace
+    And I click the "Quizzes" tab
+    Then I see the "Quizzes" section
+    And I do not see the "Questions" section

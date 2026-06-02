@@ -29,6 +29,14 @@ Then('the {string} tab is closed', async function (name: string) {
     await this.workspacePage.expectTabNotSelected(name)
 })
 
+Then('I see the {string} section', async function (section: string) {
+    await this.workspacePage.expectSectionVisible(section)
+})
+
+Then('I do not see the {string} section', async function (section: string) {
+    await this.workspacePage.expectSectionHidden(section)
+})
+
 // ── Workspace page assertions ───────────────────────────
 
 Then('I see the workspace {string}', async function (name: string) {
