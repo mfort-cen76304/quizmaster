@@ -13,6 +13,10 @@ Then('I see the {string} tab', async function (name: string) {
     await this.workspacePage.expectTabVisible(name)
 })
 
+Then('the {string} tab is open by default', async function (name: string) {
+    await this.workspacePage.expectTabSelected(name)
+})
+
 // ── Workspace page assertions ───────────────────────────
 
 Then('I see the workspace {string}', async function (name: string) {

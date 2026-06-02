@@ -7,3 +7,9 @@ Feature: Workspace tabs
     When I open the workspace
     Then I see the "Quizzes" tab
     And I see the "Questions" tab
+
+
+  Scenario: Quizzes tab is open by default
+    Given workspace "Workspace"
+    When I open the workspace
+    Then the "Quizzes" tab is open by default
