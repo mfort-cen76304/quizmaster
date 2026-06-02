@@ -9,7 +9,7 @@ Feature: Share Quiz
   Background:
     Given quiz "Cohort Quiz" with 2 questions
 
-@skip
+  @skip
   Scenario: Open the Share screen and see the quiz take link
     When I navigate to share quiz "Cohort Quiz"
     Then I see the quiz take link for "Cohort Quiz"
@@ -18,7 +18,7 @@ Feature: Share Quiz
     When I follow the quiz take link
     Then I see the "Cohort Quiz" welcome page
 
-@skip
+  @skip
   Scenario: List multiple cohorts in alphabetical order
     When I navigate to share quiz "Cohort Quiz"
     * I create a new cohort "Girlz"
@@ -30,14 +30,14 @@ Feature: Share Quiz
       | Mixed |
     And I see a unique quiz take link for each cohort
 
-@skip
+  @skip
   Scenario: Reject blank cohort name
     When I navigate to share quiz "Cohort Quiz"
     * I create a new cohort ""
     Then I see no cohorts
     And I see error "empty-cohort-name" on the share screen
 
-@skip
+  @skip
   Scenario: Reject duplicate cohort name
     Given I navigate to share quiz "Cohort Quiz"
     * I create a new cohort "Ladies"
@@ -48,7 +48,7 @@ Feature: Share Quiz
       | Ladies |
     And I see error "duplicate-cohort-name" on the share screen
 
-@skip
+  @skip
   Scenario: Show QR code for the quiz take link
     When I navigate to share quiz "Cohort Quiz"
     * I show the QR code for the quiz take link
@@ -57,7 +57,7 @@ Feature: Share Quiz
     When I hide the QR code for the quiz take link
     Then I do not see the QR code for the quiz take link
 
-@skip
+  @skip
   Scenario: Show QR code for a cohort take link
     Given quiz "Cohort Quiz" has a cohort named "Boyz"
     * quiz "Cohort Quiz" has a cohort named "Girlz"
@@ -67,14 +67,14 @@ Feature: Share Quiz
     * the QR code value matches the take link for cohort "Boyz"
     * I do not see the QR code for cohort "Girlz"
 
-@skip
+  @skip
   Scenario: Copy the quiz take link
     When I navigate to share quiz "Cohort Quiz"
     * I copy the quiz take link
     Then the clipboard contains the quiz take link
     * I see that the quiz take link was copied
 
-@skip
+  @skip
   Scenario: Copy a cohort take link
     Given quiz "Cohort Quiz" has a cohort named "Boyz"
     * quiz "Cohort Quiz" has a cohort named "Girlz"
@@ -84,7 +84,7 @@ Feature: Share Quiz
     * the clipboard does not contain the take link for cohort "Girlz"
     * I see that the take link for cohort "Boyz" was copied
 
-@skip
+  @skip
   Scenario: Rename a cohort
     Given quiz "Cohort Quiz" has a cohort named "Girlz"
     When I navigate to share quiz "Cohort Quiz"
@@ -93,7 +93,7 @@ Feature: Share Quiz
       | Ladies |
     * the take link for cohort "Ladies" uses the same cohort guid as before
 
-@skip
+  @skip
   Scenario: Cancel cohort rename
     Given quiz "Cohort Quiz" has a cohort named "Girlz"
     When I navigate to share quiz "Cohort Quiz"
@@ -102,7 +102,7 @@ Feature: Share Quiz
     Then I see cohorts in alphabetical order
       | Girlz |
 
-@skip
+  @skip
   Scenario: Reject blank cohort rename
     Given quiz "Cohort Quiz" has a cohort named "Girlz"
     When I navigate to share quiz "Cohort Quiz"
@@ -111,7 +111,7 @@ Feature: Share Quiz
       | Girlz |
     * I see error "empty-cohort-name" on the share screen
 
-@skip
+  @skip
   Scenario: Reject duplicate cohort rename
     Given quiz "Cohort Quiz" has a cohort named "Girlz"
     * quiz "Cohort Quiz" has a cohort named "Boyz"
@@ -122,14 +122,14 @@ Feature: Share Quiz
       | Girlz |
     * I see error "duplicate-cohort-name" on the share screen
 
-@skip
+  @skip
   Scenario: Delete a cohort without attempts
     Given quiz "Cohort Quiz" has a cohort named "Boyz"
     When I navigate to share quiz "Cohort Quiz"
     * I delete cohort "Boyz"
     Then I see no cohorts
 
-@skip
+  @skip
   Scenario: Cannot delete a cohort with attempts
     Given quiz "Cohort Quiz" has a cohort named "Boyz"
     * cohort "Boyz" has an attempt for quiz "Cohort Quiz"
