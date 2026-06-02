@@ -29,3 +29,11 @@ Feature: Workspace tabs
     And I click the "Quizzes" tab
     Then I see the "Quizzes" section
     And I do not see the "Questions" section
+
+
+  Scenario: Questions tab shows only the questions section
+    Given workspace "Workspace"
+    When I open the workspace
+    And I click the "Questions" tab
+    Then I see the "Questions" section
+    And I do not see the "Quizzes" section
