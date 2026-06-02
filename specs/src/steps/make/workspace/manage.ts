@@ -7,6 +7,12 @@ When('I open the workspace', async function () {
     await this.workspacePage.waitForUrl(this.workspaceGuid)
 })
 
+// ── Tabs ────────────────────────────────────────────────
+
+Then('I see the {string} tab', async function (name: string) {
+    await this.workspacePage.expectTabVisible(name)
+})
+
 // ── Workspace page assertions ───────────────────────────
 
 Then('I see the workspace {string}', async function (name: string) {

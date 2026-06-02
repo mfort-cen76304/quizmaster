@@ -14,6 +14,12 @@ export class WorkspacePage {
 
     expectWorkspaceName = (name: string) => expect(this.workspaceNameLocator()).toHaveText(name)
 
+    // ── Tabs ─────────────────────────────────────────
+
+    private tabLocator = (name: string) => this.page.getByRole('tab', { name })
+
+    expectTabVisible = (name: string) => expect(this.tabLocator(name)).toBeVisible()
+
     // ── Workspace summary ────────────────────────────
 
     private workspaceSummaryStatLocator = (index: number) => this.page.locator('.workspace-header__stat').nth(index)
