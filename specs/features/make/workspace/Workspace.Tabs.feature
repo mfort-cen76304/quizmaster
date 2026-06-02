@@ -13,3 +13,11 @@ Feature: Workspace tabs
     Given workspace "Workspace"
     When I open the workspace
     Then the "Quizzes" tab is open by default
+
+
+  Scenario: Clicking the Questions tab opens it
+    Given workspace "Workspace"
+    When I open the workspace
+    And I click the "Questions" tab
+    Then the "Questions" tab is open
+    And the "Quizzes" tab is closed

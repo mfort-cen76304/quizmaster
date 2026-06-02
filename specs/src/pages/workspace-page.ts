@@ -22,6 +22,10 @@ export class WorkspacePage {
 
     expectTabSelected = (name: string) => expect(this.page.getByRole('tab', { name, selected: true })).toBeVisible()
 
+    expectTabNotSelected = (name: string) => expect(this.page.getByRole('tab', { name, selected: false })).toBeVisible()
+
+    clickTab = (name: string) => this.tabLocator(name).click()
+
     // ── Workspace summary ────────────────────────────
 
     private workspaceSummaryStatLocator = (index: number) => this.page.locator('.workspace-header__stat').nth(index)

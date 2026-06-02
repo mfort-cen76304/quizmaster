@@ -22,6 +22,7 @@ export function WorkspacePage() {
     const [questions, setQuestions] = useState<readonly QuestionListItem[]>([])
     const [quizzes, setQuizzes] = useState<readonly QuizListItem[]>([])
     const [quizToDelete, setQuizToDelete] = useState<{ id: number; title: string } | null>(null)
+    const [activeTab, setActiveTab] = useState<'quizzes' | 'questions'>('quizzes')
 
     useApi(workspaceId, fetchWorkspace, setWorkspace)
     const refreshQuestions = useApi(workspaceId, fetchWorkspaceQuestions, setQuestions)
@@ -75,10 +76,22 @@ export function WorkspacePage() {
             </div>
 
             <div className="workspace-tabs" role="tablist" aria-label="Workspace sections">
-                <button type="button" className="workspace-tab" role="tab" aria-selected="true">
+                <button
+                    type="button"
+                    className="workspace-tab"
+                    role="tab"
+                    aria-selected={activeTab === 'quizzes'}
+                    onClick={() => setActiveTab('quizzes')}
+                >
                     Quizzes
                 </button>
-                <button type="button" className="workspace-tab" role="tab" aria-selected="false">
+                <button
+                    type="button"
+                    className="workspace-tab"
+                    role="tab"
+                    aria-selected={activeTab === 'questions'}
+                    onClick={() => setActiveTab('questions')}
+                >
                     Questions
                 </button>
             </div>
