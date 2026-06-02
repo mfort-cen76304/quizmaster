@@ -74,6 +74,15 @@ export function WorkspacePage() {
                 <LinkButton label="Create Quiz" id="create-quiz" to={urls.workspaceQuizNew(workspace.guid)} />
             </div>
 
+            <div className="workspace-tabs" role="tablist" aria-label="Workspace sections">
+                <button type="button" className="workspace-tab" role="tab" aria-selected="true">
+                    Quizzes
+                </button>
+                <button type="button" className="workspace-tab" role="tab" aria-selected="false">
+                    Questions
+                </button>
+            </div>
+
             <ItemList title="My Questions">
                 {hasQuestions ? (
                     questions.map((q, index) => (
